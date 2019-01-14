@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3 Kafka Quick Start 1.0.4</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaCli.html">&lt;&lt; <strong>2</strong><span>Using the Micronaut CLI</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3 Kafka Quick Start</h1>
+
+                    <p><strong>Version:</strong> 1.0.4</p>
+                </div>
+
+                
+
+                
+
+<h1 id="kafkaQuickStart">3 Kafka Quick Start</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaQuickStart.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>To add support for Kafka to an existing project, you should first add the Micronaut Kafka configuration to your build configuration. For example in Gradle:</p>
+</div>
+<div class="paragraph">
+<p>        <div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka'</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</p>
+</div>
+<div class="sect2">
+<h3 id="_configuring_kafka">Configuring Kafka</h3>
+<div class="paragraph">
+<p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    bootstrap:
+        servers: localhost:9092</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value can also be list of available servers:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    bootstrap:
+        servers:
+            - foo:9092
+            - bar:9092</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> to a comma separated list of values to externalize configuration.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h3>
+<div class="paragraph">
+<p>To create a Kafka <code>Producer</code> that sends messages you can simply define an interface that is annotated with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a>.</p>
+</div>
+<div class="paragraph">
+<p>For example the following is a trivial <code>@KafkaClient</code> interface:</p>
+</div>
+<div class="listingblock">
+<div class="title">ProductClient.java</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+
+@KafkaClient <i class="conum" data-value="1"></i><b>(1)</b>
+public interface ProductClient {
+
+    @Topic("my-products") <i class="conum" data-value="2"></i><b>(2)</b>
+    void sendProduct(@KafkaKey String brand, String name); <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation is used to designate this interface as a client</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> annotation indicates which topics the <code>ProducerRecord</code> should be published to</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The method defines two parameters: The parameter that is the Kafka key and the value.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can omit the key, however this will result in a <code>null</code> key which means Kafka will not know how to partition the record.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>At compile time Micronaut will produce an implementation of the above interface. You can retrieve an instance of <code>ProductClient</code> either by looking up the bean from the <a href="../api/io/micronaut/context/ApplicationContext.html">ApplicationContext</a> or by injecting the bean with <code>@Inject</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using ProductClient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ProductClient client = applicationContext.getBean(ProductClient.class);
+client.sendProduct("Nike", "Blue Trainers");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can return a <code>Future</code> or <a href="https://docs.oracle.com/javase/8/docs/api/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_a_kafka_consumer_with_kafkalistener">Creating a Kafka Consumer with @KafkaListener</h3>
+<div class="paragraph">
+<p>To listen to Kafka messages you can use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation to define a message listener.</p>
+</div>
+<div class="paragraph">
+<p>The following example will listen for messages published by the <code>ProductClient</code> in the previous section:</p>
+</div>
+<div class="listingblock">
+<div class="title">ProductListener.java</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST) <i class="conum" data-value="1"></i><b>(1)</b>
+public class ProductListener {
+
+    @Topic("my-products") <i class="conum" data-value="2"></i><b>(2)</b>
+    public void receive(@KafkaKey String brand, String name) { <i class="conum" data-value="3"></i><b>(3)</b>
+        System.out.println("Got Product - " + name + " by " + brand);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> is used with <code>offsetReset</code> set to <code>EARLIEST</code> which makes the listener start listening to messages from the beginning of the partition.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> annotation is again used to indicate which topic(s) to subscribe to.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>receive</code> method defines 2 arguments: The argument that will receive the key and the argument that will receive the value.</td>
+</tr>
+</table>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaCli.html">&lt;&lt; <strong>2</strong><span>Using the Micronaut CLI</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
