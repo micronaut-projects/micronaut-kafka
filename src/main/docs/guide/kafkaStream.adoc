@@ -17,24 +17,7 @@ Since Micronaut's DI and AOP is compile time, you can build low overhead stream 
 
 To define Kafka Streams you should first add the `kafka-streams` configuration to your build.
 
-For example in Gradle:
-
-.build.gradle
-[source,groovy]
-----
-compile "io.micronaut.configuration:micronaut-kafka-streams"
-----
-
-Or with Maven:
-
-.Maven
-[source,xml]
-----
-<dependency>
-  <groupId>io.micronaut.configuration</groupId>
-  <artifactId>micronaut-kafka-streams</artifactId>
-</dependency>
-----
+dependency:micronaut-kafka-streams[groupId="io.micronaut.configuration"]
 
 The minimum configuration required is to set the Kafka bootstrap servers:
 

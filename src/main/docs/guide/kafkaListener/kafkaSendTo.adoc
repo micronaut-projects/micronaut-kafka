@@ -1,4 +1,4 @@
-On any `@KafkaListener` method that returns a value, you can use the ann:messaging.annotation.SendTo[] annotation to forward the return value to the topic or topics specified by the `@SendTo` annotation.
+On any `@KafkaListener` method that returns a value, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/SendTo.html[@SendTo] annotation to forward the return value to the topic or topics specified by the `@SendTo` annotation.
 
 The key of the original `ConsumerRecord` will be used as the key when forwarding the message.
 
