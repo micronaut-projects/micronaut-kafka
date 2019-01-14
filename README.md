@@ -7,5 +7,5 @@ This project includes integration between [Micronaut](http://micronaut.io) and [
 
 ## Documentation
 
-See the [Documentation](https://docs.micronaut.io/latest/guide/index.html#kafka) for more information.
+See the [Documentation](https://micronaut-projects.github.io/micronaut-kafka/latest/guide) for more information.
 
