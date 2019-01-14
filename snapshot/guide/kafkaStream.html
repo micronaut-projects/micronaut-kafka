@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>7 Building Kafka Stream Applications 1.0.4.BUILD-SNAPSHOT</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaApplications.html">&lt;&lt; <strong>6</strong><span>Running Kafka Applications</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>7 Building Kafka Stream Applications</h1>
+
+                    <p><strong>Version:</strong> 1.0.4.BUILD-SNAPSHOT</p>
+                </div>
+
+                
+
+                
+
+<h1 id="kafkaStream">7 Building Kafka Stream Applications</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStream.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Using the CLI</div>
+<div class="paragraph">
+<p>If you are creating your project using the Micronaut CLI, supply the <code>kafka-streams</code> feature to include a simple Kafka Streams configuration in your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ mn create-app my-app --features kafka-streams</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><a href="https://kafka.apache.org/documentation/streams/">Kafka Streams</a> is a platform for building real time streaming applications.</p>
+</div>
+<div class="paragraph">
+<p>When using Micronaut with Kafka Stream, your application gains all of the features from Micronaut (configuration management, AOP, DI, health checks etc.), simplifying the construction of Kafka Stream applications.</p>
+</div>
+<div class="paragraph">
+<p>Since Micronaut&#8217;s DI and AOP is compile time, you can build low overhead stream applications with ease.</p>
+</div>
+<div class="sect2">
+<h3 id="_defining_kafka_streams">Defining Kafka Streams</h3>
+<div class="paragraph">
+<p>To define Kafka Streams you should first add the <code>kafka-streams</code> configuration to your build.</p>
+</div>
+<div class="paragraph">
+<p>For example in Gradle:</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compile "io.micronaut.configuration:micronaut-kafka-streams"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or with Maven:</p>
+</div>
+<div class="listingblock">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
+  &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The minimum configuration required is to set the Kafka bootstrap servers:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    bootstrap:
+        servers: localhost:9092</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should then define a <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that return a <code>KStream</code>. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+</div>
+<div class="listingblock">
+<div class="title">Kafka Streams Word Count</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.context.annotation.Factory;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.*;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.*;
+
+@Factory
+public class WordCountStream {
+
+    public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
+    public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
+
+
+    @Singleton
+    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
+        // set default serdes
+        Properties props = builder.getConfiguration();
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KStream&lt;String, String&gt; source = builder.stream(INPUT);
+        KTable&lt;String, Long&gt; counts = source
+                .flatMapValues( value -&gt; Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
+                .groupBy((key, value) -&gt; value)
+                .count();
+
+        // need to override value serde to Long type
+        counts.toStream().to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+        return source;
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The input topic</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The output topic</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>An instance of <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> is injected that allows mutating the configuration</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+With Kafka streams the key and value <code>Serdes</code> (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass <a href="../api/io/micronaut/configuration/kafka/serde/JsonSerde.html">JsonSerde</a> to define your <code>Serdes</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation to send a sentence to be processed by the above stream:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining a Kafka Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.Topic;
+
+@KafkaClient
+public interface WordCountClient {
+
+    @Topic(WordCountStream.INPUT)
+    void publishSentence(String sentence);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also define a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> to listen for the result of the word count stream:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining a Kafka Listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
+
+import io.micronaut.configuration.kafka.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+public class WordCountListener {
+
+    private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
+
+    @Topic(WordCountStream.OUTPUT)
+    void count(@KafkaKey String word, long count) {
+        wordCounts.put(word, count);
+    }
+
+    public long getCount(String word) {
+        Long num = wordCounts.get(word);
+        if (num != null) {
+            return num;
+        }
+        return 0;
+    }
+
+    public Map&lt;String, Long&gt; getWordCounts() {
+        return Collections.unmodifiableMap(wordCounts);
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_kafka_streams">Configuring Kafka Streams</h3>
+<div class="paragraph">
+<p>You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>. For example in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining Per Stream Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        my-stream:
+            num:
+                stream:
+                    threads: 10</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>10</code> for a stream named <code>my-stream</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can then inject a <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Kafka Streams Word Count</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
+KStream&lt;String, String&gt; myStream(
+        @Named("my-stream") ConfiguredStreamBuilder builder) {
+
+}</code></pre>
+</div>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaApplications.html">&lt;&lt; <strong>6</strong><span>Running Kafka Applications</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
