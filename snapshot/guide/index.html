@@ -133,7 +133,7 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> 1.0.4.BUILD-SNAPSHOT</p>
+        <p><strong>Version:</strong> 1.0.5.BUILD-SNAPSHOT</p>
     </div>
     
 
@@ -154,6 +154,19 @@
 </div>
 <div class="paragraph">
 <p>With Micronaut&#8217;s efficient compile-time AOP and cloud native features, writing efficient Kafka consumer applications that use very little resources is a breeze.</p>
+</div>
+<div class="sect2">
+<h3 id="_release_history">Release History</h3>
+<div class="sect3">
+<h4 id="_1_0_4">1.0.4</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Upgrade to Kafka 2.0.1</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -220,23 +233,21 @@ $ mn create-kafka-listener Message
 <div class="paragraph">
 <p>To add support for Kafka to an existing project, you should first add the Micronaut Kafka configuration to your build configuration. For example in Gradle:</p>
 </div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compile "io.micronaut.configuration:micronaut-kafka"</code></pre>
-</div>
-</div>
 <div class="paragraph">
-<p>Or with Maven:</p>
-</div>
-<div class="listingblock">
-<div class="title">Maven</div>
+<p>        <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
-  &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka'</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+</p>
 </div>
 <div class="sect2">
 <h3 id="_configuring_kafka">Configuring Kafka</h3>
@@ -414,7 +425,7 @@ public class ProductListener {
 <p>The Kafka key can be specified by providing a parameter annotated with <code>@KafkaKey</code>. If no such parameter is specified the record is sent with a <code>null</code> key.</p>
 </div>
 <div class="paragraph">
-<p>The value to send is resolved by selecting the argument annotated with <a href="../api/io/micronaut/messaging/annotation/Body.html">@Body</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
+<p>The value to send is resolved by selecting the argument annotated with <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -429,7 +440,7 @@ void sendProduct(@KafkaKey String brand, String name);</code></pre>
 <div class="sect2">
 <h3 id="_including_message_headers">Including Message Headers</h3>
 <div class="paragraph">
-<p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation and include a value when calling the method:</p>
+<p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation and include a value when calling the method:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -541,12 +552,12 @@ public interface ProductClient {
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message to sent</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows specifying a parameter that should be sent as a header</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
 </tr>
@@ -558,7 +569,7 @@ public interface ProductClient {
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, you can use the <a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value to a header in the <code>ProducerRecord</code>.</p>
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value to a header in the <code>ProducerRecord</code>.</p>
 </div>
 </div>
 
@@ -981,12 +992,12 @@ testCompile 'org.apache.kafka:kafka_2.12:2.0.1:test'</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows binding a parameter to a message header</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
 </tr>
@@ -998,7 +1009,7 @@ testCompile 'org.apache.kafka:kafka_2.12:2.0.1:test'</code></pre>
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, you can use the <a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1698,7 +1709,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 
 
 <div class="paragraph">
-<p>On any <code>@KafkaListener</code> method that returns a value, you can use the <a href="../api/io/micronaut/messaging/annotation/SendTo.html">@SendTo</a> annotation to forward the return value to the topic or topics specified by the <code>@SendTo</code> annotation.</p>
+<p>On any <code>@KafkaListener</code> method that returns a value, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/SendTo.html">@SendTo</a> annotation to forward the return value to the topic or topics specified by the <code>@SendTo</code> annotation.</p>
 </div>
 <div class="paragraph">
 <p>The key of the original <code>ConsumerRecord</code> will be used as the key when forwarding the message.</p>
@@ -1916,25 +1927,20 @@ By default, the details visible above are only shown to authenticated users. See
 <p>To define Kafka Streams you should first add the <code>kafka-streams</code> configuration to your build.</p>
 </div>
 <div class="paragraph">
-<p>For example in Gradle:</p>
-</div>
-<div class="listingblock">
-<div class="title">build.gradle</div>
+<p>        <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compile "io.micronaut.configuration:micronaut-kafka-streams"</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka-streams'</span></code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Or with Maven:</p>
-</div>
-<div class="listingblock">
-<div class="title">Maven</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
-  &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
+</div>
+</p>
 </div>
 <div class="paragraph">
 <p>The minimum configuration required is to set the Kafka bootstrap servers:</p>

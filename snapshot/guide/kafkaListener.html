@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Kafka Consumers Using @KafkaListener 1.0.4.BUILD-SNAPSHOT</title>
+    <title>5 Kafka Consumers Using @KafkaListener 1.0.5.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -81,7 +81,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>5 Kafka Consumers Using @KafkaListener</h1>
 
-                    <p><strong>Version:</strong> 1.0.4.BUILD-SNAPSHOT</p>
+                    <p><strong>Version:</strong> 1.0.5.BUILD-SNAPSHOT</p>
                 </div>
 
                 
@@ -237,12 +237,12 @@ function addJsClass() {
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows binding a parameter to a message header</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
 </tr>
@@ -254,7 +254,7 @@ function addJsClass() {
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, you can use the <a href="../api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -954,7 +954,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 
 
 <div class="paragraph">
-<p>On any <code>@KafkaListener</code> method that returns a value, you can use the <a href="../api/io/micronaut/messaging/annotation/SendTo.html">@SendTo</a> annotation to forward the return value to the topic or topics specified by the <code>@SendTo</code> annotation.</p>
+<p>On any <code>@KafkaListener</code> method that returns a value, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/SendTo.html">@SendTo</a> annotation to forward the return value to the topic or topics specified by the <code>@SendTo</code> annotation.</p>
 </div>
 <div class="paragraph">
 <p>The key of the original <code>ConsumerRecord</code> will be used as the key when forwarding the message.</p>
