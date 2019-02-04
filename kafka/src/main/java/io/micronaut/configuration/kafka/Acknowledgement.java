@@ -20,10 +20,13 @@ package io.micronaut.configuration.kafka;
 /**
  * Defines an interface that can be injected into {@link io.micronaut.configuration.kafka.annotation.KafkaListener} beans so that offsets can be manually committed.
  *
+ * @deprecated Use {@link io.micronaut.messaging.acknowledgement.Acknowledgement} instead
  * @author graemerocher
  * @since 1.0
  */
+@Deprecated
 public interface Acknowledgement {
+
     /**
      * Acknowledge the last {@link org.apache.kafka.clients.consumer.ConsumerRecord} synchronously.
      */
