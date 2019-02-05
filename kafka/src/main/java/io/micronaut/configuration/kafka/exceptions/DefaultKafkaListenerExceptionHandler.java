@@ -18,11 +18,17 @@ package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.context.annotation.Primary;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The default ExceptionHandler used when a {@link org.apache.kafka.clients.consumer.KafkaConsumer}
@@ -35,16 +41,70 @@ import java.util.Optional;
 @Primary
 public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaListenerExceptionHandler.class);
+    private static final Pattern SERIALIZATION_EXCEPTION_MESSAGE_PATTERN = Pattern.compile(".+ for partition (.+)-(\\d+) at offset (\\d+)\\..+");
+
+    private boolean skipRecordOnDeserializationFailure = true;
 
     @Override
     public void handle(KafkaListenerException exception) {
-        if (LOG.isErrorEnabled()) {
-            Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
-            if (consumerRecord.isPresent()) {
-                LOG.error("Error processing record [" + consumerRecord + "] for Kafka consumer [" + exception.getKafkaListener() + "] produced error: " + exception.getCause().getMessage(), exception.getCause());
+        final Throwable cause = exception.getCause();
+        final Object consumerBean = exception.getKafkaListener();
+        if (cause instanceof SerializationException) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Kafka consumer [" + consumerBean + "] failed to deserialize value: " + cause.getMessage(), cause);
+            }
 
-            } else {
-                LOG.error("Kafka consumer [" + exception.getKafkaListener() + "] produced error: " + exception.getCause().getMessage(), exception.getCause());
+            if (skipRecordOnDeserializationFailure) {
+                final KafkaConsumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
+                seekPastDeserializationError((SerializationException) cause, consumerBean, kafkaConsumer);
+            }
+        } else {
+            if (LOG.isErrorEnabled()) {
+                Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
+                if (consumerRecord.isPresent()) {
+                    LOG.error("Error processing record [" + consumerRecord + "] for Kafka consumer [" + consumerBean + "] produced error: " + cause.getMessage(), cause);
+
+                } else {
+                    LOG.error("Kafka consumer [" + consumerBean + "] produced error: " + cause.getMessage(), cause);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets whether the seek past records that are not deserializable.
+     * @param skipRecordOnDeserializationFailure True if records that are not deserializable should be skipped.
+     */
+    public void setSkipRecordOnDeserializationFailure(boolean skipRecordOnDeserializationFailure) {
+        this.skipRecordOnDeserializationFailure = skipRecordOnDeserializationFailure;
+    }
+
+    /**
+     * Seeks past a serialization exception if an error occurs.
+     * @param cause The cause
+     * @param consumerBean The consumer bean
+     * @param kafkaConsumer The kafka consumer
+     */
+    protected void seekPastDeserializationError(
+            @Nonnull SerializationException cause,
+            @Nonnull Object consumerBean,
+            @Nonnull KafkaConsumer<?, ?> kafkaConsumer) {
+        try {
+            final String message = cause.getMessage();
+            final Matcher matcher = SERIALIZATION_EXCEPTION_MESSAGE_PATTERN.matcher(message);
+            if (matcher.find()) {
+                final String topic = matcher.group(1);
+                final int partition = Integer.valueOf(matcher.group(2));
+                final int offset = Integer.valueOf(matcher.group(3));
+                TopicPartition tp = new TopicPartition(topic, partition);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Seeking past unserializable consumer record for partition {}-{} and offset {}", topic, partition, offset);
+                }
+                kafkaConsumer.seek(tp, offset + 1);
+            }
+        } catch (Throwable e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Kafka consumer [" + consumerBean + "] failed to seek past unserializable value: " + e.getMessage(), e);
             }
         }
     }

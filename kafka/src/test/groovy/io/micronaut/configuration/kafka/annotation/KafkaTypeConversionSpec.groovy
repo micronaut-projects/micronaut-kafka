@@ -11,12 +11,14 @@ import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.Header
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.errors.SerializationException
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.util.concurrent.PollingConditions
 
+import javax.inject.Inject
 import java.util.concurrent.ConcurrentHashMap
 
 @Stepwise
@@ -59,8 +61,9 @@ class KafkaTypeConversionSpec extends Specification {
         then:
         conditions.eventually {
             myConsumer.lastException != null
-            myConsumer.lastException.cause instanceof ConversionErrorException
-            myConsumer.lastException.cause.message == 'Failed to convert argument [key] for value [bunch \'o junk] due to: Invalid UUID string: bunch \'o junk'
+            myConsumer.lastException.cause instanceof SerializationException
+            myConsumer.lastException.cause.printStackTrace()
+            myConsumer.lastException.cause.message.contains("deserializing key/value for partition")
         }
     }
 
@@ -70,6 +73,8 @@ class KafkaTypeConversionSpec extends Specification {
         Map<UUID, String> messages = new ConcurrentHashMap<>()
         KafkaListenerException lastException
 
+        @Inject KafkaListenerExceptionHandler defaultExceptionHandler
+
         @Topic(patterns = "uuids")
         void receive(@KafkaKey UUID key, String message) {
             messages.put(key, message)
@@ -78,6 +83,7 @@ class KafkaTypeConversionSpec extends Specification {
         @Override
         void handle(KafkaListenerException exception) {
             lastException = exception
+            defaultExceptionHandler.handle(exception)
         }
     }
 

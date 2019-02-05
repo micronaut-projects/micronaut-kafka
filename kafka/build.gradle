@@ -9,7 +9,8 @@ dependencyManagement {
 
 dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
-    annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"    
+    annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
+    compileOnly "io.micronaut:micronaut-inject-java"
     compile "io.micronaut:micronaut-messaging:$micronautVersion"
     compile "org.apache.kafka:kafka-clients:$kafkaVersion"
 
@@ -21,6 +22,7 @@ dependencies {
 
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testCompile "io.micronaut:micronaut-inject-java"
 
     testCompile "io.micronaut.configuration:micronaut-micrometer-core"
     testCompile "io.projectreactor:reactor-core"
