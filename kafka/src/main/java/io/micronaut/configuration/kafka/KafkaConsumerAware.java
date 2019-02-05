@@ -16,6 +16,7 @@
 
 package io.micronaut.configuration.kafka;
 
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import javax.annotation.Nonnull;
@@ -28,8 +29,10 @@ import javax.annotation.Nonnull;
  * @param <V> The value type
  * @author Graeme Rocher
  * @since 1.0
+ * @deprecated Use {@link ConsumerAware} instead.
  */
-public interface KafkaConsumerAware<K, V> {
+@Deprecated
+public interface KafkaConsumerAware<K, V> extends ConsumerAware<K, V> {
 
     /**
      * Called when the underlying {@link KafkaConsumer} is created.
@@ -37,4 +40,11 @@ public interface KafkaConsumerAware<K, V> {
      * @param consumer The consumer
      */
     void setKafkaConsumer(@Nonnull KafkaConsumer<K, V> consumer);
+
+    @Override
+    default void setKafkaConsumer(@Nonnull Consumer<K, V> consumer) {
+        if (consumer instanceof KafkaConsumer) {
+            setKafkaConsumer((KafkaConsumer<K, V>) consumer);
+        }
+    }
 }

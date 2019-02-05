@@ -16,7 +16,7 @@
 
 package io.micronaut.configuration.kafka.scope;
 
-import io.micronaut.configuration.kafka.KafkaProducerRegistry;
+import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -52,17 +52,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * A scope implementation for injecting {@link org.apache.kafka.clients.producer.KafkaProducer} instances.
+ * A scope implementation for injecting {@link Producer} instances.
  *
  * @author Graeme Rocher
  * @since 1.0
  */
 @SuppressWarnings("unused")
 @Singleton
-public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<KafkaClientScope>, KafkaProducerRegistry {
+public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<KafkaClientScope>, ProducerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaClientScope.class);
-    private final Map<ClientKey, KafkaProducer> clients = new ConcurrentHashMap<>();
+    private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
 
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
@@ -121,7 +121,7 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
 
     @Nonnull
     @Override
-    public <K, V> KafkaProducer getProducer(String id, Argument<K> keyType, Argument<V> valueType) {
+    public <K, V> Producer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType) {
         return getKafkaProducer(id, keyType, valueType);
     }
 
@@ -163,13 +163,13 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
             if (hasId) {
                 properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
             }
-            return beanContext.createBean(KafkaProducer.class, newConfig);
+            return beanContext.createBean(Producer.class, newConfig);
         });
     }
 
     @Override
     public KafkaClientScope stop() {
-        for (KafkaProducer producer : clients.values()) {
+        for (Producer producer : clients.values()) {
             try {
                 producer.close();
             } catch (Exception e) {

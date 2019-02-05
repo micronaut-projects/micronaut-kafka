@@ -17,6 +17,7 @@
 package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.context.annotation.Primary;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
@@ -55,7 +56,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             }
 
             if (skipRecordOnDeserializationFailure) {
-                final KafkaConsumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
+                final Consumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
                 seekPastDeserializationError((SerializationException) cause, consumerBean, kafkaConsumer);
             }
         } else {
@@ -88,7 +89,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     protected void seekPastDeserializationError(
             @Nonnull SerializationException cause,
             @Nonnull Object consumerBean,
-            @Nonnull KafkaConsumer<?, ?> kafkaConsumer) {
+            @Nonnull Consumer<?, ?> kafkaConsumer) {
         try {
             final String message = cause.getMessage();
             final Matcher matcher = SERIALIZATION_EXCEPTION_MESSAGE_PATTERN.matcher(message);

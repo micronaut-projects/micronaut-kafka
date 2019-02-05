@@ -9,3 +9,8 @@ With Micronaut's efficient compile-time AOP and cloud native features, writing e
 ==== 1.0.4
 
 * Upgrade to Kafka 2.0.1
+
+==== 1.1.0
+
+* Upgrade to Kafka 2.1.0
+* Support for Open Tracing
