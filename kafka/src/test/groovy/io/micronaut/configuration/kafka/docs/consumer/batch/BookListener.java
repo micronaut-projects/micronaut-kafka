@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.docs.consumer.batch;
 
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.*;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -57,7 +57,7 @@ public class BookListener {
             List<Long> offsets,
             List<Integer> partitions,
             List<String> topics,
-            KafkaConsumer kafkaConsumer) { // <1>
+            Consumer kafkaConsumer) { // <1>
         for (int i = 0; i < books.size(); i++) {
 
             // process the book

@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.scope
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.Producer
 import spock.lang.Specification
 
 import javax.inject.Inject
@@ -36,7 +37,7 @@ class KafkaClientScopeSpec extends Specification {
 
         then:
         myClass.producer != null
-        myClass.producer.@producerConfig.getString("acks") == "all"
+        myClass.producer.@producer.@producerConfig.getString("acks") == "all"
 
         cleanup:
         ctx.close()
@@ -45,6 +46,6 @@ class KafkaClientScopeSpec extends Specification {
 
     @Singleton
     static class MyClass {
-        @Inject @KafkaClient("foo") KafkaProducer<String, Integer> producer
+        @Inject @KafkaClient("foo") Producer<String, Integer> producer
     }
 }

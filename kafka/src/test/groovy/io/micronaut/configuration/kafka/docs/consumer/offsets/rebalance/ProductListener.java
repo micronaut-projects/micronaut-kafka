@@ -15,12 +15,12 @@
  */
 package io.micronaut.configuration.kafka.docs.consumer.offsets.rebalance;
 
+import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 // tag::imports[]
-import io.micronaut.configuration.kafka.KafkaConsumerAware;
 import io.micronaut.configuration.kafka.annotation.*;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
 import javax.annotation.Nonnull;
@@ -30,12 +30,12 @@ import java.util.Collection;
 
 // tag::clazz[]
 @KafkaListener
-public class ProductListener implements ConsumerRebalanceListener, KafkaConsumerAware {
+public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 
-    private KafkaConsumer consumer;
+    private Consumer consumer;
 
     @Override
-    public void setKafkaConsumer(@Nonnull KafkaConsumer consumer) { // <1>
+    public void setKafkaConsumer(@Nonnull Consumer consumer) { // <1>
         this.consumer = consumer;
     }
 

@@ -23,7 +23,7 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
-import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -81,7 +81,7 @@ class BatchManualOffsetCommitSpec extends Specification {
                 List<Long> offsets,
                 List<Integer> partitions,
                 List<String> topics,
-                KafkaConsumer kafkaConsumer) {
+                Consumer kafkaConsumer) {
             int i = 0
             for(p in products) {
 

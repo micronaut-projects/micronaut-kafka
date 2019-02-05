@@ -265,8 +265,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                 if (consumerBean instanceof KafkaConsumerAware && kafkaConsumer instanceof KafkaConsumer) {
                     //noinspection unchecked
                     ((KafkaConsumerAware) consumerBean).setKafkaConsumer((KafkaConsumer) kafkaConsumer);
-                }
-                else if (consumerBean instanceof ConsumerAware) {
+                } else if (consumerBean instanceof ConsumerAware) {
                     //noinspection unchecked
                     ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
                 }

@@ -18,8 +18,6 @@ package io.micronaut.configuration.kafka.exceptions;
 import io.micronaut.messaging.exceptions.MessageListenerException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-
 import java.util.Optional;
 
 /**

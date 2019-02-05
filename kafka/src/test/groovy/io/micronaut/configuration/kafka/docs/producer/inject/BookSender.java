@@ -28,10 +28,10 @@ import java.util.concurrent.Future;
 @Singleton
 public class BookSender {
 
-    private final KafkaProducer<String, Book> kafkaProducer;
+    private final Producer<String, Book> kafkaProducer;
 
     public BookSender(
-            @KafkaClient("book-producer") KafkaProducer<String, Book> kafkaProducer) { // <1>
+            @KafkaClient("book-producer") Producer<String, Book> kafkaProducer) { // <1>
         this.kafkaProducer = kafkaProducer;
     }
 

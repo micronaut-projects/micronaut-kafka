@@ -15,17 +15,16 @@
  */
 package io.micronaut.configuration.kafka.offsets
 
-import io.micronaut.configuration.kafka.KafkaConsumerAware
+import io.micronaut.configuration.kafka.ConsumerAware
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
+import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -71,10 +70,10 @@ class AssignToPartitionSpec extends Specification {
     }
 
     @Singleton
-    static class ProductListener implements ConsumerRebalanceListener, KafkaConsumerAware {
+    static class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 
         List<Product> products = []
-        KafkaConsumer kafkaConsumer
+        Consumer kafkaConsumer
 
         @KafkaListener(
                 offsetReset = OffsetReset.EARLIEST
