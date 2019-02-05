@@ -18,7 +18,6 @@ package io.micronaut.configuration.kafka.exceptions;
 import io.micronaut.context.annotation.Primary;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;

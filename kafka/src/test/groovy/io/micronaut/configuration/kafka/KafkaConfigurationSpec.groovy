@@ -19,10 +19,9 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
 import io.micronaut.context.ApplicationContext
+import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import spock.lang.Specification
 
 class KafkaConfigurationSpec extends Specification {
@@ -44,7 +43,7 @@ class KafkaConfigurationSpec extends Specification {
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
 
         when:
-        KafkaConsumer consumer = applicationContext.createBean(KafkaConsumer, config)
+        Consumer consumer = applicationContext.createBean(Consumer, config)
 
         then:
         consumer != null
@@ -77,7 +76,7 @@ class KafkaConfigurationSpec extends Specification {
         props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] == "100"
 
         when:
-        KafkaConsumer consumer = applicationContext.createBean(KafkaConsumer, config)
+        Consumer consumer = applicationContext.createBean(Consumer, config)
 
         then:
         consumer != null
@@ -110,7 +109,7 @@ class KafkaConfigurationSpec extends Specification {
         props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] == "100"
 
         when:
-        KafkaConsumer consumer = applicationContext.createBean(KafkaConsumer, config)
+        Consumer consumer = applicationContext.createBean(Consumer, config)
 
         then:
         consumer != null

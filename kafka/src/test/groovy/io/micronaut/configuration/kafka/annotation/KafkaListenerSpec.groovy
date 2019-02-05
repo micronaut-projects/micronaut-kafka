@@ -29,6 +29,7 @@ import io.micronaut.messaging.annotation.Header
 import io.reactivex.Single
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -123,7 +124,7 @@ class KafkaListenerSpec extends Specification {
         def config = context.getBean(AbstractKafkaProducerConfiguration)
         config.setKeySerializer(new StringSerializer())
         config.setValueSerializer(new StringSerializer())
-        KafkaProducer producer = context.createBean(KafkaProducer, config)
+        Producer producer = context.createBean(Producer, config)
         producer.send(new ProducerRecord("words-records", "key", "hello world")).get()
 
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
@@ -136,7 +137,7 @@ class KafkaListenerSpec extends Specification {
         }
 
         cleanup:
-        producer.close()
+        producer?.close()
 
     }
 
@@ -148,7 +149,7 @@ class KafkaListenerSpec extends Specification {
         def config = context.getBean(AbstractKafkaProducerConfiguration)
         config.setKeySerializer(new StringSerializer())
         config.setValueSerializer(new JsonSerde(Book).serializer())
-        KafkaProducer producer = context.createBean(KafkaProducer, config)
+        Producer producer = context.createBean(Producer, config)
         producer.send(new ProducerRecord("books-records", "Stephen King", new Book(title: "The Stand"))).get()
 
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
@@ -162,7 +163,7 @@ class KafkaListenerSpec extends Specification {
         }
 
         cleanup:
-        producer.close()
+        producer?.close()
 
     }
 

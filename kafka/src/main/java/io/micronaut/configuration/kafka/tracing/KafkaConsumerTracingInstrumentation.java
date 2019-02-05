@@ -38,7 +38,11 @@ public class KafkaConsumerTracingInstrumentation implements BeanCreatedEventList
 
     private final Provider<Tracer> tracerProvider;
 
-    public KafkaConsumerTracingInstrumentation(Provider<Tracer> tracerProvider) {
+    /**
+     * Default constructor.
+     * @param tracerProvider The tracer provider
+     */
+    protected KafkaConsumerTracingInstrumentation(Provider<Tracer> tracerProvider) {
         this.tracerProvider = tracerProvider;
     }
 

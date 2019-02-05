@@ -17,12 +17,11 @@ package io.micronaut.configuration.kafka;
 
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 
 import javax.annotation.Nonnull;
 
 /**
- * A registry of managed {@link Producer} instances key by id and type.
+ * A registry of managed {@link KafkaProducer} instances key by id and type.
  *
  * @author graemerocher
  * @since 1.0

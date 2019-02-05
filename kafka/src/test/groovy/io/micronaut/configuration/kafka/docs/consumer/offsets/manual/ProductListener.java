@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka.docs.consumer.offsets.manual;
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import java.util.Collections;
@@ -38,7 +38,7 @@ class ProductListener {
             long offset,
             int partition,
             String topic,
-            KafkaConsumer kafkaConsumer) { // <2>
+            Consumer kafkaConsumer) { // <2>
         // process product record
 
         // commit offsets
