@@ -43,10 +43,7 @@ import io.micronaut.messaging.exceptions.MessagingClientException;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -82,7 +79,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     private final KafkaProducerFactory producerFactory;
     private final SerdeRegistry serdeRegistry;
     private final ConversionService<?> conversionService;
-    private final Map<ProducerKey, KafkaProducer> producerMap = new ConcurrentHashMap<>();
+    private final Map<ProducerKey, Producer> producerMap = new ConcurrentHashMap<>();
 
     /**
      * Creates the introduction advice for the given arguments.
@@ -125,7 +122,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
                     .findFirst().orElse(null);
 
-            KafkaProducer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
+            Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
             List<Header> kafkaHeaders = new ArrayList<>();
             List<AnnotationValue<io.micronaut.messaging.annotation.Header>> headers = context.getAnnotationValuesByType(io.micronaut.messaging.annotation.Header.class);
@@ -409,9 +406,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     @Override
     @PreDestroy
     public final void close() {
-        Collection<KafkaProducer> kafkaProducers = producerMap.values();
+        Collection<Producer> kafkaProducers = producerMap.values();
         try {
-            for (KafkaProducer kafkaProducer : kafkaProducers) {
+            for (Producer kafkaProducer : kafkaProducers) {
                 try {
                     kafkaProducer.close();
                 } catch (Exception e) {
@@ -430,7 +427,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             AnnotationValue<KafkaClient> client,
             String topic,
             Argument bodyArgument,
-            KafkaProducer kafkaProducer,
+            Producer kafkaProducer,
             List<Header> kafkaHeaders,
             ReturnType<Object> returnType, Object key, Object value) {
         Flowable returnFlowable;
@@ -460,7 +457,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             MethodInvocationContext<Object, Object> context,
             AnnotationValue<KafkaClient> client,
             String topic,
-            KafkaProducer kafkaProducer,
+            Producer kafkaProducer,
             List<Header> kafkaHeaders,
             Argument<?> returnType,
             Object key,
@@ -527,7 +524,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     }
 
     @SuppressWarnings("unchecked")
-    private KafkaProducer getProducer(Argument bodyArgument, @Nullable Argument keyArgument, AnnotationMetadata metadata) {
+    private Producer getProducer(Argument bodyArgument, @Nullable Argument keyArgument, AnnotationMetadata metadata) {
         Class keyType = keyArgument != null ? keyArgument.getType() : byte[].class;
         String clientId = metadata.getValue(KafkaClient.class, String.class).orElse(null);
         ProducerKey key = new ProducerKey(keyType, bodyArgument.getType(), clientId);
@@ -636,7 +633,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
 
     /**
-     * Key used to cache {@link org.apache.kafka.clients.producer.KafkaProducer} instances.
+     * Key used to cache {@link org.apache.kafka.clients.producer.Producer} instances.
      */
     private final class ProducerKey {
         final Class keyType;

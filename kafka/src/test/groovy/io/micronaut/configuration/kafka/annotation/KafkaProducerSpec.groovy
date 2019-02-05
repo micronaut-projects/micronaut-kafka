@@ -14,6 +14,7 @@ import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.SendTo
+import io.opentracing.mock.MockTracer
 import org.apache.kafka.common.serialization.BytesDeserializer
 import org.apache.kafka.common.serialization.BytesSerializer
 import spock.lang.AutoCleanup
@@ -29,8 +30,11 @@ class KafkaProducerSpec extends Specification {
     public static final String TOPIC_QUANTITY = "ProducerSpec-users-quantity"
 
     @Shared
+    MockTracer mockTracer = new MockTracer()
+
+    @Shared
     @AutoCleanup
-    ApplicationContext context = ApplicationContext.run(
+    ApplicationContext context = ApplicationContext.build(
             CollectionUtils.mapOf(
                     'micronaut.application.name', 'test-app',
                     "kafka.schema.registry.url", "http://localhot:8081",
@@ -54,7 +58,7 @@ class KafkaProducerSpec extends Specification {
                     TOPIC_BLOCKING
             ]
             )
-    )
+    ).singletons(mockTracer).start()
 
 
     def "test customize defaults"() {
@@ -70,6 +74,7 @@ class KafkaProducerSpec extends Specification {
 
         then:
         conditions.eventually {
+            mockTracer.finishedSpans().size() > 0
             userListener.keys.size() == 1
             userListener.keys.iterator().next() == "Bob"
             userListener.users.size() == 1

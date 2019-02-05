@@ -17,6 +17,7 @@
 package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.messaging.exceptions.MessageListenerException;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
@@ -32,7 +33,7 @@ import java.util.Optional;
 public class KafkaListenerException extends MessageListenerException {
 
     private final Object listener;
-    private final KafkaConsumer<?, ?> kafkaConsumer;
+    private final Consumer<?, ?> kafkaConsumer;
     private final ConsumerRecord<?, ?> consumerRecord;
 
     /**
@@ -43,7 +44,7 @@ public class KafkaListenerException extends MessageListenerException {
      * @param kafkaConsumer The consumer
      * @param consumerRecord The consumer record
      */
-    public KafkaListenerException(String message, Object listener, KafkaConsumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
+    public KafkaListenerException(String message, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
         super(message);
         this.listener = listener;
         this.kafkaConsumer = kafkaConsumer;
@@ -59,7 +60,7 @@ public class KafkaListenerException extends MessageListenerException {
      * @param kafkaConsumer The consumer
      * @param consumerRecord The consumer record
      */
-    public KafkaListenerException(String message, Throwable cause, Object listener, KafkaConsumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
+    public KafkaListenerException(String message, Throwable cause, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
         super(message, cause);
         this.listener = listener;
         this.kafkaConsumer = kafkaConsumer;
@@ -74,7 +75,7 @@ public class KafkaListenerException extends MessageListenerException {
      * @param kafkaConsumer The consumer
      * @param consumerRecord The consumer record
      */
-    public KafkaListenerException(Throwable cause, Object listener, KafkaConsumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
+    public KafkaListenerException(Throwable cause, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
         super(cause.getMessage(), cause);
         this.listener = listener;
         this.kafkaConsumer = kafkaConsumer;
@@ -91,7 +92,7 @@ public class KafkaListenerException extends MessageListenerException {
     /**
      * @return The consumer that produced the error
      */
-    public KafkaConsumer<?, ?> getKafkaConsumer() {
+    public Consumer<?, ?> getKafkaConsumer() {
         return kafkaConsumer;
     }
 

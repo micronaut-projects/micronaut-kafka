@@ -1,0 +1,3 @@
+You can enable Kafka Metrics collection by enabling https://micronaut-projects.github.io/micronaut-micrometer/latest/guide[Micrometer Metrics].
+
+If you do not wish to collect metrics you can set `micronaut.metrics.kafka.enabled` to `false` in `application.yml`.

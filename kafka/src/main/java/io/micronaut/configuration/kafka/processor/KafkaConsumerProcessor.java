@@ -16,9 +16,7 @@
 
 package io.micronaut.configuration.kafka.processor;
 
-import io.micronaut.configuration.kafka.Acknowledgement;
-import io.micronaut.configuration.kafka.KafkaConsumerAware;
-import io.micronaut.configuration.kafka.KafkaProducerRegistry;
+import io.micronaut.configuration.kafka.*;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry;
 import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry;
@@ -55,7 +53,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -99,7 +97,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
     private final SerdeRegistry serdeRegistry;
     private final Scheduler executorScheduler;
     private final KafkaListenerExceptionHandler exceptionHandler;
-    private final KafkaProducerRegistry producerRegistry;
+    private final ProducerRegistry producerRegistry;
     private final BatchConsumerRecordsBinderRegistry batchBinderRegistry;
     private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
 
@@ -113,7 +111,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
      * @param binderRegistry               The {@link ConsumerRecordBinderRegistry}
      * @param batchBinderRegistry          The {@link BatchConsumerRecordsBinderRegistry}
      * @param serdeRegistry                The {@link org.apache.kafka.common.serialization.Serde} registry
-     * @param producerRegistry             The {@link KafkaProducerRegistry}
+     * @param producerRegistry             The {@link ProducerRegistry}
      * @param exceptionHandler             The exception handler to use
      */
     public KafkaConsumerProcessor(
@@ -124,7 +122,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
             ConsumerRecordBinderRegistry binderRegistry,
             BatchConsumerRecordsBinderRegistry batchBinderRegistry,
             SerdeRegistry serdeRegistry,
-            KafkaProducerRegistry producerRegistry,
+            ProducerRegistry producerRegistry,
             KafkaListenerExceptionHandler exceptionHandler) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
@@ -262,12 +260,16 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                     properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + '-' + clientIdGenerator.incrementAndGet());
                 }
 
-                KafkaConsumer kafkaConsumer = beanContext.createBean(KafkaConsumer.class, consumerConfiguration);
+                Consumer kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
                 Object consumerBean = beanContext.getBean(beanType);
 
-                if (consumerBean instanceof KafkaConsumerAware) {
+                if (consumerBean instanceof KafkaConsumerAware && kafkaConsumer instanceof KafkaConsumer) {
                     //noinspection unchecked
-                    ((KafkaConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
+                    ((KafkaConsumerAware) consumerBean).setKafkaConsumer((KafkaConsumer) kafkaConsumer);
+                }
+                else if (consumerBean instanceof ConsumerAware) {
+                    //noinspection unchecked
+                    ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
                 }
 
                 consumers.add(kafkaConsumer);
@@ -507,7 +509,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
         consumers.clear();
     }
 
-    private void handleException(KafkaConsumer kafkaConsumer, Object consumerBean, ConsumerRecord<?, ?> consumerRecord, Throwable e) {
+    private void handleException(Consumer kafkaConsumer, Object consumerBean, ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         KafkaListenerException kafkaListenerException = new KafkaListenerException(
                 e,
                 consumerBean,
@@ -531,7 +533,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
             AnnotationValue<KafkaListener> kafkaListener,
             Object consumerBean,
             ExecutableMethod<?, ?> method,
-            KafkaConsumer kafkaConsumer,
+            Consumer kafkaConsumer,
             ConsumerRecord<?, ?> consumerRecord,
             Flowable<?> resultFlowable,
             boolean isBlocking) {
@@ -544,7 +546,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
 
                         if (value != null) {
                             String groupId = kafkaListener.get("groupId", String.class).orElse(null);
-                            KafkaProducer kafkaProducer = producerRegistry.getProducer(
+                            Producer kafkaProducer = producerRegistry.getProducer(
                                     StringUtils.isNotEmpty(groupId) ? groupId : null,
                                     Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
                                     Argument.of(value.getClass())
@@ -597,7 +599,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
 
                         if (key != null && value != null) {
                             String groupId = kafkaListener.get("groupId", String.class).orElse(null);
-                            KafkaProducer kafkaProducer = producerRegistry.getProducer(
+                            Producer kafkaProducer = producerRegistry.getProducer(
                                     StringUtils.isNotEmpty(groupId) ? groupId : null,
                                     Argument.of(key.getClass()),
                                     Argument.of(value.getClass())

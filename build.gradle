@@ -120,7 +120,35 @@ subprojects { Project subproject ->
     }
 
     task allDeps(type: DependencyReportTask) {}
+
+
+    apply plugin: 'checkstyle'
+
+    checkstyle {
+        toolVersion = 8.10
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+
+        // Per submodule
+        maxErrors = 1
+        maxWarnings = 10
+
+        showViolations = true
+    }
+
+    checkstyleTest.enabled = false
 }
 
-apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-docs/v1.0.0.M1/gradle/docs.gradle"
+allprojects {
+    apply plugin: 'idea'
+
+    idea {
+        module {
+            outputDir file('build/classes/java/main')
+            testOutputDir file('build/classes/groovy/test')
+        }
+    }
+    apply from: rootProject.file('gradle/license.gradle')
+}
+
+apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-docs/v1.0.0.M4/gradle/docs.gradle"
 

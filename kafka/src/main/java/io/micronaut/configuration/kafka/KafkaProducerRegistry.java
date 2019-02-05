@@ -18,16 +18,19 @@ package io.micronaut.configuration.kafka;
 
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 
 import javax.annotation.Nonnull;
 
 /**
- * A registry of managed {@link org.apache.kafka.clients.producer.KafkaProducer} instances key by id and type.
+ * A registry of managed {@link Producer} instances key by id and type.
  *
  * @author graemerocher
  * @since 1.0
+ * @deprecated Use {@link ProducerRegistry} instead
  */
-public interface KafkaProducerRegistry {
+@Deprecated
+public interface KafkaProducerRegistry extends ProducerRegistry {
 
     /**
      * Returns a managed Producer.
@@ -39,5 +42,6 @@ public interface KafkaProducerRegistry {
      * @param <V> The value generic type
      * @return The producer
      */
-    @Nonnull <K, V>  KafkaProducer getProducer(String id, Argument<K> keyType, Argument<V> valueType);
+    @Override
+    @Nonnull <K, V> KafkaProducer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType);
 }

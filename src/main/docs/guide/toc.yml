@@ -19,4 +19,5 @@ kafkaListener:
 kafkaApplications:
   title: Running Kafka Applications
   kafkaHealth: Kafka Health Checks
+  kafkaMetrics: Kafka Metrics
 kafkaStream: Building Kafka Stream Applications
