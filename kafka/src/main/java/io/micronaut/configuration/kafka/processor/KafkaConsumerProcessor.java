@@ -73,6 +73,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 
@@ -100,6 +101,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
     private final KafkaListenerExceptionHandler exceptionHandler;
     private final KafkaProducerRegistry producerRegistry;
     private final BatchConsumerRecordsBinderRegistry batchBinderRegistry;
+    private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
 
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
@@ -171,7 +173,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
             }
 
             String clientId = consumerAnnotation.get("clientId", String.class).orElse(null);
-
+            boolean explicitClientId = clientId != null;
             if (StringUtils.isEmpty(clientId)) {
                 clientId = applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null);
             }
@@ -254,9 +256,10 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
 
 
             for (int i = 0; i < consumerThreads; i++) {
-                if (clientId != null && consumerThreads > 1) {
-                    // unique client id per consumer thread
-                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-" + i);
+                if (explicitClientId) {
+                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
+                } else {
+                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + '-' + clientIdGenerator.incrementAndGet());
                 }
 
                 KafkaConsumer kafkaConsumer = beanContext.createBean(KafkaConsumer.class, consumerConfiguration);

@@ -1,5 +1,6 @@
 package io.micronaut.configuration.kafka.annotation
 
+import groovy.util.logging.Slf4j
 import io.micronaut.configuration.kafka.KafkaConsumerFactory
 import io.micronaut.configuration.kafka.KafkaProducerFactory
 import io.micronaut.configuration.kafka.annotation.KafkaClient
@@ -31,6 +32,7 @@ class KafkaProducerSpec extends Specification {
     @AutoCleanup
     ApplicationContext context = ApplicationContext.run(
             CollectionUtils.mapOf(
+                    'micronaut.application.name', 'test-app',
                     "kafka.schema.registry.url", "http://localhot:8081",
                     "kafka.producers.named.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
                     "kafka.producers.named.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
@@ -75,6 +77,25 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    def "test multiple consumer methods"() {
+        given:
+        ProductClient client = context.getBean(ProductClient)
+        ProductListener userListener = context.getBean(ProductListener)
+        userListener.brands.clear()
+        userListener.others.clear()
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
+        when:
+        client.send("Apple", "iMac")
+        client.send2("Other", "Stuff")
+
+        then:
+        conditions.eventually {
+            userListener.brands['Apple'] == 'iMac'
+            userListener.others['Other'] == 'Stuff'
+        }
+    }
+
     @KafkaClient(acks = KafkaClient.Acknowledge.ALL, id = "named")
     static interface NamedClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
@@ -86,6 +107,17 @@ class KafkaProducerSpec extends Specification {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
         String sendUser(@KafkaKey String name, String user)
     }
+
+    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    static interface ProductClient {
+        @Topic("ProducerSpec-my-products")
+        void send(@KafkaKey String brand, String name)
+
+        @Topic("ProducerSpec-my-products-2")
+        void send2(@KafkaKey String key, String name)
+    }
+
+
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     static class UserListener {
@@ -101,4 +133,22 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @Slf4j
+    static class ProductListener {
+
+        Map<String, String> brands = [:]
+        Map<String, String> others = [:]
+        @Topic("ProducerSpec-my-products")
+        void receive(@KafkaKey String brand, String name) {
+            log.info("Got Product - {} by {}", brand, name)
+            brands[brand] = name
+        }
+
+        @Topic("ProducerSpec-my-products-2")
+        void receive2(@KafkaKey String key, String name) {
+            log.info("Got Lineup info - {} by {}", key, name)
+            others[key] = name
+        }
+    }
 }
