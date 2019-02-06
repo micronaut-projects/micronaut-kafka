@@ -123,10 +123,6 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaHealth"><a href="#kafkaHealth"><strong>6.1</strong><span>Kafka Health Checks</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>6.2</strong><span>Kafka Metrics</span></a></div>
-        
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>6.3</strong><span>Kafka Distributed Tracing</span></a></div>
-        
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStream"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
         
         </div>
@@ -137,7 +133,7 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> 1.1.0.RC1</p>
+        <p><strong>Version:</strong> 1.0.4</p>
     </div>
     
 
@@ -167,19 +163,6 @@
 <ul>
 <li>
 <p>Upgrade to Kafka 2.0.1</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_1_1_0">1.1.0</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.1.0</p>
-</li>
-<li>
-<p>Support for Open Tracing</p>
 </li>
 </ul>
 </div>
@@ -791,10 +774,10 @@ import java.util.concurrent.Future;
 @Singleton
 public class BookSender {
 
-    private final Producer&lt;String, Book&gt; kafkaProducer;
+    private final KafkaProducer&lt;String, Book&gt; kafkaProducer;
 
     public BookSender(
-            @KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
+            @KafkaClient("book-producer") KafkaProducer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
         this.kafkaProducer = kafkaProducer;
     }
 
@@ -873,9 +856,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.1.0:test'
-testCompile 'org.apache.kafka:kafka_2.12:2.1.0'
-testCompile 'org.apache.kafka:kafka_2.12:2.1.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.0.1:test'
+testCompile 'org.apache.kafka:kafka_2.12:2.0.1'
+testCompile 'org.apache.kafka:kafka_2.12:2.0.1:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1452,7 +1435,7 @@ void receive(
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
-import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import java.util.Collections;
@@ -1467,7 +1450,7 @@ void receive(
         long offset,
         int partition,
         String topic,
-        Consumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
+        KafkaConsumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
     // process product record
 
     // commit offsets
@@ -1510,21 +1493,22 @@ void receive(
 <div class="listingblock">
 <div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
-import org.apache.kafka.clients.consumer.Consumer;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.KafkaConsumerAware;
+import io.micronaut.configuration.kafka.annotation.*;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
 @KafkaListener
-public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
+public class ProductListener implements ConsumerRebalanceListener, KafkaConsumerAware {
 
-    private Consumer consumer;
+    private KafkaConsumer consumer;
 
     @Override
-    public void setKafkaConsumer(@Nonnull Consumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+    public void setKafkaConsumer(@Nonnull KafkaConsumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
         this.consumer = consumer;
     }
 
@@ -1589,7 +1573,7 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 <div class="title">Receiving a Batch of Records</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
-import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -1643,7 +1627,7 @@ public void receive(
         List&lt;Long&gt; offsets,
         List&lt;Integer&gt; partitions,
         List&lt;String&gt; topics,
-        Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+        KafkaConsumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
     for (int i = 0; i &lt; books.size(); i++) {
 
         // process the book
@@ -1899,55 +1883,6 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 
 
-<h2 id="kafkaMetrics">6.2 Kafka Metrics</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
-<div class="paragraph">
-<p>You can enable Kafka Metrics collection by enabling <a href="https://micronaut-projects.github.io/micronaut-micrometer/latest/guide">Micrometer Metrics</a>.</p>
-</div>
-<div class="paragraph">
-<p>If you do not wish to collect metrics you can set <code>micronaut.metrics.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
-</div>
-
-
-<h2 id="kafkaTracing">6.3 Kafka Distributed Tracing</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
-<div class="paragraph">
-<p>You can enable distributed tracing with either Jaeger or Zipkin by first configuring <a href="https://docs.micronaut.io/latest/guide/index.html#distributedTracing">Micronaut Tracing</a>, then adding the following dependency:</p>
-</div>
-<div class="paragraph">
-<p>        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">runtime <span class="hljs-string">'io.opentracing.contrib:opentracing-kafka-client:0.0.16'</span></code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.opentracing.contrib&lt;/groupId&gt;
-    &lt;artifactId&gt;opentracing-kafka-client&lt;/artifactId&gt;
-    &lt;version&gt;0.0.16&lt;/version&gt;
-    &lt;scope&gt;runtime&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-</p>
-</div>
-
-
 <h1 id="kafkaStream">7 Building Kafka Stream Applications</h1>
 
 <div class='contribute-btn'>
@@ -2042,7 +1977,6 @@ public class WordCountStream {
 
 
     @Singleton
-    @Named("wordCount")
     KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
         // set default serdes
         Properties props = builder.getConfiguration();
@@ -2098,22 +2032,7 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.Topic;
@@ -2132,22 +2051,7 @@ public interface WordCountClient {
 <div class="listingblock">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.annotation.*;
 
@@ -2162,7 +2066,6 @@ public class WordCountListener {
 
     @Topic(WordCountStream.OUTPUT)
     void count(@KafkaKey String word, long count) {
-        System.out.println("word = " + word);
         wordCounts.put(word, count);
     }
 
@@ -2207,7 +2110,6 @@ public class WordCountListener {
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
-@Named("myStream")
 KStream&lt;String, String&gt; myStream(
         @Named("my-stream") ConfiguredStreamBuilder builder) {
 

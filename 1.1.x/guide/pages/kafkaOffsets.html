@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5.3 Commiting Kafka Offsets 1.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>5.3 Commiting Kafka Offsets</h1>
+
+                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                </div>
+
+                
+
+                
+
+<h2 id="kafkaOffsets">5.3 Commiting Kafka Offsets</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="sect2">
+<h3 id="_automatically_committing_offsets">Automatically Committing Offsets</h3>
+<div class="paragraph">
+<p>The way offsets are handled by a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> bean is defined by the <a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html">OffsetStrategy</a> enum.</p>
+</div>
+<div class="paragraph">
+<p>The following table summarizes the enum values and behaviour:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Kafka Messaging Annotations</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Value</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#AUTO">AUTO</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Automatically commit offsets. Sets <code>enable.auto.commit</code> to <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#DISABLED">DISABLED</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Disables automatically committing offsets. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SYNC">SYNC</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets manually at the end of each <code>poll()</code> loop if no exceptions occur. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#ASYNC">ASYNC</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Asynchronously commits offsets manually at the end of each <code>poll()</code> loop if no exceptions occur. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SYNC_PER_RECORD">SYNC_PER_RECORD</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets manually after each <code>ConsumerRecord</code> is processed. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#ASYNC_PER_RECORD">ASYNC_PER_RECORD</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets asynchronously after each <code>ConsumerRecord</code> is processed. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Depending on the your level of paranoia or durability requirements you can choose to tune how and when offsets are committed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_manually_committing_offsets">Manually Committing Offsets</h3>
+<div class="paragraph">
+<p>If you set the <code>OffsetStrategy</code> to <a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#DISABLED">DISABLED</a> it becomes your responsibility to commit offsets.</p>
+</div>
+<div class="paragraph">
+<p>There are a couple of ways that can be achieved.</p>
+</div>
+<div class="paragraph">
+<p>The simplest way is to define an argument of type <a href="../api/io/micronaut/configuration/kafka/Acknowledgement.html">Acknowledgement</a> and call the <code>ack()</code> method to commit offsets synchronously:</p>
+</div>
+<div class="listingblock">
+<div class="title">Committing offsets with <code>ack()</code></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(
+    offsetReset = OffsetReset.EARLIEST,
+    offsetStrategy = OffsetStrategy.DISABLED <i class="conum" data-value="1"></i><b>(1)</b>
+)
+@Topic("awesome-products")
+void receive(
+        Product product,
+        Acknowledgement acknowledgement) { <i class="conum" data-value="2"></i><b>(2)</b>
+    // process product record
+
+    acknowledgement.ack(); <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Committing offsets automatically is disabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The listener method specifies a parameter of type <a href="../api/io/micronaut/configuration/kafka/Acknowledgement.html">Acknowledgement</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>ack()</code> method is called once the record has been processed</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Alternatively, you an supply a <code>KafkaConsumer</code> method argument and then call <code>commitSync</code> (or <code>commitAsync</code>) yourself when you are ready to commit offsets:</p>
+</div>
+<div class="listingblock">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.docs.consumer.config.Product;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import java.util.Collections;
+
+@KafkaListener(
+        offsetReset = OffsetReset.EARLIEST,
+        offsetStrategy = OffsetStrategy.DISABLED <i class="conum" data-value="1"></i><b>(1)</b>
+)
+@Topic("awesome-products")
+void receive(
+        Product product,
+        long offset,
+        int partition,
+        String topic,
+        Consumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
+    // process product record
+
+    // commit offsets
+    kafkaConsumer.commitSync(Collections.singletonMap( <i class="conum" data-value="3"></i><b>(3)</b>
+            new TopicPartition(topic, partition),
+            new OffsetAndMetadata(offset + 1, "my metadata")
+    ));
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Committing offsets automatically is disabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The listener method specifies that it receives the offset data and a <code>KafkaConsumer</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>commitSync()</code> method is called once the record has been processed</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_manually_assigning_offsets_to_a_consumer_bean">Manually Assigning Offsets to a Consumer Bean</h3>
+<div class="paragraph">
+<p>Sometimes you may wish to control exactly the position you wish to resume consuming messages from.</p>
+</div>
+<div class="paragraph">
+<p>For example if you store offsets in a database you may wish to read the offsets from the database when the consumer starts and start reading from the position stored in the database.</p>
+</div>
+<div class="paragraph">
+<p>To support this use case your consumer bean can implement the <a href="{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html">ConsumerRebalanceListener</a> and <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> interfaces:</p>
+</div>
+<div class="listingblock">
+<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.common.TopicPartition;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+
+@KafkaListener
+public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
+
+    private Consumer consumer;
+
+    @Override
+    public void setKafkaConsumer(@Nonnull Consumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+        this.consumer = consumer;
+    }
+
+    @Topic("awesome-products")
+    void receive(Product product) {
+        // process product
+    }
+
+    @Override
+    public void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { <i class="conum" data-value="2"></i><b>(2)</b>
+        // save offsets here
+    }
+
+    @Override
+    public void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions) { <i class="conum" data-value="3"></i><b>(3)</b>
+        // seek to offset here
+        for (TopicPartition partition : partitions) {
+            consumer.seek(partition, 1);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>setKafkaConsumer</code> of the <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> allows access to the underlying producer</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>onPartitionsRevoked</code> can be used to save offsets</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>onPartitionsAssigned</code> can use used to read offsets and seek to a specific position. In this trivial example we just seek to the offset 1 (skipping the first record).</td>
+</tr>
+</table>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

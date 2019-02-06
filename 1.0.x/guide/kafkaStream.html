@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7 Building Kafka Stream Applications 1.1.0.RC1</title>
+    <title>7 Building Kafka Stream Applications 1.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -79,7 +79,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>7 Building Kafka Stream Applications</h1>
 
-                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                    <p><strong>Version:</strong> 1.0.4</p>
                 </div>
 
                 
@@ -180,7 +180,6 @@ public class WordCountStream {
 
 
     @Singleton
-    @Named("wordCount")
     KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
         // set default serdes
         Properties props = builder.getConfiguration();
@@ -236,22 +235,7 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.Topic;
@@ -270,22 +254,7 @@ public interface WordCountClient {
 <div class="listingblock">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.annotation.*;
 
@@ -300,7 +269,6 @@ public class WordCountListener {
 
     @Topic(WordCountStream.OUTPUT)
     void count(@KafkaKey String word, long count) {
-        System.out.println("word = " + word);
         wordCounts.put(word, count);
     }
 
@@ -345,7 +313,6 @@ public class WordCountListener {
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
-@Named("myStream")
 KStream&lt;String, String&gt; myStream(
         @Named("my-stream") ConfiguredStreamBuilder builder) {
 

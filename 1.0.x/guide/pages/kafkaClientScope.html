@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4.4 Injecting Kafka Producer Beans 1.1.0.RC1</title>
+    <title>4.4 Injecting Kafka Producer Beans 1.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -81,7 +81,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>4.4 Injecting Kafka Producer Beans</h1>
 
-                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                    <p><strong>Version:</strong> 1.0.4</p>
                 </div>
 
                 
@@ -115,10 +115,10 @@ import java.util.concurrent.Future;
 @Singleton
 public class BookSender {
 
-    private final Producer&lt;String, Book&gt; kafkaProducer;
+    private final KafkaProducer&lt;String, Book&gt; kafkaProducer;
 
     public BookSender(
-            @KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
+            @KafkaClient("book-producer") KafkaProducer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
         this.kafkaProducer = kafkaProducer;
     }
 

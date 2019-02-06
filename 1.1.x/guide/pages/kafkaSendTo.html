@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5.5 Forwarding Messages with @SendTo 1.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>5.5 Forwarding Messages with @SendTo</h1>
+
+                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                </div>
+
+                
+
+                
+
+<h2 id="kafkaSendTo">5.5 Forwarding Messages with @SendTo</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>On any <code>@KafkaListener</code> method that returns a value, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/SendTo.html">@SendTo</a> annotation to forward the return value to the topic or topics specified by the <code>@SendTo</code> annotation.</p>
+</div>
+<div class="paragraph">
+<p>The key of the original <code>ConsumerRecord</code> will be used as the key when forwarding the message.</p>
+</div>
+<div class="listingblock">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.docs.consumer.config.Product;
+import io.micronaut.messaging.annotation.SendTo;
+import io.reactivex.Single;
+import io.reactivex.functions.Function;
+
+@Topic("awesome-products") <i class="conum" data-value="1"></i><b>(1)</b>
+@SendTo("product-quantities") <i class="conum" data-value="2"></i><b>(2)</b>
+public int receive(
+        @KafkaKey String brand,
+        Product product) {
+    System.out.println("Got Product - " + product.getName() + " by " + brand);
+
+    return product.getQuantity(); <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The topic subscribed to is <code>awesome-products</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The topic to send the result to is <code>product-quantities</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The return value is used to indicate the value to forward</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can also do the same using Reactive programming:</p>
+</div>
+<div class="listingblock">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("awesome-products") <i class="conum" data-value="1"></i><b>(1)</b>
+@SendTo("product-quantities") <i class="conum" data-value="2"></i><b>(2)</b>
+public Single&lt;Integer&gt; receiveProduct(
+        @KafkaKey String brand,
+        Single&lt;Product&gt; productSingle) {
+
+    return productSingle.map(product -&gt; {
+        System.out.println("Got Product - " + product.getName() + " by " + brand);
+        return product.getQuantity(); <i class="conum" data-value="3"></i><b>(3)</b>
+    });
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The topic subscribed to is <code>awesome-products</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The topic to send the result to is <code>product-quantities</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The return is mapped from the single to the value of the quantity</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In the reactive case the <code>poll</code> loop will continue and will not wait for the record to be sent unless you specifically annotate the method with <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a>.</p>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

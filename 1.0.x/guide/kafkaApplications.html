@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>6 Running Kafka Applications 1.1.0.RC1</title>
+    <title>6 Running Kafka Applications 1.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -81,7 +81,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>6 Running Kafka Applications</h1>
 
-                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                    <p><strong>Version:</strong> 1.0.4</p>
                 </div>
 
                 
@@ -89,12 +89,6 @@ function addJsClass() {
                     <h2>Table of Contents</h2>
                     
                     <div class="toc-item" style="margin-left:0px"><a href="#kafkaHealth"><strong>6.1</strong><span>Kafka Health Checks</span></a>
-                    </div>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaMetrics"><strong>6.2</strong><span>Kafka Metrics</span></a>
-                    </div>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaTracing"><strong>6.3</strong><span>Kafka Distributed Tracing</span></a>
                     </div>
                     
                 </div>
@@ -169,55 +163,6 @@ By default, the details visible above are only shown to authenticated users. See
 </td>
 </tr>
 </table>
-</div>
-
-
-<h2 id="kafkaMetrics">6.2 Kafka Metrics</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
-<div class="paragraph">
-<p>You can enable Kafka Metrics collection by enabling <a href="https://micronaut-projects.github.io/micronaut-micrometer/latest/guide">Micrometer Metrics</a>.</p>
-</div>
-<div class="paragraph">
-<p>If you do not wish to collect metrics you can set <code>micronaut.metrics.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
-</div>
-
-
-<h2 id="kafkaTracing">6.3 Kafka Distributed Tracing</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
-<div class="paragraph">
-<p>You can enable distributed tracing with either Jaeger or Zipkin by first configuring <a href="https://docs.micronaut.io/latest/guide/index.html#distributedTracing">Micronaut Tracing</a>, then adding the following dependency:</p>
-</div>
-<div class="paragraph">
-<p>        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">runtime <span class="hljs-string">'io.opentracing.contrib:opentracing-kafka-client:0.0.16'</span></code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.opentracing.contrib&lt;/groupId&gt;
-    &lt;artifactId&gt;opentracing-kafka-client&lt;/artifactId&gt;
-    &lt;version&gt;0.0.16&lt;/version&gt;
-    &lt;scope&gt;runtime&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-</p>
 </div>
 
 

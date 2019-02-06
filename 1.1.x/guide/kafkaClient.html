@@ -1,0 +1,615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4 Kafka Producers Using @KafkaClient 1.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaQuickStart.html">&lt;&lt; <strong>3</strong><span>Kafka Quick Start</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4 Kafka Producers Using @KafkaClient</h1>
+
+                    <p><strong>Version:</strong> 1.1.0.RC1</p>
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaClientMethods"><strong>4.1</strong><span>Defining @KafkaClient Methods</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaClientConfiguration"><strong>4.2</strong><span>Configuring @KafkaClient beans</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaClientBatch"><strong>4.3</strong><span>Sending Records in Batch</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaClientScope"><strong>4.4</strong><span>Injecting Kafka Producer Beans</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaEmbedded"><strong>4.5</strong><span>Embedding Kafka</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="kafkaClient">4 Kafka Producers Using @KafkaClient</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The example in the quick start presented a trivial definition of an interface that be implemented automatically for you using the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation.</p>
+</div>
+<div class="paragraph">
+<p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
+</div>
+
+
+<h2 id="kafkaClientMethods">4.1 Defining @KafkaClient Methods</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="sect2">
+<h3 id="_specifying_the_key_and_the_value">Specifying the Key and the Value</h3>
+<div class="paragraph">
+<p>The Kafka key can be specified by providing a parameter annotated with <code>@KafkaKey</code>. If no such parameter is specified the record is sent with a <code>null</code> key.</p>
+</div>
+<div class="paragraph">
+<p>The value to send is resolved by selecting the argument annotated with <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-products")
+void sendProduct(@KafkaKey String brand, String name);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The method above will use the parameter <code>brand</code> as the key and the parameter <code>name</code> as the value.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_including_message_headers">Including Message Headers</h3>
+<div class="paragraph">
+<p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation and include a value when calling the method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-products")
+void sendProduct(
+    @KafkaKey String brand,
+    String name,
+    @Header("My-Header") String myHeader);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The example above will include the value of the <code>myHeader</code> argument as a header called <code>My-Header</code>.</p>
+</div>
+<div class="paragraph">
+<p>Another way to include headers is at the type level with the values driven from configuration:</p>
+</div>
+<div class="listingblock">
+<div class="title">Declaring @KafkaClient Headers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.messaging.annotation.Header;
+
+@KafkaClient(id="product-client")
+@Header(name = "X-Token", value = "${my.application.token}")
+public interface ProductClient {
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example will send a header called <code>X-Token</code> with the value read from the setting <code>my.application.token</code> in <code>application.yml</code> (or the environnment variable <code>MY_APPLICATION_TOKEN</code>).</p>
+</div>
+<div class="paragraph">
+<p>If the <code>my.application.token</code> is not set then an error will occur creating the client.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reactive_and_non_blocking_method_definitions">Reactive and Non-Blocking Method Definitions</h3>
+<div class="paragraph">
+<p>The <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation supports the definition of reactive return types (such as <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> or Reactor <code>Flux</code>) as well as Futures.</p>
+</div>
+<div class="paragraph">
+<p>The following sections cover possible method signatures and behaviour:</p>
+</div>
+<div class="sect3">
+<h4 id="_single_value_and_return_type">Single Value and Return Type</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Single&lt;Book&gt; sendBook(
+    @KafkaKey String author,
+    Single&lt;Book&gt; book
+);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The implementation will return a <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> that when subscribed to will subscribe to the passed <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> and send the emitted item as a <code>ProducerRecord</code> emitting the item again if successful or an error otherwise.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_flowable_value_and_return_type">Flowable Value and Return Type</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flowable&lt;Book&gt; sendBooks(
+    @KafkaKey String author,
+    Flowable&lt;Book&gt; book
+);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The implementation will return a <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> that when subscribed to will subscribe to the passed <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> and for each emitted item will send a <code>ProducerRecord</code> emitting the item again if successful or an error otherwise.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_flowable_value_and_return_type_2">Flowable Value and Return Type</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flux&lt;RecordMetadata&gt; sendBooks(
+    @KafkaKey String author,
+    Flux&lt;Book&gt; book
+);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The implementation will return a Reactor <code>Flux</code> that when subscribed to will subscribe to the passed <code>Flux</code> and for each emitted item will send a <code>ProducerRecord</code> emitting the resulting Kafka <code>RecordMetadata</code> if successful or an error otherwise.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_available_annotations">Available Annotations</h3>
+<div class="paragraph">
+<p>There are a number of annotations available that allow you to specify how a method argument is treated.</p>
+</div>
+<div class="paragraph">
+<p>The following table summarizes the annotations and their purpose, with an example:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Kafka Messaging Annotations</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Annotation</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message to sent</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows specifying a parameter that should be sent as a header</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/KafkaKey.html">@KafkaKey</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows specifying the parameter that is the Kafka key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@KafkaKey String key</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value to a header in the <code>ProducerRecord</code>.</p>
+</div>
+</div>
+
+
+<h2 id="kafkaClientConfiguration">4.2 Configuring @KafkaClient beans</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="sect2">
+<h3 id="_kafkaclient_and_producer_properties">@KafkaClient and Producer Properties</h3>
+<div class="paragraph">
+<p>There are a number of ways to pass configuration properties to the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a>. You can set default producer properties using <code>kafka.producers.default</code> in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Default Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    producers:
+        default:
+            retries: 5</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Any property in the <a href="{kafkaapi}/org/apache/kafka/clients/producer/ProducerConfig.html">ProducerConfig</a> class can be set. The above example will set the default number of times to retry sending a record.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_per_kafkaclient_producer_properties">Per @KafkaClient Producer Properties</h3>
+<div class="paragraph">
+<p>To configure different properties for each client, you should set a <code>@KafkaClient</code> id using the annotation:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using a Client ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient("product-client")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This serves 2 purposes. Firstly it sets the value of the <code>client.id</code> setting used to build the <code>KafkaProducer</code>. Secondly, it allows you to apply per producer configuration in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Default Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    producers:
+        product-client:
+            retries: 5</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally, the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation itself provides a <code>properties</code> member that you can use to set producer specific properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Producer Properties with @KafkaClient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.context.annotation.Property;
+import org.apache.kafka.clients.producer.ProducerConfig;
+
+@KafkaClient(
+    id="product-client",
+    acks = KafkaClient.Acknowledge.ALL,
+    properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")
+)
+public interface ProductClient {
+    ...
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kafkaclient_and_serializers">@KafkaClient and Serializers</h3>
+<div class="paragraph">
+<p>When serializing keys and values Micronaut will by default attempt to automatically pick a <a href="{kafkaapi}/org/apache/kafka/common/serialization/Serializer.html">Serializer</a> to use. This is done via the <a href="../api/io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html">CompositeSerdeRegistry</a> bean.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can replace the default <a href="../api/io/micronaut/configuration/kafka/serde/SerdeRegistry.html">SerdeRegistry</a> bean with your own implementation by defining a bean that uses <code>@Replaces(CompositeSerdeRegistry.class)</code>. See the section on <a href="#replaces">Bean Replacement</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All common <code>java.lang</code> types (<code>String</code>, <code>Integer</code>, primitives etc.) are supported and for POJOs by default a Jackson based JSON serializer is used.</p>
+</div>
+<div class="paragraph">
+<p>You can, however, explicitly override the <code>Serializer</code> used by providing the appropriate configuration in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Default Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    producers:
+        product-client:
+            value:
+                serializer: org.apache.kafka.common.serialization.ByteArrayDeserializer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You may want to do this if for example you choose an alternative serialization format such as Avro or Protobuf.</p>
+</div>
+</div>
+
+
+<h2 id="kafkaClientBatch">4.3 Sending Records in Batch</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>By default if you define a method that takes a container type such as a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html">List</a> the list will be serialized using the specified <code>value.serializer</code> (the default will result in a JSON array).</p>
+</div>
+<div class="paragraph">
+<p>For example the following two methods will both send serialized arrays:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending Arrays and Lists</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("books")
+void sendList(List&lt;Book&gt; books);
+
+@Topic("books")
+void sendBooks(Book...books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of a sending a serialized array you may wish to instead send batches of <a href="{kafkaapi}/org/apache/kafka/clients/producer/ProducerRecord.html">ProducerRecord</a> either synchronously or asynchronously.</p>
+</div>
+<div class="paragraph">
+<p>To do this you can specify a value of <code>true</code> to the <code>batch</code> member of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+void send(List&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above case instead of sending a serialized array the client implementation will iterate over each item in the list and send a <code>ProducerRecord</code> for each. The previous example is blocking, however you can return a reactive type if desired:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches Reactively</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+Flowable&lt;RecordMetadata&gt; send(List&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use an unbound reactive type such as <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> as the source of your batch data:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches from a Flowable</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+
+
+<h2 id="kafkaClientScope">4.4 Injecting Kafka Producer Beans</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>If you need maximum flexibility and don&#8217;t want to use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> support you can use the <code>@KafkaClient</code> annotation as qualifier for dependency injection of <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> instances.</p>
+</div>
+<div class="paragraph">
+<p>Consider the following example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import org.apache.kafka.clients.producer.*;
+
+import javax.inject.Singleton;
+import java.util.concurrent.Future;
+
+@Singleton
+public class BookSender {
+
+    private final Producer&lt;String, Book&gt; kafkaProducer;
+
+    public BookSender(
+            @KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
+        this.kafkaProducer = kafkaProducer;
+    }
+
+    public Future&lt;RecordMetadata&gt; send(String author, Book book) {
+        return kafkaProducer.send(new ProducerRecord&lt;&gt;("books", author, book)); <i class="conum" data-value="2"></i><b>(2)</b>
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>KafkaProducer</code> is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>KafkaProducer</code> is used to send records</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Note that there is no need to call the <code>close()</code> method to shut down the <code>KafkaProducer</code>, it is fully managed by Micronaut and will be shutdown when the application shuts down.</p>
+</div>
+<div class="paragraph">
+<p>The previous example can be tested in JUnit with the following test:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Test
+public void testBookSender() throws IOException {
+    Map&lt;String, Object&gt; config = Collections.singletonMap( <i class="conum" data-value="1"></i><b>(1)</b>
+            AbstractKafkaConfiguration.EMBEDDED, true
+    );
+
+    try (ApplicationContext ctx = ApplicationContext.run(config)) {
+        BookSender bookSender = ctx.getBean(BookSender.class); <i class="conum" data-value="2"></i><b>(2)</b>
+        Book book = new Book();
+        book.setTitle("The Stand");
+        bookSender.send("Stephen King", book);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>An embedded version of Kafka is used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>BookSender</code> is retrieved from the <a href="../api/io/micronaut/context/ApplicationContext.html">ApplicationContext</a> and a <code>ProducerRecord</code> sent</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By using the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
+</div>
+
+
+<h2 id="kafkaEmbedded">4.5 Embedding Kafka</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The previous section introduced the ability to embed Kafka for your tests. This is possible in Micronaut by specifying the <code>kafka.embedded.enabled</code> setting to <code>true</code> and adding the following dependencies to your test classpath:</p>
+</div>
+<div class="listingblock">
+<div class="title">Kafka Test Dependencies</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.1.0:test'
+testCompile 'org.apache.kafka:kafka_2.12:2.1.0'
+testCompile 'org.apache.kafka:kafka_2.12:2.1.0:test'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that because of the distributed nature of Kafka it is relatively slow to startup so it is generally better to do the initialization with <code>@BeforeClass</code> (or <code>setupSpec</code> in Spock) and have a large number of test methods rather than many test classes otherwise your test execution performance will suffer.</p>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaQuickStart.html">&lt;&lt; <strong>3</strong><span>Kafka Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
