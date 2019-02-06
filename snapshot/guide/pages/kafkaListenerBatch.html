@@ -110,7 +110,7 @@ function addJsClass() {
 <div class="title">Receiving a Batch of Records</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -164,7 +164,7 @@ public void receive(
         List&lt;Long&gt; offsets,
         List&lt;Integer&gt; partitions,
         List&lt;String&gt; topics,
-        KafkaConsumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+        Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
     for (int i = 0; i &lt; books.size(); i++) {
 
         // process the book

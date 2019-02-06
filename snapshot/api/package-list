@@ -15,3 +15,4 @@ io.micronaut.configuration.kafka.processor
 io.micronaut.configuration.kafka.scope
 io.micronaut.configuration.kafka.serde
 io.micronaut.configuration.kafka.streams
+io.micronaut.configuration.kafka.tracing

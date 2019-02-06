@@ -142,14 +142,14 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#KafkaConsumerProcessor-java.util.concurrent.ExecutorService-io.micronaut.runtime.ApplicationConfiguration-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration-io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry-io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.KafkaProducerRegistry-io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler-">KafkaConsumerProcessor</a></span>(java.util.concurrent.ExecutorService&nbsp;executorService,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#KafkaConsumerProcessor-java.util.concurrent.ExecutorService-io.micronaut.runtime.ApplicationConfiguration-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration-io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry-io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.ProducerRegistry-io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler-">KafkaConsumerProcessor</a></span>(java.util.concurrent.ExecutorService&nbsp;executorService,
                       io.micronaut.runtime.ApplicationConfiguration&nbsp;applicationConfiguration,
                       io.micronaut.context.BeanContext&nbsp;beanContext,
                       <a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&nbsp;defaultConsumerConfiguration,
                       <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind">ConsumerRecordBinderRegistry</a>&nbsp;binderRegistry,
                       <a href="../../../../../io/micronaut/configuration/kafka/bind/batch/BatchConsumerRecordsBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind.batch">BatchConsumerRecordsBinderRegistry</a>&nbsp;batchBinderRegistry,
                       <a href="../../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry,
-                      <a href="../../../../../io/micronaut/configuration/kafka/KafkaProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">KafkaProducerRegistry</a>&nbsp;producerRegistry,
+                      <a href="../../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a>&nbsp;producerRegistry,
                       <a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html" title="interface in io.micronaut.configuration.kafka.exceptions">KafkaListenerExceptionHandler</a>&nbsp;exceptionHandler)</code>
 <div class="block">Creates a new processor using the given <code>ExecutorService</code> to schedule consumers on.</div>
 </td>
@@ -200,7 +200,7 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="KafkaConsumerProcessor-java.util.concurrent.ExecutorService-io.micronaut.runtime.ApplicationConfiguration-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration-io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry-io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.KafkaProducerRegistry-io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler-">
+<a name="KafkaConsumerProcessor-java.util.concurrent.ExecutorService-io.micronaut.runtime.ApplicationConfiguration-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration-io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry-io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.ProducerRegistry-io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -214,7 +214,7 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
                               <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind">ConsumerRecordBinderRegistry</a>&nbsp;binderRegistry,
                               <a href="../../../../../io/micronaut/configuration/kafka/bind/batch/BatchConsumerRecordsBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind.batch">BatchConsumerRecordsBinderRegistry</a>&nbsp;batchBinderRegistry,
                               <a href="../../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry,
-                              <a href="../../../../../io/micronaut/configuration/kafka/KafkaProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">KafkaProducerRegistry</a>&nbsp;producerRegistry,
+                              <a href="../../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a>&nbsp;producerRegistry,
                               <a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html" title="interface in io.micronaut.configuration.kafka.exceptions">KafkaListenerExceptionHandler</a>&nbsp;exceptionHandler)</pre>
 <div class="block">Creates a new processor using the given <code>ExecutorService</code> to schedule consumers on.</div>
 <dl>
@@ -226,7 +226,7 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
 <dd><code>binderRegistry</code> - The <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind"><code>ConsumerRecordBinderRegistry</code></a></dd>
 <dd><code>batchBinderRegistry</code> - The <a href="../../../../../io/micronaut/configuration/kafka/bind/batch/BatchConsumerRecordsBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind.batch"><code>BatchConsumerRecordsBinderRegistry</code></a></dd>
 <dd><code>serdeRegistry</code> - The <code>Serde</code> registry</dd>
-<dd><code>producerRegistry</code> - The <a href="../../../../../io/micronaut/configuration/kafka/KafkaProducerRegistry.html" title="interface in io.micronaut.configuration.kafka"><code>KafkaProducerRegistry</code></a></dd>
+<dd><code>producerRegistry</code> - The <a href="../../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka"><code>ProducerRegistry</code></a></dd>
 <dd><code>exceptionHandler</code> - The exception handler to use</dd>
 </dl>
 </li>

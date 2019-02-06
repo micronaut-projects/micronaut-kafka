@@ -91,6 +91,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0px"><a href="#kafkaHealth"><strong>6.1</strong><span>Kafka Health Checks</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaMetrics"><strong>6.2</strong><span>Kafka Metrics</span></a>
+                    </div>
+                    
                 </div>
                 
 
@@ -163,6 +166,23 @@ By default, the details visible above are only shown to authenticated users. See
 </td>
 </tr>
 </table>
+</div>
+
+
+<h2 id="kafkaMetrics">6.2 Kafka Metrics</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>You can enable Kafka Metrics collection by enabling <a href="https://micronaut-projects.github.io/micronaut-micrometer/latest/guide">Micrometer Metrics</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you do not wish to collect metrics you can set <code>micronaut.metrics.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
 </div>
 
 

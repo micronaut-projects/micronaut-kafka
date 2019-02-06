@@ -489,10 +489,10 @@ import java.util.concurrent.Future;
 @Singleton
 public class BookSender {
 
-    private final KafkaProducer&lt;String, Book&gt; kafkaProducer;
+    private final Producer&lt;String, Book&gt; kafkaProducer;
 
     public BookSender(
-            @KafkaClient("book-producer") KafkaProducer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
+            @KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
         this.kafkaProducer = kafkaProducer;
     }
 

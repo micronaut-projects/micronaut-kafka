@@ -165,26 +165,26 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.String-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.String&nbsp;message,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.String-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.String&nbsp;message,
                       java.lang.Object&nbsp;listener,
-                      org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                      org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                       org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</code>
 <div class="block">Creates a new exception.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.String-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.String&nbsp;message,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.String-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.String&nbsp;message,
                       java.lang.Throwable&nbsp;cause,
                       java.lang.Object&nbsp;listener,
-                      org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                      org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                       org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</code>
 <div class="block">Creates a new exception.</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.Throwable&nbsp;cause,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#KafkaListenerException-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">KafkaListenerException</a></span>(java.lang.Throwable&nbsp;cause,
                       java.lang.Object&nbsp;listener,
-                      org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                      org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                       org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</code>
 <div class="block">Creates a new exception.</div>
 </td>
@@ -209,7 +209,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#getConsumerRecord--">getConsumerRecord</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;</code></td>
+<td class="colFirst"><code>org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#getKafkaConsumer--">getKafkaConsumer</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
@@ -245,7 +245,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="KafkaListenerException-java.lang.String-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
+<a name="KafkaListenerException-java.lang.String-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -253,7 +253,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <h4>KafkaListenerException</h4>
 <pre>public&nbsp;KafkaListenerException(java.lang.String&nbsp;message,
                               java.lang.Object&nbsp;listener,
-                              org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                              org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                               org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</pre>
 <div class="block">Creates a new exception.</div>
 <dl>
@@ -265,7 +265,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 </dl>
 </li>
 </ul>
-<a name="KafkaListenerException-java.lang.String-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
+<a name="KafkaListenerException-java.lang.String-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -274,7 +274,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <pre>public&nbsp;KafkaListenerException(java.lang.String&nbsp;message,
                               java.lang.Throwable&nbsp;cause,
                               java.lang.Object&nbsp;listener,
-                              org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                              org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                               org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</pre>
 <div class="block">Creates a new exception.</div>
 <dl>
@@ -287,7 +287,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 </dl>
 </li>
 </ul>
-<a name="KafkaListenerException-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.KafkaConsumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
+<a name="KafkaListenerException-java.lang.Throwable-java.lang.Object-org.apache.kafka.clients.consumer.Consumer-org.apache.kafka.clients.consumer.ConsumerRecord-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -295,7 +295,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <h4>KafkaListenerException</h4>
 <pre>public&nbsp;KafkaListenerException(java.lang.Throwable&nbsp;cause,
                               java.lang.Object&nbsp;listener,
-                              org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;kafkaConsumer,
+                              org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;kafkaConsumer,
                               org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;consumerRecord)</pre>
 <div class="block">Creates a new exception.</div>
 <dl>
@@ -334,7 +334,7 @@ extends io.micronaut.messaging.exceptions.MessageListenerException</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getKafkaConsumer</h4>
-<pre>public&nbsp;org.apache.kafka.clients.consumer.KafkaConsumer&lt;?,?&gt;&nbsp;getKafkaConsumer()</pre>
+<pre>public&nbsp;org.apache.kafka.clients.consumer.Consumer&lt;?,?&gt;&nbsp;getKafkaConsumer()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The consumer that produced the error</dd>

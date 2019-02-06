@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>1 Introduction 1.1.0.BUILD-SNAPSHOT</title>
+    <title>6.2 Kafka Metrics 1.1.0.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -25,29 +25,29 @@ function addJsClass() {
         <ul>
             <li>
                 <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
-                    <a href="../guide/index.html" class="button">Table of contents</a>
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
 
                     <div id="nav-summary-childs" style="display:none;">
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
                         </div>
                         
                     </div>
@@ -68,16 +68,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaListener.html">&lt;&lt; <strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+                
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>1 Introduction</h1>
+                    <h1>6.2 Kafka Metrics</h1>
 
                     <p><strong>Version:</strong> 1.1.0.BUILD-SNAPSHOT</p>
                 </div>
@@ -86,55 +88,28 @@ function addJsClass() {
 
                 
 
-<h1 id="introduction">1 Introduction</h1>
+<h2 id="kafkaMetrics">6.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/introduction.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
 
 
 <div class="paragraph">
-<p><a href="https://kafka.apache.org">Apache Kafka</a> is a distributed stream processing platform that can be used for a range of messaging requirements in addition to stream processing and real-time data handling.</p>
+<p>You can enable Kafka Metrics collection by enabling <a href="https://micronaut-projects.github.io/micronaut-micrometer/latest/guide">Micrometer Metrics</a>.</p>
 </div>
 <div class="paragraph">
-<p>Micronaut features dedicated support for defining both Kafka <code>Producer</code> and <code>Consumer</code> instances. Micronaut applications built with Kafka can be deployed with or without the presence of an HTTP server.</p>
-</div>
-<div class="paragraph">
-<p>With Micronaut&#8217;s efficient compile-time AOP and cloud native features, writing efficient Kafka consumer applications that use very little resources is a breeze.</p>
-</div>
-<div class="sect2">
-<h3 id="_release_history">Release History</h3>
-<div class="sect3">
-<h4 id="_1_0_4">1.0.4</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.0.1</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_1_1_0">1.1.0</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.1.0</p>
-</li>
-<li>
-<p>Support for Open Tracing</p>
-</li>
-</ul>
-</div>
-</div>
+<p>If you do not wish to collect metrics you can set <code>micronaut.metrics.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
 </div>
 
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item next-right"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span> >></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaListener.html">&lt;&lt; <strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
@@ -142,7 +117,7 @@ function addJsClass() {
         <td id="col2">
             <div class="local clearfix">
                 <div class="local-title">
-                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
                     <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
                 </div>
                 <div class="menu">
