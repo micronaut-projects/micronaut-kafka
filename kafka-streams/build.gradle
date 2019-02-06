@@ -18,8 +18,6 @@ dependencies {
     testCompile "io.projectreactor:reactor-core"
     testCompile "io.micronaut:micronaut-management"
     testCompile "io.micronaut:micronaut-inject-groovy"    
-    testCompile "io.micronaut:micronaut-management"
-
     testCompile "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"

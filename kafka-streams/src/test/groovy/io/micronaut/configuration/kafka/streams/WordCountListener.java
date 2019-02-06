@@ -28,6 +28,7 @@ public class WordCountListener {
 
     @Topic(WordCountStream.OUTPUT)
     void count(@KafkaKey String word, long count) {
+        System.out.println("word = " + word);
         wordCounts.put(word, count);
     }
 

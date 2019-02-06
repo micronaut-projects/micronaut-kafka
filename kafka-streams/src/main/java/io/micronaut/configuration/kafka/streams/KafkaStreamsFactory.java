@@ -21,6 +21,7 @@ import org.apache.kafka.streams.kstream.KStream;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,7 @@ public class KafkaStreamsFactory implements Closeable {
     public void close() {
         for (KafkaStreams stream : streams) {
             try {
-                stream.close(3, TimeUnit.SECONDS);
+                stream.close(Duration.ofSeconds(3));
             } catch (Exception e) {
                 // ignore
             }

@@ -46,8 +46,8 @@ class KafkaStreamsSpec extends Specification {
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
-        WordCountClient wordCountClient = context.getBean(WordCountClient);
-        wordCountClient.publishSentence("The quick brown fox jumps over the lazy dog. THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK");
+        WordCountClient wordCountClient = context.getBean(WordCountClient)
+        wordCountClient.publishSentence("The quick brown fox jumps over the lazy dog. THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK")
 
         WordCountListener countListener = context.getBean(WordCountListener)
 
