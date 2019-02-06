@@ -125,6 +125,8 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>6.2</strong><span>Kafka Metrics</span></a></div>
         
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>6.3</strong><span>Kafka Distributed Tracing</span></a></div>
+        
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStream"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
         
         </div>
@@ -1911,6 +1913,38 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 <div class="paragraph">
 <p>If you do not wish to collect metrics you can set <code>micronaut.metrics.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
+</div>
+
+
+<h2 id="kafkaTracing">6.3 Kafka Distributed Tracing</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>You can enable distributed tracing with either Jaeger or Zipkin by first configuring <a href="https://docs.micronaut.io/latest/guide/index.html#distributedTracing">Micronaut Tracing</a>, then adding the following dependency:</p>
+</div>
+<div class="paragraph">
+<p>        <div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle">runtime <span class="hljs-string">'io.opentracing.contrib:opentracing-kafka-client:0.0.16'</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.opentracing.contrib&lt;/groupId&gt;
+    &lt;artifactId&gt;opentracing-kafka-client&lt;/artifactId&gt;
+    &lt;version&gt;0.0.16&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</p>
 </div>
 
 
