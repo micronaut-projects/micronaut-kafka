@@ -20,4 +20,5 @@ kafkaApplications:
   title: Running Kafka Applications
   kafkaHealth: Kafka Health Checks
   kafkaMetrics: Kafka Metrics
+  kafkaTracing: Kafka Distributed Tracing
 kafkaStream: Building Kafka Stream Applications
