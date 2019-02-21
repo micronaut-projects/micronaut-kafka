@@ -86,8 +86,8 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../io/micronaut/configuration/kafka/Acknowledgement.html" title="interface in io.micronaut.configuration.kafka">Acknowledgement</a></td>
-<td class="colLast">
-<div class="block">Defines an interface that can be injected into <a href="../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that offsets can be manually committed.</div>
+<td class="colLast">Deprecated
+<div class="block"><span class="deprecationComment">Use <code>io.micronaut.messaging.acknowledgement.Acknowledgement</code> instead</span></div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -98,18 +98,24 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../io/micronaut/configuration/kafka/KafkaAcknowledgement.html" title="interface in io.micronaut.configuration.kafka">KafkaAcknowledgement</a></td>
+<td class="colLast">
+<div class="block">Defines an interface that can be injected into <a href="../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that offsets can be manually committed.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../io/micronaut/configuration/kafka/KafkaConsumerAware.html" title="interface in io.micronaut.configuration.kafka">KafkaConsumerAware</a>&lt;K,V&gt;</td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">Use <a href="../../../../io/micronaut/configuration/kafka/ConsumerAware.html" title="interface in io.micronaut.configuration.kafka"><code>ConsumerAware</code></a> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../io/micronaut/configuration/kafka/KafkaProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">KafkaProducerRegistry</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">Use <a href="../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka"><code>ProducerRegistry</code></a> instead</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a></td>
 <td class="colLast">
 <div class="block">A registry of managed <code>Producer</code> instances key by id and type.</div>

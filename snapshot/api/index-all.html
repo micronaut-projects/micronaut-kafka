@@ -106,13 +106,16 @@
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/Acknowledgement.html#ack--">ack()</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/Acknowledgement.html" title="interface in io.micronaut.configuration.kafka">Acknowledgement</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Acknowledge the last <code>ConsumerRecord</code> synchronously.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html#Acknowledge--">Acknowledge()</a></span> - Constructor for class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html" title="class in io.micronaut.configuration.kafka.annotation">KafkaClient.Acknowledge</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/Acknowledgement.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">Acknowledgement</span></a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
 <dd>
-<div class="block">Defines an interface that can be injected into <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that offsets can be manually committed.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Use <code>io.micronaut.messaging.acknowledgement.Acknowledgement</code> instead</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#add-java.lang.CharSequence-java.lang.CharSequence-">add(CharSequence, CharSequence)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
@@ -559,6 +562,10 @@
 </a>
 <h2 class="title">K</h2>
 <dl>
+<dt><a href="io/micronaut/configuration/kafka/KafkaAcknowledgement.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">KafkaAcknowledgement</span></a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">Defines an interface that can be injected into <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that offsets can be manually committed.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/KafkaBodyBinder.html" title="class in io.micronaut.configuration.kafka.bind"><span class="typeNameLink">KafkaBodyBinder</span></a>&lt;<a href="io/micronaut/configuration/kafka/bind/KafkaBodyBinder.html" title="type parameter in KafkaBodyBinder">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
 <dd>
 <div class="block">The default binder that binds the body of a ConsumerRecord.</div>
@@ -810,6 +817,10 @@
 </a>
 <h2 class="title">N</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaAcknowledgement.html#nack--">nack()</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaAcknowledgement.html" title="interface in io.micronaut.configuration.kafka">KafkaAcknowledgement</a></dt>
+<dd>
+<div class="block">Kafka does not support rejection of messages explicitly.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#names--">names()</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html#NONE">NONE</a></span> - Static variable in class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html" title="class in io.micronaut.configuration.kafka.annotation">KafkaClient.Acknowledge</a></dt>
