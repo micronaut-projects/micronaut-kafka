@@ -160,7 +160,10 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                     .orElse(false);
 
             Optional<Argument> consumerArg = Arrays.stream(method.getArguments()).filter(arg -> Consumer.class.isAssignableFrom(arg.getType())).findFirst();
-            Optional<Argument> ackArg = Arrays.stream(method.getArguments()).filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType())).findFirst();
+            Optional<Argument> ackArg = Arrays.stream(method.getArguments())
+                    .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()) ||
+                            io.micronaut.messaging.Acknowledgement.class.isAssignableFrom(arg.getType()))
+                    .findFirst();
 
             String groupId = consumerAnnotation.get("groupId", String.class).orElse(null);
 
@@ -411,7 +414,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                                             }
 
                                             if (ackArg.isPresent()) {
-                                                boundArguments.put(ackArg.get(), (Acknowledgement) () -> kafkaConsumer.commitSync(
+                                                boundArguments.put(ackArg.get(), (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(
                                                         currentOffsets
                                                 ));
                                             }
