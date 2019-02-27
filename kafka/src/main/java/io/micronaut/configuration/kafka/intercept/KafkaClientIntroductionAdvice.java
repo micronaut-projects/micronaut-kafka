@@ -186,11 +186,8 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
 
-            if (value == null) {
-                throw new MessagingClientException("Value cannot be null for method: " + context);
-            }
-
-            boolean isReactiveValue = Publishers.isConvertibleToPublisher(value.getClass());
+            boolean isReactiveValue =
+                    value != null && Publishers.isConvertibleToPublisher(value.getClass());
 
 
             if (isReactiveReturnType) {
@@ -211,7 +208,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 } else {
                     if (isBatchSend) {
                         Object batchValue;
-                        if (value.getClass().isArray()) {
+                        if(value != null && value.getClass().isArray()) {
                             batchValue = Arrays.asList((Object[]) value);
                         } else {
                             batchValue = value;
@@ -338,7 +335,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     try {
                         if (isBatchSend) {
                             Iterable batchValue;
-                            if (value.getClass().isArray()) {
+                            if (value != null && value.getClass().isArray()) {
                                 batchValue = Arrays.asList((Object[]) value);
                             } else if (!(value instanceof Iterable)) {
                                 batchValue = Collections.singletonList(value);
