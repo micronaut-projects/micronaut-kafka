@@ -38,7 +38,7 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
      * The default health timeout value.
      */
     @SuppressWarnings("WeakerAccess")
-    public static final int DEFAULT_HEALTHTIMEOUT = 1;
+    public static final int DEFAULT_HEALTHTIMEOUT = 10;
 
     private Duration healthTimeout = Duration.ofSeconds(DEFAULT_HEALTHTIMEOUT);
 
