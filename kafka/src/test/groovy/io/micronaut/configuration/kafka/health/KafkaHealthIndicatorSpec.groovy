@@ -17,13 +17,14 @@ package io.micronaut.configuration.kafka.health
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
+import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.health.HealthStatus
 import io.micronaut.management.health.indicator.HealthResult
 import spock.lang.Specification
 
 class KafkaHealthIndicatorSpec extends Specification {
 
-    void "test kafka health indicator"() {
+    void "test kafka health indicator - UP"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(
                 Collections.singletonMap(
@@ -37,8 +38,26 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         then:
         // report down because the not enough nodes to meet replication factor
-        result.status == HealthStatus.DOWN
+        result.status == HealthStatus.UP
         result.details.nodes == 1
+
+        cleanup:
+        applicationContext.close()
+    }
+
+    void "test kafka health indicator - DOWN"() {
+        given:
+        ApplicationContext applicationContext = ApplicationContext.run(
+                'kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()
+        )
+
+        when:
+        KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
+        HealthResult result = healthIndicator.result.firstElement().blockingGet()
+
+        then:
+        // report down because the not enough nodes to meet replication factor
+        result.status == HealthStatus.DOWN
 
         cleanup:
         applicationContext.close()

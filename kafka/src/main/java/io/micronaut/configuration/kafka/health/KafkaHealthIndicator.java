@@ -42,7 +42,7 @@ import java.util.Map;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
-    private static final String REPLICATION_PROPERTY = "transaction.state.log.replication.factor";
+    private static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
     private final AdminClient adminClient;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
