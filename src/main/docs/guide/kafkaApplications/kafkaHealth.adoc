@@ -20,7 +20,8 @@ For example if Kafka is not available the `/health` endpoint will return:
 
 NOTE: By default, the details visible above are only shown to authenticated users. See the <<healthEndpoint, Health Endpoint>> documentation for how to configure that setting.
 
-If you wish to disable this health check while still using the `management` dependency you can set the property `kafka.health.enabled` to `false` in your application configuration.
+If you wish to disable the kafka health check while still using the `management` dependency you can set the property `kafka.health.enabled` to `false` in your application configuration.
+
 [source,yaml]
 ----
 kafka:
