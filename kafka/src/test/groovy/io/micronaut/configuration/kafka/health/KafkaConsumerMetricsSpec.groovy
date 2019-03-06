@@ -79,6 +79,7 @@ class KafkaConsumerMetricsSpec extends Specification {
 
         and: 'generic count will not exist'
         !result.names.contains("kafka.count")
+        println "[\"${result.names.join("\",\n\"")}\"]"
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
