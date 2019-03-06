@@ -73,14 +73,14 @@ class KafkaProducerMetricsSpec extends Specification {
         result.names.contains("kafka.consumer.count")
 
         and: 'producer only metric not bleed to consumer'
-        !result.names.contains("kafka.consumer.record-error-rate")
+        !result.names.contains("kafka.consumer.record.error.rate")
 
         and: 'producer count will be there because we fired up consumer bean via send'
         result.names.contains("kafka.producer.count")
-        result.names.contains("kafka.producer.record-error-rate")
+        result.names.contains("kafka.producer.record.error.rate")
 
         and: 'consumer only metric not bleed to producer'
-        !result.names.contains("kafka.producer.bytes-consumed-total")
+        !result.names.contains("kafka.producer.bytes.consumed.total")
 
         and: 'generic count will not exist'
         !result.names.contains("kafka.count")
