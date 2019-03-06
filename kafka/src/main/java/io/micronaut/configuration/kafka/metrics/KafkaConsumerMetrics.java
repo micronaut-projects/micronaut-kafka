@@ -37,6 +37,6 @@ public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaCons
 
     @Override
     public AbstractKafkaConsumerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaConsumerConfiguration> event) {
-        return addKafkaMetrics(event);
+        return addKafkaMetrics(event, ConsumerKafkaMetricsReporter.class.getName());
     }
 }

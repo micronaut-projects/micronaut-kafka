@@ -63,8 +63,22 @@ class KafkaConsumerMetricsSpec extends Specification {
         def response = httpClient.exchange("/metrics", Map).blockingFirst()
         Map result = response.body()
 
-        then:
-        result.names.contains("kafka.count")
+        then: 'kafka.consumer only metrics will be present'
+        result.names.contains("kafka.consumer.count")
+        result.names.contains("kafka.consumer.bytes-consumed-total")
+
+        and: 'producer only metric not bleed to consumer'
+        !result.names.contains("kafka.consumer.record-error-rate")
+
+        and: 'producer metrics will not be present'
+        !result.names.contains("kafka.producer.count")
+        !result.names.contains("kafka.producer.record-error-rate")
+
+        and: 'consumer only metric not bleed to producer'
+        !result.names.contains("kafka.producer.bytes-consumed-total")
+
+        and: 'generic count will not exist'
+        !result.names.contains("kafka.count")
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)

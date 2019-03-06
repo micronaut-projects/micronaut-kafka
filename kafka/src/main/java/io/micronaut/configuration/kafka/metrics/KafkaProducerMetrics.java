@@ -35,7 +35,6 @@ public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProd
 
     @Override
     public AbstractKafkaProducerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaProducerConfiguration> event) {
-        return addKafkaMetrics(event);
+        return addKafkaMetrics(event, ProducerKafkaMetricsReporter.class.getName());
     }
 }
-

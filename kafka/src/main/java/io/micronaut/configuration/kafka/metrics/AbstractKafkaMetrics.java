@@ -19,6 +19,8 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.core.annotation.Internal;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -32,16 +34,22 @@ import java.util.Properties;
 @Internal
 abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractKafkaMetrics.class);
+
     /**
      * Method to add a default metric reporter if not otherwise defined.
      *
-     * @param event The event for bean created of type AbstractKafkaConfiguration
+     * @param event                         The event for bean created of type AbstractKafkaConfiguration
+     * @param kafkaMetricsReporterClassName The class name to use for kafka metrics registration
      * @return The bean
      */
-    T addKafkaMetrics(BeanCreatedEvent<T> event) {
+    T addKafkaMetrics(BeanCreatedEvent<T> event, String kafkaMetricsReporterClassName) {
         Properties props = event.getBean().getConfig();
         if (!props.containsKey(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG)) {
-            props.put(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, KafkaMetricsReporter.class.getName());
+            props.put(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("Adding kafka property:value of %s:%s", ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName));
+            }
         }
         return event.getBean();
     }
