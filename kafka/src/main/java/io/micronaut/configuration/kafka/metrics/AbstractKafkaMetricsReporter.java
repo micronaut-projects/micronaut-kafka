@@ -96,7 +96,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
                     .stream()
                     .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList());
-            String name = getMetricPrefix() + '.' + metricName.name().replaceAll("-", ".");
+            String name = getMetricPrefix() + '.' + metricName.name();
             meterRegistry.gauge(name, tags, metric, value -> (Double) value.metricValue());
         }
     }

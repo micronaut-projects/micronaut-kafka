@@ -65,21 +65,20 @@ class KafkaConsumerMetricsSpec extends Specification {
 
         then: 'kafka.consumer only metrics will be present'
         result.names.contains("kafka.consumer.count")
-        result.names.contains("kafka.consumer.bytes.consumed.total")
+        result.names.contains("kafka.consumer.bytes-consumed-total")
 
         and: 'producer only metric not bleed to consumer'
-        !result.names.contains("kafka.consumer.record.error.rate")
+        !result.names.contains("kafka.consumer.record-error-rate")
 
         and: 'producer metrics will not be present'
         !result.names.contains("kafka.producer.count")
-        !result.names.contains("kafka.producer.record.error.rate")
+        !result.names.contains("kafka.producer.record-error-rate")
 
         and: 'consumer only metric not bleed to producer'
-        !result.names.contains("kafka.producer.bytes.consumed.total")
+        !result.names.contains("kafka.producer.bytes-consumed-total")
 
         and: 'generic count will not exist'
         !result.names.contains("kafka.count")
-        println "[\"${result.names.join("\",\n\"")}\"]"
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
