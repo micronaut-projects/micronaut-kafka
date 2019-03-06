@@ -93,6 +93,8 @@ class KafkaListenerSpec extends Specification {
 
         then:
         result.names.contains("kafka.producer.count")
+        result.names.contains("kafka.consumer.count")
+        !result.names.contains("kafka.count")
     }
 
     void "test POJO consumer"() {
