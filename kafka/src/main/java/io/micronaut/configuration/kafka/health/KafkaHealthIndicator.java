@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.health;
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.util.CollectionUtils;
@@ -39,6 +40,7 @@ import java.util.Map;
  */
 @Singleton
 @Requires(beans = AdminClient.class)
+@Requires(property = AbstractKafkaConfiguration.PREFIX + ".health.enabled", value = "true", defaultValue = "true")
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
