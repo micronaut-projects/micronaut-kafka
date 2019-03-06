@@ -18,14 +18,8 @@ package io.micronaut.configuration.kafka.annotation
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
-import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
-import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.context.ApplicationContext
-import io.micronaut.core.convert.exceptions.ConversionErrorException
 import io.micronaut.core.util.CollectionUtils
-import io.micronaut.messaging.annotation.Header
-import io.reactivex.Single
-import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.errors.SerializationException
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -39,7 +33,9 @@ import java.util.concurrent.ConcurrentHashMap
 @Stepwise
 class KafkaTypeConversionSpec extends Specification {
 
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
+    @Shared
+    @AutoCleanup
+    ApplicationContext context = ApplicationContext.run(
             CollectionUtils.mapOf(
                     "kafka.bootstrap.servers", 'localhost:${random.port}',
                     AbstractKafkaConfiguration.EMBEDDED, true,
@@ -88,7 +84,8 @@ class KafkaTypeConversionSpec extends Specification {
         Map<UUID, String> messages = new ConcurrentHashMap<>()
         KafkaListenerException lastException
 
-        @Inject KafkaListenerExceptionHandler defaultExceptionHandler
+        @Inject
+        KafkaListenerExceptionHandler defaultExceptionHandler
 
         @Topic(patterns = "uuids")
         void receive(@KafkaKey UUID key, String message) {
