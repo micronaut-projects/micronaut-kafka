@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -47,8 +47,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.Reporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.Reporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" target="_top">Frames</a></li>
@@ -72,7 +72,7 @@ var activeTableTab = "activeTableTab";
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
@@ -107,7 +107,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>io.micrometer.core.instrument.binder.MeterBinder, io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&gt;, java.io.Closeable, java.lang.AutoCloseable, java.util.EventListener</dd>
+<dd>io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&gt;, java.util.EventListener</dd>
 </dl>
 <hr>
 <br>
@@ -118,7 +118,7 @@ var activeTableTab = "activeTableTab";
  @Context
 public class <span class="typeNameLabel">KafkaProducerMetrics</span>
 extends java.lang.Object
-implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&gt;, io.micrometer.core.instrument.binder.MeterBinder, java.io.Closeable</pre>
+implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&gt;</pre>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0</dd>
@@ -131,27 +131,6 @@ implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../..
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
-<!-- ======== NESTED CLASS SUMMARY ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="nested.class.summary">
-<!--   -->
-</a>
-<h3>Nested Class Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Nested Class Summary table, listing nested classes, and an explanation">
-<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Class and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.Reporter.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics.Reporter</a></span></code>
-<div class="block">A <code>MetricsReporter</code> that binds metrics to micrometer.</div>
-</td>
-</tr>
-</table>
-</li>
-</ul>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.summary">
@@ -182,16 +161,8 @@ implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../..
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo</a></span>(io.micrometer.core.instrument.MeterRegistry&nbsp;registry)</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#close--">close</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated</a></span>(io.micronaut.context.event.BeanCreatedEvent&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&gt;&nbsp;event)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated</a></span>(io.micronaut.context.event.BeanCreatedEvent&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&gt;&nbsp;event)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -235,42 +206,13 @@ implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../..
 <a name="onCreated-io.micronaut.context.event.BeanCreatedEvent-">
 <!--   -->
 </a>
-<ul class="blockList">
-<li class="blockList">
-<h4>onCreated</h4>
-<pre>public&nbsp;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&nbsp;onCreated(io.micronaut.context.event.BeanCreatedEvent&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&gt;&nbsp;event)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>onCreated</code>&nbsp;in interface&nbsp;<code>io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&gt;</code></dd>
-</dl>
-</li>
-</ul>
-<a name="bindTo-io.micrometer.core.instrument.MeterRegistry-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>bindTo</h4>
-<pre>public&nbsp;void&nbsp;bindTo(io.micrometer.core.instrument.MeterRegistry&nbsp;registry)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>bindTo</code>&nbsp;in interface&nbsp;<code>io.micrometer.core.instrument.binder.MeterBinder</code></dd>
-</dl>
-</li>
-</ul>
-<a name="close--">
-<!--   -->
-</a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>close</h4>
-<pre>@PreDestroy
-public&nbsp;void&nbsp;close()</pre>
+<h4>onCreated</h4>
+<pre>public&nbsp;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&nbsp;onCreated(io.micronaut.context.event.BeanCreatedEvent&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&gt;&nbsp;event)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>close</code>&nbsp;in interface&nbsp;<code>java.io.Closeable</code></dd>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>close</code>&nbsp;in interface&nbsp;<code>java.lang.AutoCloseable</code></dd>
+<dd><code>onCreated</code>&nbsp;in interface&nbsp;<code>io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -301,8 +243,8 @@ public&nbsp;void&nbsp;close()</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.Reporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.Reporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/KafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" target="_top">Frames</a></li>
@@ -326,7 +268,7 @@ public&nbsp;void&nbsp;close()</pre>
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>

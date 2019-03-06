@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>@Singleton
- @Requires(beans=org.apache.kafka.clients.admin.AdminClient.class)
+ @Requires(beans=org.apache.kafka.clients.admin.AdminClient.class) @Requires(property="kafka.health.enabled",value="true",defaultValue="true")
 public class <span class="typeNameLabel">KafkaHealthIndicator</span>
 extends java.lang.Object
 implements io.micronaut.management.health.indicator.HealthIndicator</pre>
