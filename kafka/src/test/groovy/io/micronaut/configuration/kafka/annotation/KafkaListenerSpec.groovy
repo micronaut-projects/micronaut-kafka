@@ -92,7 +92,9 @@ class KafkaListenerSpec extends Specification {
         Map result = response.body()
 
         then:
-        result.names.contains("kafka.count")
+        result.names.contains("kafka.producer.count")
+        result.names.contains("kafka.consumer.count")
+        !result.names.contains("kafka.count")
     }
 
     void "test POJO consumer"() {

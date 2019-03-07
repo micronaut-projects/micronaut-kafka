@@ -56,18 +56,34 @@ class KafkaProducerMetricsSpec extends Specification {
     @AutoCleanup
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 
-    void "test simple consumer"() {
+    void "test simple producer"() {
         expect:
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyClientMetrics)
 
         when:
+        context.getBean(MyClientMetrics).sendGetRecordMetadata("key", "value")
+
+        and:
         def response = httpClient.exchange("/metrics", Map).blockingFirst()
         Map result = response.body()
 
-        then:
-        result.names.contains("kafka.count")
+        then: 'kafka.consumer.count will be there due to default consumer'
+        result.names.contains("kafka.consumer.count")
+
+        and: 'producer only metric not bleed to consumer'
+        !result.names.contains("kafka.consumer.record-error-rate")
+
+        and: 'producer count will be there because we fired up consumer bean via send'
+        result.names.contains("kafka.producer.count")
+        result.names.contains("kafka.producer.record-error-rate")
+
+        and: 'consumer only metric not bleed to producer'
+        !result.names.contains("kafka.producer.bytes-consumed-total")
+
+        and: 'generic count will not exist'
+        !result.names.contains("kafka.count")
     }
 
     @KafkaClient
