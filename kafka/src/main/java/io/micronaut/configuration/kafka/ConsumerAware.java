@@ -22,6 +22,11 @@ import javax.annotation.Nonnull;
 /**
  * Interface for {@link io.micronaut.configuration.kafka.annotation.KafkaListener} instances to implement
  * if they wish to obtain a reference to the underlying {@link Consumer}.
+ * <p>
+ * Modification of received {@link Consumer} instances (e.g. modifying subscriptions) is possible ONLY
+ * when run by the Thread driving KafkaConsumer's poll loop! Otherwise you will receive {@link
+ * java.util.ConcurrentModificationException}, cause KafkaConsumer instances are not safe for
+ * multi-threaded access!
  *
  * @param <K> The key type
  * @param <V> The value type
