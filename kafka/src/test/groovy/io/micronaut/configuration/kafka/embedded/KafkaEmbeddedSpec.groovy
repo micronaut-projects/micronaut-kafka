@@ -44,6 +44,7 @@ class KafkaEmbeddedSpec extends Specification{
 
         then:
         kafkaEmbedded.kafkaServer.isPresent()
+        kafkaEmbedded.zkPort.isPresent()
 
         cleanup:
         applicationContext.close()
