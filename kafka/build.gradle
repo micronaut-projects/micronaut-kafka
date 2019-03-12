@@ -6,7 +6,6 @@ dependencyManagement {
     }
 }
 
-
 dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
@@ -27,7 +26,8 @@ dependencies {
     testCompile "io.micronaut.configuration:micronaut-micrometer-core"
     testCompile "io.projectreactor:reactor-core"
     testCompile "io.micronaut:micronaut-management"
-    testCompile "io.micronaut:micronaut-inject-groovy"    
+    testCompile "io.micronaut:micronaut-http-client"
+    testCompile "io.micronaut:micronaut-inject-groovy"
     testCompile "io.micronaut:micronaut-management"
     testCompile "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}"
@@ -35,5 +35,10 @@ dependencies {
 
     testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.0.16'
     testCompile 'io.opentracing:opentracing-mock:0.31.0'
+
     testRuntime 'io.micronaut:micronaut-tracing'
+    testRuntime "io.micronaut:micronaut-runtime"
+    testRuntime "io.micronaut:micronaut-http-server-netty"
+    testRuntime "io.micronaut:micronaut-management"
+    testRuntime "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
 }

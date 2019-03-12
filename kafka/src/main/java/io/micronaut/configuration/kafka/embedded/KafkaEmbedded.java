@@ -209,6 +209,18 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
         return Optional.ofNullable(zkUtils);
     }
 
+    /**
+     * Returns the port Zookeeper is running on if it was created.
+     * @return The Zookeeper port
+     */
+    public Optional<Integer> getZkPort() {
+        if (zkServer != null) {
+            return Optional.of(zkServer.port());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private void initZooKeeper() {
         zkServer = new EmbeddedZookeeper();
         String zkConnect = ZKHOST + ":" + zkServer.port();

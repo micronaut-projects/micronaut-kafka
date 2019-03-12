@@ -42,7 +42,10 @@ import io.micronaut.messaging.exceptions.MessagingClientException;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -57,7 +60,15 @@ import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -208,7 +219,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 } else {
                     if (isBatchSend) {
                         Object batchValue;
-                        if(value != null && value.getClass().isArray()) {
+                        if (value != null && value.getClass().isArray()) {
                             batchValue = Arrays.asList((Object[]) value);
                         } else {
                             batchValue = value;
@@ -253,6 +264,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     //noinspection SubscriberImplementation
                     sendFlowable.subscribe(new Subscriber() {
                         boolean completed = false;
+
                         @Override
                         public void onSubscribe(Subscription s) {
                             s.request(1);
@@ -510,13 +522,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     @SuppressWarnings("unchecked")
     private ProducerRecord buildProducerRecord(AnnotationValue<KafkaClient> client, String topic, List<Header> kafkaHeaders, Object key, Object value) {
         return new ProducerRecord(
-                        topic,
-                        null,
-                        client.getRequiredValue("timestamp", Boolean.class) ? System.currentTimeMillis() : null,
-                        key,
-                        value,
-                        kafkaHeaders.isEmpty() ? null : kafkaHeaders
-                );
+                topic,
+                null,
+                client.getRequiredValue("timestamp", Boolean.class) ? System.currentTimeMillis() : null,
+                key,
+                value,
+                kafkaHeaders.isEmpty() ? null : kafkaHeaders
+        );
     }
 
     @SuppressWarnings("unchecked")
