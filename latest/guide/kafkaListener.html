@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Kafka Consumers Using @KafkaListener 1.0.4</title>
+    <title>5 Kafka Consumers Using @KafkaListener 1.1.0.RC2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -81,7 +81,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>5 Kafka Consumers Using @KafkaListener</h1>
 
-                    <p><strong>Version:</strong> 1.0.4</p>
+                    <p><strong>Version:</strong> 1.1.0.RC2</p>
                 </div>
 
                 
@@ -680,7 +680,7 @@ void receive(
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import java.util.Collections;
@@ -695,7 +695,7 @@ void receive(
         long offset,
         int partition,
         String topic,
-        KafkaConsumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
+        Consumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
     // process product record
 
     // commit offsets
@@ -738,22 +738,21 @@ void receive(
 <div class="listingblock">
 <div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.KafkaConsumerAware;
-import io.micronaut.configuration.kafka.annotation.*;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
 @KafkaListener
-public class ProductListener implements ConsumerRebalanceListener, KafkaConsumerAware {
+public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 
-    private KafkaConsumer consumer;
+    private Consumer consumer;
 
     @Override
-    public void setKafkaConsumer(@Nonnull KafkaConsumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+    public void setKafkaConsumer(@Nonnull Consumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
         this.consumer = consumer;
     }
 
@@ -818,7 +817,7 @@ public class ProductListener implements ConsumerRebalanceListener, KafkaConsumer
 <div class="title">Receiving a Batch of Records</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -872,7 +871,7 @@ public void receive(
         List&lt;Long&gt; offsets,
         List&lt;Integer&gt; partitions,
         List&lt;String&gt; topics,
-        KafkaConsumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+        Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
     for (int i = 0; i &lt; books.size(); i++) {
 
         // process the book
