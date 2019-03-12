@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -171,12 +171,18 @@ implements io.micronaut.context.event.BeanCreatedEventListener&lt;<a href="../..
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>java.util.Optional&lt;java.lang.Integer&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#getZkPort--">getZkPort</a></span>()</code>
+<div class="block">Returns the port Zookeeper is running on if it was created.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.util.Optional&lt;kafka.utils.ZkUtils&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#getZkUtils--">getZkUtils</a></span>()</code>
 <div class="block">Returns the Zookeeper tools if they are available.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated</a></span>(io.micronaut.context.event.BeanCreatedEvent&lt;<a href="../../../../../io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a>&gt;&nbsp;event)</code>&nbsp;</td>
 </tr>
@@ -268,7 +274,7 @@ public&nbsp;void&nbsp;close()</pre>
 <a name="getZkUtils--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getZkUtils</h4>
 <pre>public&nbsp;java.util.Optional&lt;kafka.utils.ZkUtils&gt;&nbsp;getZkUtils()</pre>
@@ -276,6 +282,20 @@ public&nbsp;void&nbsp;close()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The Zookeeper tools</dd>
+</dl>
+</li>
+</ul>
+<a name="getZkPort--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getZkPort</h4>
+<pre>public&nbsp;java.util.Optional&lt;java.lang.Integer&gt;&nbsp;getZkPort()</pre>
+<div class="block">Returns the port Zookeeper is running on if it was created.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The Zookeeper port</dd>
 </dl>
 </li>
 </ul>

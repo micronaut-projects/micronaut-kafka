@@ -110,7 +110,11 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public interface <span class="typeNameLabel">ConsumerAware&lt;K,V&gt;</span></pre>
 <div class="block">Interface for <a href="../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> instances to implement
- if they wish to obtain a reference to the underlying <code>Consumer</code>.</div>
+ if they wish to obtain a reference to the underlying <code>Consumer</code>.
+ <p>
+ Modification of received <code>Consumer</code> instances (e.g. modifying subscriptions) is possible ONLY
+ when run by the Thread driving KafkaConsumer's poll loop! Otherwise you will receive <code>ConcurrentModificationException</code>, cause KafkaConsumer instances are not safe for
+ multi-threaded access!</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0</dd>
