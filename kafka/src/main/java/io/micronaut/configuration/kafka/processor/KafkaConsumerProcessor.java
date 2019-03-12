@@ -36,6 +36,7 @@ import io.micronaut.core.bind.*;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.ArgumentUtils;
 import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
@@ -63,12 +64,14 @@ import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -83,7 +86,8 @@ import java.util.regex.Pattern;
  */
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
-public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable {
+public class KafkaConsumerProcessor
+        implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable, ConsumerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
 
@@ -91,7 +95,9 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
     private final ApplicationConfiguration applicationConfiguration;
     private final BeanContext beanContext;
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
-    private final Queue<Consumer> consumers = new ConcurrentLinkedDeque<>();
+    private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
+    private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
+    private final Set<String> paused = new ConcurrentSkipListSet<>();
     private final ConsumerRecordBinderRegistry binderRegistry;
     private final SerdeRegistry serdeRegistry;
     private final Scheduler executorScheduler;
@@ -135,6 +141,49 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
         this.exceptionHandler = exceptionHandler;
     }
 
+    @Nonnull
+    @Override
+    public <K, V> Consumer<K, V> getConsumer(@Nonnull String id) {
+        ArgumentUtils.requireNonNull("id", id);
+        final Consumer consumer = consumers.get(id);
+        if (consumer == null) {
+            throw new IllegalArgumentException("No consumer found for ID: " + id);
+        }
+        return consumer;
+    }
+
+    @Nonnull
+    @Override
+    public Set<String> getConsumerIds() {
+        return Collections.unmodifiableSet(consumers.keySet());
+    }
+
+    @Override
+    public boolean isPaused(@Nonnull String id) {
+        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
+            return paused.contains(id) && pausedConsumers.containsKey(id);
+        }
+        return false;
+    }
+
+    @Override
+    public void pause(@Nonnull String id) {
+        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
+            paused.add(id);
+        } else {
+            throw new IllegalArgumentException("No consumer found for ID: " + id);
+        }
+    }
+
+    @Override
+    public void resume(@Nonnull String id) {
+        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
+            paused.remove(id);
+        } else {
+            throw new IllegalArgumentException("No consumer found for ID: " + id);
+        }
+    }
+
     @Override
     public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
 
@@ -173,7 +222,6 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
             }
 
             String clientId = consumerAnnotation.get("clientId", String.class).orElse(null);
-            boolean explicitClientId = clientId != null;
             if (StringUtils.isEmpty(clientId)) {
                 clientId = applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null);
             }
@@ -256,13 +304,23 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
 
 
             for (int i = 0; i < consumerThreads; i++) {
-                if (explicitClientId) {
-                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
+                String finalClientId;
+                if (clientId != null) {
+                    if (consumerThreads > 1) {
+                        finalClientId = clientId + '-' + clientIdGenerator.incrementAndGet();
+                    } else {
+                        finalClientId = clientId;
+                    }
+                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, finalClientId);
                 } else {
-                    properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + '-' + clientIdGenerator.incrementAndGet());
+                    finalClientId = "kafka-consumer-" + clientIdGenerator.incrementAndGet();
                 }
 
+
                 Consumer kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
+
+                consumers.put(finalClientId, kafkaConsumer);
+
                 Object consumerBean = beanContext.getBean(beanType);
 
                 if (consumerBean instanceof KafkaConsumerAware && kafkaConsumer instanceof KafkaConsumer) {
@@ -273,7 +331,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                     ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
                 }
 
-                consumers.add(kafkaConsumer);
+
 
                 for (Topic topicAnnotation : topicAnnotations) {
                     String[] topicNames = topicAnnotation.value();
@@ -327,10 +385,33 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                         Map<Argument<?>, Object> boundArguments = new HashMap<>(2);
                         consumerArg.ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
+                        boolean consumerPaused = false;
+
                         //noinspection InfiniteLoopStatement
                         while (true) {
                             try {
+                                if (!consumerPaused && paused.contains(finalClientId)) {
+                                    consumerPaused = true;
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
+                                    }
+                                    kafkaConsumer.pause(kafkaConsumer.assignment());
+                                    pausedConsumers.put(finalClientId, kafkaConsumer);
+                                }
+
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
+
+                                if (consumerPaused && !paused.contains(finalClientId)) {
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
+                                    }
+                                    kafkaConsumer.resume(
+                                            kafkaConsumer.paused()
+                                    );
+                                    pausedConsumers.remove(finalClientId);
+                                    consumerPaused = false;
+                                }
+
                                 Map<TopicPartition, OffsetAndMetadata> currentOffsets = trackPartitions ? new HashMap<>() : null;
                                 if (consumerRecords != null && consumerRecords.count() > 0) {
 
@@ -506,7 +587,7 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
     @Override
     @PreDestroy
     public void close() {
-        for (Consumer consumer : consumers) {
+        for (Consumer consumer : consumers.values()) {
             consumer.wakeup();
         }
         consumers.clear();
