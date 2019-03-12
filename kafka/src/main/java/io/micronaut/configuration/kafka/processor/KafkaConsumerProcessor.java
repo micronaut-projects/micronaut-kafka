@@ -487,7 +487,9 @@ public class KafkaConsumerProcessor implements ExecutableMethodProcessor<KafkaLi
                         // ignore for shutdown
                     } finally {
                         try {
-                            kafkaConsumer.commitSync();
+                            if (offsetStrategy != OffsetStrategy.DISABLED) {
+                                kafkaConsumer.commitSync();
+                            }
                         } catch (Throwable e) {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("Error committing Kafka offsets on shutdown: " + e.getMessage(), e);
