@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -107,7 +107,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>io.micronaut.context.processor.AnnotationProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>,io.micronaut.inject.ExecutableMethod&lt;?,?&gt;&gt;, io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>&gt;, java.lang.AutoCloseable</dd>
+<dd><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a>, io.micronaut.context.processor.AnnotationProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>,io.micronaut.inject.ExecutableMethod&lt;?,?&gt;&gt;, io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>&gt;, java.lang.AutoCloseable</dd>
 </dl>
 <hr>
 <br>
@@ -115,7 +115,7 @@ var activeTableTab = "activeTableTab";
  @Requires(beans=<a href="../../../../../io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration.class</a>)
 public class <span class="typeNameLabel">KafkaConsumerProcessor</span>
 extends java.lang.Object
-implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>&gt;, java.lang.AutoCloseable</pre>
+implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation">KafkaListener</a>&gt;, java.lang.AutoCloseable, <a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></pre>
 <div class="block"><p>A <code>ExecutableMethodProcessor</code> that will process all beans annotated with <a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a>
  and create and subscribe the relevant methods as consumers to Kafka topics.</p></div>
 <dl>
@@ -174,9 +174,39 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#close--">close</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>&lt;K,V&gt;&nbsp;org.apache.kafka.clients.consumer.Consumer&lt;K,V&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#getConsumer-java.lang.String-">getConsumer</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Returns a managed Consumer.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#getConsumerIds--">getConsumerIds</a></span>()</code>
+<div class="block">The IDs of the available consumers.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#isPaused-java.lang.String-">isPaused</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Is the consumer with the given ID paused.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#pause-java.lang.String-">pause</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Pause the consumer for the given ID.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#process-io.micronaut.inject.BeanDefinition-io.micronaut.inject.ExecutableMethod-">process</a></span>(io.micronaut.inject.BeanDefinition&lt;?&gt;&nbsp;beanDefinition,
        io.micronaut.inject.ExecutableMethod&lt;?,?&gt;&nbsp;method)</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#resume-java.lang.String-">resume</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Resume the consumer for the given ID.</div>
+</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -239,6 +269,109 @@ implements io.micronaut.context.processor.ExecutableMethodProcessor&lt;<a href="
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="getConsumer-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConsumer</h4>
+<pre>@Nonnull
+public&nbsp;&lt;K,V&gt;&nbsp;org.apache.kafka.clients.consumer.Consumer&lt;K,V&gt;&nbsp;getConsumer(@Nonnull
+                                                                                  java.lang.String&nbsp;id)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumer-java.lang.String-">ConsumerRegistry</a></code></span></div>
+<div class="block">Returns a managed Consumer. Note that the consumer should not be interacted with directly from a
+ different thread to the poll loop!</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumer-java.lang.String-">getConsumer</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></code></dd>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>K</code> - The key generic type</dd>
+<dd><code>V</code> - The value generic type</dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - The id of the producer.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The producer</dd>
+</dl>
+</li>
+</ul>
+<a name="getConsumerIds--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConsumerIds</h4>
+<pre>@Nonnull
+public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerIds()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerIds--">ConsumerRegistry</a></code></span></div>
+<div class="block">The IDs of the available consumers.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerIds--">getConsumerIds</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The consumers</dd>
+</dl>
+</li>
+</ul>
+<a name="isPaused-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isPaused</h4>
+<pre>public&nbsp;boolean&nbsp;isPaused(@Nonnull
+                        java.lang.String&nbsp;id)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-">ConsumerRegistry</a></code></span></div>
+<div class="block">Is the consumer with the given ID paused.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-">isPaused</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - True it is paused</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>True if it is paused</dd>
+</dl>
+</li>
+</ul>
+<a name="pause-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>pause</h4>
+<pre>public&nbsp;void&nbsp;pause(@Nonnull
+                  java.lang.String&nbsp;id)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#pause-java.lang.String-">ConsumerRegistry</a></code></span></div>
+<div class="block">Pause the consumer for the given ID. Note that this method will request that the consumer is paused, however
+ does not block until the consumer is actually paused. You can use the <a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-"><code>ConsumerRegistry.isPaused(String)</code></a> method to
+ establish when the consumer has actually been paused.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#pause-java.lang.String-">pause</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - The id of the consumer</dd>
+</dl>
+</li>
+</ul>
+<a name="resume-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>resume</h4>
+<pre>public&nbsp;void&nbsp;resume(@Nonnull
+                   java.lang.String&nbsp;id)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#resume-java.lang.String-">ConsumerRegistry</a></code></span></div>
+<div class="block">Resume the consumer for the given ID. Note that this method will request that the consumer is resumed, however
+ does not block until the consumer is actually resumed. You can use the <a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-"><code>ConsumerRegistry.isPaused(String)</code></a> method to
+ establish when the consumer has actually been resumed.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#resume-java.lang.String-">resume</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - The id of the consumer</dd>
+</dl>
+</li>
+</ul>
 <a name="process-io.micronaut.inject.BeanDefinition-io.micronaut.inject.ExecutableMethod-">
 <!--   -->
 </a>

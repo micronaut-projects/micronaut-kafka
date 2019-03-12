@@ -244,6 +244,10 @@
 <dd>
 <div class="block">Creates the registry for the given binders.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">ConsumerRegistry</span></a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">A registry for created Kafka consumers.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html#convert-org.apache.kafka.common.header.Header-java.lang.Class-io.micronaut.core.convert.ConversionContext-">convert(Header, Class&lt;Object&gt;, ConversionContext)</a></span> - Method in class io.micronaut.configuration.kafka.convert.<a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html" title="class in io.micronaut.configuration.kafka.convert">KafkaHeaderConverter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaConsumerFactory.html#createConsumer-io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration-">createConsumer(AbstractKafkaConsumerConfiguration&lt;K, V&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaConsumerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaConsumerFactory</a></dt>
@@ -367,6 +371,18 @@
 <dd>
 <div class="block">The configuration.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumer-java.lang.String-">getConsumer(String)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
+<dd>
+<div class="block">Returns a managed Consumer.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#getConsumer-java.lang.String-">getConsumer(String)</a></span> - Method in class io.micronaut.configuration.kafka.processor.<a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html" title="class in io.micronaut.configuration.kafka.processor">KafkaConsumerProcessor</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerIds--">getConsumerIds()</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
+<dd>
+<div class="block">The IDs of the available consumers.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#getConsumerIds--">getConsumerIds()</a></span> - Method in class io.micronaut.configuration.kafka.processor.<a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html" title="class in io.micronaut.configuration.kafka.processor">KafkaConsumerProcessor</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#getConsumerRecord--">getConsumerRecord()</a></span> - Method in exception io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html#getDeserializer-java.lang.Class-">getDeserializer(Class&lt;T&gt;)</a></span> - Method in interface io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a></dt>
@@ -521,6 +537,12 @@
 <dt><a href="io/micronaut/configuration/kafka/tracing/package-summary.html">io.micronaut.configuration.kafka.tracing</a> - package io.micronaut.configuration.kafka.tracing</dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html#isEnabled--">isEnabled()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbeddedConfiguration</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-">isPaused(String)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
+<dd>
+<div class="block">Is the consumer with the given ID paused.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#isPaused-java.lang.String-">isPaused(String)</a></span> - Method in class io.micronaut.configuration.kafka.processor.<a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html" title="class in io.micronaut.configuration.kafka.processor">KafkaConsumerProcessor</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html#isRunning--">isRunning()</a></span> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaClientScope</a></dt>
 <dd>&nbsp;</dd>
@@ -837,6 +859,12 @@
 </a>
 <h2 class="title">P</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#pause-java.lang.String-">pause(String)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
+<dd>
+<div class="block">Pause the consumer for the given ID.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#pause-java.lang.String-">pause(String)</a></span> - Method in class io.micronaut.configuration.kafka.processor.<a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html" title="class in io.micronaut.configuration.kafka.processor">KafkaConsumerProcessor</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html#pickDeserializer-io.micronaut.core.type.Argument-">pickDeserializer(Argument&lt;T&gt;)</a></span> - Method in interface io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a></dt>
 <dd>
 <div class="block">Picks the most appropriate <code>Deserializer</code> for the given argument.</div>
@@ -886,6 +914,12 @@
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#remove-java.lang.CharSequence-">remove(CharSequence)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html#remove-io.micronaut.inject.BeanIdentifier-">remove(BeanIdentifier)</a></span> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaClientScope</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#resume-java.lang.String-">resume(String)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
+<dd>
+<div class="block">Resume the consumer for the given ID.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html#resume-java.lang.String-">resume(String)</a></span> - Method in class io.micronaut.configuration.kafka.processor.<a href="io/micronaut/configuration/kafka/processor/KafkaConsumerProcessor.html" title="class in io.micronaut.configuration.kafka.processor">KafkaConsumerProcessor</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:S">
