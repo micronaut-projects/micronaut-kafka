@@ -19,7 +19,6 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.convert.ConversionService;
-import io.micronaut.core.convert.DefaultConversionService;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
@@ -44,7 +43,6 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
     @SuppressWarnings("WeakerAccess")
     public static final int DEFAULT_HEALTHTIMEOUT = 10;
 
-    private static final ConversionService CONVERSION_SERVICE = new DefaultConversionService();
     private Duration healthTimeout = Duration.ofSeconds(DEFAULT_HEALTHTIMEOUT);
 
     /**
@@ -88,8 +86,8 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
             return !Stream.of("embedded", "consumers", "producers", "streams").anyMatch(key::startsWith);
         }).forEach(entry -> {
             Object value = entry.getValue();
-            if (CONVERSION_SERVICE.canConvert(entry.getValue().getClass(), String.class)) {
-                Optional<Object> converted = CONVERSION_SERVICE.convert(entry.getValue(), String.class);
+            if (ConversionService.SHARED.canConvert(entry.getValue().getClass(), String.class)) {
+                Optional<?> converted = ConversionService.SHARED.convert(entry.getValue(), String.class);
                 if (converted.isPresent()){
                     value = converted.get();
                 }
