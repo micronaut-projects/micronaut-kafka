@@ -44,7 +44,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
-        if(!METER_REGISTRIES.contains(registry)) {
+        if (!METER_REGISTRIES.contains(registry)) {
             METER_REGISTRIES.add(registry);
         }
     }
