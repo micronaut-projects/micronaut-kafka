@@ -307,6 +307,27 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>If your broker needs to setup SSL, it can be configured this way:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  bootstrap:
+    servers: localhost:9092
+  ssl:
+    keystore:
+      location: /path/to/client.keystore.p12
+      password: secret
+    truststore:
+      location: /path/to/client.truststore.jks
+      password: secret
+      type: PKCS12
+  security:
+    protocol: ssl</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h3>
