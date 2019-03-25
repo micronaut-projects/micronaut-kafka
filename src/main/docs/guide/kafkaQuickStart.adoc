@@ -28,6 +28,26 @@ kafka:
 
 TIP: You can also set the environment variable `KAFKA_BOOTSTRAP_SERVERS` to a comma separated list of values to externalize configuration.
 
+If your broker needs to setup SSL, it can be configured this way:
+
+.Configuring Kafka
+[source,yaml]
+----
+kafka:
+  bootstrap:
+    servers: localhost:9092
+  ssl:
+    keystore:
+      location: /path/to/client.keystore.p12
+      password: secret
+    truststore:
+      location: /path/to/client.truststore.jks
+      password: secret
+      type: PKCS12
+  security:
+    protocol: ssl
+----
+
 === Creating a Kafka Producer with @KafkaClient
 
 To create a Kafka `Producer` that sends messages you can simply define an interface that is annotated with ann:configuration.kafka.annotation.KafkaClient[].
