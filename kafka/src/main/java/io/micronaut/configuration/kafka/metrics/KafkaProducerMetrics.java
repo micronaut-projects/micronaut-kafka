@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.metrics;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.metrics.annotation.RequiresMetrics;
 import io.micronaut.context.annotation.Context;
+import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
@@ -31,6 +32,8 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
 @RequiresMetrics
 @Requires(property = MICRONAUT_METRICS_BINDERS + ".kafka.enabled", value = "true", defaultValue = "true")
 @Context
+// Producer metrics are primary since Grails/Boot only support a single metric provider
+@Primary
 public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration> {
 
     @Override
