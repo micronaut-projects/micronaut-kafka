@@ -59,7 +59,7 @@ class KafkaProducerMetricsSpec extends Specification {
 
     void "test simple producer"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyClientMetrics)
@@ -72,7 +72,6 @@ class KafkaProducerMetricsSpec extends Specification {
         conditions.eventually {
             def response = httpClient.exchange("/metrics", Map).blockingFirst()
             Map result = response.body()
-            result.names.contains("kafka.consumer.count")
             !result.names.contains("kafka.consumer.record-error-rate")
             result.names.contains("kafka.producer.count")
             result.names.contains("kafka.producer.record-error-rate")
