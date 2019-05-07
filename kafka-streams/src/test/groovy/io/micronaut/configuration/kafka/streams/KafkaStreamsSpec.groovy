@@ -33,8 +33,7 @@ class KafkaStreamsSpec extends Specification {
                     "kafka.bootstrap.servers", 'localhost:${random.port}',
                     AbstractKafkaConfiguration.EMBEDDED, true,
                     AbstractKafkaConfiguration.EMBEDDED_TOPICS, [WordCountStream.INPUT, WordCountStream.OUTPUT],
-                    'kafka.streams.my-stream.num.stream.threads', 10,
-                    'kafka.streams.count-stream.num.stream.threads', 10,
+                    'kafka.streams.my-stream.num.stream.threads', 10
             )
     )
 
