@@ -16,15 +16,23 @@
 package io.micronaut.configuration.kafka.streams;
 
 // tag::imports[]
+
 import io.micronaut.context.annotation.Factory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KGroupedStream;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
 // end::imports[]
 
 // tag::clazz[]
@@ -33,6 +41,7 @@ public class WordCountStream {
 
     public static final String INPUT = "streams-plaintext-input"; // <1>
     public static final String OUTPUT = "streams-wordcount-output"; // <2>
+    public static final String WORD_COUNT_MEMORY_STORE = "word-count-memory-store";
 
 // end::clazz[]
 
@@ -46,14 +55,21 @@ public class WordCountStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KStream<String, String> source = builder.stream(INPUT);
-        KTable<String, Long> counts = source
-                .flatMapValues( value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
-                .groupBy((key, value) -> value)
-                .count();
+        KStream<String, String> source = builder
+                .stream(INPUT);
 
-        // need to override value serde to Long type
-        counts.toStream().to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+        KTable<String, Long> groupedByWord = source
+                .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
+                .groupBy((key, word) -> word, Grouped.with(Serdes.String(), Serdes.String()))
+                //Store the result in a store for lookup later
+                .count(Materialized.as(WORD_COUNT_MEMORY_STORE)); // <4>
+
+        groupedByWord
+                //convert to stream
+                .toStream()
+                //send to output using specific serdes
+                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+
         return source;
     }
     // end::wordCountStream[]
@@ -64,7 +80,7 @@ public class WordCountStream {
     KStream<String, String> myStream(
             @Named("my-stream") ConfiguredStreamBuilder builder) {
 
-    // end::namedStream[]
+        // end::namedStream[]
         // set default serdes
         Properties props = builder.getConfiguration();
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -73,7 +89,7 @@ public class WordCountStream {
 
         KStream<String, String> source = builder.stream("named-word-count-input");
         KTable<String, Long> counts = source
-                .flatMapValues( value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
+                .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
                 .groupBy((key, value) -> value)
                 .count();
 
