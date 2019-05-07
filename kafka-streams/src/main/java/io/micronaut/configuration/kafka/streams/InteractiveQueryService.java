@@ -35,6 +35,7 @@ public class InteractiveQueryService {
 
     /**
      * Constructor for interactive query service.
+     *
      * @param streams the collection os streams
      */
     InteractiveQueryService(Collection<KafkaStreams> streams) {
@@ -42,12 +43,13 @@ public class InteractiveQueryService {
     }
 
     // tag::getQueryableStore[]
+
     /**
      * Retrieve and return a queryable store by name created in the application.
      *
      * @param storeName name of the queryable store
      * @param storeType type of the queryable store
-     * @param <T> generic queryable store
+     * @param <T>       generic queryable store
      * @return queryable store.
      */
     public <T> T getQueryableStore(String storeName, QueryableStoreType<T> storeType) {
@@ -57,8 +59,7 @@ public class InteractiveQueryService {
                 if (store != null) {
                     return store;
                 }
-            }
-            catch (InvalidStateStoreException ignored) {
+            } catch (InvalidStateStoreException ignored) {
                 //pass through
             }
         }
