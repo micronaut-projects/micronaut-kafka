@@ -63,6 +63,7 @@ class KafkaProducerMetricsSpec extends Specification {
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyClientMetrics)
+        context.containsBean(KafkaHealthIndicator)
 
         when:
         context.getBean(MyClientMetrics).sendGetRecordMetadata("key", "value")
@@ -71,7 +72,7 @@ class KafkaProducerMetricsSpec extends Specification {
         conditions.eventually {
             def response = httpClient.exchange("/metrics", Map).blockingFirst()
             Map result = response.body()
-//            result.names.contains("kafka.consumer.count")
+            result.names.contains("kafka.consumer.count")
             !result.names.contains("kafka.consumer.record-error-rate")
             result.names.contains("kafka.producer.count")
             result.names.contains("kafka.producer.record-error-rate")
@@ -85,7 +86,7 @@ class KafkaProducerMetricsSpec extends Specification {
         @Topic("words-metrics")
         void sendSentence(@KafkaKey String key, String sentence, @Header String topic)
 
-        @Topic("words-metrics")
+        @Topic("words-metrics-two")
         RecordMetadata sendGetRecordMetadata(@KafkaKey String key, String sentence)
 
         @Topic("books-metrics")
