@@ -19,6 +19,7 @@ import groovy.transform.EqualsAndHashCode
 import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
+import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
 import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
@@ -71,6 +72,7 @@ class KafkaListenerSpec extends Specification {
         PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
+        context.containsBean(KafkaHealthIndicator)
 
         expect:
         context.containsBean(KafkaConsumerMetrics)
@@ -93,7 +95,7 @@ class KafkaListenerSpec extends Specification {
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")
-            //result.names.contains("kafka.consumer.count")
+            result.names.contains("kafka.consumer.count")
             !result.names.contains("kafka.count")
         }
     }

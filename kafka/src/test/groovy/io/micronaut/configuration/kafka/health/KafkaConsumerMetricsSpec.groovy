@@ -42,7 +42,7 @@ class KafkaConsumerMetricsSpec extends Specification {
                     "micrometer.metrics.enabled", true,
                     'endpoints.metrics.sensitive', false,
                     AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
+                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words-metrics", "words", "books", "words-records", "books-records"]
             )
     )
 
@@ -60,12 +60,13 @@ class KafkaConsumerMetricsSpec extends Specification {
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyConsumerMetrics)
+        context.containsBean(KafkaHealthIndicator)
 
         expect:
         conditions.eventually {
             def response = httpClient.exchange("/metrics", Map).blockingFirst()
             Map result = response.body()
-//            result.names.contains("kafka.consumer.count")
+            result.names.contains("kafka.consumer.count")
             result.names.contains("kafka.consumer.bytes-consumed-total")
             !result.names.contains("kafka.consumer.record-error-rate")
             !result.names.contains("kafka.producer.count")
