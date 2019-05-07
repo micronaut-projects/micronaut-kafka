@@ -67,34 +67,37 @@ class KafkaListenerSpec extends Specification {
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 
     void "test simple consumer"() {
-        when:
+        given:
+        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
         MyClient myClient = context.getBean(MyClient)
-        myClient.sendSentence("key", "hello world", "words")
-
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyConsumer myConsumer = context.getBean(MyConsumer)
+
+        when:
+        myClient.sendSentence("key", "hello world", "words")
 
         then:
         context.containsBean(KafkaConsumerMetrics)
         context.containsBean(KafkaProducerMetrics)
+
+        and:
         conditions.eventually {
             myConsumer.wordCount == 2
             myConsumer.lastTopic == 'words'
         }
 
-        expect:
+        and:
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
 
-        when:
-        def response = httpClient.exchange("/metrics", Map).blockingFirst()
-        Map result = response.body()
+        and:
+        conditions.eventually {
+            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            Map result = response.body()
 
-        then:
-        result.names.contains("kafka.producer.count")
-        result.names.contains("kafka.consumer.count")
-        !result.names.contains("kafka.count")
+            result.names.contains("kafka.producer.count")
+            result.names.contains("kafka.consumer.count")
+            !result.names.contains("kafka.count")
+        }
     }
 
     void "test POJO consumer"() {
