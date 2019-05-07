@@ -22,7 +22,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.KGroupedStream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -41,7 +40,7 @@ public class WordCountStream {
 
     public static final String INPUT = "streams-plaintext-input"; // <1>
     public static final String OUTPUT = "streams-wordcount-output"; // <2>
-    public static final String WORD_COUNT_MEMORY_STORE = "word-count-memory-store";
+    public static final String WORD_COUNT_STORE = "word-count-store";
 
 // end::clazz[]
 
@@ -62,7 +61,7 @@ public class WordCountStream {
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
                 .groupBy((key, word) -> word, Grouped.with(Serdes.String(), Serdes.String()))
                 //Store the result in a store for lookup later
-                .count(Materialized.as(WORD_COUNT_MEMORY_STORE)); // <4>
+                .count(Materialized.as(WORD_COUNT_STORE)); // <4>
 
         groupedByWord
                 //convert to stream

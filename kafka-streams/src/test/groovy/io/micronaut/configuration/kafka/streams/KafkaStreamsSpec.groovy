@@ -58,14 +58,14 @@ class KafkaStreamsSpec extends Specification {
         conditions.eventually {
             countListener.getCount("fox") > 0
             countListener.getCount("jumps") > 0
-            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_MEMORY_STORE, "fox") > 0
-            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_MEMORY_STORE, "jumps") > 0
-            interactiveQueryService.<String, Long>getGenericKeyValue(WordCountStream.WORD_COUNT_MEMORY_STORE, "the") > 0
+            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "fox") > 0
+            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "jumps") > 0
+            interactiveQueryService.<String, Long>getGenericKeyValue(WordCountStream.WORD_COUNT_STORE, "the") > 0
 
             println countListener.wordCounts
-            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_MEMORY_STORE, "fox")
-            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_MEMORY_STORE, "jumps")
-            println interactiveQueryService.<String, Long>getGenericKeyValue(WordCountStream.WORD_COUNT_MEMORY_STORE, "the")
+            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "fox")
+            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "jumps")
+            println interactiveQueryService.<String, Long>getGenericKeyValue(WordCountStream.WORD_COUNT_STORE, "the")
         }
 
     }
