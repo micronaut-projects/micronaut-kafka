@@ -56,7 +56,7 @@ class KafkaConsumerMetricsSpec extends Specification {
 
     void "test simple consumer"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyConsumerMetrics)
@@ -66,7 +66,6 @@ class KafkaConsumerMetricsSpec extends Specification {
         conditions.eventually {
             def response = httpClient.exchange("/metrics", Map).blockingFirst()
             Map result = response.body()
-            result.names.contains("kafka.consumer.count")
             result.names.contains("kafka.consumer.bytes-consumed-total")
             !result.names.contains("kafka.consumer.record-error-rate")
             !result.names.contains("kafka.producer.count")

@@ -69,7 +69,7 @@ class KafkaListenerSpec extends Specification {
 
     void "test simple consumer"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
         context.containsBean(KafkaHealthIndicator)
@@ -95,7 +95,6 @@ class KafkaListenerSpec extends Specification {
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")
-            result.names.contains("kafka.consumer.count")
             !result.names.contains("kafka.count")
         }
     }
