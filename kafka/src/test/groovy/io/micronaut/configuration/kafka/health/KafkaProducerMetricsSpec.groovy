@@ -33,6 +33,7 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
 
 class KafkaProducerMetricsSpec extends Specification {
 
@@ -57,7 +58,8 @@ class KafkaProducerMetricsSpec extends Specification {
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 
     void "test simple producer"() {
-        expect:
+        given:
+        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyClientMetrics)
@@ -65,25 +67,17 @@ class KafkaProducerMetricsSpec extends Specification {
         when:
         context.getBean(MyClientMetrics).sendGetRecordMetadata("key", "value")
 
-        and:
-        def response = httpClient.exchange("/metrics", Map).blockingFirst()
-        Map result = response.body()
-
-        then: 'kafka.consumer.count will be there due to default consumer'
-        result.names.contains("kafka.consumer.count")
-
-        and: 'producer only metric not bleed to consumer'
-        !result.names.contains("kafka.consumer.record-error-rate")
-
-        and: 'producer count will be there because we fired up consumer bean via send'
-        result.names.contains("kafka.producer.count")
-        result.names.contains("kafka.producer.record-error-rate")
-
-        and: 'consumer only metric not bleed to producer'
-        !result.names.contains("kafka.producer.bytes-consumed-total")
-
-        and: 'generic count will not exist'
-        !result.names.contains("kafka.count")
+        then:
+        conditions.eventually {
+            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            Map result = response.body()
+//            result.names.contains("kafka.consumer.count")
+            !result.names.contains("kafka.consumer.record-error-rate")
+            result.names.contains("kafka.producer.count")
+            result.names.contains("kafka.producer.record-error-rate")
+            !result.names.contains("kafka.producer.bytes-consumed-total")
+            !result.names.contains("kafka.count")
+        }
     }
 
     @KafkaClient

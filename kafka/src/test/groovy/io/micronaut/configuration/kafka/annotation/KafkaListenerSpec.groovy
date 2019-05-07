@@ -93,7 +93,7 @@ class KafkaListenerSpec extends Specification {
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")
-            result.names.contains("kafka.consumer.count")
+            //result.names.contains("kafka.consumer.count")
             !result.names.contains("kafka.count")
         }
     }

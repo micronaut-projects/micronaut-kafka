@@ -30,6 +30,7 @@ import io.micronaut.runtime.server.EmbeddedServer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
 
 class KafkaConsumerMetricsSpec extends Specification {
 
@@ -54,31 +55,24 @@ class KafkaConsumerMetricsSpec extends Specification {
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 
     void "test simple consumer"() {
-        expect:
+        given:
+        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
         context.containsBean(MeterRegistry)
         context.containsBean(MetricsEndpoint)
         context.containsBean(MyConsumerMetrics)
 
-        when:
-        def response = httpClient.exchange("/metrics", Map).blockingFirst()
-        Map result = response.body()
-
-        then: 'kafka.consumer only metrics will be present'
-        result.names.contains("kafka.consumer.count")
-        result.names.contains("kafka.consumer.bytes-consumed-total")
-
-        and: 'producer only metric not bleed to consumer'
-        !result.names.contains("kafka.consumer.record-error-rate")
-
-        and: 'producer metrics will not be present'
-        !result.names.contains("kafka.producer.count")
-        !result.names.contains("kafka.producer.record-error-rate")
-
-        and: 'consumer only metric not bleed to producer'
-        !result.names.contains("kafka.producer.bytes-consumed-total")
-
-        and: 'generic count will not exist'
-        !result.names.contains("kafka.count")
+        expect:
+        conditions.eventually {
+            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            Map result = response.body()
+//            result.names.contains("kafka.consumer.count")
+            result.names.contains("kafka.consumer.bytes-consumed-total")
+            !result.names.contains("kafka.consumer.record-error-rate")
+            !result.names.contains("kafka.producer.count")
+            !result.names.contains("kafka.producer.record-error-rate")
+            !result.names.contains("kafka.producer.bytes-consumed-total")
+            !result.names.contains("kafka.count")
+        }
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
