@@ -72,22 +72,20 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
 
+        expect:
+        context.containsBean(KafkaConsumerMetrics)
+        context.containsBean(KafkaProducerMetrics)
+        context.containsBean(MeterRegistry)
+        context.containsBean(MetricsEndpoint)
+
         when:
         myClient.sendSentence("key", "hello world", "words")
 
         then:
-        context.containsBean(KafkaConsumerMetrics)
-        context.containsBean(KafkaProducerMetrics)
-
-        and:
         conditions.eventually {
             myConsumer.wordCount == 2
             myConsumer.lastTopic == 'words'
         }
-
-        and:
-        context.containsBean(MeterRegistry)
-        context.containsBean(MetricsEndpoint)
 
         and:
         conditions.eventually {
