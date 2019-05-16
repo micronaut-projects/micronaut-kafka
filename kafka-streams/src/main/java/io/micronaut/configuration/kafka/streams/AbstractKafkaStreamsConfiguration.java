@@ -33,10 +33,10 @@ import java.util.Properties;
  * @param <K> The key deserializer type
  * @param <V> The value deserializer type
  */
-public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfiguration<K, V> {
+public abstract class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfiguration<K, V> implements KafkaStreamsConfiguration {
 
     /**
-     * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.
+     * Construct a new {@link AbstractKafkaStreamsConfiguration} for the given defaults.
      *
      * @param defaultConfiguration The default configuration
      */

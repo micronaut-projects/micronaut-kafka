@@ -19,7 +19,6 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.kstream.KStream;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
@@ -27,7 +26,6 @@ import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedDeque;
-
 
 /**
  * A factory that constructs the {@link KafkaStreams} bean.
@@ -41,29 +39,14 @@ public class KafkaStreamsFactory implements Closeable {
     private final Collection<KafkaStreams> streams = new ConcurrentLinkedDeque<>();
 
     /**
-     * Exposes the {@link ConfiguredStreamBuilder} as a bean.
-     *
-     * @param configuration The configuration
-     * @return The streams builder
-     */
-    @EachBean(AbstractKafkaStreamsConfiguration.class)
-    ConfiguredStreamBuilder streamsBuilder(AbstractKafkaStreamsConfiguration configuration) {
-        return new ConfiguredStreamBuilder(configuration.getConfig());
-    }
-
-    /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
-     * @param builder  The builder
-     * @param kStreams The KStream definitions
+     * @param builder The builder
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
     @Context
-    KafkaStreams kafkaStreams(
-            ConfiguredStreamBuilder builder,
-            // required for initialization. DO NOT DELETE
-            KStream... kStreams) {
+    KafkaStreams kafkaStreams(ConfiguredStreamBuilder builder) {
         KafkaStreams kafkaStreams = new KafkaStreams(
                 builder.build(),
                 builder.getConfiguration()
@@ -94,5 +77,4 @@ public class KafkaStreamsFactory implements Closeable {
             }
         }
     }
-
 }

@@ -23,7 +23,6 @@ import io.micronaut.runtime.ApplicationConfiguration;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Properties;
 
 /**
  * The default streams configuration is non other is present.
@@ -33,14 +32,14 @@ import java.util.Properties;
  * @param <K>
  * @param <V>
  */
-@Requires(missingProperty = KafkaStreamsConfiguration.PREFIX + ".default")
+@Requires(missingProperty = NamedKafkaStreamsConfiguration.PREFIX + ".default")
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
 @Named("default")
 @Primary
 public class DefaultKafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfiguration<K, V> {
     /**
-     * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.
+     * Construct a new {@link DefaultKafkaStreamsConfiguration} for the given defaults.
      *
      * @param defaultConfiguration The default configuration
      * @param applicationConfiguration The application configuration
@@ -50,8 +49,6 @@ public class DefaultKafkaStreamsConfiguration<K, V> extends AbstractKafkaStreams
                                             ApplicationConfiguration applicationConfiguration,
                                             Environment environment) {
         super(defaultConfiguration);
-        Properties config = getConfig();
-        config.putAll(defaultConfiguration.getConfig());
-        init(applicationConfiguration, environment, config);
+        init(applicationConfiguration, environment, getConfig());
     }
 }
