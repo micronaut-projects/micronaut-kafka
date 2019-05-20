@@ -20,6 +20,7 @@ import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.QueryableStoreType;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Services to facilitate the interactive query capabilities of Kafka Streams. This class provides
@@ -45,25 +46,26 @@ public class InteractiveQueryService {
     // tag::getQueryableStore[]
 
     /**
-     * Retrieve and return a queryable store by name created in the application.
+     * Retrieve and return a queryable store by name created in the application.  If state store is not
+     * present an Optional.empty() will be returned.
      *
      * @param storeName name of the queryable store
      * @param storeType type of the queryable store
      * @param <T>       generic queryable store
      * @return queryable store.
      */
-    public <T> T getQueryableStore(String storeName, QueryableStoreType<T> storeType) {
+    public <T> Optional<T> getQueryableStore(String storeName, QueryableStoreType<T> storeType) {
         for (KafkaStreams kafkaStream : this.streams) {
             try {
                 T store = kafkaStream.store(storeName, storeType);
                 if (store != null) {
-                    return store;
+                    return Optional.of(store);
                 }
             } catch (InvalidStateStoreException ignored) {
                 //pass through
             }
         }
-        return null;
+        return Optional.empty();
     }
     // end::getQueryableStore[]
 }
