@@ -19,6 +19,7 @@ import groovy.transform.EqualsAndHashCode
 import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
+import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
 import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
@@ -67,34 +68,35 @@ class KafkaListenerSpec extends Specification {
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 
     void "test simple consumer"() {
-        when:
-        MyClient myClient = context.getBean(MyClient)
-        myClient.sendSentence("key", "hello world", "words")
-
+        given:
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
+        MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
+        context.containsBean(KafkaHealthIndicator)
 
-        then:
+        expect:
         context.containsBean(KafkaConsumerMetrics)
         context.containsBean(KafkaProducerMetrics)
+        context.containsBean(MeterRegistry)
+        context.containsBean(MetricsEndpoint)
+
+        when:
+        myClient.sendSentence("key", "hello world", "words")
+
+        then:
         conditions.eventually {
             myConsumer.wordCount == 2
             myConsumer.lastTopic == 'words'
         }
 
-        expect:
-        context.containsBean(MeterRegistry)
-        context.containsBean(MetricsEndpoint)
+        and:
+        conditions.eventually {
+            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            Map result = response.body()
 
-        when:
-        def response = httpClient.exchange("/metrics", Map).blockingFirst()
-        Map result = response.body()
-
-        then:
-        result.names.contains("kafka.producer.count")
-        result.names.contains("kafka.consumer.count")
-        !result.names.contains("kafka.count")
+            result.names.contains("kafka.producer.count")
+            !result.names.contains("kafka.count")
+        }
     }
 
     void "test POJO consumer"() {
