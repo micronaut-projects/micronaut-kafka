@@ -166,17 +166,24 @@ function addJsClass() {
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
 
 @Factory
 public class WordCountStream {
 
     public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
     public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
+    public static final String WORD_COUNT_STORE = "word-count-store";
 
 
     @Singleton
@@ -188,14 +195,21 @@ public class WordCountStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KStream&lt;String, String&gt; source = builder.stream(INPUT);
-        KTable&lt;String, Long&gt; counts = source
-                .flatMapValues( value -&gt; Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
-                .groupBy((key, value) -&gt; value)
-                .count();
+        KStream&lt;String, String&gt; source = builder
+                .stream(INPUT);
 
-        // need to override value serde to Long type
-        counts.toStream().to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+        KTable&lt;String, Long&gt; groupedByWord = source
+                .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
+                .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
+                //Store the result in a store for lookup later
+                .count(Materialized.as(WORD_COUNT_STORE)); <i class="conum" data-value="4"></i><b>(4)</b>
+
+        groupedByWord
+                //convert to stream
+                .toStream()
+                //send to output using specific serdes
+                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+
         return source;
     }
 
@@ -215,6 +229,10 @@ public class WordCountStream {
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>An instance of <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> is injected that allows mutating the configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Materialize the count stream and save to a state store</td>
 </tr>
 </table>
 </div>
@@ -350,6 +368,28 @@ KStream&lt;String, String&gt; myStream(
         @Named("my-stream") ConfiguredStreamBuilder builder) {
 
 }</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_interactive_query_service">Interactive Query Service</h3>
+<div class="paragraph">
+<p>When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores">available here</a>.</p>
+</div>
+<div class="paragraph">
+<p>You can inject the <code>InteractiveQueryService</code> and use the method <code>getQueryableStore</code> to get values from a state store.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/main/groovy/io/micronaut/configuration/kafka/streams/InteractiveQueryService.java[tags=getQueryableStore, indent=0]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example service that wraps the <code>InteractiveQueryService</code> is included below.  This is here to illustrate that when calling the <code>getQueryableStore</code> method you must provide the store name and preferably the type of key and value you are trying to retrieve.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::{testkafkastreams}/InteractiveQueryServiceExample.java[]</code></pre>
 </div>
 </div>
 </div>
