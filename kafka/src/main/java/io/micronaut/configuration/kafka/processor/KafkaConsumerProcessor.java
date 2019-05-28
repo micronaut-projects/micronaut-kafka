@@ -38,6 +38,7 @@ import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
 import io.micronaut.core.util.ArrayUtils;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
@@ -187,14 +188,14 @@ public class KafkaConsumerProcessor
     @Override
     public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
 
-        Topic[] topicAnnotations = method.synthesizeDeclaredAnnotationsByType(Topic.class);
+        List<AnnotationValue<Topic>> topicAnnotations = method.getDeclaredAnnotationValuesByType(Topic.class);
         AnnotationValue<KafkaListener> consumerAnnotation = method.getAnnotation(KafkaListener.class);
 
-        if (ArrayUtils.isEmpty(topicAnnotations)) {
-            topicAnnotations = beanDefinition.synthesizeAnnotationsByType(Topic.class);
+        if (CollectionUtils.isEmpty(topicAnnotations)) {
+            topicAnnotations = beanDefinition.getDeclaredAnnotationValuesByType(Topic.class);
         }
 
-        if (consumerAnnotation != null && ArrayUtils.isNotEmpty(topicAnnotations)) {
+        if (consumerAnnotation != null && !CollectionUtils.isEmpty(topicAnnotations)) {
 
             Duration pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class)
                     .orElse(Duration.ofMillis(100));
@@ -333,9 +334,10 @@ public class KafkaConsumerProcessor
 
 
 
-                for (Topic topicAnnotation : topicAnnotations) {
-                    String[] topicNames = topicAnnotation.value();
-                    String[] patterns = topicAnnotation.patterns();
+                for (AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
+
+                    String[] topicNames = topicAnnotation.getValue(String[].class).orElse(StringUtils.EMPTY_STRING_ARRAY);
+                    String[] patterns = topicAnnotation.get("patterns", String[].class).orElse(StringUtils.EMPTY_STRING_ARRAY);
                     boolean hasTopics = ArrayUtils.isNotEmpty(topicNames);
                     boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
 
