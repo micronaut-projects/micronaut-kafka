@@ -52,10 +52,10 @@ class KafkaEmbeddedSpec extends Specification {
         applicationContext.close()
     }
 
-    void "test run kafka embedded server with multiple partitions topic"() {
+    void "test run kafka embedded server with multi partition topic"() {
         given:
         int partitionNumber = 10
-        String topicName = "my-topic"
+        String topicName = "multi-partition-topic"
 
         ApplicationContext applicationContext = ApplicationContext.run(
                 new HashMap() {
@@ -81,6 +81,40 @@ class KafkaEmbeddedSpec extends Specification {
                 .describeTopics([topicName]).values()
                 .get(topicName).get()
                 .partitions().size() == partitionNumber
+
+        cleanup:
+        adminClient.close()
+        applicationContext.close()
+    }
+
+    void "test run kafka embedded server with single partition topic"() {
+        given:
+        String topicName = "single-partition-topic"
+
+        ApplicationContext applicationContext = ApplicationContext.run(
+                new HashMap() {
+                    {
+                        put(AbstractKafkaConfiguration.EMBEDDED, true)
+                        put(AbstractKafkaConfiguration.EMBEDDED_TOPICS, topicName)
+                    }
+                }
+        )
+
+        AdminClient adminClient = createAdminClient()
+
+        when:
+        KafkaEmbedded kafkaEmbedded = applicationContext.getBean(KafkaEmbedded)
+
+        then:
+        kafkaEmbedded.kafkaServer.isPresent()
+        kafkaEmbedded.zkPort.isPresent()
+
+        and:
+        adminClient
+                .describeTopics([topicName]).values()
+                .get(topicName).get()
+                .partitions().size() == 1
+
 
         cleanup:
         adminClient.close()
