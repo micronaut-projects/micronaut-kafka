@@ -142,7 +142,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                     Properties properties = new Properties();
                     properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + kafkaPort));
                     AdminClient adminClient = AdminClient.create(properties);
-                    adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, 1, (short) 1)).collect(Collectors.toList()))
+                    adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, kafkaConfig.numPartitions(), (short) 1)).collect(Collectors.toList()))
                                .all().get();
                 }
             } catch (Throwable e) {
