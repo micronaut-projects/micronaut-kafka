@@ -15,16 +15,18 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
-import io.micronaut.context.annotation.*;
+import io.micronaut.context.annotation.Context;
+import io.micronaut.context.annotation.EachBean;
+import io.micronaut.context.annotation.Factory;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Singleton;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -52,7 +54,7 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
-     * @param builder The builder
+     * @param builder  The builder
      * @param kStreams The KStream definitions
      * @return The {@link KafkaStreams} bean
      */
@@ -69,6 +71,16 @@ public class KafkaStreamsFactory implements Closeable {
         streams.add(kafkaStreams);
         kafkaStreams.start();
         return kafkaStreams;
+    }
+
+    /**
+     * Create the interactive query service bean.
+     *
+     * @return Rhe {@link InteractiveQueryService} bean
+     */
+    @Singleton
+    InteractiveQueryService interactiveQueryService() {
+        return new InteractiveQueryService(streams);
     }
 
     @Override
