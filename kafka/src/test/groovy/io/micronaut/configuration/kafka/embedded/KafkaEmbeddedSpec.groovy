@@ -58,13 +58,11 @@ class KafkaEmbeddedSpec extends Specification {
         String topicName = "multi-partition-topic"
 
         ApplicationContext applicationContext = ApplicationContext.run(
-                new HashMap() {
-                    {
-                        put(AbstractKafkaConfiguration.EMBEDDED, true)
-                        put(AbstractKafkaConfiguration.EMBEDDED_TOPICS, topicName)
-                        put("kafka.embedded.properties.num.partitions", partitionNumber)
-                    }
-                }
+                [
+                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
+                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName,
+                        "kafka.embedded.properties.num.partitions"  : partitionNumber
+                ]
         )
 
         AdminClient adminClient = createAdminClient()
@@ -92,12 +90,10 @@ class KafkaEmbeddedSpec extends Specification {
         String topicName = "single-partition-topic"
 
         ApplicationContext applicationContext = ApplicationContext.run(
-                new HashMap() {
-                    {
-                        put(AbstractKafkaConfiguration.EMBEDDED, true)
-                        put(AbstractKafkaConfiguration.EMBEDDED_TOPICS, topicName)
-                    }
-                }
+                [
+                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
+                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName
+                ]
         )
 
         AdminClient adminClient = createAdminClient()
