@@ -400,7 +400,7 @@ public class KafkaConsumerProcessor
                                 }
 
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
-
+                                boolean failed = false;
                                 if (consumerPaused && !paused.contains(finalClientId)) {
                                     if (LOG.isDebugEnabled()) {
                                         LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
@@ -529,34 +529,40 @@ public class KafkaConsumerProcessor
                                                 }
                                             } catch (Throwable e) {
                                                 handleException(kafkaConsumer, consumerBean, consumerRecord, e);
-                                                continue;
+                                                // break out of the poll loop so that re-delivery can be attempted
+                                                failed = true;
+                                                break;
                                             }
 
-                                            if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
-                                                try {
-                                                    kafkaConsumer.commitSync(
-                                                            currentOffsets
-                                                    );
-                                                } catch (CommitFailedException e) {
-                                                    handleException(kafkaConsumer, consumerBean, consumerRecord, e);
+                                            if (!failed) {
+                                                if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
+                                                    try {
+                                                        kafkaConsumer.commitSync(
+                                                                currentOffsets
+                                                        );
+                                                    } catch (CommitFailedException e) {
+                                                        handleException(kafkaConsumer, consumerBean, consumerRecord, e);
+                                                    }
+                                                } else if (offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
+                                                    kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerBean));
                                                 }
-                                            } else if (offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-                                                kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerBean));
                                             }
                                         }
                                     }
 
+                                    if (!failed) {
+                                        if (offsetStrategy == OffsetStrategy.SYNC) {
+                                            try {
+                                                kafkaConsumer.commitSync();
+                                            } catch (CommitFailedException e) {
+                                                handleException(kafkaConsumer, consumerBean, null, e);
+                                            }
+                                        } else if (offsetStrategy == OffsetStrategy.ASYNC) {
+                                            kafkaConsumer.commitAsync(resolveCommitCallback(consumerBean));
+                                        }
+                                    }
                                 }
 
-                                if (offsetStrategy == OffsetStrategy.SYNC) {
-                                    try {
-                                        kafkaConsumer.commitSync();
-                                    } catch (CommitFailedException e) {
-                                        handleException(kafkaConsumer, consumerBean, null, e);
-                                    }
-                                } else if (offsetStrategy == OffsetStrategy.ASYNC) {
-                                    kafkaConsumer.commitAsync(resolveCommitCallback(consumerBean));
-                                }
                             } catch (WakeupException e) {
                                 throw e;
                             } catch (Throwable e) {
