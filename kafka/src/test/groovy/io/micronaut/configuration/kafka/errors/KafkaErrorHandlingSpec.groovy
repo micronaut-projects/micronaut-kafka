@@ -60,7 +60,6 @@ class KafkaErrorHandlingSpec extends Specification {
 
         @Topic("errors")
         void handleMessage(String message) {
-            println "RECEIVED $message"
             if (count.getAndIncrement() == 1) {
                 throw new RuntimeException("Won't handle first")
             }
