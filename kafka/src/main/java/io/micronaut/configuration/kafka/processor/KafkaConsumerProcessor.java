@@ -534,18 +534,16 @@ public class KafkaConsumerProcessor
                                                 break;
                                             }
 
-                                            if (!failed) {
-                                                if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
-                                                    try {
-                                                        kafkaConsumer.commitSync(
-                                                                currentOffsets
-                                                        );
-                                                    } catch (CommitFailedException e) {
-                                                        handleException(kafkaConsumer, consumerBean, consumerRecord, e);
-                                                    }
-                                                } else if (offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-                                                    kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerBean));
+                                            if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
+                                                try {
+                                                    kafkaConsumer.commitSync(
+                                                            currentOffsets
+                                                    );
+                                                } catch (CommitFailedException e) {
+                                                    handleException(kafkaConsumer, consumerBean, consumerRecord, e);
                                                 }
+                                            } else if (offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
+                                                kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerBean));
                                             }
                                         }
                                     }
