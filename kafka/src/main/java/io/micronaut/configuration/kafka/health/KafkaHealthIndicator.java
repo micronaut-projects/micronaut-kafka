@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.health;
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.util.CollectionUtils;
@@ -22,7 +23,12 @@ import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
 import io.reactivex.Flowable;
-import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Config;
+import org.apache.kafka.clients.admin.ConfigEntry;
+import org.apache.kafka.clients.admin.DescribeClusterOptions;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
+import org.apache.kafka.clients.admin.DescribeConfigsResult;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.config.ConfigResource;
 
@@ -39,11 +45,11 @@ import java.util.Map;
  */
 @Singleton
 @Requires(beans = AdminClient.class)
+@Requires(property = AbstractKafkaConfiguration.PREFIX + ".health.enabled", value = "true", defaultValue = "true")
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
-    private static final String REPLICATION_PROPERTY = "transaction.state.log.replication.factor";
-    private static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
+    private static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
     private final AdminClient adminClient;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
@@ -78,9 +84,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
             return configs.switchMap(resources -> {
                 Config config = resources.get(configResource);
                 ConfigEntry ce = config.get(REPLICATION_PROPERTY);
-                if (ce == null) {
-                    ce = config.get(DEFAULT_REPLICATION_PROPERTY);
-                }
                 int replicationFactor = Integer.parseInt(ce.value());
                 return nodes.switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
@@ -100,7 +103,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
             });
         }).onErrorReturn(throwable ->
                 HealthResult.builder(ID, HealthStatus.DOWN)
-                            .exception(throwable).build()
+                        .exception(throwable).build()
         );
     }
 

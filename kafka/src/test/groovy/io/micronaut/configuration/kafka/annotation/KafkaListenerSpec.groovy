@@ -16,23 +16,27 @@
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
+import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
+import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
 import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
+import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
+import io.micronaut.http.client.DefaultHttpClientConfiguration
+import io.micronaut.http.client.RxHttpClient
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.Body
 import io.micronaut.messaging.annotation.Header
+import io.micronaut.runtime.server.EmbeddedServer
 import io.reactivex.Single
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.serialization.StringSerializer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -43,32 +47,57 @@ import spock.util.concurrent.PollingConditions
 @Stepwise
 class KafkaListenerSpec extends Specification {
 
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
+    @Shared
+    @AutoCleanup
+    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
             CollectionUtils.mapOf(
                     "kafka.bootstrap.servers", 'localhost:${random.port}',
+                    "micrometer.metrics.enabled", true,
+                    'endpoints.metrics.sensitive', false,
                     AbstractKafkaConfiguration.EMBEDDED, true,
                     AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
             )
     )
 
+    @Shared
+    @AutoCleanup
+    ApplicationContext context = embeddedServer.applicationContext
+
+    @Shared
+    @AutoCleanup
+    RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+
     void "test simple consumer"() {
-        when:
-        MyClient myClient = context.getBean(MyClient)
-        myClient.sendSentence("key", "hello world", "words")
-
+        given:
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
+        MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
+        context.containsBean(KafkaHealthIndicator)
 
-        then:
+        expect:
         context.containsBean(KafkaConsumerMetrics)
         context.containsBean(KafkaProducerMetrics)
+        context.containsBean(MeterRegistry)
+        context.containsBean(MetricsEndpoint)
+
+        when:
+        myClient.sendSentence("key", "hello world", "words")
+
+        then:
         conditions.eventually {
             myConsumer.wordCount == 2
             myConsumer.lastTopic == 'words'
         }
-    }
 
+        and:
+        conditions.eventually {
+            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            Map result = response.body()
+
+            result.names.contains("kafka.producer.count")
+            !result.names.contains("kafka.count")
+        }
+    }
 
     void "test POJO consumer"() {
         when:
@@ -140,7 +169,6 @@ class KafkaListenerSpec extends Specification {
         producer?.close()
 
     }
-
 
 
     void "test POJO consumer record"() {

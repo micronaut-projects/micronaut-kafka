@@ -18,9 +18,12 @@ package io.micronaut.configuration.kafka.config;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
+import io.micronaut.core.convert.ConversionService;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -38,7 +41,7 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
      * The default health timeout value.
      */
     @SuppressWarnings("WeakerAccess")
-    public static final int DEFAULT_HEALTHTIMEOUT = 1;
+    public static final int DEFAULT_HEALTHTIMEOUT = 10;
 
     private Duration healthTimeout = Duration.ofSeconds(DEFAULT_HEALTHTIMEOUT);
 
@@ -76,12 +79,22 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
     }
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
-        Properties values = environment.getProperty(PREFIX, Properties.class).orElseGet(Properties::new);
+        Map<String, Object> values = environment.getProperties(PREFIX);
         Properties properties = new Properties();
         values.entrySet().stream().filter(entry -> {
             String key = entry.getKey().toString();
             return !Stream.of("embedded", "consumers", "producers", "streams").anyMatch(key::startsWith);
-        }).forEach(entry -> properties.put(entry.getKey(), entry.getValue()));
+        }).forEach(entry -> {
+            Object value = entry.getValue();
+            if (ConversionService.SHARED.canConvert(entry.getValue().getClass(), String.class)) {
+                Optional<?> converted = ConversionService.SHARED.convert(entry.getValue(), String.class);
+                if (converted.isPresent()) {
+                    value = converted.get();
+                }
+            }
+            properties.setProperty(entry.getKey(), value.toString());
+
+        });
         return properties;
     }
 }

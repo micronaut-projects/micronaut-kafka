@@ -12,5 +12,6 @@ With Micronaut's efficient compile-time AOP and cloud native features, writing e
 
 ==== 1.1.0
 
-* Upgrade to Kafka 2.1.0
+* Upgrade to Kafka 2.1.1
 * Support for Open Tracing
+* Support for Pausing / Resuming Consumers via api:configuration.kafka.ConsumerRegistry[] interface

@@ -142,7 +142,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                     Properties properties = new Properties();
                     properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + kafkaPort));
                     AdminClient adminClient = AdminClient.create(properties);
-                    adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, 1, (short) 1)).collect(Collectors.toList()))
+                    adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, kafkaConfig.numPartitions(), (short) 1)).collect(Collectors.toList()))
                                .all().get();
                 }
             } catch (Throwable e) {
@@ -207,6 +207,18 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
      */
     public Optional<ZkUtils> getZkUtils() {
         return Optional.ofNullable(zkUtils);
+    }
+
+    /**
+     * Returns the port Zookeeper is running on if it was created.
+     * @return The Zookeeper port
+     */
+    public Optional<Integer> getZkPort() {
+        if (zkServer != null) {
+            return Optional.of(zkServer.port());
+        } else {
+            return Optional.empty();
+        }
     }
 
     private void initZooKeeper() {

@@ -118,4 +118,34 @@ class KafkaConfigurationSpec extends Specification {
         consumer.close()
         applicationContext.close()
     }
+
+    void "test configure list fields default properties"() {
+        given:
+        ApplicationContext applicationContext = ApplicationContext.run(
+                ("kafka.${ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG}".toString()):Arrays.asList("localhost:1111","localhost:1112"),
+                ("kafka.${ConsumerConfig.GROUP_ID_CONFIG}".toString()):"mygroup",
+                ("kafka.consumers.default." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka.consumers.default." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+        Properties props = config.getConfig()
+
+        then:
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == "localhost:1111,localhost:1112"
+        props[ConsumerConfig.GROUP_ID_CONFIG] == "mygroup"
+
+        when:
+        Consumer consumer = applicationContext.createBean(Consumer, config)
+
+        then:
+        consumer != null
+
+        cleanup:
+        consumer.close()
+        applicationContext.close()
+
+
+    }
 }

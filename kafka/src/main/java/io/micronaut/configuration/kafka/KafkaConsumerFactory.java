@@ -16,12 +16,18 @@
 package io.micronaut.configuration.kafka;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
+import io.micronaut.configuration.kafka.serde.JsonSerde;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
+import io.micronaut.core.annotation.TypeHint;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.clients.consumer.RangeAssignor;
+import org.apache.kafka.clients.consumer.RoundRobinAssignor;
+import org.apache.kafka.clients.consumer.StickyAssignor;
+import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
+import org.apache.kafka.common.serialization.*;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -33,6 +39,37 @@ import java.util.Properties;
  * @since 1.0
  */
 @Factory
+@TypeHint({
+        // serializers
+        ShortSerializer.class,
+        DoubleSerializer.class,
+        LongSerializer.class,
+        BytesSerializer.class,
+        ByteArraySerializer.class,
+        IntegerSerializer.class,
+        ByteBufferSerializer.class,
+        StringSerializer.class,
+        FloatSerializer.class,
+        // serdes
+        JsonSerde.class,
+        // deserializers
+        ShortDeserializer.class,
+        DoubleDeserializer.class,
+        LongDeserializer.class,
+        BytesDeserializer.class,
+        ByteArraySerializer.class,
+        IntegerDeserializer.class,
+        ByteBufferDeserializer.class,
+        StringDeserializer.class,
+        FloatDeserializer.class,
+
+        // partitioners
+        DefaultPartitioner.class,
+        // assigners
+        RangeAssignor.class,
+        RoundRobinAssignor.class,
+        StickyAssignor.class
+})
 public class KafkaConsumerFactory {
 
     /**
