@@ -58,7 +58,7 @@ public class KafkaStreamsFactory implements Closeable {
      * @param kStreams The KStream definitions
      * @return The {@link KafkaStreams} bean
      */
-    @EachBean(ConfiguredStreamBuilder.class)
+    @EachBean(AbstractKafkaStreamsConfiguration.class)
     @Context
     KafkaStreams kafkaStreams(
             ConfiguredStreamBuilder builder,
