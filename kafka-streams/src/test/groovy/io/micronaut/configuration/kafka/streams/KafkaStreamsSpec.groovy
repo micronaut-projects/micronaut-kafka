@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.inject.qualifiers.Qualifiers
+import org.apache.kafka.streams.KafkaStreams
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -31,13 +32,27 @@ class KafkaStreamsSpec extends Specification {
                     "kafka.bootstrap.servers", 'localhost:${random.port}',
                     AbstractKafkaConfiguration.EMBEDDED, true,
                     AbstractKafkaConfiguration.EMBEDDED_TOPICS, [WordCountStream.INPUT, WordCountStream.OUTPUT],
-                    'kafka.streams.my-stream.num.stream.threads',10
+                    'kafka.generic.config', "hello",
+                    'kafka.streams.my-stream.application.id','my-stream'
             )
     )
 
     void "test config"() {
-        expect:
-        context.getBean(ConfiguredStreamBuilder, Qualifiers.byName('my-stream')).configuration['num.stream.threads'] == "10"
+        when:
+        def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName('my-stream'))
+
+        then:
+        builder.configuration['application.id'] == "my-stream"
+        builder.configuration['generic.config'] == "hello"
+    }
+
+    void "test config from stream"() {
+        when:
+        def stream = context.getBean(KafkaStreams, Qualifiers.byName('my-stream'))
+
+        then:
+        stream.config.originals().get('application.id') == "my-stream"
+        stream.config.originals().get('generic.config') == "hello"
     }
 
     void "test kafka stream application"() {
