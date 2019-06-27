@@ -43,6 +43,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
     private static final String REPLICATION_PROPERTY = "transaction.state.log.replication.factor";
+    private static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
     private final AdminClient adminClient;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
@@ -77,6 +78,9 @@ public class KafkaHealthIndicator implements HealthIndicator {
             return configs.switchMap(resources -> {
                 Config config = resources.get(configResource);
                 ConfigEntry ce = config.get(REPLICATION_PROPERTY);
+                if (ce == null) {
+                    ce = config.get(DEFAULT_REPLICATION_PROPERTY);
+                }
                 int replicationFactor = Integer.parseInt(ce.value());
                 return nodes.switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
