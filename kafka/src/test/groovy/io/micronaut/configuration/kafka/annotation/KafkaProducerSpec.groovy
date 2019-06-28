@@ -108,11 +108,13 @@ class KafkaProducerSpec extends Specification {
         when:
         client.send("Apple", "iMac")
         client.send2("Other", "Stuff")
+        client.send3("ProducerSpec-my-products-2", "Dell", "PC")
 
         then:
         conditions.eventually {
             userListener.brands['Apple'] == 'iMac'
             userListener.others['Other'] == 'Stuff'
+            userListener.others['Dell'] == 'PC'
         }
     }
 
@@ -135,6 +137,8 @@ class KafkaProducerSpec extends Specification {
 
         @Topic("ProducerSpec-my-products-2")
         void send2(@KafkaKey String key, String name)
+
+        void send3(@Topic String topic, @KafkaKey String key, String name)
     }
 
 

@@ -25,5 +25,7 @@ public interface ProductClient {
 
     @Topic("my-products") // <2>
     void sendProduct(@KafkaKey String brand, String name); // <3>
+
+    void sendProduct(@Topic String topic, @KafkaKey String brand, String name); // <4>
 }
 // end::clazz[]

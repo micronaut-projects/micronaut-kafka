@@ -114,11 +114,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     @Override
     public final Object intercept(MethodInvocationContext<Object, Object> context) {
 
-        if (context.hasAnnotation(Topic.class) && context.hasAnnotation(KafkaClient.class)) {
+        if (context.hasAnnotation(KafkaClient.class)) {
             AnnotationValue<KafkaClient> client = context.findAnnotation(KafkaClient.class).orElseThrow(() -> new IllegalStateException("No @KafkaClient annotation present on method: " + context));
 
             boolean isBatchSend = client.getRequiredValue("batch", Boolean.class);
-            String topic = context.getValue(Topic.class, String.class).orElse(null);
+
+            String topic = context.getValue(Topic.class, String.class)
+                    .orElseGet(() -> findTopicArgument(context).orElse(null));
 
             if (StringUtils.isEmpty(topic)) {
                 throw new MessagingClientException("No topic specified for method: " + context);
@@ -639,6 +641,16 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 );
     }
 
+    private Optional<String> findTopicArgument(MethodInvocationContext<Object, Object> method) {
+        Map<String, Object> argumentValues = method.getParameterValueMap();
+        return Arrays.stream(method.getArguments())
+                .filter(arg -> arg.getAnnotationMetadata().hasAnnotation(Topic.class))
+                .map(Argument::getName)
+                .map(argumentValues::get)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .findFirst();
+    }
 
     /**
      * Key used to cache {@link org.apache.kafka.clients.producer.Producer} instances.
