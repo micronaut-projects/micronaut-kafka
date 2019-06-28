@@ -187,6 +187,25 @@
 </ul>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_1_2_0">1.2.0</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Micronaut 1.1.x minimum version</p>
+</li>
+<li>
+<p>Upgrade to Kafka 2.3.0</p>
+</li>
+<li>
+<p>GraalVM metadata</p>
+</li>
+<li>
+<p>Better Exception Handling</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -897,9 +916,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.2.0:test'
-testCompile 'org.apache.kafka:kafka_2.12:2.2.0'
-testCompile 'org.apache.kafka:kafka_2.12:2.2.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.3.0:test'
+testCompile 'org.apache.kafka:kafka_2.12:2.3.0'
+testCompile 'org.apache.kafka:kafka_2.12:2.3.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -911,18 +930,18 @@ testCompile 'org.apache.kafka:kafka_2.12:2.2.0:test'</code></pre>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;2.2.0&lt;/version&gt;
+  &lt;version&gt;2.3.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.2.0&lt;/version&gt;
+  &lt;version&gt;2.3.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.2.0&lt;/version&gt;
+  &lt;version&gt;2.3.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -2102,13 +2121,14 @@ import java.util.Properties;
 @Factory
 public class WordCountStream {
 
+    public static final String STREAM_WORD_COUNT = "word-count";
     public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
     public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
     public static final String WORD_COUNT_STORE = "word-count-store";
 
 
     @Singleton
-    @Named("wordCount")
+    @Named(STREAM_WORD_COUNT)
     KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
         // set default serdes
         Properties props = builder.getConfiguration();
@@ -2283,10 +2303,14 @@ public class WordCountListener {
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
-@Named("myStream")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static final String MY_STREAM = "my-stream";
+public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
+public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
+
+@Singleton
+@Named(MY_STREAM)
 KStream&lt;String, String&gt; myStream(
-        @Named("my-stream") ConfiguredStreamBuilder builder) {
+        @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
 
 }</code></pre>
 </div>
