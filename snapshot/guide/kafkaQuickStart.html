@@ -194,6 +194,8 @@ public interface ProductClient {
 
     @Topic("my-products") <i class="conum" data-value="2"></i><b>(2)</b>
     void sendProduct(@KafkaKey String brand, String name); <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void sendProduct(@Topic String topic, @KafkaKey String brand, String name); <i class="conum" data-value="4"></i><b>(4)</b>
 }</code></pre>
 </div>
 </div>
@@ -210,6 +212,10 @@ public interface ProductClient {
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>The method defines two parameters: The parameter that is the Kafka key and the value.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>It is also possible for the topic to be dynamic by making it a method argument</td>
 </tr>
 </table>
 </div>
