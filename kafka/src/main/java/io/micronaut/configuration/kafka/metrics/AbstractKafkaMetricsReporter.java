@@ -26,9 +26,7 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -94,6 +92,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
                     .tags()
                     .entrySet()
                     .stream()
+                    .filter(entry -> getIncludedTags().contains(entry.getKey()))
                     .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList());
             String name = getMetricPrefix() + '.' + metricName.name();
@@ -101,10 +100,21 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
         }
     }
 
+
+    /**
+     * The tags to include in the gauge. Defaults to just the client-id.
+     * @return The tags to include
+     */
+    protected Set<String> getIncludedTags() {
+        return Collections.singleton("client-id");
+    }
+
     /**
      * Abstract method to implement with the metric prefix for the reporter.
      *
      * @return prefix name
      */
-    abstract String getMetricPrefix();
+    protected abstract String getMetricPrefix();
+
+
 }
