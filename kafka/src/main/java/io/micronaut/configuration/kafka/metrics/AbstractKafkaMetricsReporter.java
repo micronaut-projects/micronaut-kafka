@@ -42,7 +42,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
-        if(!METER_REGISTRIES.contains(registry)) {
+        if (!METER_REGISTRIES.contains(registry)) {
             METER_REGISTRIES.add(registry);
         }
     }
@@ -100,7 +100,6 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
         }
     }
 
-
     /**
      * The tags to include in the gauge. Defaults to just the client-id.
      * @return The tags to include
@@ -115,6 +114,5 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
      * @return prefix name
      */
     protected abstract String getMetricPrefix();
-
 
 }
