@@ -31,7 +31,8 @@ public class ProducerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
     /**
      * {@inheritDoc}
      */
-    String getMetricPrefix() {
+    @Override
+    protected String getMetricPrefix() {
         return PRODUCER_PREFIX;
     }
 

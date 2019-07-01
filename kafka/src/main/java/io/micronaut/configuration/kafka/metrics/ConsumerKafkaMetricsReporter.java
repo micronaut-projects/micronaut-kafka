@@ -28,10 +28,16 @@ public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
     private static final String CONSUMER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".consumer";
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     /**
      * {@inheritDoc}
      */
-    String getMetricPrefix() {
+    @Override
+    protected String getMetricPrefix() {
         return CONSUMER_PREFIX;
     }
 
