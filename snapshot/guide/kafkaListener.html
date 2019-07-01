@@ -793,6 +793,27 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_manual_offsets_with_multiple_topics">Manual Offsets with Multiple Topics</h3>
+<div class="paragraph">
+<p>It is possible for a single <code>@KafkaListener</code> bean to represent multiple consumers. If you have more than one method annotated with <code>@Topic</code> then <code>setKafkaConsumer</code> will be called multiple times for each backing consumer.</p>
+</div>
+<div class="paragraph">
+<p>It is recommended in the case of manually seeking offsets that you use a single listener bean per consumer, the alternative is to store an internal <code>Set</code> of all consumers associated with a particular listener and manually search for the correct listener in the <code>onPartitionsAssigned</code> using the partition assignment data.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Not doing so will lead to a <code>ConcurrentModificationException</code> error.
+</td>
+</tr>
+</table>
+</div>
+</div>
 
 
 <h2 id="kafkaListenerBatch">5.4 Kafka Batch Processing</h2>

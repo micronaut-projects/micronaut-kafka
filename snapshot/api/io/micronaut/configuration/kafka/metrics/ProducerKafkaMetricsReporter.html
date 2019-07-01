@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -165,14 +165,26 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#configure-java.util.Map-">configure</a></span>(java.util.Map&lt;java.lang.String,?&gt;&nbsp;configs)</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code>protected java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a></span>()</code>
+<div class="block">The tags to include in the gauge.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix</a></span>()</code>
+<div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#init-java.util.List-">init</a></span>(java.util.List&lt;org.apache.kafka.common.metrics.KafkaMetric&gt;&nbsp;metrics)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange</a></span>(org.apache.kafka.common.metrics.KafkaMetric&nbsp;metric)</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval</a></span>(org.apache.kafka.common.metrics.KafkaMetric&nbsp;metric)</code>&nbsp;</td>
 </tr>
@@ -215,6 +227,20 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="getMetricPrefix--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMetricPrefix</h4>
+<pre>protected&nbsp;java.lang.String&nbsp;getMetricPrefix()</pre>
+<div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>prefix name</dd>
+</dl>
+</li>
+</ul>
 <a name="close--">
 <!--   -->
 </a>
@@ -290,13 +316,27 @@ public&nbsp;void&nbsp;close()</pre>
 <a name="configure-java.util.Map-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>configure</h4>
 <pre>public&nbsp;void&nbsp;configure(java.util.Map&lt;java.lang.String,?&gt;&nbsp;configs)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>configure</code>&nbsp;in interface&nbsp;<code>org.apache.kafka.common.Configurable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getIncludedTags--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getIncludedTags</h4>
+<pre>protected&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getIncludedTags()</pre>
+<div class="block">The tags to include in the gauge. Defaults to just the client-id.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The tags to include</dd>
 </dl>
 </li>
 </ul>
