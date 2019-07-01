@@ -65,6 +65,7 @@ include::{testskafka}/quickstart/ProductClient.java[tags=clazz, indent=0]
 <1> The ann:configuration.kafka.annotation.KafkaClient[] annotation is used to designate this interface as a client
 <2> The ann:configuration.kafka.annotation.Topic[] annotation indicates which topics the `ProducerRecord` should be published to
 <3> The method defines two parameters: The parameter that is the Kafka key and the value.
+<4> It is also possible for the topic to be dynamic by making it a method argument
 
 NOTE: You can omit the key, however this will result in a `null` key which means Kafka will not know how to partition the record.
 

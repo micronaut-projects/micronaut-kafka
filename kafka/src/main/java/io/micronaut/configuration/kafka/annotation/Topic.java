@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.context.annotation.AliasFor;
+import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.messaging.annotation.MessageMapping;
 
 import java.lang.annotation.*;
@@ -29,6 +30,7 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
+@Bindable
 @Repeatable(Topics.class)
 public @interface Topic {
 
