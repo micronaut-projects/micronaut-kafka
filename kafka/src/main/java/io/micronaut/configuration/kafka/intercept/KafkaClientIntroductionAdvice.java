@@ -26,7 +26,6 @@ import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
-import io.micronaut.context.annotation.Property;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.async.publisher.Publishers;
