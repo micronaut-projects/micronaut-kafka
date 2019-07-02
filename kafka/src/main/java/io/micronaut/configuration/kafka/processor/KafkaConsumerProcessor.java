@@ -273,17 +273,7 @@ public class KafkaConsumerProcessor
                 properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
             }
 
-            List<AnnotationValue<Property>> additionalProperties = consumerAnnotation.getAnnotations("properties", Property.class);
-
-            if (!additionalProperties.isEmpty()) {
-                for (AnnotationValue<Property> property : additionalProperties) {
-                    String v = property.getValue(String.class).orElse(null);
-                    String n = property.get("name", String.class).orElse(null);
-                    if (StringUtils.isNotEmpty(n) && StringUtils.isNotEmpty(v)) {
-                        properties.put(n, v);
-                    }
-                }
-            }
+            properties.putAll(consumerAnnotation.getProperties("properties", "name"));
 
             configureDeserializers(method, consumerConfiguration);
 

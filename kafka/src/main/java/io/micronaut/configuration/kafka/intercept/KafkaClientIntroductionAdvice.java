@@ -578,18 +578,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 );
             }
 
-            List<AnnotationValue<Property>> additionalProperties = metadata.findAnnotation(KafkaClient.class).map(ann ->
-                    ann.getAnnotations("properties", Property.class)
-            ).orElse(Collections.emptyList());
-
-            for (AnnotationValue<Property> additionalProperty : additionalProperties) {
-                String v = additionalProperty.getValue(String.class).orElse(null);
-                String n = additionalProperty.get("name", String.class).orElse(null);
-
-                if (StringUtils.isNotEmpty(n) && StringUtils.isNotEmpty(v)) {
-                    newProperties.put(n, v);
-                }
-            }
+            metadata.findAnnotation(KafkaClient.class).map(ann ->
+                    ann.getProperties("properties", "name")
+            ).ifPresent(newProperties::putAll);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Creating new KafkaProducer.");
