@@ -89,7 +89,7 @@ class KafkaListenerSpec extends Specification {
 
 //        when: TODO: uncomment this once we can actually properly integrate metrics beans without static state
 //        https://issues.apache.org/jira/browse/KAFKA-8619
-        
+
 //        def response = httpClient.exchange("/metrics", Map).blockingFirst()
 //        Map result = response.body()
 //
