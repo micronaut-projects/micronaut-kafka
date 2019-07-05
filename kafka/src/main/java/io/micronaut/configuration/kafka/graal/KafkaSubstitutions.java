@@ -16,7 +16,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 
-
+//CHECKSTYLE:OFF
 @TargetClass(className = "org.apache.kafka.common.utils.Crc32C$Java9ChecksumFactory")
 @Substitute
 final class Java9ChecksumFactory {
@@ -94,3 +94,4 @@ final class AppInfoParserNoJMX {
         // no-op
     }
 }
+//CHECKSTYLE:ON
