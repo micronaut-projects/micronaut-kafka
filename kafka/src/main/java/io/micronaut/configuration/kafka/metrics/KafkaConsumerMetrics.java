@@ -15,13 +15,19 @@
  */
 package io.micronaut.configuration.kafka.metrics;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
 import io.micronaut.configuration.metrics.annotation.RequiresMetrics;
+import io.micronaut.context.BeanLocator;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import static io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter.METER_REGISTRIES;
 import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory.MICRONAUT_METRICS_BINDERS;
 
 /**
@@ -33,10 +39,27 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
 @RequiresMetrics
 @Context
 @Requires(property = MICRONAUT_METRICS_BINDERS + ".kafka.enabled", value = "true", defaultValue = "true")
-public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaConsumerConfiguration> implements BeanCreatedEventListener<AbstractKafkaConsumerConfiguration> {
+public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaConsumerConfiguration> implements BeanCreatedEventListener<AbstractKafkaConsumerConfiguration>, AutoCloseable {
+
+    private final BeanLocator beanLocator;
+
+    /**
+     * Default constructor.
+     * @param beanLocator The bean locator
+     */
+    public KafkaConsumerMetrics(BeanLocator beanLocator) {
+        this.beanLocator = beanLocator;
+    }
 
     @Override
     public AbstractKafkaConsumerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaConsumerConfiguration> event) {
+        beanLocator.findBean(MeterRegistry.class).ifPresent(METER_REGISTRIES::add);
         return addKafkaMetrics(event, ConsumerKafkaMetricsReporter.class.getName());
+    }
+
+    @PreDestroy
+    @Override
+    public void close() {
+        METER_REGISTRIES.clear();
     }
 }

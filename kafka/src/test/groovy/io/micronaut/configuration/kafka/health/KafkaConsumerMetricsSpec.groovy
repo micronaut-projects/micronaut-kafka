@@ -51,6 +51,9 @@ class KafkaConsumerMetricsSpec extends Specification {
     ApplicationContext context = embeddedServer.applicationContext
 
     @Shared
+    MeterRegistry meterRegistry = context.getBean(MeterRegistry)
+
+    @Shared
     @AutoCleanup
     RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
 

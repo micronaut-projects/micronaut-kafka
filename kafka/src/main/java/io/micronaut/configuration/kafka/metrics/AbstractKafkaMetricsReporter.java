@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Internal
 abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
 
-    private static final Collection<MeterRegistry> METER_REGISTRIES = new ConcurrentLinkedQueue<>();
+    static final Collection<MeterRegistry> METER_REGISTRIES = new ConcurrentLinkedQueue<>();
 
     private List<KafkaMetric> metrics;
 

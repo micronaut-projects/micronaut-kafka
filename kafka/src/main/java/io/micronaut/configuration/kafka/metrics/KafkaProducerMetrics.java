@@ -15,14 +15,19 @@
  */
 package io.micronaut.configuration.kafka.metrics;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.metrics.annotation.RequiresMetrics;
+import io.micronaut.context.BeanLocator;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 
+import javax.annotation.PreDestroy;
+
+import static io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter.METER_REGISTRIES;
 import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory.MICRONAUT_METRICS_BINDERS;
 
 /**
@@ -34,10 +39,27 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
 @Context
 // Producer metrics are primary since Grails/Boot only support a single metric provider
 @Primary
-public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration> {
+public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration>, AutoCloseable {
+
+    private final BeanLocator beanLocator;
+
+    /**
+     * Default constructor.
+     * @param beanLocator The bean locator
+     */
+    protected KafkaProducerMetrics(BeanLocator beanLocator) {
+        this.beanLocator = beanLocator;
+    }
 
     @Override
     public AbstractKafkaProducerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaProducerConfiguration> event) {
+        beanLocator.findBean(MeterRegistry.class).ifPresent(METER_REGISTRIES::add);
         return addKafkaMetrics(event, ProducerKafkaMetricsReporter.class.getName());
+    }
+
+    @PreDestroy
+    @Override
+    public void close() {
+        METER_REGISTRIES.clear();
     }
 }
