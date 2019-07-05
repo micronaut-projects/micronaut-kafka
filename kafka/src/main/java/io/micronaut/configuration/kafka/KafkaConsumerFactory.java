@@ -57,7 +57,7 @@ import java.util.Properties;
         DoubleDeserializer.class,
         LongDeserializer.class,
         BytesDeserializer.class,
-        ByteArraySerializer.class,
+        ByteArrayDeserializer.class,
         IntegerDeserializer.class,
         ByteBufferDeserializer.class,
         StringDeserializer.class,
