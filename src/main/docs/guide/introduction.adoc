@@ -20,5 +20,5 @@ With Micronaut's efficient compile-time AOP and cloud native features, writing e
 
 * Micronaut 1.1.x minimum version
 * Upgrade to Kafka 2.3.0
-* GraalVM metadata
+* GraalVM Native Support (with Micronaut 1.2+)
 * Better Exception Handling
