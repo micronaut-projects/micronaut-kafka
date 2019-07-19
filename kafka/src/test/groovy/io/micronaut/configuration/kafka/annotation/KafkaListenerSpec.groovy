@@ -195,6 +195,22 @@ class KafkaListenerSpec extends Specification {
 
     }
 
+    void "test @Header annotation with optional"() {
+        when:
+        MyClient myClient = context.getBean(MyClient)
+        myClient.sendSentence("key", "Hello, world!", "words")
+
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
+        MyConsumer5 myConsumer = context.getBean(MyConsumer5)
+        then:
+        conditions.eventually {
+            myConsumer.sentence == "Hello, world!"
+            myConsumer.missingHeader
+            myConsumer.topic == "words"
+        }
+    }
+
     @KafkaClient
     static interface MyClient {
         @Topic("words")
@@ -250,6 +266,20 @@ class KafkaListenerSpec extends Specification {
         @Topic("words")
         void countWord(@Body String body) {
             this.body = body
+        }
+    }
+
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    static class MyConsumer5 {
+        boolean missingHeader
+        String sentence
+        String topic
+
+        @Topic("words")
+        void countWord(@Body String sentence, @Header Optional<String> topic, @Header Optional<String> missing) {
+            missingHeader = !missing.isPresent()
+            this.sentence = sentence
+            this.topic = topic.get()
         }
     }
 

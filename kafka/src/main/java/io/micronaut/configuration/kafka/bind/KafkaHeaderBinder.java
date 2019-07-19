@@ -53,6 +53,9 @@ public class KafkaHeaderBinder<T> implements AnnotatedConsumerRecordBinder<Heade
         if (value.iterator().hasNext()) {
             Optional<T> converted = ConversionService.SHARED.convert(value, context);
             return () -> converted;
+        } else if ( context.getArgument().getType() == Optional.class) {
+            //noinspection unchecked
+            return () -> (Optional<T>) Optional.of(Optional.empty());
         } else {
             //noinspection unchecked
             return BindingResult.EMPTY;
