@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Kafka Quick Start 1.1.1</title>
+    <title>3 Kafka Quick Start 1.2.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -81,7 +81,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>3 Kafka Quick Start</h1>
 
-                    <p><strong>Version:</strong> 1.1.1</p>
+                    <p><strong>Version:</strong> 1.2.0</p>
                 </div>
 
                 
@@ -154,6 +154,27 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>If your broker needs to setup SSL, it can be configured this way:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  bootstrap:
+    servers: localhost:9092
+  ssl:
+    keystore:
+      location: /path/to/client.keystore.p12
+      password: secret
+    truststore:
+      location: /path/to/client.truststore.jks
+      password: secret
+      type: PKCS12
+  security:
+    protocol: ssl</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h3>
@@ -173,6 +194,8 @@ public interface ProductClient {
 
     @Topic("my-products") <i class="conum" data-value="2"></i><b>(2)</b>
     void sendProduct(@KafkaKey String brand, String name); <i class="conum" data-value="3"></i><b>(3)</b>
+
+    void sendProduct(@Topic String topic, @KafkaKey String brand, String name); <i class="conum" data-value="4"></i><b>(4)</b>
 }</code></pre>
 </div>
 </div>
@@ -189,6 +212,10 @@ public interface ProductClient {
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>The method defines two parameters: The parameter that is the Kafka key and the value.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>It is also possible for the topic to be dynamic by making it a method argument</td>
 </tr>
 </table>
 </div>
