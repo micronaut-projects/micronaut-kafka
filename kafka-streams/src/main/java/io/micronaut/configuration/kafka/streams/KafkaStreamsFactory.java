@@ -41,12 +41,13 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
-     * @param builder The builder
+     * @param config The builder
      * @return The {@link KafkaStreams} bean
      */
-    @EachBean(ConfiguredStreamBuilder.class)
+    @EachBean(KafkaStreamsConfiguration.class)
     @Context
-    KafkaStreams kafkaStreams(ConfiguredStreamBuilder builder) {
+    KafkaStreams kafkaStreams(KafkaStreamsConfiguration config) {
+        ConfiguredStreamBuilder builder = new ConfiguredStreamBuilder(config);
         KafkaStreams kafkaStreams = new KafkaStreams(
                 builder.build(),
                 builder.getConfiguration()

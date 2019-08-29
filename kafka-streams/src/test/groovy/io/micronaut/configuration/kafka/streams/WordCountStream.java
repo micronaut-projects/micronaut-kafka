@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.streams;
 // tag::imports[]
 
 import io.micronaut.context.annotation.Factory;
+import kafka.Kafka;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
@@ -48,8 +49,9 @@ public class WordCountStream {
     // tag::wordCountStream[]
     @Singleton
     @Named(STREAM_WORD_COUNT)
-    KStream<String, String> wordCountStream(ConfiguredStreamBuilder builder) { // <3>
+    KStream<String, String> wordCountStream(NamedKafkaStreamsConfiguration config) { // <3>
         // set default serdes
+        ConfiguredStreamBuilder builder = new ConfiguredStreamBuilder(config);
         Properties props = builder.getConfiguration();
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -82,10 +84,11 @@ public class WordCountStream {
     @Singleton
     @Named(MY_STREAM)
     KStream<String, String> myStream(
-            @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
+            @Named(MY_STREAM) NamedKafkaStreamsConfiguration config) {
 
         // end::namedStream[]
         // set default serdes
+        ConfiguredStreamBuilder builder = new ConfiguredStreamBuilder(config);
         Properties props = builder.getConfiguration();
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
