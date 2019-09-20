@@ -20,6 +20,7 @@ import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.configuration.kafka.KafkaProducerFactory;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -194,6 +195,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
             Object key = keyArgument != null ? parameterValues.get(keyArgument.getName()) : null;
             Object value = parameterValues.get(bodyArgument.getName());
+            Long timestamp = findTimestampArgument(context, client.getRequiredValue("timestamp", Boolean.class));
             boolean isReactiveReturnType = Publishers.isConvertibleToPublisher(javaReturnType);
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
@@ -208,13 +210,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     Optional<Argument<?>> firstTypeVariable = returnType.getFirstTypeVariable();
                     returnFlowable = buildSendFlowable(
                             context,
-                            client,
                             topic,
                             kafkaProducer,
                             kafkaHeaders,
                             firstTypeVariable.orElse(Argument.OBJECT_ARGUMENT),
                             key,
                             value,
+                            timestamp,
                             maxBlock);
 
                 } else {
@@ -234,11 +236,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         }
 
                         returnFlowable = bodyEmitter.flatMap(o ->
-                                buildSendFlowable(context, client, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, o)
+                                buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, o, timestamp)
                         );
 
                     } else {
-                        returnFlowable = buildSendFlowable(context, client, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, value);
+                        returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, value, timestamp);
                     }
                 }
                 return Publishers.convertPublisher(returnFlowable, javaReturnType);
@@ -249,13 +251,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 if (isReactiveValue) {
                     Flowable sendFlowable = buildSendFlowable(
                             context,
-                            client,
                             topic,
                             kafkaProducer,
                             kafkaHeaders,
                             firstTypeVariable.orElse(Argument.of(RecordMetadata.class)),
                             key,
                             value,
+                            timestamp,
                             maxBlock);
 
                     if (!Publishers.isSingle(value.getClass())) {
@@ -292,7 +294,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     });
                 } else {
 
-                    ProducerRecord record = buildProducerRecord(client, topic, kafkaHeaders, key, value);
+                    ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
                     }
@@ -323,13 +325,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 if (isReactiveValue) {
                     Flowable<Object> sendFlowable = buildSendFlowable(
                             context,
-                            client,
                             topic,
                             kafkaProducer,
                             kafkaHeaders,
                             returnTypeArgument,
                             key,
                             value,
+                            timestamp,
                             maxBlock
                     );
 
@@ -358,7 +360,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
                             List results = new ArrayList();
                             for (Object o : batchValue) {
-                                ProducerRecord record = buildProducerRecord(client, topic, kafkaHeaders, key, o);
+                                ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
 
                                 if (LOG.isTraceEnabled()) {
                                     LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
@@ -380,7 +382,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 }
                             });
                         }
-                        ProducerRecord record = buildProducerRecord(client, topic, kafkaHeaders, key, value);
+                        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
 
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
@@ -433,14 +435,16 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
     private Flowable buildSendFlowable(
             MethodInvocationContext<Object, Object> context,
-            AnnotationValue<KafkaClient> client,
             String topic,
             Argument bodyArgument,
             Producer kafkaProducer,
             List<Header> kafkaHeaders,
-            ReturnType<Object> returnType, Object key, Object value) {
+            ReturnType<Object> returnType,
+            Object key,
+            Object value,
+            Long timestamp) {
         Flowable returnFlowable;
-        ProducerRecord record = buildProducerRecord(client, topic, kafkaHeaders, key, value);
+        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
         Optional<Argument<?>> firstTypeVariable = returnType.getFirstTypeVariable();
         returnFlowable = Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
@@ -464,13 +468,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
     private Flowable<Object> buildSendFlowable(
             MethodInvocationContext<Object, Object> context,
-            AnnotationValue<KafkaClient> client,
             String topic,
             Producer kafkaProducer,
             List<Header> kafkaHeaders,
             Argument<?> returnType,
             Object key,
             Object value,
+            Long timestamp,
             Duration maxBlock) {
         Flowable<?> valueFlowable = Publishers.convertPublisher(value, Flowable.class);
         Class<?> javaReturnType = returnType.getType();
@@ -481,7 +485,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
         Class<?> finalJavaReturnType = javaReturnType;
         Flowable<Object> sendFlowable = valueFlowable.flatMap(o -> {
-            ProducerRecord record = buildProducerRecord(client, topic, kafkaHeaders, key, o);
+            ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
@@ -521,11 +525,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     }
 
     @SuppressWarnings("unchecked")
-    private ProducerRecord buildProducerRecord(AnnotationValue<KafkaClient> client, String topic, List<Header> kafkaHeaders, Object key, Object value) {
+    private ProducerRecord buildProducerRecord(String topic, List<Header> kafkaHeaders, Object key, Object value, Long timestamp) {
         return new ProducerRecord(
                 topic,
                 null,
-                client.getRequiredValue("timestamp", Boolean.class) ? System.currentTimeMillis() : null,
+                timestamp,
                 key,
                 value,
                 kafkaHeaders.isEmpty() ? null : kafkaHeaders
@@ -640,6 +644,23 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .findFirst();
+    }
+
+    private Long findTimestampArgument(MethodInvocationContext<Object, Object> context, Boolean clientTimestampParameter) {
+        if (clientTimestampParameter) {
+            return System.currentTimeMillis();
+        } else {
+            Map<String, Object> argumentValues = context.getParameterValueMap();
+            return Arrays.stream(context.getArguments())
+                    .filter(arg -> arg.isAnnotationPresent(KafkaTimestamp.class))
+                    .map(Argument::getName)
+                    .map(argumentValues::get)
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .map(Long::parseLong)
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
     /**
