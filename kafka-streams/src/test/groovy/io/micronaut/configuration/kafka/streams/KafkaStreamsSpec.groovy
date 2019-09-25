@@ -25,6 +25,10 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
+import javax.inject.Qualifier
+import javax.naming.Name
+import javax.validation.groups.Default
+
 class KafkaStreamsSpec extends Specification {
 
     @Shared
@@ -47,7 +51,8 @@ class KafkaStreamsSpec extends Specification {
 
     void "test config"() {
         when:
-        def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName('my-stream'))
+        def config = context.getBean(NamedKafkaStreamsConfiguration, Qualifiers.byName("my-stream"))
+        def builder = new ConfiguredStreamBuilder(config)
 
         then:
         builder.configuration['application.id'] == "my-stream"
@@ -56,7 +61,7 @@ class KafkaStreamsSpec extends Specification {
 
     void "test config from stream"() {
         when:
-        def stream = context.getBean(KafkaStreams, Qualifiers.byName('my-stream'))
+        def stream = context.getBean(KafkaStreams, Qualifiers.byName("my-stream"))
 
         then:
         stream.config.originals().get('application.id') == "my-stream"

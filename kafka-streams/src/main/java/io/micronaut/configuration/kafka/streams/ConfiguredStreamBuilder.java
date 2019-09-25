@@ -35,8 +35,8 @@ public class ConfiguredStreamBuilder extends StreamsBuilder {
      *
      * @param configuration The configuration
      */
-    public ConfiguredStreamBuilder(Properties configuration) {
-        this.configuration.putAll(configuration);
+    public ConfiguredStreamBuilder(KafkaStreamsConfiguration configuration) {
+        this.configuration.putAll(configuration.getConfig());
     }
 
     /**
