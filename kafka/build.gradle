@@ -12,7 +12,7 @@ dependencies {
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     compileOnly "com.oracle.substratevm:svm"
     compileOnly "io.micronaut:micronaut-inject-java"
-    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.4'
+    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.5'
     compile "io.micronaut:micronaut-messaging:$micronautVersion"
     compile "org.apache.kafka:kafka-clients:$kafkaVersion"
 
@@ -35,7 +35,7 @@ dependencies {
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
-    testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.0.16'
+    testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.1.5'
     testCompile 'io.opentracing:opentracing-mock:0.31.0'
 
     testRuntime 'io.micronaut:micronaut-tracing'
