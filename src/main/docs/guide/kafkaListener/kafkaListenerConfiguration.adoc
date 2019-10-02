@@ -8,9 +8,28 @@ Kafka consumers created with `@KafkaListener` will by default run within a consu
 @KafkaListener("myGroup")
 ----
 
-The above example will run the consumer within a consumer group called `myGroup`.
+or
+
+.Specifying a Consumer Group alternative
+[source,java]
+----
+@KafkaListener(groupId="myGroup")
+----
+
+The above examples will run the consumer within a consumer group called `myGroup`.
+In this case, each record will be consumed by one consumer instance of the consumer group.
 
 TIP: You can make the consumer group configurable using a placeholder: `@KafkaListener("${my.consumer.group:myGroup}")`
+
+To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), `uniqueGroupId` can be set to `true`:
+
+.Unique group IDs
+[source,java]
+----
+@KafkaListener(groupId="myGroup", uniqueGroupId=true)
+----
+
+For more information, see for example https://kafka.apache.org/intro#intro_consumers
 
 === @KafkaListener and Consumer Properties
 
