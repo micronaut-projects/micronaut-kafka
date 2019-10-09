@@ -65,7 +65,7 @@ public class KafkaStreamsFactory implements Closeable {
             // required for initialization. DO NOT DELETE
             KStream... kStreams) {
         KafkaStreams kafkaStreams = new KafkaStreams(
-                builder.build(),
+                builder.build(builder.getConfiguration()),
                 builder.getConfiguration()
         );
         streams.add(kafkaStreams);
