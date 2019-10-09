@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.streams;
+package io.micronaut.configuration.kafka.streams.wordcount;
 
 import io.micronaut.configuration.kafka.annotation.*;
 

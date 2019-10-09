@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.streams;
+package io.micronaut.configuration.kafka.streams.optimization;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.Topic;
 
 @KafkaClient
-public interface WordCountClient {
+public interface OptimizationClient {
 
-    @Topic(WordCountStream.INPUT)
-    void publishSentence(String sentence);
+    @Topic(OptimizationStream.OPTIMIZATION_ON_INPUT)
+    void publishOptimizationOnMessage(@KafkaKey String key, String value);
+
+    @Topic(OptimizationStream.OPTIMIZATION_OFF_INPUT)
+    void publishOptimizationOffMessage(@KafkaKey String key, String value);
 }

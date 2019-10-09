@@ -1,5 +1,6 @@
-package io.micronaut.configuration.kafka.streams;
+package io.micronaut.configuration.kafka.streams.wordcount;
 
+import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
