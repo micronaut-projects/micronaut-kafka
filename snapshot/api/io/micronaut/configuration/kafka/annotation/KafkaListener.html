@@ -186,6 +186,12 @@ public @interface <span class="memberNameLabel">KafkaListener</span></pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html#uniqueGroupId--">uniqueGroupId</a></span></code>
+<div class="block">A unique string (UUID) can be appended to the group ID.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/KafkaListener.html#value--">value</a></span></code>
 <div class="block">Sets the consumer group id of the Kafka consumer.</div>
@@ -246,6 +252,28 @@ public abstract&nbsp;java.lang.String&nbsp;groupId</pre>
 <dl>
 <dt>Default:</dt>
 <dd>""</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="uniqueGroupId--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>uniqueGroupId</h4>
+<pre>public abstract&nbsp;boolean&nbsp;uniqueGroupId</pre>
+<div class="block">A unique string (UUID) can be appended to the group ID.
+ In that case, each consumer will be the only member of a unique consumer group.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>True to make each group ID unique. Defaults to false.</dd>
+</dl>
+<dl>
+<dt>Default:</dt>
+<dd>false</dd>
 </dl>
 </li>
 </ul>

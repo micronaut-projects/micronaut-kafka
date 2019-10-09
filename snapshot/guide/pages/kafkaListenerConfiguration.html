@@ -109,7 +109,17 @@ function addJsClass() {
 </div>
 </div>
 <div class="paragraph">
-<p>The above example will run the consumer within a consumer group called <code>myGroup</code>.</p>
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying a Consumer Group alternative</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above examples will run the consumer within a consumer group called <code>myGroup</code>.
+In this case, each record will be consumed by one consumer instance of the consumer group.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -122,6 +132,18 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), <code>uniqueGroupId</code> can be set to <code>true</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Unique group IDs</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup", uniqueGroupId=true)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more information, see for example <a href="https://kafka.apache.org/intro#intro_consumers" class="bare">https://kafka.apache.org/intro#intro_consumers</a></p>
 </div>
 </div>
 <div class="sect2">
