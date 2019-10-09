@@ -221,6 +221,12 @@ public class KafkaConsumerProcessor
                 groupId = applicationConfiguration.getName().orElse(beanType.getName());
             }
 
+            boolean hasUniqueGroupId = consumerAnnotation.get("uniqueGroupId", Boolean.class).orElse(false);
+            String uniqueGroupId = groupId;
+            if (hasUniqueGroupId) {
+                uniqueGroupId += "_" + UUID.randomUUID().toString();
+            }
+
             String clientId = consumerAnnotation.get("clientId", String.class).orElse(null);
             if (StringUtils.isEmpty(clientId)) {
                 clientId = applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null);
@@ -266,7 +272,7 @@ public class KafkaConsumerProcessor
                 );
             }
 
-            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, hasUniqueGroupId ? uniqueGroupId : groupId);
 
             if (clientId != null) {
                 properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);

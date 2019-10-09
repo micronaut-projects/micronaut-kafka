@@ -56,6 +56,14 @@ public @interface KafkaListener {
     String groupId() default "";
 
     /**
+     * A unique string (UUID) can be appended to the group ID.
+     * In that case, each consumer will be the only member of a unique consumer group.
+     *
+     * @return True to make each group ID unique. Defaults to false.
+     */
+    boolean uniqueGroupId() default false;
+
+    /**
      * Sets the client id of the Kafka consumer. If not specified the client id is configured
      * to be the value of {@link io.micronaut.runtime.ApplicationConfiguration#getName()}.
      *
