@@ -162,57 +162,11 @@ function addJsClass() {
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.context.annotation.Factory;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Produced;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=imports, indent=0]
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Properties;
+Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=clazz, indent=0]
 
-@Factory
-public class WordCountStream {
-
-    public static final String STREAM_WORD_COUNT = "word-count";
-    public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
-    public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
-    public static final String WORD_COUNT_STORE = "word-count-store";
-
-
-    @Singleton
-    @Named(STREAM_WORD_COUNT)
-    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
-        // set default serdes
-        Properties props = builder.getConfiguration();
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        KStream&lt;String, String&gt; source = builder
-                .stream(INPUT);
-
-        KTable&lt;String, Long&gt; groupedByWord = source
-                .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
-                .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
-                //Store the result in a store for lookup later
-                .count(Materialized.as(WORD_COUNT_STORE)); <i class="conum" data-value="4"></i><b>(4)</b>
-
-        groupedByWord
-                //convert to stream
-                .toStream()
-                //send to output using specific serdes
-                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
-
-        return source;
-    }
+Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=wordCountStream, indent=4]
 
 }</code></pre>
 </div>
@@ -255,32 +209,7 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
-
-import io.micronaut.configuration.kafka.annotation.KafkaClient;
-import io.micronaut.configuration.kafka.annotation.Topic;
-
-@KafkaClient
-public interface WordCountClient {
-
-    @Topic(WordCountStream.INPUT)
-    void publishSentence(String sentence);
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountClient.java[]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -289,52 +218,7 @@ public interface WordCountClient {
 <div class="listingblock">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/*
- * Copyright 2017-2019 original authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package io.micronaut.configuration.kafka.streams;
-
-import io.micronaut.configuration.kafka.annotation.*;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
-public class WordCountListener {
-
-    private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
-
-    @Topic(WordCountStream.OUTPUT)
-    void count(@KafkaKey String word, long count) {
-        System.out.println("word = " + word);
-        wordCounts.put(word, count);
-    }
-
-    public long getCount(String word) {
-        Long num = wordCounts.get(word);
-        if (num != null) {
-            return num;
-        }
-        return 0;
-    }
-
-    public Map&lt;String, Long&gt; getWordCounts() {
-        return Collections.unmodifiableMap(wordCounts);
-    }
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountListener.java[]</code></pre>
 </div>
 </div>
 </div>
@@ -363,15 +247,7 @@ public class WordCountListener {
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static final String MY_STREAM = "my-stream";
-public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
-public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
-
-@Singleton
-@Named(MY_STREAM)
-KStream&lt;String, String&gt; myStream(
-        @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
-
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=namedStream, indent=0]
 }</code></pre>
 </div>
 </div>
