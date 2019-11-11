@@ -45,3 +45,7 @@ dependencies {
     testRuntime "io.micronaut:micronaut-management"
     testRuntime "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
 }
+
+test {
+    maxHeapSize = "2048m"
+}
