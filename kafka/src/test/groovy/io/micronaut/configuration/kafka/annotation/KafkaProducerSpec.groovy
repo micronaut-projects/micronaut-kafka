@@ -16,29 +16,24 @@
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.util.logging.Slf4j
-import io.micronaut.configuration.kafka.KafkaConsumerFactory
-import io.micronaut.configuration.kafka.KafkaProducerFactory
-import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
-import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
-import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration
 import io.micronaut.context.ApplicationContext
+import io.micronaut.context.event.BeanCreatedEvent
+import io.micronaut.context.event.BeanCreatedEventListener
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
-import org.apache.kafka.common.serialization.BytesDeserializer
-import org.apache.kafka.common.serialization.BytesSerializer
 import org.testcontainers.containers.KafkaContainer
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.producer.Producer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
+import javax.inject.Singleton
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.atomic.AtomicInteger
 
 class KafkaProducerSpec extends Specification {
 
@@ -123,6 +118,9 @@ class KafkaProducerSpec extends Specification {
             userListener.others['Other'] == 'Stuff'
             userListener.others['Dell'] == 'PC'
         }
+        and:
+            context.getBean(KafkaConsumerInstrumentation).counter.get() > 0
+            context.getBean(KafkaProducerInstrumentation).counter.get() > 0
     }
 
     @KafkaClient(acks = KafkaClient.Acknowledge.ALL, id = "named")
@@ -181,5 +179,30 @@ class KafkaProducerSpec extends Specification {
             log.info("Got Lineup info - {} by {}", key, name)
             others[key] = name
         }
+    }
+
+    @Singleton
+    static class KafkaConsumerInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
+
+        final AtomicInteger counter = new AtomicInteger(0);
+
+        @Override
+        Consumer<?, ?> onCreated(BeanCreatedEvent<Consumer<?, ?>> event) {
+            counter.incrementAndGet()
+            return event.getBean()
+        }
+    }
+
+    @Singleton
+    static class KafkaProducerInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
+
+        final AtomicInteger counter = new AtomicInteger(0);
+
+        @Override
+        Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
+            counter.incrementAndGet()
+            return event.getBean()
+        }
+
     }
 }
