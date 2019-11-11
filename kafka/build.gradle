@@ -5,10 +5,7 @@ dependencyManagement {
         mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
     }
 }
-//ext['jackson.version'] = '2.10.1'
-//ext['jackson.databind.version'] = '2.10.1'
-//ext['jackson.modules.version'] = '2.10.1'
-//ext['jackson.datatype.version'] = '2.10.1'
+
 dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-graal"

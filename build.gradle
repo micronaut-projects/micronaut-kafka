@@ -48,6 +48,7 @@ subprojects { Project subproject ->
     
     repositories {
         maven { url "https://repo.grails.org/grails/core" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
     
     apply plugin:"groovy"
@@ -55,7 +56,7 @@ subprojects { Project subproject ->
 
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
-    apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-build/f7ecafbd37dae3ab0d2598adf6af31aef5e20b1c/publishing.gradle"
+    apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-core/01e2b1ef1255b584e9e5c1965d334e1190e2ade5/gradle/publishing.gradle"
         
 
     jar {
@@ -150,5 +151,5 @@ allprojects {
     apply from: rootProject.file('gradle/license.gradle')
 }
 
-apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-docs/v1.0.5/gradle/docs.gradle"
+apply from:"https://raw.githubusercontent.com/micronaut-projects/micronaut-docs/v1.0.0.M4/gradle/docs.gradle"
 
