@@ -173,6 +173,28 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaMessagingBodyBinder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave"><span class="typeNameLink">BraveKafkaConsumerTracingInstrumentation</span></a> - Class in <a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a></dt>
+<dd>
+<div class="block">Kafka consumer tracing instrumentation using Brave.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html#BraveKafkaConsumerTracingInstrumentation-brave.kafka.clients.KafkaTracing-">BraveKafkaConsumerTracingInstrumentation(KafkaTracing)</a></span> - Constructor for class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaConsumerTracingInstrumentation</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave"><span class="typeNameLink">BraveKafkaProducerTracingInstrumentation</span></a> - Class in <a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a></dt>
+<dd>
+<div class="block">Kafka producer tracing instrumentation using Brave.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html#BraveKafkaProducerTracingInstrumentation-brave.kafka.clients.KafkaTracing-">BraveKafkaProducerTracingInstrumentation(KafkaTracing)</a></span> - Constructor for class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaProducerTracingInstrumentation</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaTracingFactory.html" title="class in io.micronaut.configuration.kafka.tracing.brave"><span class="typeNameLink">BraveKafkaTracingFactory</span></a> - Class in <a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a></dt>
+<dd>
+<div class="block">Brave's Kafka tracing factory.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaTracingFactory.html#BraveKafkaTracingFactory--">BraveKafkaTracingFactory()</a></span> - Constructor for class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaTracingFactory.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaTracingFactory</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:C">
 <!--   -->
@@ -556,6 +578,8 @@
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/package-summary.html">io.micronaut.configuration.kafka.tracing</a> - package io.micronaut.configuration.kafka.tracing</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a> - package io.micronaut.configuration.kafka.tracing.brave</dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html#isEnabled--">isEnabled()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbeddedConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-">isPaused(String)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
@@ -872,6 +896,10 @@
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaConsumerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaProducerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;Consumer&lt;?, ?&gt;&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaConsumerTracingInstrumentation</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;Producer&lt;?, ?&gt;&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaProducerTracingInstrumentation</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/KafkaConsumerTracingInstrumentation.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;Consumer&lt;?, ?&gt;&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.tracing.<a href="io/micronaut/configuration/kafka/tracing/KafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing">KafkaConsumerTracingInstrumentation</a></dt>
 <dd>&nbsp;</dd>

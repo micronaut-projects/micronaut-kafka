@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>@Singleton
- @Requires(beans=io.opentracing.Tracer.class) @Requires(classes=io.opentracing.contrib.kafka.TracingKafkaProducer.class)
+ @Requires(beans=io.opentracing.Tracer.class) @Requires(missingBeans=<a href="../../../../../io/micronaut/configuration/kafka/tracing/brave/BraveKafkaProducerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaProducerTracingInstrumentation.class</a>) @Requires(classes=io.opentracing.contrib.kafka.TracingKafkaProducer.class)
 public class <span class="typeNameLabel">KafkaProducerTracingInstrumentation</span>
 extends java.lang.Object
 implements io.micronaut.context.event.BeanCreatedEventListener&lt;org.apache.kafka.clients.producer.Producer&lt;?,?&gt;&gt;</pre>
