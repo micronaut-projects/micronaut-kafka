@@ -126,7 +126,7 @@ subprojects { Project subproject ->
 
     checkstyle {
         toolVersion = 8.10
-        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        configFile = file("${rootDir}/config/checkstyle/ckeckstyle.xml")
 
         // Per submodule
         maxErrors = 1
