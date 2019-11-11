@@ -13,44 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.tracing;
+package io.micronaut.configuration.kafka.tracing.brave;
 
-import io.micronaut.configuration.kafka.tracing.brave.BraveKafkaProducerTracingInstrumentation;
+import brave.kafka.clients.KafkaTracing;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
- * Instruments Kafka producers with Open Tracing support.
+ * Kafka producer tracing instrumentation using Brave.
  *
- * @author graemerocher
- * @since 1.1
+ * @author dstepanov
  */
 @Singleton
-@Requires(beans = Tracer.class)
-@Requires(missingBeans = BraveKafkaProducerTracingInstrumentation.class)
-@Requires(classes = TracingKafkaProducer.class)
-public class KafkaProducerTracingInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
+@Requires(beans = KafkaTracing.class)
+public class BraveKafkaProducerTracingInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
 
-    private final Provider<Tracer> tracerProvider;
+    private final KafkaTracing kafkaTracing;
 
     /**
      * Default constructor.
-     * @param tracerProvider The tracer provider
+     * @param kafkaTracing The kafka tracing
      */
-    protected KafkaProducerTracingInstrumentation(Provider<Tracer> tracerProvider) {
-        this.tracerProvider = tracerProvider;
+    public BraveKafkaProducerTracingInstrumentation(KafkaTracing kafkaTracing) {
+        this.kafkaTracing = kafkaTracing;
     }
 
     @Override
     public Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
-        final Producer<?, ?> kafkaProducer = event.getBean();
-        return new TracingKafkaProducer<>(kafkaProducer, tracerProvider.get());
+        return kafkaTracing.producer(event.getBean());
     }
 }
