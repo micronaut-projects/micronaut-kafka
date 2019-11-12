@@ -53,11 +53,13 @@ import java.util.stream.Collectors;
  *
  * @author Graeme Rocher
  * @since 1.0
+ * @deprecated Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/
  */
 @Singleton
 @Requires(env = {Environment.TEST, Environment.DEVELOPMENT})
 @Requires(classes = {KafkaServer.class, ZkClient.class, TestUtils.class, org.apache.kafka.test.TestUtils.class})
 @Requires(property = AbstractKafkaConfiguration.EMBEDDED)
+@Deprecated
 public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConfiguration>, AutoCloseable {
 
     private static final String ZKHOST = "127.0.0.1";
@@ -83,6 +85,10 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
     @Override
     public synchronized AbstractKafkaConfiguration onCreated(BeanCreatedEvent<AbstractKafkaConfiguration> event) {
 
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/");
+        }
+
         AbstractKafkaConfiguration config = event.getBean();
         if (kafkaServer != null) {
             return config;
@@ -102,10 +108,6 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
 
         boolean randomPort = kafkaPort == -1;
         if (embeddedConfiguration.isEnabled()) {
-
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/");
-            }
             int retries = 0;
             do {
                 // only handle localhost

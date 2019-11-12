@@ -20,6 +20,7 @@ import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.naming.conventions.StringConvention;
 
 import java.util.Properties;
 
@@ -56,7 +57,11 @@ public class KafkaConsumerConfiguration<K, V> extends AbstractKafkaConsumerConfi
         Properties config = getConfig();
         config.putAll(defaultConfiguration.getConfig());
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(consumerName, true);
-        config.putAll(environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new));
+        if (environment.containsProperties(propertyKey)) {
+            config.putAll(
+                    environment.getProperties(propertyKey, StringConvention.RAW)
+            );
+        }
     }
 
 }

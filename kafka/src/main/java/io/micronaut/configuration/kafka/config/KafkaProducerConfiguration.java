@@ -20,6 +20,7 @@ import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.naming.conventions.StringConvention;
 
 import java.util.Properties;
 
@@ -58,7 +59,11 @@ public class KafkaProducerConfiguration<K, V> extends AbstractKafkaProducerConfi
         Properties config = getConfig();
         config.putAll(defaultConfiguration.getConfig());
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(producerName, true);
-        config.putAll(environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new));
+        if (environment.containsProperties(propertyKey)) {
+            config.putAll(
+                    environment.getProperties(producerName, StringConvention.RAW)
+            );
+        }
 
     }
 

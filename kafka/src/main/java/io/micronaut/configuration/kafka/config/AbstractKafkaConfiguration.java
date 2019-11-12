@@ -34,24 +34,25 @@ public abstract class AbstractKafkaConfiguration<K, V> {
     /**
      * The default prefix used for Kafka configuration.
      */
-    @SuppressWarnings("WeakerAccess")
     public static final String PREFIX = "kafka";
 
     /**
      * The property to use to enable embedded Kafka.
      */
-    @SuppressWarnings("WeakerAccess")
     public static final String EMBEDDED = "kafka.embedded.enabled";
 
     /**
      * The topics that should be created.
      */
-    @SuppressWarnings("WeakerAccess")
+    public static final String TOPICS = "kafka.topics";
+
+    /**
+     * The topics that should be created.
+     */
     public static final String EMBEDDED_TOPICS = "kafka.embedded.topics";
     /**
      * The default bootstrap server address.
      */
-    @SuppressWarnings("WeakerAccess")
     public static final String DEFAULT_BOOTSTRAP_SERVERS = "localhost:" + DEFAULT_KAFKA_PORT;
 
     private final Properties config;
@@ -61,7 +62,6 @@ public abstract class AbstractKafkaConfiguration<K, V> {
      *
      * @param config The config to use
      */
-    @SuppressWarnings("WeakerAccess")
     protected AbstractKafkaConfiguration(Properties config) {
         this.config = config;
     }
@@ -69,7 +69,6 @@ public abstract class AbstractKafkaConfiguration<K, V> {
     /**
      * @return The Kafka configuration
      */
-    @SuppressWarnings("WeakerAccess")
     public @Nonnull Properties getConfig() {
         if (config != null) {
             return config;
