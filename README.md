@@ -11,11 +11,11 @@ See the [Documentation](https://micronaut-projects.github.io/micronaut-kafka/lat
 
 ## Snapshots and Releases
 
-Snaphots are automatically published to JFrog OSS using [Github Actions](https://github.com/micronaut-projects/micronaut-data/actions).
+Snaphots are automatically published to JFrog OSS using [Github Actions](https://github.com/micronaut-projects/micronaut-kafka/actions).
 
 See the documentation in the [Micronaut Docs](https://docs.micronaut.io/latest/guide/index.html#usingsnapshots) for how to configure your build to use snapshots.
 
-Releases are published to JCenter and Maven Central via [Github Actions](https://github.com/micronaut-projects/micronaut-data/actions).
+Releases are published to JCenter and Maven Central via [Github Actions](https://github.com/micronaut-projects/micronaut-kafka/actions).
 
 A release is performed with the following steps:
 
