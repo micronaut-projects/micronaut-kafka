@@ -106,7 +106,7 @@ public @interface KafkaListener {
      * The session timeout for a consumer. See {@code session.timeout.ms}.
      *
      * @return The session timeout as a duration.
-     * @see org.apache.kafka.clients.consumer.ConsumerConfig#SESSION_TIMEOUT_MS_DOC
+     * @see org.apache.kafka.clients.consumer.ConsumerConfig#SESSION_TIMEOUT_MS_CONFIG
      */
     String sessionTimeout() default "";
 
@@ -114,7 +114,7 @@ public @interface KafkaListener {
      * The heart beat interval for the consumer. See {@code heartbeat.interval.ms}.
      *
      * @return The heartbeat interval as a duration.
-     * @see org.apache.kafka.clients.consumer.ConsumerConfig#HEARTBEAT_INTERVAL_MS_DOC
+     * @see org.apache.kafka.clients.consumer.ConsumerConfig#HEARTBEAT_INTERVAL_MS_CONFIG
      */
     String heartbeatInterval() default "";
 

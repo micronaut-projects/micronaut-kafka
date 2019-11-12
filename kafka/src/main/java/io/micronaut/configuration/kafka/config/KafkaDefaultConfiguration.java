@@ -22,6 +22,7 @@ import io.micronaut.core.convert.ConversionService;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -79,11 +80,11 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
     }
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
-        Map<String, Object> values = environment.getProperties(PREFIX);
+        Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
         Properties properties = new Properties();
         values.entrySet().stream().filter(entry -> {
-            String key = entry.getKey().toString();
-            return !Stream.of("embedded", "consumers", "producers", "streams").anyMatch(key::startsWith);
+            String key = entry.getKey();
+            return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
         }).forEach(entry -> {
             Object value = entry.getValue();
             if (ConversionService.SHARED.canConvert(entry.getValue().getClass(), String.class)) {

@@ -205,8 +205,7 @@ public class KafkaConsumerProcessor
             Duration heartbeatInterval = method.getValue(KafkaListener.class, "heartbeatInterval", Duration.class)
                     .orElse(null);
 
-            boolean isBatch = method.getValue(KafkaListener.class, "batch", Boolean.class)
-                    .orElse(false);
+            boolean isBatch = method.isTrue(KafkaListener.class, "batch");
 
             Optional<Argument> consumerArg = Arrays.stream(method.getArguments()).filter(arg -> Consumer.class.isAssignableFrom(arg.getType())).findFirst();
             Optional<Argument> ackArg = Arrays.stream(method.getArguments())
@@ -214,26 +213,26 @@ public class KafkaConsumerProcessor
                             io.micronaut.messaging.Acknowledgement.class.isAssignableFrom(arg.getType()))
                     .findFirst();
 
-            String groupId = consumerAnnotation.get("groupId", String.class).orElse(null);
+            String groupId = consumerAnnotation.stringValue("groupId").orElse(null);
 
             Class<?> beanType = beanDefinition.getBeanType();
             if (StringUtils.isEmpty(groupId)) {
                 groupId = applicationConfiguration.getName().orElse(beanType.getName());
             }
 
-            boolean hasUniqueGroupId = consumerAnnotation.get("uniqueGroupId", Boolean.class).orElse(false);
+            boolean hasUniqueGroupId = consumerAnnotation.isTrue("uniqueGroupId");
             String uniqueGroupId = groupId;
             if (hasUniqueGroupId) {
                 uniqueGroupId += "_" + UUID.randomUUID().toString();
             }
 
-            String clientId = consumerAnnotation.get("clientId", String.class).orElse(null);
+            String clientId = consumerAnnotation.stringValue("clientId").orElse(null);
             if (StringUtils.isEmpty(clientId)) {
                 clientId = applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null);
             }
 
-            OffsetStrategy offsetStrategy = consumerAnnotation.getRequiredValue("offsetStrategy", OffsetStrategy.class);
-            int consumerThreads = consumerAnnotation.getRequiredValue("threads", Integer.class);
+            OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class).orElse(OffsetStrategy.AUTO);
+            int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
 
             AbstractKafkaConsumerConfiguration consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
                     .orElse(defaultConsumerConfiguration);
@@ -319,20 +318,15 @@ public class KafkaConsumerProcessor
 
                 Object consumerBean = beanContext.getBean(beanType);
 
-                if (consumerBean instanceof KafkaConsumerAware && kafkaConsumer instanceof KafkaConsumer) {
-                    //noinspection unchecked
-                    ((KafkaConsumerAware) consumerBean).setKafkaConsumer((KafkaConsumer) kafkaConsumer);
-                } else if (consumerBean instanceof ConsumerAware) {
+                if (consumerBean instanceof ConsumerAware) {
                     //noinspection unchecked
                     ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
                 }
 
-
-
                 for (AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
 
-                    String[] topicNames = topicAnnotation.getValue(String[].class).orElse(StringUtils.EMPTY_STRING_ARRAY);
-                    String[] patterns = topicAnnotation.get("patterns", String[].class).orElse(StringUtils.EMPTY_STRING_ARRAY);
+                    String[] topicNames = topicAnnotation.stringValues();
+                    String[] patterns = topicAnnotation.stringValues("patterns");
                     boolean hasTopics = ArrayUtils.isNotEmpty(topicNames);
                     boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
 
@@ -624,13 +618,13 @@ public class KafkaConsumerProcessor
             boolean isBlocking) {
         Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
-                    String[] destinationTopics = method.getValue(SendTo.class, String[].class).orElse(StringUtils.EMPTY_STRING_ARRAY);
+                    String[] destinationTopics = method.stringValues(SendTo.class);
                     if (ArrayUtils.isNotEmpty(destinationTopics)) {
                         Object key = consumerRecord.key();
                         Object value = o;
 
                         if (value != null) {
-                            String groupId = kafkaListener.get("groupId", String.class).orElse(null);
+                            String groupId = kafkaListener.stringValue("groupId").orElse(null);
                             Producer kafkaProducer = producerRegistry.getProducer(
                                     StringUtils.isNotEmpty(groupId) ? groupId : null,
                                     Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
@@ -673,7 +667,7 @@ public class KafkaConsumerProcessor
                             consumerRecord
                     ));
 
-                    if (kafkaListener.getRequiredValue("redelivery", Boolean.class)) {
+                    if (kafkaListener.isTrue("redelivery")) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
                         }
@@ -683,7 +677,7 @@ public class KafkaConsumerProcessor
 
 
                         if (key != null && value != null) {
-                            String groupId = kafkaListener.get("groupId", String.class).orElse(null);
+                            String groupId = kafkaListener.stringValue("groupId").orElse(null);
                             Producer kafkaProducer = producerRegistry.getProducer(
                                     StringUtils.isNotEmpty(groupId) ? groupId : null,
                                     Argument.of(key.getClass()),
@@ -798,7 +792,7 @@ public class KafkaConsumerProcessor
                     }
 
                 } else {
-                    boolean batch = method.getValue(KafkaListener.class, "batch", Boolean.class).orElse(false);
+                    boolean batch = method.isTrue(KafkaListener.class, "batch");
 
                     consumerConfiguration.setValueDeserializer(
                             serdeRegistry.pickDeserializer(batch ? bodyArgument.getFirstTypeVariable().orElse(bodyArgument) : bodyArgument)

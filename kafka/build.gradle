@@ -6,6 +6,11 @@ dependencyManagement {
     }
 }
 
+ext['jackson.version'] = '2.10.1'
+ext['jackson.databind.version'] = '2.10.1'
+ext['jackson.modules.version'] = '2.10.1'
+ext['jackson.datatype.version'] = '2.10.1'
+
 dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-graal"
@@ -38,8 +43,8 @@ dependencies {
 
     testCompile "org.testcontainers:kafka:1.12.3"
 
-    testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.0.16'
-    testCompile 'io.opentracing:opentracing-mock:0.31.0'
+    testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.1.7'
+    testCompile 'io.opentracing:opentracing-mock:0.33.0'
 
     testRuntime 'io.micronaut:micronaut-tracing'
     testRuntime "io.micronaut:micronaut-runtime"
@@ -52,6 +57,6 @@ test {
     maxHeapSize = "2048m"
 }
 
-testlogger {
-    showStandardStreams true
-}
+//testlogger {
+//    showStandardStreams true
+//}
