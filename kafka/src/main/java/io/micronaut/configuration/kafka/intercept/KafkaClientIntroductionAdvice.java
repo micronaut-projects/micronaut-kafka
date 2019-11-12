@@ -17,7 +17,6 @@ package io.micronaut.configuration.kafka.intercept;
 
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
-import io.micronaut.configuration.kafka.KafkaProducerFactory;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
@@ -86,7 +85,6 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaClientIntroductionAdvice.class);
 
     private final BeanContext beanContext;
-    private final KafkaProducerFactory producerFactory;
     private final SerdeRegistry serdeRegistry;
     private final ConversionService<?> conversionService;
     private final Map<ProducerKey, Producer> producerMap = new ConcurrentHashMap<>();
@@ -95,17 +93,14 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
      * Creates the introduction advice for the given arguments.
      *
      * @param beanContext       The bean context.
-     * @param producerFactory   The producer factory.
      * @param serdeRegistry     The serde registry
      * @param conversionService The conversion service
      */
     public KafkaClientIntroductionAdvice(
             BeanContext beanContext,
-            KafkaProducerFactory producerFactory,
             SerdeRegistry serdeRegistry,
             ConversionService<?> conversionService) {
         this.beanContext = beanContext;
-        this.producerFactory = producerFactory;
         this.serdeRegistry = serdeRegistry;
         this.conversionService = conversionService;
     }
@@ -622,7 +617,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 }
             }
 
-            return producerFactory.createProducer(newConfiguration);
+            return beanContext.createBean(Producer.class, newConfiguration);
         });
     }
 
