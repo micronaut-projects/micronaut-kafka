@@ -19,8 +19,8 @@ dependencies {
     compileOnly "io.micronaut:micronaut-inject-java"
     compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.8'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.9.0'
-    compile "io.micronaut:micronaut-messaging:$micronautVersion"
-    compile "org.apache.kafka:kafka-clients:$kafkaVersion"
+    implementation "io.micronaut:micronaut-messaging:$micronautVersion"
+    implementation "org.apache.kafka:kafka-clients:$kafkaVersion"
 
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.configuration:micronaut-micrometer-core"
@@ -30,27 +30,27 @@ dependencies {
 
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
-    testCompile "io.micronaut:micronaut-inject-java"
-    testCompile "io.micronaut.configuration:micronaut-micrometer-core"
-    testCompile "io.projectreactor:reactor-core"
-    testCompile "io.micronaut:micronaut-management"
-    testCompile "io.micronaut:micronaut-http-client"
-    testCompile "io.micronaut:micronaut-inject-groovy"
-    testCompile "io.micronaut:micronaut-management"
-    testCompile "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
+    testImplementation "io.micronaut.test:micronaut-test-spock"
+    testImplementation "io.micronaut:micronaut-inject-java"
+    testImplementation "io.micronaut.configuration:micronaut-micrometer-core"
+    testImplementation "io.projectreactor:reactor-core"
+    testImplementation "io.micronaut:micronaut-management"
+    testImplementation "io.micronaut:micronaut-http-client"
+    testImplementation "io.micronaut:micronaut-inject-groovy"
+    testImplementation "io.micronaut:micronaut-management"
+    testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
+    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
+    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
-    testCompile "org.testcontainers:kafka:1.12.3"
+    testImplementation "org.testcontainers:kafka:1.12.3"
+    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.8'
+    testImplementation 'io.opentracing:opentracing-mock:0.33.0'
 
-    testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.1.8'
-    testCompile 'io.opentracing:opentracing-mock:0.33.0'
-
-    testRuntime 'io.micronaut:micronaut-tracing'
-    testRuntime "io.micronaut:micronaut-runtime"
-    testRuntime "io.micronaut:micronaut-http-server-netty"
-    testRuntime "io.micronaut:micronaut-management"
-    testRuntime "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
+    testRuntimeOnly 'io.micronaut:micronaut-tracing'
+    testRuntimeOnly "io.micronaut:micronaut-runtime"
+    testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
+    testRuntimeOnly "io.micronaut:micronaut-management"
+    testRuntimeOnly "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
 }
 
 test {

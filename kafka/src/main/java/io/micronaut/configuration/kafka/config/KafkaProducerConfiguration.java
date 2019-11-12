@@ -61,7 +61,7 @@ public class KafkaProducerConfiguration<K, V> extends AbstractKafkaProducerConfi
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(producerName, true);
         if (environment.containsProperties(propertyKey)) {
             config.putAll(
-                    environment.getProperties(producerName, StringConvention.RAW)
+                    environment.getProperties(propertyKey, StringConvention.RAW)
             );
         }
 
