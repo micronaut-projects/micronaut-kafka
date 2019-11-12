@@ -49,3 +49,7 @@ dependencies {
 test {
     maxHeapSize = "2048m"
 }
+
+testlogger {
+    showStandardStreams true
+}

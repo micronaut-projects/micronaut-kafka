@@ -31,6 +31,7 @@ import kafka.zk.EmbeddedZookeeper;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.utils.MockTime;
@@ -135,15 +136,25 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                 );
                 KafkaConfig kafkaConfig = new KafkaConfig(brokerProps);
                 this.kafkaServer = TestUtils.createServer(kafkaConfig, new MockTime());
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Started Embedded Kafka on Port: {}", kafkaPort);
+                }
 
                 List<String> topics = embeddedConfiguration.getTopics();
 
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Creating Kafka Topics in Embedded Kafka: {}", topics);
+                }
                 if (!topics.isEmpty()) {
                     Properties properties = new Properties();
                     properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + kafkaPort));
                     AdminClient adminClient = AdminClient.create(properties);
-                    adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, kafkaConfig.numPartitions(), (short) 1)).collect(Collectors.toList()))
-                               .all().get();
+                    final CreateTopicsResult result = adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, kafkaConfig.numPartitions(), (short) 1)).collect(Collectors.toList()));
+                    result.all().get();
+
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Created Kafka Topics in Embedded Kafka: {}", topics);
+                    }
                 }
             } catch (Throwable e) {
                 // check server not already running
