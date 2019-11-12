@@ -202,7 +202,9 @@
 <h2 class="title">C</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.intercept.<a href="io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html" title="class in io.micronaut.configuration.kafka.intercept">KafkaClientIntroductionAdvice</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
@@ -425,6 +427,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#getKafkaServer--">getKafkaServer()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Return the configured Kafka server is it was configured.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html#getKeyDeserializer--">getKeyDeserializer()</a></span> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a></dt>
@@ -478,10 +481,12 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#getZkPort--">getZkPort()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns the port Zookeeper is running on if it was created.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#getZkUtils--">getZkUtils()</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns the Zookeeper tools if they are available.</div>
 </dd>
 </dl>
@@ -723,10 +728,13 @@
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded"><span class="typeNameLink">KafkaEmbedded</span></a> - Class in <a href="io/micronaut/configuration/kafka/embedded/package-summary.html">io.micronaut.configuration.kafka.embedded</a></dt>
 <dd>
-<div class="block">This class will configure a Kafka server for the test environment if no server is already available.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#KafkaEmbedded-io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration-">KafkaEmbedded(KafkaEmbeddedConfiguration)</a></span> - Constructor for class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
 <dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Construct a new instance.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html" title="class in io.micronaut.configuration.kafka.embedded"><span class="typeNameLink">KafkaEmbeddedConfiguration</span></a> - Class in <a href="io/micronaut/configuration/kafka/embedded/package-summary.html">io.micronaut.configuration.kafka.embedded</a></dt>
@@ -892,7 +900,9 @@
 <div class="block">An enum representing different strategies for committing offsets to Kafka when using <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.embedded.<a href="io/micronaut/configuration/kafka/embedded/KafkaEmbedded.html" title="class in io.micronaut.configuration.kafka.embedded">KafkaEmbedded</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaConsumerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaProducerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
@@ -1059,6 +1069,10 @@
 <dt><a href="io/micronaut/configuration/kafka/annotation/Topics.html" title="annotation in io.micronaut.configuration.kafka.annotation"><span class="typeNameLink">Topics</span></a> - Annotation Type in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
 <dd>
 <div class="block">Repeatable annotation for one or many <a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a> annotations.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html#TOPICS">TOPICS</a></span> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></dt>
+<dd>
+<div class="block">The topics that should be created.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/JsonSerde.html#toString--">toString()</a></span> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonSerde</a></dt>
 <dd>&nbsp;</dd>
