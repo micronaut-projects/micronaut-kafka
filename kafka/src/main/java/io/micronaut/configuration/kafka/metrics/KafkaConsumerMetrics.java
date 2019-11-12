@@ -23,8 +23,6 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import static io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter.METER_REGISTRIES;
