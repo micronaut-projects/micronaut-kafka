@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.metrics;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.annotation.TypeHint;
 
 import javax.annotation.PreDestroy;
 
@@ -24,6 +25,7 @@ import javax.annotation.PreDestroy;
  * A {@link org.apache.kafka.common.metrics.MetricsReporter} class for producer metrics.
  */
 @Internal
+@TypeHint(ProducerKafkaMetricsReporter.class)
 public class ProducerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
     private static final String PRODUCER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".producer";
