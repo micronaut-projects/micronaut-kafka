@@ -39,7 +39,7 @@ dependencies {
     testCompile "org.testcontainers:kafka:1.12.3"
 
     testCompile 'io.opentracing.contrib:opentracing-kafka-client:0.0.16'
-    testCompile 'io.opentracing:opentracing-mock:0.31.0'
+    testCompile 'io.opentracing:opentracing-mock:0.33.0'
 
     testRuntime 'io.micronaut:micronaut-tracing'
     testRuntime "io.micronaut:micronaut-runtime"
