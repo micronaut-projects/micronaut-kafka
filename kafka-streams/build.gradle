@@ -22,3 +22,7 @@ dependencies {
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testCompile "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 }
+
+test {
+    maxHeapSize = "2048m"
+}
