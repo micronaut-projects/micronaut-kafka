@@ -21,6 +21,7 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import org.apache.kafka.common.errors.SerializationException
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -33,15 +34,20 @@ import java.util.concurrent.ConcurrentHashMap
 @Stepwise
 class KafkaTypeConversionSpec extends Specification {
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared
     @AutoCleanup
-    ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["uuids"]
-            )
-    )
+    ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["uuids"]
+                )
+        )
+    }
 
     void "test send valid UUID key"() {
         when:
@@ -87,7 +93,7 @@ class KafkaTypeConversionSpec extends Specification {
         @Inject
         KafkaListenerExceptionHandler defaultExceptionHandler
 
-        @Topic(patterns = "uuids")
+        @Topic("uuids")
         void receive(@KafkaKey UUID key, String message) {
             messages.put(key, message)
         }

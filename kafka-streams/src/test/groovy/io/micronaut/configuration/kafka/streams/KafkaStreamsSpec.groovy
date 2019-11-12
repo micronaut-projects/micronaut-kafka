@@ -29,6 +29,7 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -36,30 +37,33 @@ import spock.util.concurrent.PollingConditions
 
 class KafkaStreamsSpec extends Specification {
 
-    @Shared
-    @AutoCleanup
-    ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", 'localhost:${random.port}',
+                        AbstractKafkaConfiguration.EMBEDDED, true,
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
                         WordCountStream.INPUT,
                         WordCountStream.OUTPUT,
                         WordCountStream.NAMED_WORD_COUNT_INPUT,
                         WordCountStream.NAMED_WORD_COUNT_OUTPUT,
                         OptimizationStream.OPTIMIZATION_ON_INPUT,
                         OptimizationStream.OPTIMIZATION_OFF_INPUT
-                    ],
-                    'kafka.generic.config', "hello",
-                    'kafka.streams.my-stream.application.id', 'my-stream',
-                    'kafka.streams.my-stream.num.stream.threads', 10,
-                    'kafka.streams.optimization-on.application.id', 'optimization-on',
-                    'kafka.streams.optimization-on.topology.optimization', 'all',
-                    'kafka.streams.optimization-off.application.id', 'optimization-off',
-                    'kafka.streams.optimization-off.topology.optimization', 'none'
-            )
-    )
-
+                ],
+                        'kafka.generic.config', "hello",
+                        'kafka.streams.my-stream.application.id', 'my-stream',
+                        'kafka.streams.my-stream.num.stream.threads', 10,
+                        'kafka.streams.optimization-on.application.id', 'optimization-on',
+                        'kafka.streams.optimization-on.topology.optimization', 'all',
+                        'kafka.streams.optimization-off.application.id', 'optimization-off',
+                        'kafka.streams.optimization-off.topology.optimization', 'none'
+                )
+        )
+    }
     void "test config"() {
         when:
         def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName('my-stream'))

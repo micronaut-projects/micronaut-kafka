@@ -23,6 +23,7 @@ import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.Header
 import io.micronaut.messaging.annotation.SendTo
 import io.reactivex.Flowable
+import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -43,19 +44,24 @@ class KafkaBatchListenerSpec extends Specification {
     public static final String BOOKS_ARRAY_TOPIC = 'KafkaBatchListenerSpec-books-array'
     public static final String TITLES_TOPIC = 'KafkaBatchListenerSpec-titles'
 
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS,
-                    [ TITLES_TOPIC,
-                      BOOKS_LIST_TOPIC,
-                      BOOKS_ARRAY_TOPIC,
-                      BOOKS_TOPIC,
-                      BOOKS_FORWARD_LIST_TOPIC
-                    ]
-            )
-    )
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS,
+                        [ TITLES_TOPIC,
+                          BOOKS_LIST_TOPIC,
+                          BOOKS_ARRAY_TOPIC,
+                          BOOKS_TOPIC,
+                          BOOKS_FORWARD_LIST_TOPIC
+                        ]
+                )
+        )
+    }
 
 
     void "test send batch list with headers - blocking"() {

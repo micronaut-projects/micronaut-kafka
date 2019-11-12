@@ -7,6 +7,7 @@ import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.Body
 import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -16,21 +17,28 @@ import java.util.concurrent.ConcurrentSkipListSet
 
 class KafkaPauseResumeSpec extends Specification {
 
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    "micrometer.metrics.enabled", true,
-                    'endpoints.metrics.sensitive', false,
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["fruits"]
-            )
-    )
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
 
     @Shared
     @AutoCleanup
-    ApplicationContext context = embeddedServer.applicationContext
+    EmbeddedServer embeddedServer
+
+    @Shared
+    @AutoCleanup
+    ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        embeddedServer = ApplicationContext.run(EmbeddedServer,
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        "micrometer.metrics.enabled", true,
+                        'endpoints.metrics.sensitive', false,
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["fruits"]
+                )
+        )
+        context = embeddedServer.applicationContext
+    }
 
     void "test pause / resume listener"() {
         given:

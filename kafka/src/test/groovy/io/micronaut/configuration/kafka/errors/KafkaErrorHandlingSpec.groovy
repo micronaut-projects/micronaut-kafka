@@ -15,6 +15,7 @@ import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -23,15 +24,20 @@ import spock.util.concurrent.PollingConditions
 import java.util.concurrent.atomic.AtomicInteger
 
 class KafkaErrorHandlingSpec extends Specification {
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared
     @AutoCleanup
-    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["errors"]
-            )
-    )
+    EmbeddedServer embeddedServer
+
+    def setupSpec() {
+        kafkaContainer.start()
+        embeddedServer = ApplicationContext.run(EmbeddedServer,
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["errors"]
+                )
+        )
+    }
 
     void "test an exception that is thrown is not committed"() {
         when:"A consumer throws an exception"

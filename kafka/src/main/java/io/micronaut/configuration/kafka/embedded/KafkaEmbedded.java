@@ -45,6 +45,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -98,72 +99,102 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
             } catch (NumberFormatException e) {
                 return config;
             }
-        } else if (SocketUtils.isTcpPortAvailable(AbstractKafkaConfiguration.DEFAULT_KAFKA_PORT)) {
-            kafkaPort = AbstractKafkaConfiguration.DEFAULT_KAFKA_PORT;
         }
 
-        // only handle localhost
-        if (embeddedConfiguration.isEnabled() &&
-                kafkaServer == null &&
-                kafkaPort > -1 &&
-                SocketUtils.isTcpPortAvailable(kafkaPort) &&
-                init.compareAndSet(false, true)) {
-            try {
-                if (zkServer == null) {
-                    initZooKeeper();
-                }
+        boolean randomPort = kafkaPort == -1;
+        if (embeddedConfiguration.isEnabled()) {
 
-                // setup Broker
-                Properties brokerProps = embeddedConfiguration.getProperties();
-                String zkConnect = "127.0.0.1:" + zkServer.port();
-
-                brokerProps.setProperty("zookeeper.connect", zkConnect);
-                brokerProps.putIfAbsent("broker.id", "0");
-                brokerProps.put("port", kafkaPort);
-                brokerProps.putIfAbsent("offsets.topic.replication.factor" , "1");
-
-                brokerProps.computeIfAbsent("log.dirs", o -> {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/");
+            }
+            int retries = 0;
+            do {
+                // only handle localhost
+                final int targetPort = randomPort ? SocketUtils.findAvailableTcpPort() : kafkaPort;
+                if (kafkaServer == null &&
+                        targetPort > -1 &&
+                        SocketUtils.isTcpPortAvailable(targetPort) &&
+                        init.compareAndSet(false, true)) {
                     try {
-                        return Files.createTempDirectory("kafka-").toAbsolutePath().toString();
-                    } catch (IOException e) {
-                        throw new ConfigurationException("Error creating log directory for embedded Kafka server: " + e.getMessage(), e);
+                        if (zkServer == null) {
+                            initZooKeeper();
+                        }
+
+                        // setup Broker
+                        Properties brokerProps = embeddedConfiguration.getProperties();
+                        String zkConnect = "127.0.0.1:" + zkServer.port();
+
+                        brokerProps.setProperty("zookeeper.connect", zkConnect);
+                        brokerProps.putIfAbsent("broker.id", "0");
+
+                        brokerProps.put("port", targetPort);
+                        brokerProps.putIfAbsent("offsets.topic.replication.factor" , "1");
+
+                        brokerProps.computeIfAbsent("log.dirs", o -> {
+                            try {
+                                return Files.createTempDirectory("kafka-").toAbsolutePath().toString();
+                            } catch (IOException e) {
+                                throw new ConfigurationException("Error creating log directory for embedded Kafka server: " + e.getMessage(), e);
+                            }
+                        });
+
+                        brokerProps.setProperty(
+                                "listeners",
+                                "PLAINTEXT://127.0.0.1:" + targetPort
+                        );
+                        KafkaConfig kafkaConfig = new KafkaConfig(brokerProps);
+                        this.kafkaServer = TestUtils.createServer(kafkaConfig, new MockTime());
+                        final Integer numPartitions = kafkaConfig.numPartitions();
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Started Embedded Kafka on Port: {}", targetPort);
+                        }
+
+                        createTopics(targetPort, numPartitions);
+                        return config;
+                    } catch (Throwable e) {
+                        // check server not already running
+                        if (!e.getMessage().contains("Address already in use")) {
+                            throw new ConfigurationException("Error starting embedded Kafka server: " + e.getMessage(), e);
+
+                        }
+                        retries++;
                     }
-                });
-
-                brokerProps.setProperty(
-                        "listeners",
-                        "PLAINTEXT://127.0.0.1:" + kafkaPort
-                );
-                KafkaConfig kafkaConfig = new KafkaConfig(brokerProps);
-                this.kafkaServer = TestUtils.createServer(kafkaConfig, new MockTime());
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Started Embedded Kafka on Port: {}", kafkaPort);
                 }
 
-                List<String> topics = embeddedConfiguration.getTopics();
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Creating Kafka Topics in Embedded Kafka: {}", topics);
-                }
-                if (!topics.isEmpty()) {
-                    Properties properties = new Properties();
-                    properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + kafkaPort));
-                    AdminClient adminClient = AdminClient.create(properties);
-                    final CreateTopicsResult result = adminClient.createTopics(topics.stream().map(s -> new NewTopic(s, kafkaConfig.numPartitions(), (short) 1)).collect(Collectors.toList()));
-                    result.all().get();
-
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Created Kafka Topics in Embedded Kafka: {}", topics);
-                    }
-                }
-            } catch (Throwable e) {
-                // check server not already running
-                if (!e.getMessage().contains("Address already in use")) {
-                    throw new ConfigurationException("Error starting embedded Kafka server: " + e.getMessage(), e);
+            } while (retries < 3);
+            throw new ConfigurationException("Error starting embedded Kafka server. Could not start after attempting port binding several times");
+        } else {
+            if (kafkaPort > -1) {
+                try {
+                    createTopics(kafkaPort, 1);
+                } catch (Throwable e) {
+                    throw new ConfigurationException("Error creating Kafka Topics: " + e.getMessage(), e);
                 }
             }
+            return config;
         }
-        return config;
+
+    }
+
+    private void createTopics(int targetPort, Integer numPartitions) throws InterruptedException, java.util.concurrent.ExecutionException {
+        List<String> topics = embeddedConfiguration.getTopics();
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Creating Kafka Topics in Embedded Kafka: {}", topics);
+        }
+        if (!topics.isEmpty()) {
+            Properties properties = new Properties();
+            properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + targetPort));
+            AdminClient adminClient = AdminClient.create(properties);
+            final CreateTopicsResult result = adminClient.createTopics(topics.stream().map(s ->
+                    new NewTopic(s, numPartitions, (short) 1)).collect(Collectors.toList())
+            );
+            result.all().get();
+
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Created Kafka Topics in Embedded Kafka: {}", topics);
+            }
+        }
     }
 
     @Override

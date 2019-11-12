@@ -32,6 +32,7 @@ import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
 import org.apache.kafka.common.serialization.BytesDeserializer
 import org.apache.kafka.common.serialization.BytesSerializer
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -47,33 +48,39 @@ class KafkaProducerSpec extends Specification {
     @Shared
     MockTracer mockTracer = new MockTracer()
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+
     @Shared
     @AutoCleanup
-    ApplicationContext context = ApplicationContext.build(
-            CollectionUtils.mapOf(
-                    'micronaut.application.name', 'test-app',
-                    "kafka.schema.registry.url", "http://localhot:8081",
-                    "kafka.producers.named.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.named.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.key-serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.keySerializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.value-serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.producers.default.valueSerializer", "org.apache.kafka.common.serialization.StringSerializer",
-                    "kafka.consumers.default.key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.consumers.default.key-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.consumers.default.keyDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.consumers.default.value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.consumers.default.value-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.consumers.default.valueDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
-                    TOPIC_BLOCKING
-            ]
-            )
-    ).singletons(mockTracer).start()
+    ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context =  ApplicationContext.build(
+                CollectionUtils.mapOf(
+                        'micronaut.application.name', 'test-app',
+                        "kafka.schema.registry.url", "http://localhot:8081",
+                        "kafka.producers.named.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.named.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.key-serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.keySerializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.value-serializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.producers.default.valueSerializer", "org.apache.kafka.common.serialization.StringSerializer",
+                        "kafka.consumers.default.key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.consumers.default.key-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.consumers.default.keyDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.consumers.default.value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.consumers.default.value-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.consumers.default.valueDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
+                        TOPIC_BLOCKING
+                ]
+                )
+        ).singletons(mockTracer).start()
+    }
 
 
     def "test customize defaults"() {

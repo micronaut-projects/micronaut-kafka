@@ -27,6 +27,7 @@ import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.messaging.annotation.Header
 import io.micronaut.runtime.server.EmbeddedServer
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -34,28 +35,36 @@ import spock.util.concurrent.PollingConditions
 
 class KafkaConsumerMetricsSpec extends Specification {
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared
     @AutoCleanup
-    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    "micrometer.metrics.enabled", true,
-                    'endpoints.metrics.sensitive', false,
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words-metrics", "words", "books", "words-records", "books-records"]
-            )
-    )
+    EmbeddedServer embeddedServer
 
     @Shared
     @AutoCleanup
-    ApplicationContext context = embeddedServer.applicationContext
+    ApplicationContext context
 
     @Shared
-    MeterRegistry meterRegistry = context.getBean(MeterRegistry)
+    MeterRegistry meterRegistry
 
     @Shared
     @AutoCleanup
-    RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+    RxHttpClient httpClient
+
+    def setupSpec() {
+        kafkaContainer.start()
+        embeddedServer = ApplicationContext.run(EmbeddedServer,
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        "micrometer.metrics.enabled", true,
+                        'endpoints.metrics.sensitive', false,
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words-metrics", "words", "books", "words-records", "books-records"]
+                )
+        )
+        context = embeddedServer.applicationContext
+        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+        meterRegistry = context.getBean(MeterRegistry)
+    }
 
     void "test simple consumer"() {
         given:

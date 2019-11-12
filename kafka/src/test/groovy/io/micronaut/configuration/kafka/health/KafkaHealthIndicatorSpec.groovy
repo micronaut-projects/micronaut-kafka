@@ -21,6 +21,7 @@ import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.health.HealthStatus
 import io.micronaut.management.health.indicator.HealthResult
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,10 +29,10 @@ class KafkaHealthIndicatorSpec extends Specification {
 
     void "test kafka health indicator - UP"() {
         given:
+        KafkaContainer kafkaContainer = new KafkaContainer()
+        kafkaContainer.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                Collections.singletonMap(
-                        AbstractKafkaConfiguration.EMBEDDED, true
-                )
+                "kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()
         )
 
         when:
@@ -45,6 +46,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
+        kafkaContainer.stop()
     }
 
     void "test kafka health indicator - DOWN"() {

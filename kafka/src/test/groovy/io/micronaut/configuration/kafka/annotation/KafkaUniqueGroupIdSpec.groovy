@@ -21,6 +21,7 @@ import io.micronaut.core.util.CollectionUtils
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.runtime.server.EmbeddedServer
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -32,23 +33,30 @@ class KafkaUniqueGroupIdSpec extends Specification {
 
     static final String TOPIC = "groupid-topic"
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared
     @AutoCleanup
-    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [KafkaUniqueGroupIdSpec.TOPIC]
-            )
-    )
+    EmbeddedServer embeddedServer
 
     @Shared
     @AutoCleanup
-    ApplicationContext context = embeddedServer.applicationContext
+    ApplicationContext context
 
     @Shared
     @AutoCleanup
-    RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+    RxHttpClient httpClient
+
+    def setupSpec() {
+        kafkaContainer.start()
+        embeddedServer = ApplicationContext.run(EmbeddedServer,
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [KafkaUniqueGroupIdSpec.TOPIC]
+                )
+        )
+        context = embeddedServer.applicationContext
+        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+    }
 
     void "test multiple consumers - single group id"() {
         given:

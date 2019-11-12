@@ -23,6 +23,7 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -32,13 +33,18 @@ import javax.inject.Singleton
 
 class PerRecordOffsetCommitSpec extends Specification {
     public static final String TOPIC_SYNC = "PerRecordOffsetCommitSpec-products-sync"
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
-            )
-    )
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
+                )
+        )
+    }
 
     void "test sync per record"() {
         given:

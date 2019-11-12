@@ -38,6 +38,7 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
+import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -47,25 +48,30 @@ import spock.util.concurrent.PollingConditions
 @Stepwise
 class KafkaListenerSpec extends Specification {
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
     @Shared
     @AutoCleanup
-    EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer,
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    "micrometer.metrics.enabled", true,
-                    'endpoints.metrics.sensitive', false,
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
-            )
-    )
+    EmbeddedServer embeddedServer
+    @Shared
+    @AutoCleanup
+    RxHttpClient httpClient
 
-    @Shared
-    @AutoCleanup
-    ApplicationContext context = embeddedServer.applicationContext
+    def setupSpec() {
+        kafkaContainer.start()
+        embeddedServer = ApplicationContext.run(EmbeddedServer,
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        "micrometer.metrics.enabled", true,
+                        'endpoints.metrics.sensitive', false,
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
+                )
+        )
+        context = embeddedServer.applicationContext
+        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+    }
 
-    @Shared
-    @AutoCleanup
-    RxHttpClient httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+
 
     void "test simple consumer"() {
         given:

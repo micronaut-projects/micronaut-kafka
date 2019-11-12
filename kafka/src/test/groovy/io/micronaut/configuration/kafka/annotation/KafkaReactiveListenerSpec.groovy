@@ -23,6 +23,7 @@ import io.micronaut.core.util.CollectionUtils
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
@@ -36,15 +37,20 @@ import java.util.concurrent.Future
 class KafkaReactiveListenerSpec extends Specification{
 
     public static final String TOPIC_NAME = "KafkaReactiveListenerSpec-books"
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_NAME]
-            )
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
+
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_NAME]
+                )
 
 
-    )
+        )
+    }
 
     void "test send and return single"() {
         given:

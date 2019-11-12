@@ -22,6 +22,7 @@ import io.micronaut.messaging.annotation.SendTo
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
@@ -40,16 +41,20 @@ class KafkaSendToSpec extends Specification {
     public static final String TOPIC_MONO = "KafkaSendToSpec-products-mono"
     public static final String TOPIC_QUANTITY = "KafkaSendToSpec-quantity"
 
-    @Shared @AutoCleanup ApplicationContext context = ApplicationContext.run(
-            CollectionUtils.mapOf(
-                    "kafka.bootstrap.servers", 'localhost:${random.port}',
-                    AbstractKafkaConfiguration.EMBEDDED, true,
-                    AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
-                    TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO
-                    ]
-            )
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup ApplicationContext context
 
-    )
+    def setupSpec() {
+        kafkaContainer.start()
+        context = ApplicationContext.run(
+                CollectionUtils.mapOf(
+                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
+                        TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO
+                ])
+
+        )
+    }
 
     void "test send to another topic - blocking"() {
         given:
