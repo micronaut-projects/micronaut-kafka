@@ -19,7 +19,7 @@ Releases are published to JCenter and Maven Central via [Github Actions](https:/
 
 A release is performed with the following steps:
 
-* Change the version specified by `projectVersion` in `gradle.properties` to a semantic, unreleased version. Example `1.0.0`
-* Commit the change. Example: `git commit -m "Release Version 1.0.0"`
-* Tag the release where the tag starts with `v`. Example: `git tag v1.0.0`
-* Push the commit and the tag: `git push && git push --tags`
+* [Edit the version](https://github.com/micronaut-projects/micronaut-kafka/edit/master/gradle.properties) specified by `projectVersion` in `gradle.properties` to a semantic, unreleased version. Example `1.0.0`
+* [Draft a new release](https://github.com/micronaut-projects/micronaut-kafka/releases/new) and create it. 
+* [Monitor the Workflow](https://github.com/micronaut-projects/micronaut-kafka/actions?query=workflow%3ARelease) to check it passed successfully.
+* Celebrate!
