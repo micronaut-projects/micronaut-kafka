@@ -21,7 +21,7 @@ dependencies {
     testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
-    testImplementation "org.testcontainers:kafka:1.12.3"
+    testImplementation "org.testcontainers:kafka:1.12.4"
 }
 
 test {
