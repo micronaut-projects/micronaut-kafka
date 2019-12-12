@@ -17,7 +17,7 @@ dependencies {
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     compileOnly "com.oracle.substratevm:svm"
     compileOnly "io.micronaut:micronaut-inject-java"
-    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.8'
+    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.9'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.9.1'
     implementation "io.micronaut:micronaut-messaging:$micronautVersion"
     implementation "org.apache.kafka:kafka-clients:$kafkaVersion"
