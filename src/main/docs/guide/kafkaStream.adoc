@@ -36,11 +36,11 @@ You should then define a ann:context.annotation.Factory[] for your streams that 
 .Kafka Streams Word Count
 [source,java]
 ----
-include::{testskafkastreams}/WordCountStream.java[tags=imports, indent=0]
+include::{testskafkastreams}/wordcount/WordCountStream.java[tags=imports, indent=0]
 
-include::{testskafkastreams}/WordCountStream.java[tags=clazz, indent=0]
+include::{testskafkastreams}/wordcount/WordCountStream.java[tags=clazz, indent=0]
 
-include::{testskafkastreams}/WordCountStream.java[tags=wordCountStream, indent=4]
+include::{testskafkastreams}/wordcount/WordCountStream.java[tags=wordCountStream, indent=4]
 
 }
 ----
@@ -57,7 +57,7 @@ You can use the ann:configuration.kafka.annotation.KafkaClient[] annotation to s
 .Defining a Kafka Client
 [source,java]
 ----
-include::{testskafkastreams}/WordCountClient.java[]
+include::{testskafkastreams}/wordcount/WordCountClient.java[]
 ----
 
 You can also define a ann:configuration.kafka.annotation.KafkaListener[] to listen for the result of the word count stream:
@@ -65,7 +65,7 @@ You can also define a ann:configuration.kafka.annotation.KafkaListener[] to list
 .Defining a Kafka Listener
 [source,java]
 ----
-include::{testskafkastreams}/WordCountListener.java[]
+include::{testskafkastreams}/wordcount/WordCountListener.java[]
 ----
 
 
@@ -91,7 +91,7 @@ You can then inject a api:configuration.kafka.streams.ConfiguredStreamBuilder[] 
 .Kafka Streams Word Count
 [source,java]
 ----
-include::{testskafkastreams}/WordCountStream.java[tags=namedStream, indent=0]
+include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream, indent=0]
 }
 ----
 
@@ -110,7 +110,7 @@ An example service that wraps the `InteractiveQueryService` is included below.  
 
 [source,java]
 ----
-include::{testkafkastreams}/InteractiveQueryServiceExample.java[]
+include::{testskafkastreams}/wordcount/InteractiveQueryServiceExample.java[]
 ----
 
 
