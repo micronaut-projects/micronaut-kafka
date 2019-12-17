@@ -22,3 +22,4 @@ kafkaApplications:
   kafkaMetrics: Kafka Metrics
   kafkaTracing: Kafka Distributed Tracing
 kafkaStream: Building Kafka Stream Applications
+repository: Repository
