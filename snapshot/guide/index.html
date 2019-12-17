@@ -28,6 +28,7 @@
 <body class="body" id="docs" onload="addJsClass();" onhashchange="highlightMenu()">
 
 <div id="table-of-content-nav-link" class="desktop">
+    <a id="theme-switcher" title="Switch to dark theme" href="javascript:switchTheme(true)"><i class="fa fa-moon-o"></i></a>
     <a title="Collapse/Open Table of contents" title="Hide Table of Contents" href="javascript:hideTableOfContents();" class="button">[ + ]</a>
 </div>
 
@@ -38,8 +39,7 @@
         </div>
         <div class="navLinks">
             <ul>
-                    <li>
-                        <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)" class="desktop">
+                    <li class='desktop'><select style='margin-top: 10px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option selected='selected' value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>1.3.1.BUILD-SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select></li><li><div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)" class="desktop">
                             <a href="../guide/index.html" class="button">Table of contents</a>
                             <div id="nav-summary-childs" style="display:none;">
                                 
@@ -56,6 +56,8 @@
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>6</strong><span>Running Kafka Applications</span></a></div>
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -76,7 +78,6 @@
                 <li class="mobile">
                     <a title="Go to Configuration Reference documentation" href="../guide/configurationreference.html" class="button">Conf</a>
                 </li>
-
             </ul>
 
         </div>
@@ -129,6 +130,8 @@
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStream"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
         
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
+        
         </div>
     </div>
     
@@ -137,11 +140,10 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> 1.3.1.BUILD-SNAPSHOT</p>
+        <p><strong>Version:</strong> <select style='margin-top: 10px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option selected='selected' value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>1.3.1.BUILD-SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select></p>
     </div>
     
-
-<h1 id="introduction">1 Introduction</h1>
+<h1 id="introduction"><a class="anchor" href="#introduction"></a>1 Introduction</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/introduction.adoc"'>
@@ -244,8 +246,7 @@
 </div>
 </div>
 
-
-<h1 id="kafkaCli">2 Using the Micronaut CLI</h1>
+<h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>2 Using the Micronaut CLI</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaCli.adoc"'>
@@ -295,8 +296,7 @@ $ mn create-kafka-listener Message
 </div>
 </div>
 
-
-<h1 id="kafkaQuickStart">3 Kafka Quick Start</h1>
+<h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>3 Kafka Quick Start</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaQuickStart.adoc"'>
@@ -494,8 +494,7 @@ public class ProductListener {
 </div>
 </div>
 
-
-<h1 id="kafkaClient">4 Kafka Producers Using @KafkaClient</h1>
+<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>4 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
@@ -511,8 +510,7 @@ public class ProductListener {
 <p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
 </div>
 
-
-<h2 id="kafkaClientMethods">4.1 Defining @KafkaClient Methods</h2>
+<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>4.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
@@ -675,8 +673,7 @@ public interface ProductClient {
 </div>
 </div>
 
-
-<h2 id="kafkaClientConfiguration">4.2 Configuring @KafkaClient beans</h2>
+<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>4.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
@@ -785,8 +782,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-
-<h2 id="kafkaClientBatch">4.3 Sending Records in Batch</h2>
+<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
@@ -848,8 +844,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 </div>
 </div>
 
-
-<h2 id="kafkaClientScope">4.4 Injecting Kafka Producer Beans</h2>
+<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>4.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
@@ -942,8 +937,7 @@ public void testBookSender() throws IOException {
 <p>By using the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
-
-<h2 id="kafkaEmbedded">4.5 Embedding Kafka</h2>
+<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>4.5 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
@@ -992,8 +986,7 @@ testCompile 'org.apache.kafka:kafka_2.12:2.3.1:test'</code></pre>
 <p>Note that because of the distributed nature of Kafka it is relatively slow to startup so it is generally better to do the initialization with <code>@BeforeClass</code> (or <code>setupSpec</code> in Spock) and have a large number of test methods rather than many test classes otherwise your test execution performance will suffer.</p>
 </div>
 
-
-<h1 id="kafkaListener">5 Kafka Consumers Using @KafkaListener</h1>
+<h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>5 Kafka Consumers Using @KafkaListener</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener.adoc"'>
@@ -1052,8 +1045,7 @@ testCompile 'org.apache.kafka:kafka_2.12:2.3.1:test'</code></pre>
 <p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="{kafkaapi}/org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
 </div>
 
-
-<h2 id="kafkaListenerMethods">5.1 Defining @KafkaListener Methods</h2>
+<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>5.1 Defining @KafkaListener Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
@@ -1316,8 +1308,7 @@ public Single&lt;Product&gt; receive(
 </div>
 </div>
 
-
-<h2 id="kafkaListenerConfiguration">5.2 Configuring @KafkaListener beans</h2>
+<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>5.2 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
@@ -1471,8 +1462,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-
-<h2 id="kafkaOffsets">5.3 Commiting Kafka Offsets</h2>
+<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>5.3 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
@@ -1719,8 +1709,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 </div>
 </div>
 
-
-<h2 id="kafkaListenerBatch">5.4 Kafka Batch Processing</h2>
+<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>5.4 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
@@ -1867,8 +1856,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 </div>
 
-
-<h2 id="kafkaSendTo">5.5 Forwarding Messages with @SendTo</h2>
+<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>5.5 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
@@ -1958,8 +1946,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>In the reactive case the <code>poll</code> loop will continue and will not wait for the record to be sent unless you specifically annotate the method with <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a>.</p>
 </div>
 
-
-<h2 id="kafkaExceptions">5.6 Handling Consumer Exceptions</h2>
+<h2 id="kafkaExceptions"><a class="anchor" href="#kafkaExceptions"></a>5.6 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaExceptions.adoc"'>
@@ -1981,8 +1968,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>The <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> receives an exception of type <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html">KafkaListenerException</a> which allows access to the original <code>ConsumerRecord</code>, if available.</p>
 </div>
 
-
-<h1 id="kafkaApplications">6 Running Kafka Applications</h1>
+<h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>6 Running Kafka Applications</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications.adoc"'>
@@ -2006,8 +1992,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the <code>KafkaConsumer</code> instances are closed correctly when the server is shutdown.</p>
 </div>
 
-
-<h2 id="kafkaHealth">6.1 Kafka Health Checks</h2>
+<h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>6.1 Kafka Health Checks</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
@@ -2061,8 +2046,7 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 </div>
 
-
-<h2 id="kafkaMetrics">6.2 Kafka Metrics</h2>
+<h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>6.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
@@ -2078,8 +2062,7 @@ By default, the details visible above are only shown to authenticated users. See
 <p>If you do not wish to collect Kafka metrics, you can set <code>micronaut.metrics.binders.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
 </div>
 
-
-<h2 id="kafkaTracing">6.3 Kafka Distributed Tracing</h2>
+<h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>6.3 Kafka Distributed Tracing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
@@ -2110,8 +2093,7 @@ By default, the details visible above are only shown to authenticated users. See
 </p>
 </div>
 
-
-<h1 id="kafkaStream">7 Building Kafka Stream Applications</h1>
+<h1 id="kafkaStream"><a class="anchor" href="#kafkaStream"></a>7 Building Kafka Stream Applications</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStream.adoc"'>
@@ -2187,11 +2169,58 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=imports, indent=0]
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
+import io.micronaut.context.annotation.Factory;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 
-Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=clazz, indent=0]
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
 
-Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=wordCountStream, indent=4]
+@Factory
+public class WordCountStream {
+
+    public static final String STREAM_WORD_COUNT = "word-count";
+    public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
+    public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
+    public static final String WORD_COUNT_STORE = "word-count-store";
+
+
+    @Singleton
+    @Named(STREAM_WORD_COUNT)
+    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
+        // set default serdes
+        Properties props = builder.getConfiguration();
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KStream&lt;String, String&gt; source = builder
+                .stream(INPUT);
+
+        KTable&lt;String, Long&gt; groupedByWord = source
+                .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
+                .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
+                //Store the result in a store for lookup later
+                .count(Materialized.as(WORD_COUNT_STORE)); <i class="conum" data-value="4"></i><b>(4)</b>
+
+        groupedByWord
+                //convert to stream
+                .toStream()
+                //send to output using specific serdes
+                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+
+        return source;
+    }
 
 }</code></pre>
 </div>
@@ -2234,7 +2263,17 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountClient.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.Topic;
+
+@KafkaClient
+public interface WordCountClient {
+
+    @Topic(WordCountStream.INPUT)
+    void publishSentence(String sentence);
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2243,7 +2282,37 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountListener.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+public class WordCountListener {
+
+    private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
+
+    @Topic(WordCountStream.OUTPUT)
+    void count(@KafkaKey String word, long count) {
+        System.out.println("word = " + word);
+        wordCounts.put(word, count);
+    }
+
+    public long getCount(String word) {
+        Long num = wordCounts.get(word);
+        if (num != null) {
+            return num;
+        }
+        return 0;
+    }
+
+    public Map&lt;String, Long&gt; getWordCounts() {
+        return Collections.unmodifiableMap(wordCounts);
+    }
+}</code></pre>
 </div>
 </div>
 </div>
@@ -2272,7 +2341,15 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=namedStream, indent=0]
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static final String MY_STREAM = "my-stream";
+public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
+public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
+
+@Singleton
+@Named(MY_STREAM)
+KStream&lt;String, String&gt; myStream(
+        @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
+
 }</code></pre>
 </div>
 </div>
@@ -2287,7 +2364,28 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/main/groovy/io/micronaut/configuration/kafka/streams/InteractiveQueryService.java[tags=getQueryableStore, indent=0]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/**
+ * Retrieve and return a queryable store by name created in the application.  If state store is not
+ * present an Optional.empty() will be returned.
+ *
+ * @param storeName name of the queryable store
+ * @param storeType type of the queryable store
+ * @param &lt;T&gt;       generic queryable store
+ * @return queryable store.
+ */
+public &lt;T&gt; Optional&lt;T&gt; getQueryableStore(String storeName, QueryableStoreType&lt;T&gt; storeType) {
+    for (KafkaStreams kafkaStream : this.streams) {
+        try {
+            T store = kafkaStream.store(storeName, storeType);
+            if (store != null) {
+                return Optional.of(store);
+            }
+        } catch (InvalidStateStoreException ignored) {
+            //pass through
+        }
+    }
+    return Optional.empty();
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2295,9 +2393,81 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::{testkafkastreams}/InteractiveQueryServiceExample.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+
+import javax.inject.Singleton;
+import java.util.Optional;
+
+/**
+ * Example service that uses the InteractiveQueryService in a reusable way.  This is only intended as an example.
+ */
+@Singleton
+public class InteractiveQueryServiceExample {
+
+    private final InteractiveQueryService interactiveQueryService;
+
+    public InteractiveQueryServiceExample(InteractiveQueryService interactiveQueryService) {
+        this.interactiveQueryService = interactiveQueryService;
+    }
+
+    /**
+     * Method to get the word state store and word count from the store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "foo-store"
+     * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
+     * @return the Long count of the word in the store
+     */
+    public Long getWordCount(String stateStore, String word) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, Long&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(word)).orElse(0L);
+    }
+
+    /**
+     * Method to get byte array from a state store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "bar-store"
+     * @param blobName   the key to get, in this case the name of the blob
+     * @return the byte[] stored in the state store
+     */
+    public byte[] getBytes(String stateStore, String blobName) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, byte[]&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(stringReadOnlyKeyValueStore -&gt; stringReadOnlyKeyValueStore.get(blobName)).orElse(null);
+    }
+
+    /**
+     * Method to get value V by key K.
+     *
+     * @param stateStore the name of the state store ie "baz-store"
+     * @param name       the key to get
+     * @return the value of type V stored in the state store
+     */
+    public &lt;K, V&gt; V getGenericKeyValue(String stateStore, K name) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;K, V&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.&lt;K, V&gt;keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(name)).orElse(null);
+    }
+}</code></pre>
 </div>
 </div>
+</div>
+
+<h1 id="repository"><a class="anchor" href="#repository"></a>8 Repository</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/repository.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>You can find the source code of this project in this repository:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/micronaut-projects/micronaut-kafka">https://github.com/micronaut-projects/micronaut-kafka</a></p>
 </div>
 
     </div>

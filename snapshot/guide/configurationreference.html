@@ -10,9 +10,7 @@
     <link rel="stylesheet" href="../css/highlight/agate.css">
     <script src="../js/highlight.pack.js"></script>
     <script src="../js/guide.js"></script>
-    <script src="${resourcesPath}/js/multi-language-sample.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <link rel="stylesheet" href="${resourcesPath}/css/multi-language-sample.css"/>
     <script src="../js/docs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.13/clipboard.min.js"></script>
 </head>
@@ -82,9 +80,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration" href="#io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration">&#128279;</a>
+<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
+<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -99,19 +97,14 @@
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.enabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets whether the embedded Kafka server is enabled. Default value (false).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key serializer.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.topics</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.List</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The topics that should be created by the embedded instance.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.properties</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.Properties</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the broker properties.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value serializer.</p></td>
 </tr>
 </tbody>
 </table>
@@ -140,9 +133,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
+<a id="io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration" href="#io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
+<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -157,14 +150,19 @@
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key serializer.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.enabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets whether the embedded Kafka server is enabled. Default value (false).</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value serializer.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.topics</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.List</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The topics that should be created by the embedded instance.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.properties</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.Properties</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the broker properties.</p></td>
 </tr>
 </tbody>
 </table>

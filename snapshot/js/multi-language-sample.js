@@ -74,65 +74,9 @@ function postProcessCodeBlocks() {
     }
 
     function switchSampleLanguage(languageId, buildId) {
-        var multiLanguageSampleElements = [].slice.call(document.querySelectorAll(".multi-language-sample"));
 
-        // Array of Arrays, each top-level array representing a single collection of samples
-        var multiLanguageSets = [];
-        for (var i = 0; i < multiLanguageSampleElements.length; i++) {
-            var currentCollection = [multiLanguageSampleElements[i]];
-            var currentSampleElement = multiLanguageSampleElements[i];
-            processSampleEl(currentSampleElement, languageId, buildId);
-            while (currentSampleElement.nextElementSibling != null && currentSampleElement.nextElementSibling.classList.contains("multi-language-sample")) {
-                currentCollection.push(currentSampleElement.nextElementSibling);
-                currentSampleElement = currentSampleElement.nextElementSibling;
-                processSampleEl(currentSampleElement, languageId, buildId);
-                i++;
-            }
-
-            multiLanguageSets.push(currentCollection);
-        }
-
-        multiLanguageSets.forEach(function (sampleCollection) {
-            // Create selector element if not existing
-            if (sampleCollection.length > 1 &&
-                (sampleCollection[0].previousElementSibling == null ||
-                    !sampleCollection[0].previousElementSibling.classList.contains("multi-language-selector"))) {
-                var languageSelectorFragment = document.createDocumentFragment();
-                var multiLanguageSelectorElement = document.createElement("div");
-                multiLanguageSelectorElement.classList.add("multi-language-selector");
-                languageSelectorFragment.appendChild(multiLanguageSelectorElement);
-
-
-                sampleCollection.forEach(function (sampleEl) {
-                    var optionEl = document.createElement("code");
-                    var sampleLanguage = sampleEl.getAttribute("data-lang");
-                    optionEl.setAttribute("data-lang", sampleLanguage);
-                    optionEl.setAttribute("role", "button");
-                    optionEl.classList.add("language-option");
-
-                    optionEl.innerText = capitalizeFirstLetter(sampleLanguage);
-
-                    optionEl.addEventListener("click", function updatePreferredLanguage(evt) {
-                        var optionId = optionEl.getAttribute("data-lang");
-                        if (isBuild(optionId)) {
-                            window.localStorage.setItem(LOCALSTORAGE_KEY_BUILD, optionId);
-                        }
-                        if (isLang(optionId)) {
-                            window.localStorage.setItem(LOCALSTORAGE_KEY_LANG, optionId);
-                        }
-                        // Record how far down the page the clicked element is before switching all samples
-                        var beforeOffset = evt.target.offsetTop;
-
-                        switchSampleLanguage(isLang(optionId) ? optionId : initPreferredLanguage(), isBuild(optionId) ? optionId : initPreferredBuild());
-
-                        // Scroll the window to account for content height differences between different sample languages
-                        window.scrollBy(0, evt.target.offsetTop - beforeOffset);
-                    });
-                    multiLanguageSelectorElement.appendChild(optionEl);
-                });
-                sampleCollection[0].parentNode.insertBefore(languageSelectorFragment, sampleCollection[0]);
-            }
-        });
+        // First make sure all the code sample sections are created
+        ensureMultiLanguageSampleSectionsHydrated(languageId, buildId);
 
         [].slice.call(document.querySelectorAll(".multi-language-selector .language-option")).forEach(function (optionEl) {
             if (optionEl.getAttribute("data-lang") === languageId || optionEl.getAttribute("data-lang") === buildId) {
@@ -151,33 +95,96 @@ function postProcessCodeBlocks() {
         });
     }
 
+    function ensureMultiLanguageSampleSectionsHydrated(languageId, buildId) {
+        var multiLanguageSampleElements = [].slice.call(document.querySelectorAll(".multi-language-sample"));
+        // Array of Arrays, each top-level array representing a single collection of samples
+        var multiLanguageSets = [];
+        for (var i = 0; i < multiLanguageSampleElements.length; i++) {
+            var currentCollection = [multiLanguageSampleElements[i]];
+            var currentSampleElement = multiLanguageSampleElements[i];
+            processSampleEl(currentSampleElement, languageId, buildId);
+            while (currentSampleElement.nextElementSibling != null && currentSampleElement.nextElementSibling.classList.contains("multi-language-sample")) {
+                currentCollection.push(currentSampleElement.nextElementSibling);
+                currentSampleElement = currentSampleElement.nextElementSibling;
+                processSampleEl(currentSampleElement, languageId, buildId);
+                i++;
+            }
+
+            multiLanguageSets.push(currentCollection);
+        }
+
+        multiLanguageSets.forEach(function (sampleCollection) {
+            // Create selector element if not existing
+            if (sampleCollection.length > 1) {
+
+                if (sampleCollection.every(function(element) {
+                    return element.classList.contains("hidden");
+                })) {
+                    sampleCollection[0].classList.remove("hidden");
+                }
+
+                // Add the multi-lang selector
+                if (sampleCollection[0].previousElementSibling == null ||
+                    !sampleCollection[0].previousElementSibling.classList.contains("multi-language-selector")) {
+
+                    
+                    var languageSelectorFragment = document.createDocumentFragment();
+                    var multiLanguageSelectorElement = document.createElement("div");
+                    multiLanguageSelectorElement.classList.add("multi-language-selector");
+                    languageSelectorFragment.appendChild(multiLanguageSelectorElement);
+
+                    sampleCollection.forEach(function (sampleEl) {
+                        var optionEl = document.createElement("code");
+                        var sampleLanguage = sampleEl.getAttribute("data-lang");
+                        optionEl.setAttribute("data-lang", sampleLanguage);
+                        optionEl.setAttribute("role", "button");
+                        optionEl.classList.add("language-option");
+
+                        optionEl.innerText = capitalizeFirstLetter(sampleLanguage);
+
+                        optionEl.addEventListener("click", function updatePreferredLanguage(evt) {
+                            var optionId = optionEl.getAttribute("data-lang");
+                            if (isBuild(optionId)) {
+                                window.localStorage.setItem(LOCALSTORAGE_KEY_BUILD, optionId);
+                            }
+                            if (isLang(optionId)) {
+                                window.localStorage.setItem(LOCALSTORAGE_KEY_LANG, optionId);
+                            }
+
+                            switchSampleLanguage(isLang(optionId) ? optionId : initPreferredLanguage(), isBuild(optionId) ? optionId : initPreferredBuild());
+                            
+                            // scroll to multi-lange selector. Offset the scroll a little bit to focus. 
+                            optionEl.scrollIntoView();
+                            var offset = 150;
+                            window.scrollBy(0, -offset);
+                        });
+                        multiLanguageSelectorElement.appendChild(optionEl);
+                    });
+                    sampleCollection[0].parentNode.insertBefore(languageSelectorFragment, sampleCollection[0]);
+                    // Insert title node prior to selector if title is present in sample collections, and remove duplicate title nodes
+                    if (sampleCollection[0].getElementsByClassName("title").length > 0) {
+                        var titleFragment =  document.createDocumentFragment();
+                        var titleContainerFragment = document.createElement("div");
+                        titleContainerFragment.classList.add("paragraph");
+                        titleFragment.appendChild(titleContainerFragment);
+                        var titleEl = sampleCollection[0].getElementsByClassName("title")[0].cloneNode(true);
+                        titleContainerFragment.appendChild(titleEl);
+                        sampleCollection.forEach(function(element) {
+                            var titleElementsToRemove = element.getElementsByClassName("title");
+                            if(titleElementsToRemove.length > 0) {
+                                for (var i = 0; i < titleElementsToRemove.length; i++) {
+                                    titleElementsToRemove[i].parentNode.removeChild(titleElementsToRemove[i]);
+                                }
+                            }
+                        });
+                        sampleCollection[0].parentNode.insertBefore(titleFragment, multiLanguageSelectorElement);
+                    }
+                }
+            }
+        });
+    }
+
     switchSampleLanguage(preferredLanguage, preferredBuild);
-}
-
-function copyText(element) {
-    var range, selection;
-
-    if (document.body.createTextRange) {
-        range = document.body.createTextRange();
-        range.moveToElementText(element);
-        range.select();
-
-    } else if (window.getSelection) {
-        selection = window.getSelection();
-        range = document.createRange();
-        range.selectNodeContents(element);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-    try {
-        document.execCommand('copy');
-    }
-    catch (err) {
-        console.error('unable to copy text');
-    }
-}
-function copyToClipboard(el) {
-    copyText(el.parentNode.previousElementSibling);
 }
 
 function createCopyToClipboardElement() {

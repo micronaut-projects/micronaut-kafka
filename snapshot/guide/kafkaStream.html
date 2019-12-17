@@ -2,6 +2,15 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
     <title>7 Building Kafka Stream Applications 1.3.1.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
@@ -50,6 +59,9 @@ function addJsClass() {
                         <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
                         </div>
                         
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
                     </div>
                 </div>
             </li>
@@ -74,6 +86,8 @@ function addJsClass() {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
+                    <div class="toc-item next-right"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span> >></a></div>
+                
 
 
                 <div class="project">
@@ -85,8 +99,7 @@ function addJsClass() {
                 
 
                 
-
-<h1 id="kafkaStream">7 Building Kafka Stream Applications</h1>
+<h1 id="kafkaStream"><a class="anchor" href="#kafkaStream"></a>7 Building Kafka Stream Applications</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStream.adoc"'>
@@ -162,11 +175,58 @@ function addJsClass() {
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=imports, indent=0]
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
+import io.micronaut.context.annotation.Factory;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 
-Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=clazz, indent=0]
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
 
-Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=wordCountStream, indent=4]
+@Factory
+public class WordCountStream {
+
+    public static final String STREAM_WORD_COUNT = "word-count";
+    public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
+    public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
+    public static final String WORD_COUNT_STORE = "word-count-store";
+
+
+    @Singleton
+    @Named(STREAM_WORD_COUNT)
+    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
+        // set default serdes
+        Properties props = builder.getConfiguration();
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KStream&lt;String, String&gt; source = builder
+                .stream(INPUT);
+
+        KTable&lt;String, Long&gt; groupedByWord = source
+                .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
+                .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
+                //Store the result in a store for lookup later
+                .count(Materialized.as(WORD_COUNT_STORE)); <i class="conum" data-value="4"></i><b>(4)</b>
+
+        groupedByWord
+                //convert to stream
+                .toStream()
+                //send to output using specific serdes
+                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+
+        return source;
+    }
 
 }</code></pre>
 </div>
@@ -209,7 +269,17 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountClient.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.Topic;
+
+@KafkaClient
+public interface WordCountClient {
+
+    @Topic(WordCountStream.INPUT)
+    void publishSentence(String sentence);
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -218,7 +288,37 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountListener.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+public class WordCountListener {
+
+    private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
+
+    @Topic(WordCountStream.OUTPUT)
+    void count(@KafkaKey String word, long count) {
+        System.out.println("word = " + word);
+        wordCounts.put(word, count);
+    }
+
+    public long getCount(String word) {
+        Long num = wordCounts.get(word);
+        if (num != null) {
+            return num;
+        }
+        return 0;
+    }
+
+    public Map&lt;String, Long&gt; getWordCounts() {
+        return Collections.unmodifiableMap(wordCounts);
+    }
+}</code></pre>
 </div>
 </div>
 </div>
@@ -247,7 +347,15 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/test/groovy/io/micronaut/configuration/kafka/streams/WordCountStream.java[tags=namedStream, indent=0]
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static final String MY_STREAM = "my-stream";
+public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
+public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
+
+@Singleton
+@Named(MY_STREAM)
+KStream&lt;String, String&gt; myStream(
+        @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
+
 }</code></pre>
 </div>
 </div>
@@ -262,7 +370,28 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::kafka-streams/src/main/groovy/io/micronaut/configuration/kafka/streams/InteractiveQueryService.java[tags=getQueryableStore, indent=0]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/**
+ * Retrieve and return a queryable store by name created in the application.  If state store is not
+ * present an Optional.empty() will be returned.
+ *
+ * @param storeName name of the queryable store
+ * @param storeType type of the queryable store
+ * @param &lt;T&gt;       generic queryable store
+ * @return queryable store.
+ */
+public &lt;T&gt; Optional&lt;T&gt; getQueryableStore(String storeName, QueryableStoreType&lt;T&gt; storeType) {
+    for (KafkaStreams kafkaStream : this.streams) {
+        try {
+            T store = kafkaStream.store(storeName, storeType);
+            if (store != null) {
+                return Optional.of(store);
+            }
+        } catch (InvalidStateStoreException ignored) {
+            //pass through
+        }
+    }
+    return Optional.empty();
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -270,7 +399,63 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Unresolved directive in &lt;stdin&gt; - include::{testkafkastreams}/InteractiveQueryServiceExample.java[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+
+import javax.inject.Singleton;
+import java.util.Optional;
+
+/**
+ * Example service that uses the InteractiveQueryService in a reusable way.  This is only intended as an example.
+ */
+@Singleton
+public class InteractiveQueryServiceExample {
+
+    private final InteractiveQueryService interactiveQueryService;
+
+    public InteractiveQueryServiceExample(InteractiveQueryService interactiveQueryService) {
+        this.interactiveQueryService = interactiveQueryService;
+    }
+
+    /**
+     * Method to get the word state store and word count from the store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "foo-store"
+     * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
+     * @return the Long count of the word in the store
+     */
+    public Long getWordCount(String stateStore, String word) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, Long&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(word)).orElse(0L);
+    }
+
+    /**
+     * Method to get byte array from a state store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "bar-store"
+     * @param blobName   the key to get, in this case the name of the blob
+     * @return the byte[] stored in the state store
+     */
+    public byte[] getBytes(String stateStore, String blobName) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, byte[]&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(stringReadOnlyKeyValueStore -&gt; stringReadOnlyKeyValueStore.get(blobName)).orElse(null);
+    }
+
+    /**
+     * Method to get value V by key K.
+     *
+     * @param stateStore the name of the state store ie "baz-store"
+     * @param name       the key to get
+     * @return the value of type V stored in the state store
+     */
+    public &lt;K, V&gt; V getGenericKeyValue(String stateStore, K name) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;K, V&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.&lt;K, V&gt;keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(name)).orElse(null);
+    }
+}</code></pre>
 </div>
 </div>
 </div>
@@ -279,6 +464,8 @@ With Kafka streams the key and value <code>Serdes</code> (serializer/deserialize
                 <div style="clear:both;margin-top:15px;"></div>
                 
                     <div class="toc-item prev-left"><a href="../guide/kafkaApplications.html">&lt;&lt; <strong>6</strong><span>Running Kafka Applications</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>

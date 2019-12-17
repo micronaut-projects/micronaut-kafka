@@ -2,6 +2,15 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
     <title>4 Kafka Producers Using @KafkaClient 1.3.1.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
@@ -48,6 +57,9 @@ function addJsClass() {
                         </div>
                         
                         <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
                         </div>
                         
                     </div>
@@ -107,8 +119,7 @@ function addJsClass() {
                 
 
                 
-
-<h1 id="kafkaClient">4 Kafka Producers Using @KafkaClient</h1>
+<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>4 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
@@ -124,8 +135,7 @@ function addJsClass() {
 <p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
 </div>
 
-
-<h2 id="kafkaClientMethods">4.1 Defining @KafkaClient Methods</h2>
+<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>4.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
@@ -288,8 +298,7 @@ public interface ProductClient {
 </div>
 </div>
 
-
-<h2 id="kafkaClientConfiguration">4.2 Configuring @KafkaClient beans</h2>
+<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>4.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
@@ -398,8 +407,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-
-<h2 id="kafkaClientBatch">4.3 Sending Records in Batch</h2>
+<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
@@ -461,8 +469,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 </div>
 </div>
 
-
-<h2 id="kafkaClientScope">4.4 Injecting Kafka Producer Beans</h2>
+<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>4.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
@@ -555,8 +562,7 @@ public void testBookSender() throws IOException {
 <p>By using the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
-
-<h2 id="kafkaEmbedded">4.5 Embedding Kafka</h2>
+<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>4.5 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
