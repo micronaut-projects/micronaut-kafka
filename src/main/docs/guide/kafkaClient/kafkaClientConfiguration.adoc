@@ -63,7 +63,7 @@ kafka:
     producers:
         product-client:
             value:
-                serializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+                serializer: org.apache.kafka.common.serialization.ByteArraySerializer
 ----
 
 You may want to do this if for example you choose an alternative serialization format such as Avro or Protobuf.
