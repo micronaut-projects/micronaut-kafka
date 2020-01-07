@@ -45,6 +45,8 @@ import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.util.concurrent.PollingConditions
 
+import javax.annotation.Nullable
+
 @Stepwise
 class KafkaListenerSpec extends Specification {
 
@@ -120,6 +122,20 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    void "test POJO consumer null with (tombstone) value"() {
+        when:
+        MyClient myClient = context.getBean(MyClient)
+        myClient.sendBook("Stephen King", null)
+
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
+        PojoConsumer myConsumer = context.getBean(PojoConsumer)
+        then:
+        conditions.eventually {
+            myConsumer.lastBook == null
+            myConsumer.messageHeaders != null
+        }
+    }
 
     void "test @KafkaKey annotation"() {
         when:
@@ -227,6 +243,9 @@ class KafkaListenerSpec extends Specification {
 
         @Topic("books")
         Single<Book> sendReactive(@KafkaKey String key, Book book)
+
+        @Topic("books")
+        void sendBook(@KafkaKey String key, @Nullable @Body Book book)
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
@@ -309,10 +328,9 @@ class KafkaListenerSpec extends Specification {
         MessageHeaders messageHeaders
 
         @Topic("books")
-        void receiveBook(Book book, MessageHeaders messageHeaders) {
+        void receiveBook(@Nullable Book book, MessageHeaders messageHeaders) {
             lastBook = book
             this.messageHeaders = messageHeaders
-
         }
     }
 

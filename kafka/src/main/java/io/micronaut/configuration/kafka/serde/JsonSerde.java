@@ -76,6 +76,9 @@ public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
     @Override
     public T deserialize(String topic, byte[] data) {
+        if (data == null) {
+            return null;
+        }
         return objectSerializer.deserialize(data, type)
                 .orElseThrow(() -> new SerializationException("Unable to deserialize data: " + data));
     }
@@ -87,6 +90,9 @@ public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
     @Override
     public byte[] serialize(String topic, T data) {
+        if (data == null) {
+            return null;
+        }
         return objectSerializer.serialize(data)
                 .orElseThrow(() -> new SerializationException("Unable to serialize data: " + data));
     }
