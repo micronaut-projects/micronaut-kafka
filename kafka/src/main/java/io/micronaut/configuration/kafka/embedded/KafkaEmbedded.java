@@ -25,10 +25,7 @@ import io.micronaut.core.io.socket.SocketUtils;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.utils.TestUtils;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
 import kafka.zk.EmbeddedZookeeper;
-import org.I0Itec.zkclient.ZkClient;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -57,17 +54,14 @@ import java.util.stream.Collectors;
  */
 @Singleton
 @Requires(env = {Environment.TEST, Environment.DEVELOPMENT})
-@Requires(classes = {KafkaServer.class, ZkClient.class, TestUtils.class, org.apache.kafka.test.TestUtils.class})
+@Requires(classes = {KafkaServer.class, TestUtils.class, org.apache.kafka.test.TestUtils.class})
 @Requires(property = AbstractKafkaConfiguration.EMBEDDED)
 @Deprecated
 public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConfiguration>, AutoCloseable {
 
-    private static final String ZKHOST = "127.0.0.1";
     private static final Logger LOG = LoggerFactory.getLogger(KafkaEmbedded.class);
 
     private EmbeddedZookeeper zkServer;
-    private ZkClient zkClient;
-    private ZkUtils zkUtils;
     private KafkaServer kafkaServer;
 
     private final KafkaEmbeddedConfiguration embeddedConfiguration;
@@ -211,15 +205,6 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                     }
                 }
             }
-            if (zkClient != null) {
-                try {
-                    zkClient.close();
-                } catch (Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Error shutting down embedded ZooKeeper Client: " + e.getMessage(), e);
-                    }
-                }
-            }
             if (zkServer != null) {
                 try {
                     zkServer.shutdown();
@@ -244,15 +229,6 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
     }
 
     /**
-     * Returns the Zookeeper tools if they are available.
-     *
-     * @return The Zookeeper tools
-     */
-    public Optional<ZkUtils> getZkUtils() {
-        return Optional.ofNullable(zkUtils);
-    }
-
-    /**
      * Returns the port Zookeeper is running on if it was created.
      * @return The Zookeeper port
      */
@@ -266,8 +242,5 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
 
     private void initZooKeeper() {
         zkServer = new EmbeddedZookeeper();
-        String zkConnect = ZKHOST + ":" + zkServer.port();
-        this.zkClient = new ZkClient(zkConnect, 30000, 30000, ZKStringSerializer$.MODULE$);
-        this.zkUtils = ZkUtils.apply(zkClient, false);
     }
 }
