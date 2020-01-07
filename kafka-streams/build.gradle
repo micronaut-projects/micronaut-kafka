@@ -1,17 +1,9 @@
-apply plugin: "io.spring.dependency-management"
-
-dependencyManagement {
-    imports {
-        mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
-    }
-}
-
 dependencies {
 	annotationProcessor "io.micronaut:micronaut-inject-java"
 	annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
-    implementation project(":kafka")
-    implementation "io.micronaut:micronaut-messaging:$micronautVersion"
-    implementation "org.apache.kafka:kafka-streams:$kafkaVersion"
+    api project(":kafka")
+    api "io.micronaut:micronaut-messaging:$micronautVersion"
+    api "org.apache.kafka:kafka-streams:$kafkaVersion"
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
 

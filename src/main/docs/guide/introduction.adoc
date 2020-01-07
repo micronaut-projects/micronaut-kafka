@@ -6,6 +6,10 @@ With Micronaut's efficient compile-time AOP and cloud native features, writing e
 
 === Release History
 
+==== 1.4.0
+
+* Upgrade to Kafka 2.4.0
+
 ==== 1.3.0
 
 * Upgrade to Kafka 2.3.1
