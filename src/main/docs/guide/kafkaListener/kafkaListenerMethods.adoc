@@ -2,7 +2,7 @@ The ann:configuration.kafka.annotation.KafkaListener[] annotation examples up un
 
 The following sections detail examples of supported use cases.
 
-=== Specifying Topics
+== Specifying Topics
 
 The ann:configuration.kafka.annotation.Topic[] annotation can be used at the method or the class level to specify which topics to be listened for.
 
@@ -25,7 +25,7 @@ You can also specify one or many regular expressions to listen for:
 ----
 
 
-=== Available Annotations
+== Available Annotations
 
 There are a number of annotations available that allow you to specify how a method argument is bound.
 
@@ -52,7 +52,7 @@ The following table summarizes the annotations and their purpose, with an exampl
 For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation to bind a parameter value from a header contained within a `ConsumerRecord`.
 
 
-=== Topics, Partitions and Offsets
+== Topics, Partitions and Offsets
 
 If you want a reference to the topic, partition or offset it is a simple matter of defining a parameter for each.
 
@@ -91,7 +91,7 @@ include::{testskafka}/consumer/config/ProductListener.java[tags=method, indent=0
 <5> The topic. Note that the `@Topic` annotation supports multiple topics.
 <6> The timestamp of the `ConsumerRecord`
 
-=== Receiving a ConsumerRecord
+== Receiving a ConsumerRecord
 
 If you prefer you can also receive the entire `ConsumerRecord` object being listened for. In this case you should specify appropriate generic types for the key and value of the `ConsumerRecord` so that Micronaut can pick the correct deserializer for each.
 
@@ -107,7 +107,7 @@ include::{testskafka}/consumer/config/ProductListener.java[tags=consumeRecord, i
 <2> The `value()` method is used to retrieve the value
 <3> The `key()` method is used to retrieve the key
 
-=== Receiving and returning Reactive Types
+== Receiving and returning Reactive Types
 
 In addition to common Java types and POJOs you can also define listener methods that receive a Reactive type such as a rx:Single[] or a Reactor `Mono`. For example:
 

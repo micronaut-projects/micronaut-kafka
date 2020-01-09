@@ -22,7 +22,7 @@ include::{testskafka}/consumer/batch/BookListener.java[tags=method, indent=2]
 
 Note in the previous case offsets will automatically be committed for the whole batch by default when the method returns without error.
 
-=== Manually Committing Offsets with Batch
+== Manually Committing Offsets with Batch
 
 You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:
 
@@ -39,7 +39,7 @@ include::{testskafka}/consumer/batch/BookListener.java[tags=manual, indent=0]
 
 This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.
 
-=== Reactive Batch Processing
+== Reactive Batch Processing
 
 Batch listeners also support defining reactive types (either rx:Flowable[] or Reactor `Flux`) as the method argument.
 

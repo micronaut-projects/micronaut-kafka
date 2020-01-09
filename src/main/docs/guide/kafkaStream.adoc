@@ -13,7 +13,7 @@ When using Micronaut with Kafka Stream, your application gains all of the featur
 
 Since Micronaut's DI and AOP is compile time, you can build low overhead stream applications with ease.
 
-=== Defining Kafka Streams
+== Defining Kafka Streams
 
 To define Kafka Streams you should first add the `kafka-streams` configuration to your build.
 
@@ -69,7 +69,7 @@ include::{testskafkastreams}/wordcount/WordCountListener.java[]
 ----
 
 
-=== Configuring Kafka Streams
+== Configuring Kafka Streams
 
 You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`. For example in `application.yml`:
 
@@ -95,7 +95,7 @@ include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream, in
 }
 ----
 
-=== Interactive Query Service
+== Interactive Query Service
 
 When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores[available here].
 

@@ -6,7 +6,7 @@ $ mn create-app my-kafka-app --features kafka
 
 This will create a project with the minimum necessary configuration for Kafka.
 
-=== Kafka Profile
+== Kafka Profile
 
 The Micronaut CLI includes a specialized profile for Kafka-based messaging applications. This profile will create a Micronaut app with Kafka support, and _without_ an HTTP server (although you can add one if you desire). The profile also provides a couple commands for generating Kafka listeners and producers.
 

@@ -4,37 +4,37 @@ Micronaut features dedicated support for defining both Kafka `Producer` and `Con
 
 With Micronaut's efficient compile-time AOP and cloud native features, writing efficient Kafka consumer applications that use very little resources is a breeze.
 
-=== Release History
+== Release History
 
-==== 1.4.0
+=== 1.4.0
 
 * Upgrade to Kafka 2.4.0
 
-==== 1.3.0
+=== 1.3.0
 
 * Upgrade to Kafka 2.3.1
 * Micronaut 1.2.x Minimum Version
 
-==== 1.2.0
+=== 1.2.0
 
 * Upgrade to Kafka 2.3.0
 * Micronaut 1.1.x Minimum Version
 
-==== 1.1.0
+=== 1.1.0
 
 * Upgrade to Kafka 2.1.0
 
-==== 1.0.4
+=== 1.0.4
 
 * Upgrade to Kafka 2.0.1
 
-==== 1.1.0
+=== 1.1.0
 
 * Upgrade to Kafka 2.1.1
 * Support for Open Tracing
 * Support for Pausing / Resuming Consumers via api:configuration.kafka.ConsumerRegistry[] interface
 
-==== 1.2.0
+=== 1.2.0
 
 * Micronaut 1.1.x minimum version
 * Upgrade to Kafka 2.3.0

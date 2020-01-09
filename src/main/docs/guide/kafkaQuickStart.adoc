@@ -2,7 +2,7 @@ To add support for Kafka to an existing project, you should first add the Micron
 
 dependency:micronaut-kafka[groupId="io.micronaut.configuration"]
 
-=== Configuring Kafka
+== Configuring Kafka
 
 The minimum requirement to configure Kafka is set the value of the `kafka.bootstrap.servers` property in `application.yml`:
 
@@ -48,7 +48,7 @@ kafka:
     protocol: ssl
 ----
 
-=== Creating a Kafka Producer with @KafkaClient
+== Creating a Kafka Producer with @KafkaClient
 
 To create a Kafka `Producer` that sends messages you can simply define an interface that is annotated with ann:configuration.kafka.annotation.KafkaClient[].
 
@@ -80,8 +80,7 @@ include::{testskafka}/DocTests.java[tags=quickstart, indent=0]
 
 Note that since the `sendProduct` method returns `void` this means the method will send the `ProducerRecord` and block until the response is received. You can return a `Future` or rs:Publisher[] to support non-blocking message delivery.
 
-
-=== Creating a Kafka Consumer with @KafkaListener
+== Creating a Kafka Consumer with @KafkaListener
 
 To listen to Kafka messages you can use the ann:configuration.kafka.annotation.KafkaListener[] annotation to define a message listener.
 
