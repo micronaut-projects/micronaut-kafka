@@ -110,7 +110,7 @@ subprojects { Project subproject ->
         documentation "org.codehaus.groovy:groovy-dateutil:$groovyVersion"
 
 
-        testCompile("org.spockframework:spock-core:${spockVersion}") {
+        testImplementation("org.spockframework:spock-core:${spockVersion}") {
             exclude module:'groovy-all'
         }
         testRuntimeOnly "ch.qos.logback:logback-classic:1.2.3"
