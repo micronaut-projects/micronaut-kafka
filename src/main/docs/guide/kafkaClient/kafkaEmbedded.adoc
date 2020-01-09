@@ -3,9 +3,9 @@ The previous section introduced the ability to embed Kafka for your tests. This 
 .Kafka Gradle Test Dependencies
 [source,groovy,subs="attributes"]
 ----
-testCompile 'org.apache.kafka:kafka-clients:{kafka-version}:test'
-testCompile 'org.apache.kafka:kafka_2.12:{kafka-version}'
-testCompile 'org.apache.kafka:kafka_2.12:{kafka-version}:test'
+testImplementation 'org.apache.kafka:kafka-clients:{kafka-version}:test'
+testImplementation 'org.apache.kafka:kafka_2.12:{kafka-version}'
+testImplementation 'org.apache.kafka:kafka_2.12:{kafka-version}:test'
 ----
 
 or
