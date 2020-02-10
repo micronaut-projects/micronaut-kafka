@@ -9,7 +9,7 @@ dependencies {
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     compileOnly "com.oracle.substratevm:svm"
     compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.10'
-    compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.9.3'
+    compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.9.4'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-clients:$kafkaVersion"
 
