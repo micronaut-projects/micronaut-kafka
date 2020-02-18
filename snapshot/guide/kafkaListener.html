@@ -196,8 +196,9 @@ function addJsClass() {
 <div class="paragraph">
 <p>The following sections detail examples of supported use cases.</p>
 </div>
-<div class="sect2">
-<h3 id="_specifying_topics">Specifying Topics</h3>
+<div class="sect1">
+<h2 id="_specifying_topics">Specifying Topics</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> annotation can be used at the method or the class level to specify which topics to be listened for.</p>
 </div>
@@ -223,8 +224,10 @@ function addJsClass() {
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_available_annotations">Available Annotations</h3>
+</div>
+<div class="sect1">
+<h2 id="_available_annotations">Available Annotations</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>There are a number of annotations available that allow you to specify how a method argument is bound.</p>
 </div>
@@ -267,8 +270,10 @@ function addJsClass() {
 <p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_topics_partitions_and_offsets">Topics, Partitions and Offsets</h3>
+</div>
+<div class="sect1">
+<h2 id="_topics_partitions_and_offsets">Topics, Partitions and Offsets</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>If you want a reference to the topic, partition or offset it is a simple matter of defining a parameter for each.</p>
 </div>
@@ -353,8 +358,10 @@ public void receive(
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_receiving_a_consumerrecord">Receiving a ConsumerRecord</h3>
+</div>
+<div class="sect1">
+<h2 id="_receiving_a_consumerrecord">Receiving a ConsumerRecord</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>If you prefer you can also receive the entire <code>ConsumerRecord</code> object being listened for. In this case you should specify appropriate generic types for the key and value of the <code>ConsumerRecord</code> so that Micronaut can pick the correct deserializer for each.</p>
 </div>
@@ -389,8 +396,10 @@ public void receive(ConsumerRecord&lt;String, Product&gt; record) { <i class="co
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_receiving_and_returning_reactive_types">Receiving and returning Reactive Types</h3>
+</div>
+<div class="sect1">
+<h2 id="_receiving_and_returning_reactive_types">Receiving and returning Reactive Types</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>In addition to common Java types and POJOs you can also define listener methods that receive a Reactive type such as a <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> or a Reactor <code>Mono</code>. For example:</p>
 </div>
@@ -440,6 +449,7 @@ public Single&lt;Product&gt; receive(
 public Single&lt;Product&gt; receive(
     ...
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -907,8 +917,9 @@ public class BookListener {
 <div class="paragraph">
 <p>Note in the previous case offsets will automatically be committed for the whole batch by default when the method returns without error.</p>
 </div>
-<div class="sect2">
-<h3 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h3>
+<div class="sect1">
+<h2 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:</p>
 </div>
@@ -965,8 +976,10 @@ public void receive(
 <p>This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_reactive_batch_processing">Reactive Batch Processing</h3>
+</div>
+<div class="sect1">
+<h2 id="_reactive_batch_processing">Reactive Batch Processing</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Batch listeners also support defining reactive types (either <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> or Reactor <code>Flux</code>) as the method argument.</p>
 </div>
@@ -989,6 +1002,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 <div class="paragraph">
 <p>This means that you should only use reactive processing if message durability is not a requirement and you may wish to implement message re-delivery upon failure.</p>
+</div>
 </div>
 </div>
 

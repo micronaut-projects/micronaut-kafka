@@ -113,13 +113,9 @@ function addJsClass() {
 </div>
 <div class="paragraph">
 <p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle-groovy">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka'</span></code></pre>
-</div>
-</div>
-        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle-kotlin">compile(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -132,8 +128,9 @@ function addJsClass() {
 </div>
 </p>
 </div>
-<div class="sect2">
-<h3 id="_configuring_kafka">Configuring Kafka</h3>
+<div class="sect1">
+<h2 id="_configuring_kafka">Configuring Kafka</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code>:</p>
 </div>
@@ -192,8 +189,10 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To create a Kafka <code>Producer</code> that sends messages you can simply define an interface that is annotated with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a>.</p>
 </div>
@@ -261,8 +260,10 @@ client.sendProduct("Nike", "Blue Trainers");</code></pre>
 <p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can return a <code>Future</code> or <a href="https://docs.oracle.com/javase/8/docs/api/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_a_kafka_consumer_with_kafkalistener">Creating a Kafka Consumer with @KafkaListener</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_kafka_consumer_with_kafkalistener">Creating a Kafka Consumer with @KafkaListener</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To listen to Kafka messages you can use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation to define a message listener.</p>
 </div>
@@ -299,6 +300,7 @@ public class ProductListener {
 <td>The <code>receive</code> method defines 2 arguments: The argument that will receive the key and the argument that will receive the value.</td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 

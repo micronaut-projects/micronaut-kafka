@@ -161,10 +161,11 @@
 <div class="paragraph">
 <p>With Micronaut&#8217;s efficient compile-time AOP and cloud native features, writing efficient Kafka consumer applications that use very little resources is a breeze.</p>
 </div>
+<div class="sect1">
+<h2 id="_release_history">Release History</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_release_history">Release History</h3>
-<div class="sect3">
-<h4 id="_1_4_0">1.4.0</h4>
+<h3 id="_1_4_0">1.4.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -173,8 +174,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_3_0">1.3.0</h4>
+<div class="sect2">
+<h3 id="_1_3_0">1.3.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -186,8 +187,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_2_0">1.2.0</h4>
+<div class="sect2">
+<h3 id="_1_2_0">1.2.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -199,8 +200,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_1_0">1.1.0</h4>
+<div class="sect2">
+<h3 id="_1_1_0">1.1.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -209,8 +210,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_0_4">1.0.4</h4>
+<div class="sect2">
+<h3 id="_1_0_4">1.0.4</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -219,8 +220,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_1_0_2">1.1.0</h4>
+<div class="sect2">
+<h3 id="_1_1_0_2">1.1.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -235,8 +236,8 @@
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_1_2_0_2">1.2.0</h4>
+<div class="sect2">
+<h3 id="_1_2_0_2">1.2.0</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -252,6 +253,7 @@
 <p>Better Exception Handling</p>
 </li>
 </ul>
+</div>
 </div>
 </div>
 </div>
@@ -276,8 +278,9 @@
 <div class="paragraph">
 <p>This will create a project with the minimum necessary configuration for Kafka.</p>
 </div>
-<div class="sect2">
-<h3 id="_kafka_profile">Kafka Profile</h3>
+<div class="sect1">
+<h2 id="_kafka_profile">Kafka Profile</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The Micronaut CLI includes a specialized profile for Kafka-based messaging applications. This profile will create a Micronaut app with Kafka support, and <em>without</em> an HTTP server (although you can add one if you desire). The profile also provides a couple commands for generating Kafka listeners and producers.</p>
 </div>
@@ -305,6 +308,7 @@ $ mn create-kafka-listener Message
 </div>
 </div>
 </div>
+</div>
 
 <h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>3 Kafka Quick Start</h1>
 
@@ -320,13 +324,9 @@ $ mn create-kafka-listener Message
 </div>
 <div class="paragraph">
 <p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle-groovy">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka'</span></code></pre>
-</div>
-</div>
-        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle-kotlin">compile(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -339,8 +339,9 @@ $ mn create-kafka-listener Message
 </div>
 </p>
 </div>
-<div class="sect2">
-<h3 id="_configuring_kafka">Configuring Kafka</h3>
+<div class="sect1">
+<h2 id="_configuring_kafka">Configuring Kafka</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code>:</p>
 </div>
@@ -399,8 +400,10 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_kafka_producer_with_kafkaclient">Creating a Kafka Producer with @KafkaClient</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To create a Kafka <code>Producer</code> that sends messages you can simply define an interface that is annotated with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a>.</p>
 </div>
@@ -468,8 +471,10 @@ client.sendProduct("Nike", "Blue Trainers");</code></pre>
 <p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can return a <code>Future</code> or <a href="https://docs.oracle.com/javase/8/docs/api/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_a_kafka_consumer_with_kafkalistener">Creating a Kafka Consumer with @KafkaListener</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_kafka_consumer_with_kafkalistener">Creating a Kafka Consumer with @KafkaListener</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To listen to Kafka messages you can use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation to define a message listener.</p>
 </div>
@@ -506,6 +511,7 @@ public class ProductListener {
 <td>The <code>receive</code> method defines 2 arguments: The argument that will receive the key and the argument that will receive the value.</td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 
@@ -967,9 +973,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testCompile 'org.apache.kafka:kafka-clients:2.4.0:test'
-testCompile 'org.apache.kafka:kafka_2.12:2.4.0'
-testCompile 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.4.0:test'
+testImplementation 'org.apache.kafka:kafka_2.12:2.4.0'
+testImplementation 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1075,8 +1081,9 @@ testCompile 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 <div class="paragraph">
 <p>The following sections detail examples of supported use cases.</p>
 </div>
-<div class="sect2">
-<h3 id="_specifying_topics">Specifying Topics</h3>
+<div class="sect1">
+<h2 id="_specifying_topics">Specifying Topics</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> annotation can be used at the method or the class level to specify which topics to be listened for.</p>
 </div>
@@ -1102,8 +1109,10 @@ testCompile 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_available_annotations">Available Annotations</h3>
+</div>
+<div class="sect1">
+<h2 id="_available_annotations">Available Annotations</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>There are a number of annotations available that allow you to specify how a method argument is bound.</p>
 </div>
@@ -1146,8 +1155,10 @@ testCompile 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 <p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_topics_partitions_and_offsets">Topics, Partitions and Offsets</h3>
+</div>
+<div class="sect1">
+<h2 id="_topics_partitions_and_offsets">Topics, Partitions and Offsets</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>If you want a reference to the topic, partition or offset it is a simple matter of defining a parameter for each.</p>
 </div>
@@ -1232,8 +1243,10 @@ public void receive(
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_receiving_a_consumerrecord">Receiving a ConsumerRecord</h3>
+</div>
+<div class="sect1">
+<h2 id="_receiving_a_consumerrecord">Receiving a ConsumerRecord</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>If you prefer you can also receive the entire <code>ConsumerRecord</code> object being listened for. In this case you should specify appropriate generic types for the key and value of the <code>ConsumerRecord</code> so that Micronaut can pick the correct deserializer for each.</p>
 </div>
@@ -1268,8 +1281,10 @@ public void receive(ConsumerRecord&lt;String, Product&gt; record) { <i class="co
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_receiving_and_returning_reactive_types">Receiving and returning Reactive Types</h3>
+</div>
+<div class="sect1">
+<h2 id="_receiving_and_returning_reactive_types">Receiving and returning Reactive Types</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>In addition to common Java types and POJOs you can also define listener methods that receive a Reactive type such as a <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> or a Reactor <code>Mono</code>. For example:</p>
 </div>
@@ -1319,6 +1334,7 @@ public Single&lt;Product&gt; receive(
 public Single&lt;Product&gt; receive(
     ...
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1786,8 +1802,9 @@ public class BookListener {
 <div class="paragraph">
 <p>Note in the previous case offsets will automatically be committed for the whole batch by default when the method returns without error.</p>
 </div>
-<div class="sect2">
-<h3 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h3>
+<div class="sect1">
+<h2 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:</p>
 </div>
@@ -1844,8 +1861,10 @@ public void receive(
 <p>This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_reactive_batch_processing">Reactive Batch Processing</h3>
+</div>
+<div class="sect1">
+<h2 id="_reactive_batch_processing">Reactive Batch Processing</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Batch listeners also support defining reactive types (either <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> or Reactor <code>Flux</code>) as the method argument.</p>
 </div>
@@ -1868,6 +1887,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 <div class="paragraph">
 <p>This means that you should only use reactive processing if message durability is not a requirement and you may wish to implement message re-delivery upon failure.</p>
+</div>
 </div>
 </div>
 
@@ -2091,13 +2111,9 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 <div class="paragraph">
 <p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle-groovy">runtime <span class="hljs-string">'io.opentracing.contrib:opentracing-kafka-client:0.0.16'</span></code></pre>
-</div>
-</div>
-        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle-kotlin">runtime(<span class="hljs-string">"io.opentracing.contrib:opentracing-kafka-client:0.0.16")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">runtime(<span class="hljs-string">"io.opentracing.contrib:opentracing-kafka-client:0.0.16")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -2151,20 +2167,17 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="paragraph">
 <p>Since Micronaut&#8217;s DI and AOP is compile time, you can build low overhead stream applications with ease.</p>
 </div>
-<div class="sect2">
-<h3 id="_defining_kafka_streams">Defining Kafka Streams</h3>
+<div class="sect1">
+<h2 id="_defining_kafka_streams">Defining Kafka Streams</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To define Kafka Streams you should first add the <code>kafka-streams</code> configuration to your build.</p>
 </div>
 <div class="paragraph">
 <p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle-groovy">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka-streams'</span></code></pre>
-</div>
-</div>
-        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle-kotlin">compile(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka-streams")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka-streams")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -2341,8 +2354,10 @@ public class WordCountListener {
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_configuring_kafka_streams">Configuring Kafka Streams</h3>
+</div>
+<div class="sect1">
+<h2 id="_configuring_kafka_streams">Configuring Kafka Streams</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>. For example in <code>application.yml</code>:</p>
 </div>
@@ -2379,8 +2394,10 @@ KStream&lt;String, String&gt; myStream(
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_interactive_query_service">Interactive Query Service</h3>
+</div>
+<div class="sect1">
+<h2 id="_interactive_query_service">Interactive Query Service</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores">available here</a>.</p>
 </div>
@@ -2475,6 +2492,7 @@ public class InteractiveQueryServiceExample {
         return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(name)).orElse(null);
     }
 }</code></pre>
+</div>
 </div>
 </div>
 </div>

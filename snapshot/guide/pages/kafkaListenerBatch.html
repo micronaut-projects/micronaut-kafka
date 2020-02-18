@@ -161,8 +161,9 @@ public class BookListener {
 <div class="paragraph">
 <p>Note in the previous case offsets will automatically be committed for the whole batch by default when the method returns without error.</p>
 </div>
-<div class="sect2">
-<h3 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h3>
+<div class="sect1">
+<h2 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:</p>
 </div>
@@ -219,8 +220,10 @@ public void receive(
 <p>This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_reactive_batch_processing">Reactive Batch Processing</h3>
+</div>
+<div class="sect1">
+<h2 id="_reactive_batch_processing">Reactive Batch Processing</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Batch listeners also support defining reactive types (either <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> or Reactor <code>Flux</code>) as the method argument.</p>
 </div>
@@ -243,6 +246,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 <div class="paragraph">
 <p>This means that you should only use reactive processing if message durability is not a requirement and you may wish to implement message re-delivery upon failure.</p>
+</div>
 </div>
 </div>
 

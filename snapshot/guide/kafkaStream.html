@@ -137,20 +137,17 @@ function addJsClass() {
 <div class="paragraph">
 <p>Since Micronaut&#8217;s DI and AOP is compile time, you can build low overhead stream applications with ease.</p>
 </div>
-<div class="sect2">
-<h3 id="_defining_kafka_streams">Defining Kafka Streams</h3>
+<div class="sect1">
+<h2 id="_defining_kafka_streams">Defining Kafka Streams</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>To define Kafka Streams you should first add the <code>kafka-streams</code> configuration to your build.</p>
 </div>
 <div class="paragraph">
 <p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="gradle-groovy">compile <span class="hljs-string">'io.micronaut.configuration:micronaut-kafka-streams'</span></code></pre>
-</div>
-</div>
-        <div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle-kotlin">compile(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka-streams")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka-streams")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -327,8 +324,10 @@ public class WordCountListener {
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_configuring_kafka_streams">Configuring Kafka Streams</h3>
+</div>
+<div class="sect1">
+<h2 id="_configuring_kafka_streams">Configuring Kafka Streams</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>. For example in <code>application.yml</code>:</p>
 </div>
@@ -365,8 +364,10 @@ KStream&lt;String, String&gt; myStream(
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_interactive_query_service">Interactive Query Service</h3>
+</div>
+<div class="sect1">
+<h2 id="_interactive_query_service">Interactive Query Service</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores">available here</a>.</p>
 </div>
@@ -461,6 +462,7 @@ public class InteractiveQueryServiceExample {
         return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(name)).orElse(null);
     }
 }</code></pre>
+</div>
 </div>
 </div>
 </div>
