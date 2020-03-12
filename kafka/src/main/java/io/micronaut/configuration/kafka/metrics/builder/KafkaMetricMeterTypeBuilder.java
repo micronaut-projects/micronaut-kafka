@@ -35,7 +35,7 @@ import java.util.function.Function;
  * type in {@link KafkaMetricMeterTypeRegistry}.  Supported meter types can
  * be seen in {@link MeterType}.
  *
- * @author christian oestreich
+ * @author Christian Oestreich
  * @since 1.4.1
  */
 @Internal

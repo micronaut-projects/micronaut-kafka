@@ -20,7 +20,7 @@ import io.micronaut.core.annotation.Internal;
 /**
  * Types of meters to be created for metrics.
  *
- * @author christian oestreich
+ * @author Christian Oestreich
  * @since 1.4.1
  */
 @Internal

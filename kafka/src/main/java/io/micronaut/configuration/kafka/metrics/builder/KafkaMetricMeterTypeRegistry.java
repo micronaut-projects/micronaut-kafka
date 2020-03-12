@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A static lookup for registering kafka metrics to meter types through the use of {@link MeterType} and {@link KafkaMetricMeterType}.
  *
- * @author christian oestreich
+ * @author Christian Oestreich
  * @since 1.4.1
  */
 @Internal

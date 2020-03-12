@@ -16,7 +16,7 @@
 /**
  * Contains classes specific to capturing Kafka metric builders.
  *
- * @author christian oestreich
+ * @author Christian Oestreich
  * @since 1.5
  */
 package io.micronaut.configuration.kafka.metrics.builder;
