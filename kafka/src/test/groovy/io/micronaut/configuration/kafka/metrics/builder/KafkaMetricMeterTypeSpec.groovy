@@ -32,6 +32,39 @@ class KafkaMetricMeterTypeSpec extends Specification {
         kafkaMetricMeterType.description == null
     }
 
+    def "should be able to construct with some args"() {
+        when:
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test")
+
+        then:
+        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.baseUnit == null
+        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
+        kafkaMetricMeterType.description == "test"
+    }
+
+    def "should be able to construct with more args"() {
+        when:
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test", "test2")
+
+        then:
+        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.baseUnit == "test2"
+        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
+        kafkaMetricMeterType.description == "test"
+    }
+
+    def "should be able to construct with even more args"() {
+        when:
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test", TimeUnit.SECONDS)
+
+        then:
+        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.baseUnit == null
+        kafkaMetricMeterType.timeUnit == TimeUnit.SECONDS
+        kafkaMetricMeterType.description == "test"
+    }
+
     def "should be able to construct with args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.TIME_GAUGE, "a", TimeUnit.DAYS, "c")

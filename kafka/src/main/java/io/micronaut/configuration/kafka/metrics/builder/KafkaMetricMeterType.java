@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.metrics.builder;
 
+import io.micrometer.core.lang.NonNull;
 import io.micronaut.core.annotation.Internal;
 
 import java.util.concurrent.TimeUnit;
@@ -47,11 +48,48 @@ class KafkaMetricMeterType {
      * @param timeUnit    Time Unit of metric
      * @param baseUnit    Base Unit of metric
      */
-    KafkaMetricMeterType(final MeterType meterType, final String description, final TimeUnit timeUnit, final String baseUnit) {
+    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, @NonNull final TimeUnit timeUnit, final String baseUnit) {
         this.meterType = meterType;
         this.description = description;
         this.timeUnit = timeUnit;
         this.baseUnit = baseUnit;
+    }
+
+    /**
+     * Class for hosing a metric type, description, time unit and base unit.
+     *
+     * @param meterType   Meter Type
+     * @param description Metric Description
+     * @param baseUnit    Base Unit of metric
+     */
+    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, final String baseUnit) {
+        this.meterType = meterType;
+        this.description = description;
+        this.baseUnit = baseUnit;
+    }
+
+    /**
+     * Class for hosing a metric type, description, time unit and base unit.
+     *
+     * @param meterType   Meter Type
+     * @param description Metric Description
+     * @param timeUnit    Time Unit of metric
+     */
+    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, @NonNull final TimeUnit timeUnit) {
+        this.meterType = meterType;
+        this.description = description;
+        this.timeUnit = timeUnit;
+    }
+
+    /**
+     * Class for hosing a metric type, description, time unit and base unit.
+     *
+     * @param meterType   Meter Type
+     * @param description Metric Description
+     */
+    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description) {
+        this.meterType = meterType;
+        this.description = description;
     }
 
     /**
