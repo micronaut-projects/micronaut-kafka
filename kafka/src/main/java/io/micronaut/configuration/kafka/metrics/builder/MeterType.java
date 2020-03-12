@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka.metrics.builder;
 import io.micronaut.core.annotation.Internal;
 
 /**
- * Types of meters to be created for metrics
+ * Types of meters to be created for metrics.
  *
  * @author christian oestreich
  * @since 1.4.1

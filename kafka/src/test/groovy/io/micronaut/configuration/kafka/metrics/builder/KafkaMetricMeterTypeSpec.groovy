@@ -28,7 +28,7 @@ class KafkaMetricMeterTypeSpec extends Specification {
         then:
         kafkaMetricMeterType.meterType == MeterType.GAUGE
         kafkaMetricMeterType.baseUnit == null
-        kafkaMetricMeterType.timeUnit == null
+        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
         kafkaMetricMeterType.description == null
     }
 

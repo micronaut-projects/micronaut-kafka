@@ -96,7 +96,7 @@ public class KafkaMetricMeterTypeBuilder {
 
     /**
      * Builder method for setting function to get tags.  This is {@link Function}
-     * due to the use of abstract method for getting tags details in {@link io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter}
+     * due to the use of abstract method for getting tags details in AbstractKafkaMetricsReporter.
      *
      * @param tagFunction Function to provide tags
      * @return builder class
@@ -119,6 +119,8 @@ public class KafkaMetricMeterTypeBuilder {
 
     /**
      * Build and register a typed meter.
+     *
+     * @return Optional type of {@link Meter}
      */
     public Optional<Meter> build() {
         if (!isValid()) {
@@ -133,14 +135,12 @@ public class KafkaMetricMeterTypeBuilder {
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Double) {
             return Optional.of(Gauge.builder(getMetricName(), () -> (Double) kafkaMetric.metricValue())
-                    .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
         } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Double) {
             return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, value -> (Double) value.metricValue())
-                    .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())

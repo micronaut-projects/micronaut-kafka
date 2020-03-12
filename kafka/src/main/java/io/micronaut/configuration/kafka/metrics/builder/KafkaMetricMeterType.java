@@ -30,12 +30,23 @@ import java.util.concurrent.TimeUnit;
 class KafkaMetricMeterType {
     private MeterType meterType = MeterType.GAUGE;
     private String description = null;
-    private TimeUnit timeUnit = null;
+    private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
     private String baseUnit = null;
 
+    /**
+     * Class for hosing a metric type, description, time unit and base unit.
+     */
     KafkaMetricMeterType() {
     }
 
+    /**
+     * Class for hosing a metric type, description, time unit and base unit.
+     *
+     * @param meterType   Meter Type
+     * @param description Metric Description
+     * @param timeUnit    Time Unit of metric
+     * @param baseUnit    Base Unit of metric
+     */
     KafkaMetricMeterType(final MeterType meterType, final String description, final TimeUnit timeUnit, final String baseUnit) {
         this.meterType = meterType;
         this.description = description;
@@ -43,18 +54,38 @@ class KafkaMetricMeterType {
         this.baseUnit = baseUnit;
     }
 
+    /**
+     * Get meter type.
+     *
+     * @return meter type
+     */
     MeterType getMeterType() {
         return meterType;
     }
 
+    /**
+     * Get metric description.
+     *
+     * @return meter description
+     */
     String getDescription() {
         return description;
     }
 
+    /**
+     * Get metric time unit.
+     *
+     * @return meter time unit
+     */
     TimeUnit getTimeUnit() {
         return timeUnit;
     }
 
+    /**
+     * Get metric base unit.
+     *
+     * @return meter base unit
+     */
     String getBaseUnit() {
         return baseUnit;
     }

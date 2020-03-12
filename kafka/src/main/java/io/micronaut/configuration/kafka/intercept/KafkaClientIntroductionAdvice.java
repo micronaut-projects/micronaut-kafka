@@ -156,7 +156,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
-                            .stringValue(io.micronaut.messaging.annotation.Header.class,"name")
+                            .stringValue(io.micronaut.messaging.annotation.Header.class, "name")
                             .orElseGet(() ->
                                     annotationMetadata.stringValue(io.micronaut.messaging.annotation.Header.class).orElse(argumentName));
                     Object v = parameterValues.get(argumentName);

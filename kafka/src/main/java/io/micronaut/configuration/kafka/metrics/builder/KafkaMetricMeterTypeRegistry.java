@@ -42,6 +42,9 @@ class KafkaMetricMeterTypeRegistry {
 
     private final Map<String, KafkaMetricMeterType> meterTypeMap;
 
+    /**
+     * Constructor that will populate the metric name to type map.
+     */
     public KafkaMetricMeterTypeRegistry() {
         meterTypeMap = new HashMap<>();
         meterTypeMap.put("records-lag", new KafkaMetricMeterType(MeterType.GAUGE, "The latest lag of the partition", null, RECORDS));
@@ -106,6 +109,12 @@ class KafkaMetricMeterTypeRegistry {
         meterTypeMap.put("io-time-total", new KafkaMetricMeterType(MeterType.TIME_GAUGE, "Time spent in I/O during select calls.", TimeUnit.NANOSECONDS, null));
     }
 
+    /**
+     * Lookup the {@link KafkaMetricMeterType} for a given metric name.  Will default to GAUGE type.
+     *
+     * @param name The metric name
+     * @return {@link KafkaMetricMeterType} for the metric name
+     */
     protected KafkaMetricMeterType lookup(final String name) {
         return meterTypeMap.getOrDefault(name, DEFAULT_KAFKA_METRIC_METER_TYPE);
     }
