@@ -21,7 +21,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Class for helping to build "typed" metrics.  Will default to GAUGE for all metrics where
- * not registered in {@link KafkaMetricMeterTypeRegistry}
+ * not registered in {@link KafkaMetricMeterTypeRegistry}.
+ *
+ * @author christian oestreich
+ * @since 1.4.1
  */
 @Internal
 class KafkaMetricMeterType {

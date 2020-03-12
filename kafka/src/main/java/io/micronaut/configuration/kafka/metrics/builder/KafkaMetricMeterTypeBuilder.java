@@ -36,7 +36,7 @@ import java.util.function.Function;
  * be seen in {@link MeterType}.
  *
  * @author christian oestreich
- * @since 1.5
+ * @since 1.4.1
  */
 @Internal
 public class KafkaMetricMeterTypeBuilder {
