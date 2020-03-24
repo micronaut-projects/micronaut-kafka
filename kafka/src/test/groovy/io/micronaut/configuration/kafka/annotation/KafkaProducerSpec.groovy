@@ -21,8 +21,13 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
 import io.micronaut.core.util.CollectionUtils
+import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
+import org.apache.kafka.common.header.Header
+import org.apache.kafka.common.header.Headers
+import org.apache.kafka.common.header.internals.RecordHeader
+import org.apache.kafka.common.header.internals.RecordHeaders
 import org.testcontainers.containers.KafkaContainer
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.Producer
@@ -123,6 +128,52 @@ class KafkaProducerSpec extends Specification {
             context.getBean(KafkaProducerInstrumentation).counter.get() > 0
     }
 
+    def "test collection of headers"() {
+        given:
+        BicycleClient client = context.getBean(BicycleClient)
+        BicycleListener listener = context.getBean(BicycleListener)
+        listener.brands.clear()
+        listener.others.clear()
+        listener.additionalInfo.clear()
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
+        when:
+        client.send("Raleigh", "Professional", [new RecordHeader("size", "60cm".bytes)])
+
+        then:
+        conditions.eventually {
+            mockTracer.finishedSpans().size() > 0
+            listener.brands.size() == 1
+            listener.brands["Raleigh"] == "Professional"
+            listener.others.isEmpty()
+            listener.additionalInfo.size() == 1
+            listener.additionalInfo["size"] == "60cm"
+        }
+    }
+
+    def "test kafka record headers"() {
+        given:
+        BicycleClient client = context.getBean(BicycleClient)
+        BicycleListener listener = context.getBean(BicycleListener)
+        listener.brands.clear()
+        listener.others.clear()
+        listener.additionalInfo.clear()
+        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
+        when:
+        client.send2("Raleigh", "International", new RecordHeaders([new RecordHeader("year", "1971".bytes)]))
+
+        then:
+        conditions.eventually {
+            mockTracer.finishedSpans().size() > 0
+            listener.brands.isEmpty()
+            listener.others.size() == 1
+            listener.others["Raleigh"] == "International"
+            listener.additionalInfo.size() == 1
+            listener.additionalInfo["year"] == "1971"
+        }
+    }
+
     @KafkaClient(acks = KafkaClient.Acknowledge.ALL, id = "named")
     static interface NamedClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
@@ -146,7 +197,14 @@ class KafkaProducerSpec extends Specification {
         void send3(@Topic String topic, @KafkaKey String key, String name)
     }
 
+    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    static interface BicycleClient {
+        @Topic("ProducerSpec-my-bicycles")
+        void send(@KafkaKey String brand, String name, Collection<Header> headers)
 
+        @Topic("ProducerSpec-my-bicycles-2")
+        void send2(@KafkaKey String key, String name, Headers headers)
+    }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     static class UserListener {
@@ -178,6 +236,29 @@ class KafkaProducerSpec extends Specification {
         void receive2(@KafkaKey String key, String name) {
             log.info("Got Lineup info - {} by {}", key, name)
             others[key] = name
+        }
+    }
+
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @Slf4j
+    static class BicycleListener {
+
+        Map<String, String> brands = [:]
+        Map<String, String> others = [:]
+        Map<String, String> additionalInfo = [:]
+
+        @Topic("ProducerSpec-my-bicycles")
+        void receive(@KafkaKey String brand, String name, MessageHeaders messageHeaders) {
+            log.info("Got Bicycle - {} by {}", brand, name)
+            brands[brand] = name
+            messageHeaders.each { header -> additionalInfo.put(header.key, new String(header.value[0])) }
+        }
+
+        @Topic("ProducerSpec-my-bicycles-2")
+        void receive2(@KafkaKey String key, String name, MessageHeaders messageHeaders) {
+            log.info("Got Bicycle info - {} by {}", key, name)
+            others[key] = name
+            messageHeaders.each { header -> additionalInfo.put(header.key, new String(header.value[0])) }
         }
     }
 

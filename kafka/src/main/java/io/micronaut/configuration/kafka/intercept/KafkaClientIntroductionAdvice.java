@@ -33,6 +33,7 @@ import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -46,7 +47,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.reactivestreams.Subscriber;
@@ -132,6 +135,25 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
             List<Header> kafkaHeaders = new ArrayList<>();
+
+            final Optional<Argument> headersCollectionArgument = findHeadersCollectionArgument(context);
+            if (headersCollectionArgument.isPresent()) {
+                final String parameterName = headersCollectionArgument.get().getName();
+                final Collection<Header> parameterValue = (Collection<Header>) context.getParameterValueMap().get(parameterName);
+                if (CollectionUtils.isNotEmpty(parameterValue)) {
+                    kafkaHeaders.addAll(parameterValue);
+                }
+            }
+
+            final Optional<Argument> headersArgument = findHeadersArgument(context);
+            if (headersArgument.isPresent()) {
+                final String parameterName = headersArgument.get().getName();
+                final Headers parameterValue = (Headers) context.getParameterValueMap().get(parameterName);
+                if (parameterValue != null) {
+                    parameterValue.forEach(kafkaHeaders::add);
+                }
+            }
+
             List<AnnotationValue<io.micronaut.messaging.annotation.Header>> headers = context.getAnnotationValuesByType(io.micronaut.messaging.annotation.Header.class);
 
             for (AnnotationValue<io.micronaut.messaging.annotation.Header> header : headers) {
@@ -631,6 +653,20 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 .findFirst()
                                 .orElse(null)
                 );
+    }
+
+    private Optional<Argument> findHeadersCollectionArgument(ExecutableMethod<?, ?> method) {
+        return Arrays.stream(method.getArguments())
+                .filter(arg -> arg.getType().isAssignableFrom(Collection.class))
+                .filter(arg -> arg.getFirstTypeVariable().isPresent())
+                .filter(arg -> arg.getFirstTypeVariable().get().getType() == Header.class || arg.getFirstTypeVariable().get().getType() == RecordHeader.class)
+                .findFirst();
+    }
+
+    private Optional<Argument> findHeadersArgument(ExecutableMethod<?, ?> method) {
+        return Arrays.stream(method.getArguments())
+                .filter(arg -> arg.getFirstTypeVariable().get().getType() == Headers.class || arg.getFirstTypeVariable().get().getType() == RecordHeaders.class)
+                .findFirst();
     }
 
     private Optional<String> findTopicArgument(MethodInvocationContext<Object, Object> method) {
