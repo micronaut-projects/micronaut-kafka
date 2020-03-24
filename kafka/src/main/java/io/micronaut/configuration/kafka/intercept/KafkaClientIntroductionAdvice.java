@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -178,7 +179,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
-                            .stringValue(io.micronaut.messaging.annotation.Header.class,"name")
+                            .stringValue(io.micronaut.messaging.annotation.Header.class, "name")
                             .orElseGet(() ->
                                     annotationMetadata.stringValue(io.micronaut.messaging.annotation.Header.class).orElse(argumentName));
                     Object v = parameterValues.get(argumentName);
@@ -665,7 +666,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
     private Optional<Argument> findHeadersArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getFirstTypeVariable().get().getType() == Headers.class || arg.getFirstTypeVariable().get().getType() == RecordHeaders.class)
+                .filter(arg -> arg.getType() == Headers.class || arg.getType() == RecordHeaders.class)
                 .findFirst();
     }
 

@@ -146,7 +146,7 @@ class KafkaProducerSpec extends Specification {
             listener.brands.size() == 1
             listener.brands["Raleigh"] == "Professional"
             listener.others.isEmpty()
-            listener.additionalInfo.size() == 1
+            !listener.additionalInfo.isEmpty()
             listener.additionalInfo["size"] == "60cm"
         }
     }
@@ -169,7 +169,7 @@ class KafkaProducerSpec extends Specification {
             listener.brands.isEmpty()
             listener.others.size() == 1
             listener.others["Raleigh"] == "International"
-            listener.additionalInfo.size() == 1
+            !listener.additionalInfo.isEmpty()
             listener.additionalInfo["year"] == "1971"
         }
     }
