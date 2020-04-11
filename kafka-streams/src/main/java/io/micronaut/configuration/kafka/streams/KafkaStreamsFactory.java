@@ -57,6 +57,7 @@ public class KafkaStreamsFactory implements Closeable {
      *
      * @param builder  The builder
      * @param kStreams The KStream definitions
+     * @param listeners A list of  {@link BeforeStartKafkaStreamsListener} to execute before {@link KafkaStreams#start()}
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
