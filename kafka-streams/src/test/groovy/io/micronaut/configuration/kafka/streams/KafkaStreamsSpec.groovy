@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.streams
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
+import io.micronaut.configuration.kafka.streams.listeners.BeforeStartKafkaStreamsListenerImp
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationClient
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationInteractiveQueryService
 
@@ -140,5 +141,12 @@ class KafkaStreamsSpec extends Specification {
             interactiveQueryService.getValue(OptimizationStream.OPTIMIZATION_ON_STORE, "key") == "on"
         }
 
+    }
+
+    void "test BeforeStartKafkaStreamsListener execution"() {
+        when:
+        def builder = context.getBean(BeforeStartKafkaStreamsListenerImp)
+        then:
+        builder.executed
     }
 }

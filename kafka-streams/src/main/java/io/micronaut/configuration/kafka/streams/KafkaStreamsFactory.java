@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 
@@ -63,11 +64,16 @@ public class KafkaStreamsFactory implements Closeable {
     KafkaStreams kafkaStreams(
             ConfiguredStreamBuilder builder,
             // required for initialization. DO NOT DELETE
-            KStream... kStreams) {
+            List<BeforeStartKafkaStreamsListener> listeners,
+            KStream... kStreams
+    ) {
         KafkaStreams kafkaStreams = new KafkaStreams(
                 builder.build(builder.getConfiguration()),
                 builder.getConfiguration()
         );
+        for (BeforeStartKafkaStreamsListener listener : listeners) {
+            listener.execute(kafkaStreams, kStreams);
+        }
         streams.add(kafkaStreams);
         kafkaStreams.start();
         return kafkaStreams;
