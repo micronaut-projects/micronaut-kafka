@@ -8,16 +8,16 @@ dependencies {
     annotationProcessor "io.micronaut:micronaut-graal"
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     compileOnly "com.oracle.substratevm:svm"
-    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.11'
+    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.11.2'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-clients:$kafkaVersion"
+    api "org.apache.kafka:kafka-clients:2.4.1"
 
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.configuration:micronaut-micrometer-core"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    compileOnly "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
+    compileOnly "org.apache.kafka:kafka_2.12:2.4.1"
+    compileOnly "org.apache.kafka:kafka-clients:2.4.1:test"
+    compileOnly "org.apache.kafka:kafka_2.12:2.4.1:test"
 
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
@@ -33,8 +33,8 @@ dependencies {
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
-    testImplementation "org.testcontainers:kafka:1.13.0"
-    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.10'
+    testImplementation "org.testcontainers:kafka:1.14.0"
+    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     testImplementation 'io.opentracing:opentracing-mock:0.33.0'
 
     testRuntimeOnly 'io.micronaut:micronaut-tracing'

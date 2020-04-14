@@ -19,6 +19,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.lang.NonNull;
+import io.micronaut.configuration.kafka.metrics.builder.KafkaMetricMeterTypeBuilder;
 import io.micronaut.core.annotation.Internal;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
@@ -26,8 +27,13 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -85,23 +91,27 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
     }
 
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
-        MetricName metricName = metric.metricName();
-        Object v = metric.metricValue();
-        if (v instanceof Double) {
-            List<Tag> tags = metricName
-                    .tags()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> getIncludedTags().contains(entry.getKey()))
-                    .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-            String name = getMetricPrefix() + '.' + metricName.name();
-            meterRegistry.gauge(name, tags, metric, value -> (Double) value.metricValue());
-        }
+        KafkaMetricMeterTypeBuilder.newBuilder()
+                .prefix(getMetricPrefix())
+                .metric(metric)
+                .tagFunction(getTagFunction())
+                .registry(meterRegistry)
+                .build();
+    }
+
+    private Function<MetricName, List<Tag>> getTagFunction() {
+        return metricName -> metricName
+                .tags()
+                .entrySet()
+                .stream()
+                .filter(entry -> getIncludedTags().contains(entry.getKey()))
+                .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**
      * The tags to include in the gauge. Defaults to just the client-id.
+     *
      * @return The tags to include
      */
     protected Set<String> getIncludedTags() {
