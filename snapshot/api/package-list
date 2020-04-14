@@ -11,6 +11,7 @@ io.micronaut.configuration.kafka.executor
 io.micronaut.configuration.kafka.health
 io.micronaut.configuration.kafka.intercept
 io.micronaut.configuration.kafka.metrics
+io.micronaut.configuration.kafka.metrics.builder
 io.micronaut.configuration.kafka.processor
 io.micronaut.configuration.kafka.scope
 io.micronaut.configuration.kafka.serde
