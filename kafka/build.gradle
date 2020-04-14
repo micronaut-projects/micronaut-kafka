@@ -8,7 +8,7 @@ dependencies {
     annotationProcessor "io.micronaut:micronaut-graal"
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     compileOnly "com.oracle.substratevm:svm"
-    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.11'
+    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.11.2'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-clients:2.4.1"
@@ -34,7 +34,7 @@ dependencies {
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
     testImplementation "org.testcontainers:kafka:1.14.0"
-    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.10'
+    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     testImplementation 'io.opentracing:opentracing-mock:0.33.0'
 
     testRuntimeOnly 'io.micronaut:micronaut-tracing'
