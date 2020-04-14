@@ -15,9 +15,12 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
+import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
+import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 
@@ -40,6 +43,15 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class KafkaStreamsFactory implements Closeable {
 
     private final Collection<KafkaStreams> streams = new ConcurrentLinkedDeque<>();
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * Default constructor.
+     * @param eventPublisher The event publisher
+     */
+    public KafkaStreamsFactory(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     /**
      * Exposes the {@link ConfiguredStreamBuilder} as a bean.
@@ -57,26 +69,22 @@ public class KafkaStreamsFactory implements Closeable {
      *
      * @param builder  The builder
      * @param kStreams The KStream definitions
-     * @param listeners A list of  {@link BeforeStartKafkaStreamsListener} to execute before {@link KafkaStreams#start()}
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
     @Context
     KafkaStreams kafkaStreams(
             ConfiguredStreamBuilder builder,
-            // required for initialization. DO NOT DELETE
-            List<BeforeStartKafkaStreamsListener> listeners,
             KStream... kStreams
     ) {
         KafkaStreams kafkaStreams = new KafkaStreams(
                 builder.build(builder.getConfiguration()),
                 builder.getConfiguration()
         );
-        for (BeforeStartKafkaStreamsListener listener : listeners) {
-            listener.execute(kafkaStreams, kStreams);
-        }
+        eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
         streams.add(kafkaStreams);
         kafkaStreams.start();
+        eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
         return kafkaStreams;
     }
 

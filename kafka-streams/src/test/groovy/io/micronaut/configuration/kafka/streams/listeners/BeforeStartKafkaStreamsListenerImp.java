@@ -1,17 +1,16 @@
 package io.micronaut.configuration.kafka.streams.listeners;
 
-import io.micronaut.configuration.kafka.streams.BeforeStartKafkaStreamsListener;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.kstream.KStream;
+import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
+import io.micronaut.runtime.event.annotation.EventListener;
 
 import javax.inject.Singleton;
 
 @Singleton
-public class BeforeStartKafkaStreamsListenerImp implements BeforeStartKafkaStreamsListener {
+public class BeforeStartKafkaStreamsListenerImp  {
     private boolean executed = false;
 
-    @Override
-    public void execute(KafkaStreams kafkaStreams, KStream[] kStreams) {
+    @EventListener
+    public void execute(BeforeKafkaStreamStart event) {
         executed = true;
     }
 
