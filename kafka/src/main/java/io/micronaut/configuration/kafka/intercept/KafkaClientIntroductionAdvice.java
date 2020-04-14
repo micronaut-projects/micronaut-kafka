@@ -33,9 +33,7 @@ import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
-import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
-import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.annotation.Body;
 import io.micronaut.messaging.exceptions.MessagingClientException;
@@ -162,7 +160,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     if (o instanceof Long) {
                         timestampArgument = (Long) o;
                     }
-                } if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
+                } else if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
