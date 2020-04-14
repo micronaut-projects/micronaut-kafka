@@ -3,16 +3,16 @@ dependencies {
 	annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     api project(":kafka")
     api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-streams:$kafkaVersion"
+    api "org.apache.kafka:kafka-streams:2.4.1"
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
 
     testImplementation "io.projectreactor:reactor-core"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "io.micronaut:micronaut-inject-groovy"    
-    testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
+    testImplementation "org.apache.kafka:kafka-clients:2.4.1:test"
+    testImplementation "org.apache.kafka:kafka_2.12:2.4.1"
+    testImplementation "org.apache.kafka:kafka_2.12:2.4.1:test"
     testImplementation "org.testcontainers:kafka:1.13.0"
 }
 

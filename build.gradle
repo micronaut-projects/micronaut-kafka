@@ -39,7 +39,7 @@ ext {
 subprojects { Project subproject ->
 
     version project.projectVersion
-	group "io.micronaut.configuration"
+	group "io.micronaut.kafka"
     ext {
         isConfiguration = subproject.projectDir.parentFile.name == 'configurations'
         isBuildSnapshot = version.toString().endsWith("-SNAPSHOT")

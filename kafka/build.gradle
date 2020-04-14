@@ -11,13 +11,13 @@ dependencies {
     compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.11'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.11.2'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-clients:$kafkaVersion"
+    api "org.apache.kafka:kafka-clients:2.4.1"
 
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.configuration:micronaut-micrometer-core"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    compileOnly "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
+    compileOnly "org.apache.kafka:kafka_2.12:2.4.1"
+    compileOnly "org.apache.kafka:kafka-clients:2.4.1:test"
+    compileOnly "org.apache.kafka:kafka_2.12:2.4.1:test"
 
     
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
