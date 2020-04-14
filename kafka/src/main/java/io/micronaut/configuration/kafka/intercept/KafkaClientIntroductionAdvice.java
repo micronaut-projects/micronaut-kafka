@@ -118,42 +118,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             boolean isBatchSend = client.isTrue("batch");
 
             String topic = context.stringValue(Topic.class)
-                    .orElseGet(() -> findTopicArgument(context).orElse(null));
+                    .orElse(null);
 
-            if (StringUtils.isEmpty(topic)) {
-                throw new MessagingClientException("No topic specified for method: " + context);
-            }
-            Argument bodyArgument = findBodyArgument(context);
-            if (bodyArgument == null) {
-                throw new MessagingClientException("No valid message body argument found for method: " + context);
-            }
-
-            Argument keyArgument = Arrays.stream(context.getArguments())
-                    .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
-                    .findFirst().orElse(null);
-
-            Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
-
+            Argument keyArgument = null;
+            Argument bodyArgument = null;
             List<Header> kafkaHeaders = new ArrayList<>();
-
-            final Optional<Argument> headersCollectionArgument = findHeadersCollectionArgument(context);
-            if (headersCollectionArgument.isPresent()) {
-                final String parameterName = headersCollectionArgument.get().getName();
-                final Collection<Header> parameterValue = (Collection<Header>) context.getParameterValueMap().get(parameterName);
-                if (CollectionUtils.isNotEmpty(parameterValue)) {
-                    kafkaHeaders.addAll(parameterValue);
-                }
-            }
-
-            final Optional<Argument> headersArgument = findHeadersArgument(context);
-            if (headersArgument.isPresent()) {
-                final String parameterName = headersArgument.get().getName();
-                final Headers parameterValue = (Headers) context.getParameterValueMap().get(parameterName);
-                if (parameterValue != null) {
-                    parameterValue.forEach(kafkaHeaders::add);
-                }
-            }
-
             List<AnnotationValue<io.micronaut.messaging.annotation.Header>> headers = context.getAnnotationValuesByType(io.micronaut.messaging.annotation.Header.class);
 
             for (AnnotationValue<io.micronaut.messaging.annotation.Header> header : headers) {
@@ -171,17 +140,36 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             }
 
             Argument[] arguments = context.getArguments();
-            Map<String, Object> parameterValues = context.getParameterValueMap();
-
-            for (Argument argument : arguments) {
-                if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
+            Object[] parameterValues = context.getParameterValues();
+            Object key = null;
+            Object value = null;
+            Long timestampArgument = null;
+            for (int i = 0; i < arguments.length; i++) {
+                Argument argument = arguments[i];
+                if (ProducerRecord.class.isAssignableFrom(argument.getType()) || argument.isAnnotationPresent(Body.class)) {
+                    bodyArgument = argument;
+                    value = parameterValues[i];
+                } else if (argument.isAnnotationPresent(KafkaKey.class)) {
+                   keyArgument = argument;
+                   key = parameterValues[i];
+                } else if (argument.isAnnotationPresent(Topic.class)) {
+                    Object o = parameterValues[i];
+                    if (o != null) {
+                        topic = o.toString();
+                    }
+                } else if (argument.isAnnotationPresent(KafkaTimestamp.class)) {
+                    Object o = parameterValues[i];
+                    if (o instanceof Long) {
+                        timestampArgument = (Long) o;
+                    }
+                } if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
                             .stringValue(io.micronaut.messaging.annotation.Header.class, "name")
                             .orElseGet(() ->
                                     annotationMetadata.stringValue(io.micronaut.messaging.annotation.Header.class).orElse(argumentName));
-                    Object v = parameterValues.get(argumentName);
+                    Object v = parameterValues[i];
 
                     if (v != null) {
 
@@ -205,24 +193,51 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             }
                         }
                     }
+                } else {
+                    if (argument.isContainerType() && Header.class.isAssignableFrom(argument.getFirstTypeVariable().orElse(Argument.OBJECT_ARGUMENT).getType())) {
+                        final Collection<Header> parameterValue = (Collection<Header>) parameterValues[i];
+                        if (parameterValue != null) {
+                            kafkaHeaders.addAll(parameterValue);
+                        }
+                    } else {
+                        Class argumentType = argument.getType();
+                        if (argumentType == Headers.class || argumentType == RecordHeaders.class) {
+                            final Headers parameterValue = (Headers) parameterValues[i];
+                            if (parameterValue != null) {
+                                parameterValue.forEach(kafkaHeaders::add);
+                            }
+                        }
+                    }
+                }
+            }
+            if (bodyArgument == null) {
+                for (int i = 0; i < arguments.length; i++) {
+                    Argument argument = arguments[i];
+                    if (!argument.getAnnotationMetadata().hasStereotype(Bindable.class)) {
+                        bodyArgument = argument;
+                        value = parameterValues[i];
+                        break;
+                    }
+                }
+                if (bodyArgument == null) {
+                    throw new MessagingClientException("No valid message body argument found for method: " + context);
                 }
             }
 
-
             ReturnType<Object> returnType = context.getReturnType();
             Class javaReturnType = returnType.getType();
+            Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
-
-            Object key = keyArgument != null ? parameterValues.get(keyArgument.getName()) : null;
-            Object value = parameterValues.get(bodyArgument.getName());
-            Long timestamp = findTimestampArgument(context, client.getRequiredValue("timestamp", Boolean.class));
+            Long timestamp = client.isTrue("timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
             boolean isReactiveReturnType = Publishers.isConvertibleToPublisher(javaReturnType);
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
 
             boolean isReactiveValue =
                     value != null && Publishers.isConvertibleToPublisher(value.getClass());
-
+            if (StringUtils.isEmpty(topic)) {
+                throw new MessagingClientException("No topic specified for method: " + context);
+            }
 
             if (isReactiveReturnType) {
                 Flowable returnFlowable;
@@ -255,8 +270,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             bodyEmitter = Flowable.just(batchValue);
                         }
 
+                        String finalTopic = topic;
+                        Argument finalBodyArgument = bodyArgument;
+                        Object finalKey = key;
                         returnFlowable = bodyEmitter.flatMap(o ->
-                                buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, o, timestamp)
+                                buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, returnType, finalKey, o, timestamp)
                         );
 
                     } else {
@@ -319,6 +337,8 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
                     }
 
+                    Argument finalBodyArgument = bodyArgument;
+                    Object finalValue = value;
                     kafkaProducer.send(record, (metadata, exception) -> {
                         if (exception != null) {
                             completableFuture.completeExceptionally(wrapException(context, exception));
@@ -328,8 +348,8 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 Optional<?> converted = conversionService.convert(metadata, argument);
                                 if (converted.isPresent()) {
                                     completableFuture.complete(converted.get());
-                                } else if (argument.getType() == bodyArgument.getType()) {
-                                    completableFuture.complete(value);
+                                } else if (argument.getType() == finalBodyArgument.getType()) {
+                                    completableFuture.complete(finalValue);
                                 }
                             } else {
                                 completableFuture.complete(null);
@@ -394,9 +414,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 }
                                 results.add(result);
                             }
+                            Argument finalBodyArgument = bodyArgument;
+                            Object finalValue = value;
                             return conversionService.convert(results, returnTypeArgument).orElseGet(() -> {
-                                if (javaReturnType == bodyArgument.getType()) {
-                                    return value;
+                                if (javaReturnType == finalBodyArgument.getType()) {
+                                    return finalValue;
                                 } else {
                                     return null;
                                 }
@@ -414,10 +436,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         } else {
                             result = kafkaProducer.send(record).get();
                         }
-
+                        Argument finalBodyArgument = bodyArgument;
+                        Object finalValue = value;
                         return conversionService.convert(result, returnTypeArgument).orElseGet(() -> {
-                            if (javaReturnType == bodyArgument.getType()) {
-                                return value;
+                            if (javaReturnType == finalBodyArgument.getType()) {
+                                return finalValue;
                             } else {
                                 return null;
                             }
@@ -641,60 +664,6 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
             return beanContext.createBean(Producer.class, newConfiguration);
         });
-    }
-
-    private Argument findBodyArgument(ExecutableMethod<?, ?> method) {
-        return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == ProducerRecord.class || arg.getAnnotationMetadata().hasAnnotation(Body.class))
-                .findFirst()
-                .orElseGet(() ->
-                        Arrays.stream(method.getArguments())
-                                .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
-                                .findFirst()
-                                .orElse(null)
-                );
-    }
-
-    private Optional<Argument> findHeadersCollectionArgument(ExecutableMethod<?, ?> method) {
-        return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType().isAssignableFrom(Collection.class))
-                .filter(arg -> arg.getFirstTypeVariable().isPresent())
-                .filter(arg -> arg.getFirstTypeVariable().get().getType() == Header.class || arg.getFirstTypeVariable().get().getType() == RecordHeader.class)
-                .findFirst();
-    }
-
-    private Optional<Argument> findHeadersArgument(ExecutableMethod<?, ?> method) {
-        return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == Headers.class || arg.getType() == RecordHeaders.class)
-                .findFirst();
-    }
-
-    private Optional<String> findTopicArgument(MethodInvocationContext<Object, Object> method) {
-        Map<String, Object> argumentValues = method.getParameterValueMap();
-        return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getAnnotationMetadata().hasAnnotation(Topic.class))
-                .map(Argument::getName)
-                .map(argumentValues::get)
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .findFirst();
-    }
-
-    private Long findTimestampArgument(MethodInvocationContext<Object, Object> context, Boolean clientTimestampParameter) {
-        if (clientTimestampParameter) {
-            return System.currentTimeMillis();
-        } else {
-            Map<String, Object> argumentValues = context.getParameterValueMap();
-            return Arrays.stream(context.getArguments())
-                    .filter(arg -> arg.isAnnotationPresent(KafkaTimestamp.class))
-                    .map(Argument::getName)
-                    .map(argumentValues::get)
-                    .filter(Objects::nonNull)
-                    .map(Object::toString)
-                    .map(Long::parseLong)
-                    .findFirst()
-                    .orElse(null);
-        }
     }
 
     /**
