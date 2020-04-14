@@ -89,6 +89,7 @@
 <li><a href="io/micronaut/configuration/kafka/scope/package-tree.html">io.micronaut.configuration.kafka.scope</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/serde/package-tree.html">io.micronaut.configuration.kafka.serde</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/streams/package-tree.html">io.micronaut.configuration.kafka.streams</a>, </li>
+<li><a href="io/micronaut/configuration/kafka/streams/event/package-tree.html">io.micronaut.configuration.kafka.streams.event</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/tracing/package-tree.html">io.micronaut.configuration.kafka.tracing</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/tracing/brave/package-tree.html">io.micronaut.configuration.kafka.tracing.brave</a></li>
 </ul>
@@ -131,6 +132,20 @@
 <li type="circle">io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">ConsumerKafkaMetricsReporter</span></a></li>
 <li type="circle">io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind"><span class="typeNameLink">ConsumerRecordBinderRegistry</span></a> (implements io.micronaut.core.bind.ArgumentBinderRegistry&lt;S&gt;)</li>
 <li type="circle">io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions"><span class="typeNameLink">DefaultKafkaListenerExceptionHandler</span></a> (implements io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html" title="interface in io.micronaut.configuration.kafka.exceptions">KafkaListenerExceptionHandler</a>)</li>
+<li type="circle">java.util.EventObject (implements java.io.Serializable)
+<ul>
+<li type="circle">io.micronaut.context.event.ApplicationEvent
+<ul>
+<li type="circle">io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html" title="class in io.micronaut.configuration.kafka.streams.event"><span class="typeNameLink">AbstractKafkaStreamsEvent</span></a>
+<ul>
+<li type="circle">io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/AfterKafkaStreamsStart.html" title="class in io.micronaut.configuration.kafka.streams.event"><span class="typeNameLink">AfterKafkaStreamsStart</span></a></li>
+<li type="circle">io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html" title="class in io.micronaut.configuration.kafka.streams.event"><span class="typeNameLink">BeforeKafkaStreamStart</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li type="circle">io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/InteractiveQueryService.html" title="class in io.micronaut.configuration.kafka.streams"><span class="typeNameLink">InteractiveQueryService</span></a></li>
 <li type="circle">io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonSerde.html" title="class in io.micronaut.configuration.kafka.serde"><span class="typeNameLink">JsonSerde</span></a>&lt;T&gt; (implements org.apache.kafka.common.serialization.Deserializer&lt;T&gt;, org.apache.kafka.common.serialization.Serde&lt;T&gt;, org.apache.kafka.common.serialization.Serializer&lt;T&gt;)</li>
 <li type="circle">io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonSerdeRegistry.html" title="class in io.micronaut.configuration.kafka.serde"><span class="typeNameLink">JsonSerdeRegistry</span></a> (implements io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>)</li>

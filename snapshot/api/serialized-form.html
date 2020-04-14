@@ -101,6 +101,59 @@
 </li>
 </ul>
 </li>
+<li class="blockList">
+<h2 title="Package">Package&nbsp;io.micronaut.configuration.kafka.streams.event</h2>
+<ul class="blockList">
+<li class="blockList"><a name="io.micronaut.configuration.kafka.streams.event.AbstractKafkaStreamsEvent">
+<!--   -->
+</a>
+<h3>Class <a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html" title="class in io.micronaut.configuration.kafka.streams.event">io.micronaut.configuration.kafka.streams.event.AbstractKafkaStreamsEvent</a> extends io.micronaut.context.event.ApplicationEvent implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>kafkaStreams</h4>
+<pre>org.apache.kafka.streams.KafkaStreams kafkaStreams</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart">
+<!--   -->
+</a>
+<h3>Class <a href="io/micronaut/configuration/kafka/streams/event/AfterKafkaStreamsStart.html" title="class in io.micronaut.configuration.kafka.streams.event">io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart</a> extends <a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html" title="class in io.micronaut.configuration.kafka.streams.event">AbstractKafkaStreamsEvent</a> implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>streams</h4>
+<pre>org.apache.kafka.streams.kstream.KStream&lt;K,V&gt;[] streams</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart">
+<!--   -->
+</a>
+<h3>Class <a href="io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html" title="class in io.micronaut.configuration.kafka.streams.event">io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart</a> extends <a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html" title="class in io.micronaut.configuration.kafka.streams.event">AbstractKafkaStreamsEvent</a> implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>streams</h4>
+<pre>org.apache.kafka.streams.kstream.KStream&lt;K,V&gt;[] streams</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->
