@@ -17,10 +17,12 @@ package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Property
-import io.micronaut.messaging.annotation.Header
 import io.micronaut.messaging.exceptions.MessagingClientException
 import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.serialization.ByteArraySerializer
+import org.apache.kafka.common.header.Header
+import org.apache.kafka.common.header.Headers
+import org.apache.kafka.common.header.internals.RecordHeader
+import org.apache.kafka.common.header.internals.RecordHeaders
 import reactor.core.publisher.Mono
 import spock.lang.Specification
 
@@ -36,7 +38,7 @@ class KafkaClientSpec extends Specification {
         MyClient client = ctx.getBean(MyClient)
 
         when:
-        client.sendSync("test", "hello-world")
+        client.sendSync("test", "hello-world", [new RecordHeader("hello", "world".bytes)])
 
         then:
         def e = thrown(MessagingClientException)
@@ -51,7 +53,7 @@ class KafkaClientSpec extends Specification {
         MyClient client = ctx.getBean(MyClient)
 
         when:
-        client.sendRx("test", "hello-world").block()
+        client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])).block()
 
         then:
         def e = thrown(MessagingClientException)
@@ -91,9 +93,9 @@ class KafkaClientSpec extends Specification {
                                 value = "org.apache.kafka.common.serialization.ByteArraySerializer")
                 ]
         )
-        String sendSync(@KafkaKey String key, String sentence)
+        String sendSync(@KafkaKey String key, String sentence, Collection<Header> headers)
 
         @Topic("words")
-        Mono<String> sendRx(@KafkaKey String key, String sentence)
+        Mono<String> sendRx(@KafkaKey String key, String sentence, Headers headers)
     }
 }
