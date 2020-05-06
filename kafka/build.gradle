@@ -7,7 +7,7 @@ dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-graal"
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
-    compileOnly "com.oracle.substratevm:svm"
+    compileOnly "org.graalvm.nativeimage:svm"
     compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.11.2'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
@@ -42,6 +42,7 @@ dependencies {
     testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
     testRuntimeOnly "io.micronaut:micronaut-management"
     testRuntimeOnly "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
+    testRuntimeOnly "io.micronaut.cache:micronaut-cache-core"
 }
 
 test {
