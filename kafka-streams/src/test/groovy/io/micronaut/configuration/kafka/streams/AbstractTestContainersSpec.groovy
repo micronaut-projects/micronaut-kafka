@@ -73,7 +73,7 @@ abstract class AbstractTestContainersSpec extends Specification {
                 'kafka.streams.optimization-off.topology.optimization', 'none']
     }
 
-    //Override to create different topics ono startup
+    //Override to create different topics on startup
     protected List<String> getTopics() {
         return [WordCountStream.INPUT,
                 WordCountStream.OUTPUT,
