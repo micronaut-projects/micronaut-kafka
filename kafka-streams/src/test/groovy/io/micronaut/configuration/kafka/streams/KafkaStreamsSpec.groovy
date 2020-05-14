@@ -15,56 +15,21 @@
  */
 package io.micronaut.configuration.kafka.streams
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.streams.listeners.BeforeStartKafkaStreamsListenerImp
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationClient
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationInteractiveQueryService
-
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationListener
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
 import io.micronaut.configuration.kafka.streams.wordcount.InteractiveQueryServiceExample
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountClient
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountListener
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class KafkaStreamsSpec extends Specification {
+class KafkaStreamsSpec extends AbstractTestContainersSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", 'localhost:${random.port}',
-                        AbstractKafkaConfiguration.EMBEDDED, true,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
-                        WordCountStream.INPUT,
-                        WordCountStream.OUTPUT,
-                        WordCountStream.NAMED_WORD_COUNT_INPUT,
-                        WordCountStream.NAMED_WORD_COUNT_OUTPUT,
-                        OptimizationStream.OPTIMIZATION_ON_INPUT,
-                        OptimizationStream.OPTIMIZATION_OFF_INPUT
-                ],
-                        'kafka.generic.config', "hello",
-                        'kafka.streams.my-stream.application.id', 'my-stream',
-                        'kafka.streams.my-stream.num.stream.threads', 10,
-                        'kafka.streams.optimization-on.application.id', 'optimization-on',
-                        'kafka.streams.optimization-on.topology.optimization', 'all',
-                        'kafka.streams.optimization-off.application.id', 'optimization-off',
-                        'kafka.streams.optimization-off.topology.optimization', 'none'
-                )
-        )
-    }
     void "test config"() {
         when:
         def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName('my-stream'))
@@ -135,7 +100,8 @@ class KafkaStreamsSpec extends Specification {
 
         then:
         conditions.eventually {
-            optimizationListener.getOptimizationOnChangelogMessageCount() == 0 //no changelog should be created/used when topology optimization is enabled
+            optimizationListener.getOptimizationOnChangelogMessageCount() == 0
+            //no changelog should be created/used when topology optimization is enabled
             optimizationListener.getOptimizationOffChangelogMessageCount() == 1
             interactiveQueryService.getValue(OptimizationStream.OPTIMIZATION_OFF_STORE, "key") == "off"
             interactiveQueryService.getValue(OptimizationStream.OPTIMIZATION_ON_STORE, "key") == "on"
