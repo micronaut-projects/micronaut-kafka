@@ -88,7 +88,7 @@ The above configuration sets the `num.stream.threads` setting of the Kafka `Stre
 
 You can then inject a api:configuration.kafka.streams.ConfiguredStreamBuilder[] specfically for the above configuration using `javax.inject.Named`:
 
-NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` and you have multiple KStreams defined, you are effectively sharing configuration and will
+NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
 [source,java]
