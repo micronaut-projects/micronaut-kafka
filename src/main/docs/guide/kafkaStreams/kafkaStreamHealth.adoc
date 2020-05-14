@@ -11,7 +11,7 @@ For example stream health at the `/health` endpoint will return:
       "name": "my-application",
       "status": "UP",
       "details": {
-        "coalescence-router-my": {
+        "named-stream": {
           "name": "my-application",
           "status": "UP",
           "details": {
