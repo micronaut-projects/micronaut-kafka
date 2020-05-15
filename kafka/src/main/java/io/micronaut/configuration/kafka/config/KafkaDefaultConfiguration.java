@@ -19,6 +19,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.convert.ConversionService;
+import io.micronaut.core.naming.conventions.StringConvention;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
@@ -80,7 +81,7 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
     }
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
-        Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
+        Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX, StringConvention.RAW) : Collections.emptyMap();
         Properties properties = new Properties();
         values.entrySet().stream().filter(entry -> {
             String key = entry.getKey();
