@@ -11,7 +11,7 @@ dependencies {
     compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.12'
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.11.2'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-clients:2.4.1"
+    api "org.apache.kafka:kafka-clients:2.5.0"
 
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.configuration:micronaut-micrometer-core"
