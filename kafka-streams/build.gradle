@@ -18,7 +18,7 @@ dependencies {
     testImplementation "io.projectreactor:reactor-core"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "org.apache.kafka:kafka-clients:2.4.1:test"
-    testImplementation "org.apache.kafka:kafka_2.12:2.4.1"
+    testImplementation "org.apache.kafka:kafka_2.12:2.5.0"
     testImplementation "org.apache.kafka:kafka_2.12:2.4.1:test"
     testImplementation "org.testcontainers:kafka:1.12.5" //Breaking change in java container after 1.12 see https://github.com/docker-java/docker-java/pull/1392
     testImplementation "org.testcontainers:spock:1.12.5"
