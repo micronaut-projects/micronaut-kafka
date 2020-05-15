@@ -23,6 +23,7 @@ import io.micronaut.management.health.aggregator.RxJavaHealthAggregator
 import io.micronaut.management.health.indicator.HealthResult
 import io.micronaut.runtime.ApplicationConfiguration
 import io.reactivex.Single
+import org.apache.kafka.streams.KafkaStreams
 
 class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
@@ -62,5 +63,44 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
         (healthLevelTwo.details as Map).containsKey("activeTasks")
         (healthLevelTwo.details as Map).containsKey("consumerClientId")
         (healthLevelTwo.details as Map).containsKey("threadName")
+    }
+
+    def "test default if empty kafkaStream name"() {
+        given:
+        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+
+        expect:
+        conditions.eventually {
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+        }
+
+        and:
+        def name = KafkaStreamsHealth.getDefaultStreamName(kafkaStreams)
+        name =~ "StreamThread"
+    }
+
+    def "test default if thread stopped"() {
+        when:
+        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+
+        then:
+        conditions.eventually {
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+        }
+
+        when:
+        kafkaStreams.close()
+
+        then:
+        def name = KafkaStreamsHealth.getDefaultStreamName(kafkaStreams)
+        name =~ "unidentified"
+    }
+
+    def "test default null kafkaStream"() {
+        expect:
+        def name = KafkaStreamsHealth.getDefaultStreamName(null)
+        name == "unidentified"
     }
 }
