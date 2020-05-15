@@ -20,7 +20,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "OptimizationListener")
 public class OptimizationListener {
 
     private int optimizationOffChangelogMessageCount = 0;

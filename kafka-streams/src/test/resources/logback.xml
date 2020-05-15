@@ -13,4 +13,5 @@
     </root>
 <!--    <logger name="io.micronaut.context" level="TRACE"/>-->
     <logger name="io.micronaut.configuration.kafka.embedded" level="TRACE" />
+    <logger name="com.testcontainers" level="INFO" />
 </configuration>

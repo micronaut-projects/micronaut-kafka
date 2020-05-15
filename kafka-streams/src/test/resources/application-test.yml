@@ -1,0 +1,24 @@
+micronaut:
+  server:
+    port: 8888
+  application:
+    name: micronaut-kafka-streams
+
+kafka:
+  security.protocol: PLAINTEXT
+  client.id: ${random.uuid}
+  group.id: ${random.uuid}
+  consumers.group.id: ${random.uuid}
+  streams:
+    my-stream:
+      client.id: ${random.uuid}
+      application-id: micronaut-kafka-streams-1
+      group.id: ${random.uuid}
+    optimization-on:
+      client.id: ${random.uuid}
+      application-id: micronaut-kafka-streams-2
+      group.id: ${random.uuid}
+    optimization-off:
+      client.id: ${random.uuid}
+      application-id: micronaut-kafka-streams-3
+      group.id: ${random.uuid}

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
 public class WordCountListener {
 
     private final Map<String, Long> wordCounts = new ConcurrentHashMap<>();

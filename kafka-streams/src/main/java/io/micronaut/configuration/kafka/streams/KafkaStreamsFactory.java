@@ -28,9 +28,8 @@ import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
 import java.io.Closeable;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -42,11 +41,13 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Factory
 public class KafkaStreamsFactory implements Closeable {
 
-    private final Collection<KafkaStreams> streams = new ConcurrentLinkedDeque<>();
+    private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();
+
     private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Default constructor.
+     *
      * @param eventPublisher The event publisher
      */
     public KafkaStreamsFactory(ApplicationEventPublisher eventPublisher) {
@@ -60,8 +61,17 @@ public class KafkaStreamsFactory implements Closeable {
      * @return The streams builder
      */
     @EachBean(AbstractKafkaStreamsConfiguration.class)
-    ConfiguredStreamBuilder streamsBuilder(AbstractKafkaStreamsConfiguration configuration) {
+    ConfiguredStreamBuilder streamsBuilder(AbstractKafkaStreamsConfiguration<?, ?> configuration) {
         return new ConfiguredStreamBuilder(configuration.getConfig());
+    }
+
+    /**
+     * Get configured stream and builder for the stream.
+     *
+     * @return Map of streams to builders
+     */
+    public Map<KafkaStreams, ConfiguredStreamBuilder> getStreams() {
+        return streams;
     }
 
     /**
@@ -75,14 +85,14 @@ public class KafkaStreamsFactory implements Closeable {
     @Context
     KafkaStreams kafkaStreams(
             ConfiguredStreamBuilder builder,
-            KStream... kStreams
+            KStream<?, ?>... kStreams
     ) {
         KafkaStreams kafkaStreams = new KafkaStreams(
                 builder.build(builder.getConfiguration()),
                 builder.getConfiguration()
         );
         eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
-        streams.add(kafkaStreams);
+        streams.put(kafkaStreams, builder);
         kafkaStreams.start();
         eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
         return kafkaStreams;
@@ -95,13 +105,13 @@ public class KafkaStreamsFactory implements Closeable {
      */
     @Singleton
     InteractiveQueryService interactiveQueryService() {
-        return new InteractiveQueryService(streams);
+        return new InteractiveQueryService(streams.keySet());
     }
 
     @Override
     @PreDestroy
     public void close() {
-        for (KafkaStreams stream : streams) {
+        for (KafkaStreams stream : streams.keySet()) {
             try {
                 stream.close(Duration.ofSeconds(3));
             } catch (Exception e) {
