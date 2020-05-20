@@ -42,7 +42,6 @@ public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfigu
      */
     public static final String PREFIX = "kafka.streams";
 
-
     /**
      * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.
      *

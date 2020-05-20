@@ -77,7 +77,6 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @return Health Result Aggregate
      */
 
-
     @Override
     public Publisher<HealthResult> getResult() {
         Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
