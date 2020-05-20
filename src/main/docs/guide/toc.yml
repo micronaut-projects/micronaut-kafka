@@ -25,5 +25,5 @@ kafkaStreams:
   title: Kafka Streams
   kafkaStream: Building Kafka Stream Applications
   kafkaStreamInteractiveQuery: Interactive Query Service
-  kafkaStremHealth: Kafka Stream Health Checks
+  kafkaStreamHealth: Kafka Stream Health Checks
 repository: Repository

@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration;
 import io.micronaut.configuration.kafka.streams.KafkaStreamsFactory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.aggregator.HealthAggregator;
 import io.micronaut.management.health.indicator.HealthIndicator;
@@ -31,6 +32,7 @@ import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
 import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A {@link HealthIndicator} for Kafka Streams.
@@ -73,41 +76,45 @@ public class KafkaStreamsHealth implements HealthIndicator {
      *
      * @return Health Result Aggregate
      */
+
+
     @Override
     public Publisher<HealthResult> getResult() {
-        Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(kafkaStreamsFactory.getStreams().keySet())
-                .map(kafkaStreams -> {
-                    String applicationId = getApplicationId(kafkaStreams);
-                    try {
-                        if (kafkaStreams.state().isRunning()) {
-                            return HealthResult.builder(applicationId, HealthStatus.UP)
-                                    .details(buildDetails(kafkaStreams))
-                                    .build();
-                        } else {
-                            return HealthResult.builder(applicationId, HealthStatus.DOWN)
-                                    .details(buildDetails(kafkaStreams))
-                                    .build();
-                        }
-                    } catch (Exception e) {
-                        return HealthResult.builder(applicationId, HealthStatus.DOWN)
-                                .details(buildDownDetails(e, kafkaStreams.state()))
-                                .build();
-                    }
-                });
-
+        Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
+                .map(kafkaStreams -> Pair.of(getApplicationId(kafkaStreams), kafkaStreams))
+                .flatMap(pair -> Flowable.just(pair)
+                        .filter(p -> p.getValue().state().isRunning())
+                        .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
+                                .details(buildDetails(p.getValue())))
+                        .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
+                                .details(buildDownDetails(pair.getValue().state())))
+                        .onErrorReturn(e -> HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
+                                .details(buildDownDetails(e.getMessage(), pair.getValue().state()))))
+                .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
-
     }
 
     /**
      * Build down details for the stream down.
      *
-     * @return Map of details
+     * @param state The stream state
+     * @return Map of details messages
      */
-    private Map<String, String> buildDownDetails(Exception e, KafkaStreams.State state) {
+    private Map<String, String> buildDownDetails(KafkaStreams.State state) {
+        return buildDownDetails("Processor appears to be down", state);
+    }
+
+    /**
+     * Build down details for the stream down.
+     *
+     * @param message Down message
+     * @param state The stream state
+     * @return Map of details messages
+     */
+    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state) {
         final Map<String, String> details = new HashMap<>();
-        details.put("state", state.name());
-        details.put("error", e.getMessage());
+        details.put("threadState", state.name());
+        details.put("error", message);
         return details;
     }
 
@@ -165,15 +172,14 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param kafkaStreams the kafka stream
      * @return The name
      */
-    private String getDefaultStreamName(final KafkaStreams kafkaStreams) {
-        if (kafkaStreams != null) {
-            return Optional.ofNullable(kafkaStreams.localThreadsMetadata())
-                    .map(threadMetadataSet -> threadMetadataSet.stream().findFirst())
-                    .map(Optional::get)
-                    .map(ThreadMetadata::threadName)
-                    .orElse(kafkaStreams.toString());
-        }
-        return "unidentified";
+    private static String getDefaultStreamName(final KafkaStreams kafkaStreams) {
+        return Optional.ofNullable(kafkaStreams)
+                .filter(kafkaStreams1 -> kafkaStreams1.state().isRunning())
+                .map(KafkaStreams::localThreadsMetadata)
+                .map(Collection::stream)
+                .flatMap(Stream::findFirst)
+                .map(ThreadMetadata::threadName)
+                .orElse("unidentified");
     }
 
     /**
@@ -207,5 +213,34 @@ public class KafkaStreamsHealth implements HealthIndicator {
         return metadata.topicPartitions().stream()
                 .map(p -> "partition=" + p.partition() + ", topic=" + p.topic())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Internal only class due to missing "Tuple" like interface in Java 8.
+     *
+     * @param <K> The key
+     * @param <V> The value
+     */
+    @Internal
+    private static class Pair<K, V> {
+        private final K key;
+        private final V value;
+
+        public Pair(final K key, final V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public static <K, V> Pair<K, V> of(K key, V value) {
+            return new Pair<>(key, value);
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
     }
 }
