@@ -22,7 +22,7 @@ jobs:
           allowUpdates: true
           commit: master
           draft: true
-          name: Micronaut XXX ${{ steps.release_notes.outputs.next_version }}
+          name: Micronaut Kafka ${{ steps.release_notes.outputs.next_version }}
           tag: v${{ steps.release_notes.outputs.next_version }}
           bodyFile: CHANGELOG.md
           token: ${{ secrets.GITHUB_TOKEN }}
