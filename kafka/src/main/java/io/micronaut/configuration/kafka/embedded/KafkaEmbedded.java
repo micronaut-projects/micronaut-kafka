@@ -218,7 +218,6 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
 
     }
 
-
     /**
      * Return the configured Kafka server is it was configured.
      *

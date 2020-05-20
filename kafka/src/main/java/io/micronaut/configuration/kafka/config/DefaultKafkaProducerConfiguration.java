@@ -44,7 +44,6 @@ public class DefaultKafkaProducerConfiguration<K, V> extends AbstractKafkaProduc
         init(defaultConfiguration);
     }
 
-
     /**
      * Construct a new {@link KafkaConsumerConfiguration} for the given defaults.
      *
