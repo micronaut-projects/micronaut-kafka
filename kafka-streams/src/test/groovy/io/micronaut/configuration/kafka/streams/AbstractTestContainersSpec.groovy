@@ -44,7 +44,7 @@ abstract class AbstractTestContainersSpec extends Specification {
 
     @Shared
     @AutoCleanup
-    static KafkaContainer kafkaContainer = new KafkaContainer()
+    static KafkaContainer kafkaContainer = new KafkaContainer("5.4.2")
 
     def setupSpec() {
         kafkaContainer.start()
