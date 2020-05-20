@@ -83,7 +83,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
         Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
                 .map(kafkaStreams -> Pair.of(getApplicationId(kafkaStreams), kafkaStreams))
                 .flatMap(pair -> Flowable.just(pair)
-                        .filter(p -> p.getValue().state().isRunning())
+                        .filter(p -> p.getValue().state().isRunningOrRebalancing())
                         .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
                                 .details(buildDetails(p.getValue())))
                         .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
@@ -127,7 +127,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
     private Map<String, Object> buildDetails(KafkaStreams kafkaStreams) {
         final Map<String, Object> streamDetails = new HashMap<>();
 
-        if (kafkaStreams.state().isRunning()) {
+        if (kafkaStreams.state().isRunningOrRebalancing()) {
             for (ThreadMetadata metadata : kafkaStreams.localThreadsMetadata()) {
                 streamDetails.put("threadName", metadata.threadName());
                 streamDetails.put("threadState", metadata.threadState());
@@ -174,7 +174,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
      */
     private static String getDefaultStreamName(final KafkaStreams kafkaStreams) {
         return Optional.ofNullable(kafkaStreams)
-                .filter(kafkaStreams1 -> kafkaStreams1.state().isRunning())
+                .filter(kafkaStreams1 -> kafkaStreams1.state().isRunningOrRebalancing())
                 .map(KafkaStreams::localThreadsMetadata)
                 .map(Collection::stream)
                 .flatMap(Stream::findFirst)
