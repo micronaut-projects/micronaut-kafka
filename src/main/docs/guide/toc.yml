@@ -23,7 +23,6 @@ kafkaApplications:
   kafkaTracing: Kafka Distributed Tracing
 kafkaStreams:
   title: Kafka Streams
-  kafkaStream: Building Kafka Stream Applications
   kafkaStreamInteractiveQuery: Interactive Query Service
   kafkaStreamHealth: Kafka Stream Health Checks
 repository: Repository
