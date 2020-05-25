@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.streams.wordcount;
+package io.micronaut.configuration.kafka.streams.health
 
-import io.micronaut.configuration.kafka.annotation.KafkaClient;
-import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.streams.AbstractTestContainersSpec
 
-@KafkaClient
-public interface WordCountClient {
+class KafkaStreamsHealthDisabledSpec extends AbstractTestContainersSpec {
 
-    @Topic(WordCountStream.INPUT)
-    void publishSentence(String sentence);
+    def "health check disabled"() {
+        when:
+        def bean = context.findBean(KafkaStreamsHealth)
+
+        then:
+        !bean.isPresent()
+    }
+
+    @Override
+    protected List<Object> getConfiguration() {
+        List<Object> config = super.getConfiguration()
+        config.addAll(["kafka.streams.health.enabled", 'false'])
+        return config
+    }
 }

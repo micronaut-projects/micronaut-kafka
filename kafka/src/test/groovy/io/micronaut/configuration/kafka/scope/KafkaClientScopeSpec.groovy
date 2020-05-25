@@ -37,7 +37,8 @@ class KafkaClientScopeSpec extends Specification {
 
         then:
         myClass.producer != null
-        myClass.producer.@producer.@producerConfig.getString("acks") == "all"
+        // 'all' gets translated to '-1' by kafka
+        myClass.producer.@producer.@producerConfig.getString("acks") == "-1"
 
         cleanup:
         ctx.close()
