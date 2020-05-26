@@ -38,6 +38,7 @@ dependencies {
     testRuntimeOnly "io.micronaut:micronaut-management"
     testRuntimeOnly "io.micronaut.configuration:micronaut-micrometer-registry-statsd"
     testRuntimeOnly "io.micronaut.cache:micronaut-cache-core"
+    testRuntimeOnly "io.micronaut.reactor:micronaut-reactor"
 }
 
 test {
