@@ -51,9 +51,9 @@
             </div>
 <div class="sect2">
 <h3 id="_kafka_config_properties">Kafka Config Properties</h3>
-<a id="io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration" href="#io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration">&#128279;</a>
+<a id="io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 1. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
+<caption class="title">Table 1. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -68,19 +68,14 @@
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.enabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets whether the embedded Kafka server is enabled. Default value (false).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.key-deserializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key deserializer.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.topics</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.List</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The topics that should be created by the embedded instance.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.properties</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.Properties</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the broker properties.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.value-deserializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value deserializer.</p></td>
 </tr>
 </tbody>
 </table>
@@ -109,38 +104,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration">&#128279;</a>
-<table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.key-deserializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key deserializer.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.value-deserializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value deserializer.</p></td>
-</tr>
-</tbody>
-</table>
-<div style="page-break-after: always;"></div>
 <a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
+<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -163,6 +129,40 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value serializer.</p></td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<a id="io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration" href="#io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration">&#128279;</a>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.enabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets whether the embedded Kafka server is enabled. Default value (false).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.topics</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.List</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The topics that should be created by the embedded instance.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.embedded.properties</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.util.Properties</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the broker properties.</p></td>
 </tr>
 </tbody>
 </table>
