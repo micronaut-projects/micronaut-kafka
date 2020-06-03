@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
+    <title>4.3 Sending Records in Batch 2.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaQuickStart.html">&lt;&lt; <strong>3</strong><span>Kafka Quick Start</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4.3 Sending Records in Batch</h1>
+
+                    <p><strong>Version:</strong> 2.1.0.RC1</p>
+                </div>
+
+                
+
+                
+<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>By default if you define a method that takes a container type such as a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html">List</a> the list will be serialized using the specified <code>value.serializer</code> (the default will result in a JSON array).</p>
+</div>
+<div class="paragraph">
+<p>For example the following two methods will both send serialized arrays:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending Arrays and Lists</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("books")
+void sendList(List&lt;Book&gt; books);
+
+@Topic("books")
+void sendBooks(Book...books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of a sending a serialized array you may wish to instead send batches of <a href="{kafkaapi}/org/apache/kafka/clients/producer/ProducerRecord.html">ProducerRecord</a> either synchronously or asynchronously.</p>
+</div>
+<div class="paragraph">
+<p>To do this you can specify a value of <code>true</code> to the <code>batch</code> member of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+void send(List&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above case instead of sending a serialized array the client implementation will iterate over each item in the list and send a <code>ProducerRecord</code> for each. The previous example is blocking, however you can return a reactive type if desired:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches Reactively</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+Flowable&lt;RecordMetadata&gt; send(List&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use an unbound reactive type such as <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> as the source of your batch data:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches from a Flowable</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaQuickStart.html">&lt;&lt; <strong>3</strong><span>Kafka Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

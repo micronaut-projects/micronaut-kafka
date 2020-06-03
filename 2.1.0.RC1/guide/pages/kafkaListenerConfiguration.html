@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
+    <title>5.2 Configuring @KafkaListener beans 2.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>5.2 Configuring @KafkaListener beans</h1>
+
+                    <p><strong>Version:</strong> 2.1.0.RC1</p>
+                </div>
+
+                
+
+                
+<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>5.2 Configuring @KafkaListener beans</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="sect2">
+<h3 id="_kafkalistener_and_consumer_groups">@KafkaListener and Consumer Groups</h3>
+<div class="paragraph">
+<p>Kafka consumers created with <code>@KafkaListener</code> will by default run within a consumer group that is the value of <code>micronaut.application.name</code> unless you explicitly specify a value to the <code>@KafkaListener</code> annotation. For example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying a Consumer Group</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener("myGroup")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying a Consumer Group alternative</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above examples will run the consumer within a consumer group called <code>myGroup</code>.
+In this case, each record will be consumed by one consumer instance of the consumer group.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can make the consumer group configurable using a placeholder: <code>@KafkaListener("${my.consumer.group:myGroup}")</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), <code>uniqueGroupId</code> can be set to <code>true</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Unique group IDs</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup", uniqueGroupId=true)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more information, see for example <a href="https://kafka.apache.org/intro#intro_consumers" class="bare">https://kafka.apache.org/intro#intro_consumers</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kafkalistener_and_consumer_properties">@KafkaListener and Consumer Properties</h3>
+<div class="paragraph">
+<p>There are a number of ways to pass configuration properties to the <code>KafkaConsumer</code>. You can set default consumer properties using <code>kafka.consumers.default</code> in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Default Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    consumers:
+        default:
+            session:
+                timeout:
+                    ms: 30000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example will set the default <code>session.timeout.ms</code> that Kafka uses to decide whether a consumer is alive or not and applies it to all created <code>KafkaConsumer</code> instances.</p>
+</div>
+<div class="paragraph">
+<p>You can also provide configuration specific to a consumer group. For example consider the following configuration:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Consumer Group Specific config</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    consumers:
+        myGroup:
+            session:
+                timeout:
+                    ms: 30000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration will pass properties to only the <code>@KafkaListener</code> beans that apply to the consumer group <code>myGroup</code>.</p>
+</div>
+<div class="paragraph">
+<p>Finally, the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation itself provides a <code>properties</code> member that you can use to set consumer specific properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Consumer Properties with @KafkaListener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.context.annotation.Property;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+
+@KafkaListener(
+    groupId = "products",
+    pollTimeout = "500ms",
+    properties = @Property(name = ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, value = "10000")
+)
+public class ProductListener {
+    ...
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kafkalistener_and_deserializers">@KafkaListener and Deserializers</h3>
+<div class="paragraph">
+<p>As mentioned previously when defining <code>@KafkaListener</code> methods, Micronaut will attempt to pick an appropriate deserializer for the method signature. This is done via the <a href="../api/io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html">CompositeSerdeRegistry</a> bean.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can replace the default <a href="../api/io/micronaut/configuration/kafka/serde/SerdeRegistry.html">SerdeRegistry</a> bean with your own implementation by defining a bean that uses <code>@Replaces(CompositeSerdeRegistry.class)</code>. See the section on <a href="#replaces">Bean Replacement</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All common <code>java.lang</code> types (<code>String</code>, <code>Integer</code>, primitives etc.) are supported and for POJOs by default a Jackson based JSON deserializer is used.</p>
+</div>
+<div class="paragraph">
+<p>You can, however, explicitly override the <code>Deserializer</code> used by providing the appropriate configuration in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Default Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    consumers:
+        myGroup:
+            value:
+                deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You may want to do this if for example you choose an alternative deserialization format such as Avro or Protobuf.</p>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

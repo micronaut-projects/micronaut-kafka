@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
+    <title>2 Using the Micronaut CLI 2.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Using the Micronaut CLI</h1>
+
+                    <p><strong>Version:</strong> 2.1.0.RC1</p>
+                </div>
+
+                
+
+                
+<h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>2 Using the Micronaut CLI</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaCli.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>To create a project with Kafka support using the Micronaut CLI, supply the <code>kafka</code> feature to the <code>features</code> flag.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ mn create-app my-kafka-app --features kafka</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will create a project with the minimum necessary configuration for Kafka.</p>
+</div>
+<div class="sect1">
+<h2 id="_kafka_profile">Kafka Profile</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Micronaut CLI includes a specialized profile for Kafka-based messaging applications. This profile will create a Micronaut app with Kafka support, and <em>without</em> an HTTP server (although you can add one if you desire). The profile also provides a couple commands for generating Kafka listeners and producers.</p>
+</div>
+<div class="paragraph">
+<p>To create a project using the Kafka profile, use the <code>profile</code> flag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ mn create-app my-kafka-service --profile kafka</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you&#8217;d expect, you can start the application with <code>./gradlew run</code> (for Gradle) or <code>./mvnw compile exec:exec</code> (Maven). The application will (with the default config) attempt to connect to Kafka at <code><a href="http://localhost:9092" class="bare">http://localhost:9092</a></code>, and will continue to run without starting up an HTTP server. All communication to/from the service will take place via Kafka producers and/or listeners.</p>
+</div>
+<div class="paragraph">
+<p>Within the new project, you can now run the Kafka-specific code generation commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ mn create-kafka-producer Message
+| Rendered template Producer.java to destination src/main/java/my/kafka/app/MessageProducer.java
+
+$ mn create-kafka-listener Message
+| Rendered template Listener.java to destination src/main/java/my/kafka/app/MessageListener.java</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

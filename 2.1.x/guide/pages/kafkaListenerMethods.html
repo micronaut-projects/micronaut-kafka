@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
+    <title>5.1 Defining @KafkaListener Methods 2.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>5.1 Defining @KafkaListener Methods</h1>
+
+                    <p><strong>Version:</strong> 2.1.0.RC1</p>
+                </div>
+
+                
+
+                
+<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>5.1 Defining @KafkaListener Methods</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation examples up until now have been relatively trivial, but Micronaut offers a lot of flexibility when it comes to the types of method signatures you can define.</p>
+</div>
+<div class="paragraph">
+<p>The following sections detail examples of supported use cases.</p>
+</div>
+<div class="sect1">
+<h2 id="_specifying_topics">Specifying Topics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> annotation can be used at the method or the class level to specify which topics to be listened for.</p>
+</div>
+<div class="paragraph">
+<p>Care needs to be taken when using <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> at the class level because every public method of the class annotated with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> will become a Kafka consumer, which may be undesirable.</p>
+</div>
+<div class="paragraph">
+<p>You can specify multiple topics to listen for:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying Multiple Topics</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("fun-products", "awesome-products")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also specify one or many regular expressions to listen for:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using regular expressions to match Topics</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic(patterns="products-\\w+")</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_available_annotations">Available Annotations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are a number of annotations available that allow you to specify how a method argument is bound.</p>
+</div>
+<div class="paragraph">
+<p>The following table summarizes the annotations and their purpose, with an example:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Kafka Messaging Annotations</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Annotation</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows binding a parameter to a message header</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/KafkaKey.html">@KafkaKey</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows specifying the parameter that is the key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@KafkaKey String key</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_topics_partitions_and_offsets">Topics, Partitions and Offsets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you want a reference to the topic, partition or offset it is a simple matter of defining a parameter for each.</p>
+</div>
+<div class="paragraph">
+<p>The following table summarizes example parameters and how they related to the <code>ConsumerRecord</code> being processed:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 2. @KafkaListener Method Parameters</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String topic</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the topic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long offset</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The offset of the <code>ConsumerRecord</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>int partition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The partition of the <code>ConsumerRecord</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long timestamp</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The timestamp of the <code>ConsumerRecord</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>As an example, following listener method will receive all of the above mentioned parameters:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying Parameters for offset, topic etc.</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("awesome-products")
+public void receive(
+        @KafkaKey String brand, <i class="conum" data-value="1"></i><b>(1)</b>
+        Product product, <i class="conum" data-value="2"></i><b>(2)</b>
+        long offset, <i class="conum" data-value="3"></i><b>(3)</b>
+        int partition, <i class="conum" data-value="4"></i><b>(4)</b>
+        String topic, <i class="conum" data-value="5"></i><b>(5)</b>
+        long timestamp) { <i class="conum" data-value="6"></i><b>(6)</b>
+    System.out.println("Got Product - " + product.getName() + " by " + brand);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The Kafka key</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The message body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The offset of the <code>ConsumerRecord</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The partition of the <code>ConsumerRecord</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The topic. Note that the <code>@Topic</code> annotation supports multiple topics.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The timestamp of the <code>ConsumerRecord</code></td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_receiving_a_consumerrecord">Receiving a ConsumerRecord</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you prefer you can also receive the entire <code>ConsumerRecord</code> object being listened for. In this case you should specify appropriate generic types for the key and value of the <code>ConsumerRecord</code> so that Micronaut can pick the correct deserializer for each.</p>
+</div>
+<div class="paragraph">
+<p>Consider the following example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying Parameters for offset, topic etc.</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("awesome-products")
+public void receive(ConsumerRecord&lt;String, Product&gt; record) { <i class="conum" data-value="1"></i><b>(1)</b>
+    Product product = record.value(); <i class="conum" data-value="2"></i><b>(2)</b>
+    String brand = record.key(); <i class="conum" data-value="3"></i><b>(3)</b>
+    System.out.println("Got Product - " + product.getName() + " by " + brand);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The method signature accepts a <code>ConsumerRecord</code> that specifies a <code>String</code> for the key type and a POJO (<code>Product</code>) for the value type.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>value()</code> method is used to retrieve the value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>key()</code> method is used to retrieve the key</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_receiving_and_returning_reactive_types">Receiving and returning Reactive Types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In addition to common Java types and POJOs you can also define listener methods that receive a Reactive type such as a <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> or a Reactor <code>Mono</code>. For example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using Reactive Types</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("reactive-products")
+public Single&lt;Product&gt; receive(
+        @KafkaKey String brand,  <i class="conum" data-value="1"></i><b>(1)</b>
+        Single&lt;Product&gt; productFlowable) { <i class="conum" data-value="2"></i><b>(2)</b>
+    return productFlowable.doOnSuccess((product) -&gt;
+            System.out.println("Got Product - " + product.getName() + " by " + brand) <i class="conum" data-value="3"></i><b>(3)</b>
+    );
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>@KafkaKey</code> annotation is used to indicate the key</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>A <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a> is used to receive the message body</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>doOnSuccess</code> method is used to process the result</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Note that in this case the method returns an <code><a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Single.html">Single</a></code> this indicates to Micronaut that the <code>poll</code> loop should continue and if <code>enable.auto.commit</code> is set to <code>true</code> (the default) the offsets will be committed potentially before the <code>doOnSuccess</code> is called.</p>
+</div>
+<div class="paragraph">
+<p>The idea here is that you are able to write consumers that don&#8217;t block, however care must be taken in the case where an error occurs in the <code>doOnSuccess</code> method otherwise the message could be lost. You could for example re-deliver the message in case of an error.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can use the <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a> annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the <code>poll</code> loop, preventing offsets from being committed automatically:</p>
+</div>
+<div class="listingblock">
+<div class="title">Blocking with Reactive Consumers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Blocking
+@Topic("reactive-products")
+public Single&lt;Product&gt; receive(
+    ...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/kafkaClient.html">&lt;&lt; <strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

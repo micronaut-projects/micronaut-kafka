@@ -1,0 +1,599 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script src="/cdn-cgi/apps/head/3cOPSgo5Omz84ycX7CvigfX4cpw.js"></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-82213539-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-82213539-2');
+    </script>
+    <title>7 Kafka Streams 2.1.0.RC1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <div class="navTitle">
+        
+        Micronaut Kafka
+    </div>
+    <div class="navLinks">
+        <ul>
+            <li>
+                <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                    <a href="../guide/index.html" class="button">Table of contents</a>
+
+                    <div id="nav-summary-childs" style="display:none;">
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaCli.html"><strong>2</strong><span>Using the Micronaut CLI</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaQuickStart.html"><strong>3</strong><span>Kafka Quick Start</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaClient.html"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaListener.html"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        </div>
+                        
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </li>
+            <li class="separator selected">
+                <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaApplications.html">&lt;&lt; <strong>6</strong><span>Running Kafka Applications</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>7 Kafka Streams</h1>
+
+                    <p><strong>Version:</strong> 2.1.0.RC1</p>
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaStreamInteractiveQuery"><strong>7.1</strong><span>Interactive Query Service</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#kafkaStreamHealth"><strong>7.2</strong><span>Kafka Stream Health Checks</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>7 Kafka Streams</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Using the CLI</div>
+<div class="paragraph">
+<p>If you are creating your project using the Micronaut CLI, supply the <code>kafka-streams</code> feature to include a simple Kafka Streams configuration in your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ mn create-app my-app --features kafka-streams</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><a href="https://kafka.apache.org/documentation/streams/">Kafka Streams</a> is a platform for building real time streaming applications.</p>
+</div>
+<div class="paragraph">
+<p>When using Micronaut with Kafka Stream, your application gains all of the features from Micronaut (configuration management, AOP, DI, health checks etc.), simplifying the construction of Kafka Stream applications.</p>
+</div>
+<div class="paragraph">
+<p>Since Micronaut&#8217;s DI and AOP is compile time, you can build low overhead stream applications with ease.</p>
+</div>
+<div class="sect1">
+<h2 id="_defining_kafka_streams">Defining Kafka Streams</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To define Kafka Streams you should first add the <code>kafka-streams</code> configuration to your build.</p>
+</div>
+<div class="paragraph">
+<p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.kafka:micronaut-kafka-streams")</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</p>
+</div>
+<div class="paragraph">
+<p>The minimum configuration required is to set the Kafka bootstrap servers:</p>
+</div>
+<div class="listingblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    bootstrap:
+        servers: localhost:9092</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should then define a <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that return a <code>KStream</code>. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+</div>
+<div class="listingblock">
+<div class="title">Kafka Streams Word Count</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
+import io.micronaut.context.annotation.Factory;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
+
+@Factory
+public class WordCountStream {
+
+    public static final String STREAM_WORD_COUNT = "word-count";
+    public static final String INPUT = "streams-plaintext-input"; <i class="conum" data-value="1"></i><b>(1)</b>
+    public static final String OUTPUT = "streams-wordcount-output"; <i class="conum" data-value="2"></i><b>(2)</b>
+    public static final String WORD_COUNT_STORE = "word-count-store";
+
+
+    @Singleton
+    @Named(STREAM_WORD_COUNT)
+    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { <i class="conum" data-value="3"></i><b>(3)</b>
+        // set default serdes
+        Properties props = builder.getConfiguration();
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KStream&lt;String, String&gt; source = builder
+                .stream(INPUT);
+
+        KTable&lt;String, Long&gt; groupedByWord = source
+                .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
+                .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
+                //Store the result in a store for lookup later
+                .count(Materialized.as(WORD_COUNT_STORE)); <i class="conum" data-value="4"></i><b>(4)</b>
+
+        groupedByWord
+                //convert to stream
+                .toStream()
+                //send to output using specific serdes
+                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+
+        return source;
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The input topic</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The output topic</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>An instance of <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> is injected that allows mutating the configuration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Materialize the count stream and save to a state store</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+With Kafka streams the key and value <code>Serdes</code> (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass <a href="../api/io/micronaut/configuration/kafka/serde/JsonSerde.html">JsonSerde</a> to define your <code>Serdes</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation to send a sentence to be processed by the above stream:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining a Kafka Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.Topic;
+
+@KafkaClient
+public interface WordCountClient {
+
+    @Topic(WordCountStream.INPUT)
+    void publishSentence(String sentence);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also define a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> to listen for the result of the word count stream:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining a Kafka Listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
+public class WordCountListener {
+
+    private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
+
+    @Topic(WordCountStream.OUTPUT)
+    void count(@KafkaKey String word, long count) {
+        System.out.println("word = " + word);
+        wordCounts.put(word, count);
+    }
+
+    public long getCount(String word) {
+        Long num = wordCounts.get(word);
+        if (num != null) {
+            return num;
+        }
+        return 0;
+    }
+
+    public Map&lt;String, Long&gt; getWordCounts() {
+        return Collections.unmodifiableMap(wordCounts);
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_kafka_streams">Configuring Kafka Streams</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>. For example in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Defining Per Stream Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        my-stream:
+            num:
+                stream:
+                    threads: 10</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>10</code> for a stream named <code>my-stream</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can then inject a <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Kafka Streams Word Count</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static final String MY_STREAM = "my-stream";
+public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
+public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
+
+@Singleton
+@Named(MY_STREAM)
+KStream&lt;String, String&gt; myStream(
+        @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
+
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>7.1 Interactive Query Service</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores">available here</a>.</p>
+</div>
+<div class="paragraph">
+<p>You can inject the <code>InteractiveQueryService</code> and use the method <code>getQueryableStore</code> to get values from a state store.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/**
+ * Retrieve and return a queryable store by name created in the application.  If state store is not
+ * present an Optional.empty() will be returned.
+ *
+ * @param storeName name of the queryable store
+ * @param storeType type of the queryable store
+ * @param &lt;T&gt;       generic queryable store
+ * @return queryable store.
+ */
+public &lt;T&gt; Optional&lt;T&gt; getQueryableStore(String storeName, QueryableStoreType&lt;T&gt; storeType) {
+    for (KafkaStreams kafkaStream : this.streams) {
+        try {
+            T store = kafkaStream.store(storeName, storeType);
+            if (store != null) {
+                return Optional.of(store);
+            }
+        } catch (InvalidStateStoreException ignored) {
+            //pass through
+        }
+    }
+    return Optional.empty();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example service that wraps the <code>InteractiveQueryService</code> is included below.  This is here to illustrate that when calling the <code>getQueryableStore</code> method you must provide the store name and preferably the type of key and value you are trying to retrieve.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
+
+import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+
+import javax.inject.Singleton;
+import java.util.Optional;
+
+/**
+ * Example service that uses the InteractiveQueryService in a reusable way.  This is only intended as an example.
+ */
+@Singleton
+public class InteractiveQueryServiceExample {
+
+    private final InteractiveQueryService interactiveQueryService;
+
+    public InteractiveQueryServiceExample(InteractiveQueryService interactiveQueryService) {
+        this.interactiveQueryService = interactiveQueryService;
+    }
+
+    /**
+     * Method to get the word state store and word count from the store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "foo-store"
+     * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
+     * @return the Long count of the word in the store
+     */
+    public Long getWordCount(String stateStore, String word) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, Long&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(word)).orElse(0L);
+    }
+
+    /**
+     * Method to get byte array from a state store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "bar-store"
+     * @param blobName   the key to get, in this case the name of the blob
+     * @return the byte[] stored in the state store
+     */
+    public byte[] getBytes(String stateStore, String blobName) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;String, byte[]&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(stringReadOnlyKeyValueStore -&gt; stringReadOnlyKeyValueStore.get(blobName)).orElse(null);
+    }
+
+    /**
+     * Method to get value V by key K.
+     *
+     * @param stateStore the name of the state store ie "baz-store"
+     * @param name       the key to get
+     * @return the value of type V stored in the state store
+     */
+    public &lt;K, V&gt; V getGenericKeyValue(String stateStore, K name) {
+        Optional&lt;ReadOnlyKeyValueStore&lt;K, V&gt;&gt; queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.&lt;K, V&gt;keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore -&gt; kvReadOnlyKeyValueStore.get(name)).orElse(null);
+    }
+}</code></pre>
+</div>
+</div>
+
+<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>7.2 Kafka Stream Health Checks</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>In addition to <code>http-server-netty</code>, if the <code>management</code> dependency is added, then Micronaut&#8217;s <a href="#healthEndpoint">Health Endpoint</a> can be used to expose the health status of the Kafka streams application.</p>
+</div>
+<div class="paragraph">
+<p>For example stream health at the <code>/health</code> endpoint will return:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "status": "UP",
+  "details": {
+    "kafkaStreams": {
+      "name": "my-application",
+      "status": "UP",
+      "details": {
+        "named-stream": {
+          "name": "my-application",
+          "status": "UP",
+          "details": {
+            "adminClientId": "my-consumer-id-admin",
+            "restoreConsumerClientId": "my-consumer-id-StreamThread-1-restore-consumer",
+            "threadState": "RUNNING",
+            "producerClientIds": [
+              "my-consumer-id-StreamThread-1-producer"
+            ],
+            "consumerClientId": "my-consumer-id-StreamThread-1-consumer",
+            "threadName": "my-consumer-id-StreamThread-1"
+          }
+        }
+      }
+    },
+    ...
+  }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+By default, the details visible above are only shown to authenticated users. See the <a href="#healthEndpoint">Health Endpoint</a> documentation for how to configure that setting.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you wish to disable the Kafka streams health check while still using the <code>management</code> dependency you can set the property <code>kafka.streams.health.enabled</code> to <code>false</code> in your application configuration.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+	    health:
+		    enabled: false</code></pre>
+</div>
+</div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/kafkaApplications.html">&lt;&lt; <strong>6</strong><span>Running Kafka Applications</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
