@@ -1,11 +1,11 @@
 /*
- * Copyright 2017-2019 original authors
+ * Copyright 2017-2020 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.metrics;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.core.annotation.Internal;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +46,8 @@ abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
      */
     T addKafkaMetrics(BeanCreatedEvent<T> event, String kafkaMetricsReporterClassName) {
         Properties props = event.getBean().getConfig();
-        if (!props.containsKey(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG)) {
-            props.put(ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
+        if (!props.containsKey(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG)) {
+            props.put(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
             if (LOG.isDebugEnabled()) {
                 LOG.debug(String.format("Adding kafka property:value of %s:%s", ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName));
             }

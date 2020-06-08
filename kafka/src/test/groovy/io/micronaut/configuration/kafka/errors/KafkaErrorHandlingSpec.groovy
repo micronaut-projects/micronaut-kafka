@@ -1,3 +1,4 @@
+
 package io.micronaut.configuration.kafka.errors
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient

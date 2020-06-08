@@ -1,3 +1,4 @@
+
 package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.configuration.kafka.ConsumerRegistry

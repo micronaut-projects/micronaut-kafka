@@ -43,6 +43,35 @@ The above example will send a header called `X-Token` with the value read from t
 
 If the `my.application.token` is not set then an error will occur creating the client.
 
+It is also possible to pass `Collection<Header>>` or `Headers` object as method arguments as seen below.
+
+.Collection<Header> Argument
+[source,java]
+----
+@Topic("my-bicycles")
+void sendBicycle(
+    @KafkaKey String brand,
+    String model,
+    Collection<Header> headers);
+----
+
+https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Header.html[Kafka Header Javadocs]
+
+.Headers Argument
+[source,java]
+----
+@Topic("my-bicycles")
+void sendBicycle(
+    @KafkaKey String brand,
+    String model,
+    Headers headers);
+----
+
+https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Headers.html[Kafka Headers Javadocs]
+
+In the above examples, all of the key/value pairs in `headers` will be added to the list of headers produced to the topic.  `Header` and `Headers` are
+part of the `kafka-clients` library:
+
 === Reactive and Non-Blocking Method Definitions
 
 The ann:configuration.kafka.annotation.KafkaClient[] annotation supports the definition of reactive return types (such as rx:Flowable[] or Reactor `Flux`) as well as Futures.

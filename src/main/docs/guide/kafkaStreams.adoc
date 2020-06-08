@@ -17,7 +17,7 @@ Since Micronaut's DI and AOP is compile time, you can build low overhead stream 
 
 To define Kafka Streams you should first add the `kafka-streams` configuration to your build.
 
-dependency:micronaut-kafka-streams[groupId="io.micronaut.configuration"]
+dependency:micronaut-kafka-streams[groupId="io.micronaut.kafka"]
 
 The minimum configuration required is to set the Kafka bootstrap servers:
 
@@ -88,31 +88,11 @@ The above configuration sets the `num.stream.threads` setting of the Kafka `Stre
 
 You can then inject a api:configuration.kafka.streams.ConfiguredStreamBuilder[] specfically for the above configuration using `javax.inject.Named`:
 
+NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
+
 .Kafka Streams Word Count
 [source,java]
 ----
 include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream, indent=0]
 }
 ----
-
-== Interactive Query Service
-
-When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores[available here].
-
-You can inject the `InteractiveQueryService` and use the method `getQueryableStore` to get values from a state store.
-
-[source,java]
-----
-include::{kafkastreams}/InteractiveQueryService.java[tags=getQueryableStore, indent=0]
-----
-
-An example service that wraps the `InteractiveQueryService` is included below.  This is here to illustrate that when calling the `getQueryableStore` method you must provide the store name and preferably the type of key and value you are trying to retrieve.
-
-[source,java]
-----
-include::{testskafkastreams}/wordcount/InteractiveQueryServiceExample.java[]
-----
-
-
-
-
