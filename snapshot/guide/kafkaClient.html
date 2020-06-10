@@ -11,7 +11,7 @@
 
         gtag('config', 'UA-82213539-2');
     </script>
-    <title>4 Kafka Producers Using @KafkaClient 1.4.1.BUILD-SNAPSHOT</title>
+    <title>4 Kafka Producers Using @KafkaClient 2.1.0.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -56,7 +56,7 @@ function addJsClass() {
                         <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
                         </div>
                         
                         <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
@@ -93,7 +93,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>4 Kafka Producers Using @KafkaClient</h1>
 
-                    <p><strong>Version:</strong> 1.4.1.BUILD-SNAPSHOT</p>
+                    <p><strong>Version:</strong> 2.1.0.BUILD-SNAPSHOT</p>
                 </div>
 
                 
@@ -122,7 +122,7 @@ function addJsClass() {
 <h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>4 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -138,7 +138,7 @@ function addJsClass() {
 <h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>4.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -200,6 +200,39 @@ public interface ProductClient {
 </div>
 <div class="paragraph">
 <p>If the <code>my.application.token</code> is not set then an error will occur creating the client.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to pass <code>Collection&lt;Header&gt;&gt;</code> or <code>Headers</code> object as method arguments as seen below.</p>
+</div>
+<div class="listingblock">
+<div class="title">Collection&lt;Header&gt; Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
+void sendBicycle(
+    @KafkaKey String brand,
+    String model,
+    Collection&lt;Header&gt; headers);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a href="https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Header.html">Kafka Header Javadocs</a></p>
+</div>
+<div class="listingblock">
+<div class="title">Headers Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
+void sendBicycle(
+    @KafkaKey String brand,
+    String model,
+    Headers headers);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a href="https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Headers.html">Kafka Headers Javadocs</a></p>
+</div>
+<div class="paragraph">
+<p>In the above examples, all of the key/value pairs in <code>headers</code> will be added to the list of headers produced to the topic.  <code>Header</code> and <code>Headers</code> are
+part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 <div class="sect2">
@@ -301,7 +334,7 @@ public interface ProductClient {
 <h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>4.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -410,7 +443,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -472,7 +505,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 <h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>4.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -565,7 +598,7 @@ public void testBookSender() throws IOException {
 <h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>4.5 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -577,9 +610,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.4.0:test'
-testImplementation 'org.apache.kafka:kafka_2.12:2.4.0'
-testImplementation 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.5.0:test'
+testImplementation 'org.apache.kafka:kafka_2.12:2.5.0'
+testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -591,18 +624,18 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;2.4.0&lt;/version&gt;
+  &lt;version&gt;2.5.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.4.0&lt;/version&gt;
+  &lt;version&gt;2.5.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.4.0&lt;/version&gt;
+  &lt;version&gt;2.5.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
