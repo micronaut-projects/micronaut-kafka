@@ -1,11 +1,11 @@
 /*
- * Copyright 2017-2019 original authors
+ * Copyright 2017-2020 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,15 +59,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -156,7 +148,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
-                            .stringValue(io.micronaut.messaging.annotation.Header.class,"name")
+                            .stringValue(io.micronaut.messaging.annotation.Header.class, "name")
                             .orElseGet(() ->
                                     annotationMetadata.stringValue(io.micronaut.messaging.annotation.Header.class).orElse(argumentName));
                     Object v = parameterValues.get(argumentName);
