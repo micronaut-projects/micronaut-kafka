@@ -136,6 +136,16 @@ public @interface KafkaListener {
      */
     boolean batch() default false;
 
+
+    /**
+     * By default each listener will be started when the application starts.
+     *
+     * By setting this value to {@code true}, this listener will be initialized in the paused state.
+     *
+     * @return whether to pause this listener on startup or not. Defaults to false.
+     */
+    boolean paused() default false;
+
     /**
      * Additional properties to configure with for Consumer.
      *

@@ -51,10 +51,18 @@ class KafkaPauseResumeSpec extends Specification {
         when:
         Consumer consumer = registry.getConsumer("fruit-client")
 
-        then:
+        then: "consumer is configured as paused = true"
         consumer != null
         registry.getConsumerIds()
-        !registry.isPaused("fruit-client")
+        registry.isPaused("fruit-client")
+
+        when:
+        registry.resume("fruit-client")
+
+        then:
+        conditions.eventually {
+            !registry.isPaused("fruit-client")
+        }
 
         when:
         client.send("test", "Apple")
@@ -97,7 +105,7 @@ class KafkaPauseResumeSpec extends Specification {
         void send(@KafkaKey String company, @Body String fruit)
     }
 
-    @KafkaListener(clientId = "fruit-client", offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(clientId = "fruit-client", offsetReset = OffsetReset.EARLIEST, paused = true)
     static class FruitListener {
 
         Set<String> fruits = new ConcurrentSkipListSet<>()
