@@ -13,7 +13,7 @@ You can specify multiple topics to listen for:
 .Specifying Multiple Topics
 [source,java]
 ----
-@Topic("fun-products", "awesome-products")
+@Topic({"fun-products", "awesome-products"})
 ----
 
 You can also specify one or many regular expressions to listen for:
