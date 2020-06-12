@@ -15,30 +15,41 @@
  */
 package io.micronaut.configuration.kafka.graal;
 
-import com.oracle.svm.core.annotate.Alias;
-import com.oracle.svm.core.annotate.RecomputeFieldValue;
-import com.oracle.svm.core.annotate.Substitute;
-import com.oracle.svm.core.annotate.TargetClass;
+import com.oracle.svm.core.annotate.*;
+import io.micronaut.core.reflect.InstantiationUtils;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.MetricsReporter;
 import org.apache.kafka.common.record.CompressionType;
 import org.apache.kafka.common.utils.AppInfoParser;
+import org.apache.kafka.common.utils.Crc32C;
+import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
 import java.util.List;
 import java.util.Map;
-import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 
 //CHECKSTYLE:OFF
+@AutomaticFeature
+final class ChecksumFeature implements Feature {
+    @Override
+    public void beforeAnalysis(BeforeAnalysisAccess access) {
+        Class<?> c = access.findClassByName("java.util.zip.CRC32C");
+        if (c != null) {
+            RuntimeReflection.registerForReflectiveInstantiation(c);
+        }
+    }
+}
+
 @TargetClass(className = "org.apache.kafka.common.utils.Crc32C$Java9ChecksumFactory")
 @Substitute
 final class Java9ChecksumFactory {
 
     @Substitute
     public Checksum create() {
-        return new CRC32();
+        return (Checksum) InstantiationUtils.instantiate("java.util.zip.CRC32C", Crc32C.class.getClassLoader());
     }
 
 }
