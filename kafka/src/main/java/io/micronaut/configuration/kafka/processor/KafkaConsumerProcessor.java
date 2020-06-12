@@ -56,7 +56,11 @@ import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.AuthorizationException;
+import org.apache.kafka.common.errors.OutOfOrderSequenceException;
+import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -73,6 +77,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -619,6 +624,7 @@ public class KafkaConsumerProcessor
         Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
                     String[] destinationTopics = method.stringValues(SendTo.class);
+                    boolean hasTransaction = method.hasAnnotation(KafkaTransaction.class);
                     if (ArrayUtils.isNotEmpty(destinationTopics)) {
                         Object key = consumerRecord.key();
                         Object value = o;
@@ -630,6 +636,37 @@ public class KafkaConsumerProcessor
                                     Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
                                     Argument.of(value.getClass())
                             );
+                            //docs: https://kafka.apache.org/0110/javadoc/index.html?org/apache/kafka/clients/producer/KafkaProducer.html
+                            if(hasTransaction) {
+                                return Flowable.create(emitter -> {
+                                    try {
+                                        kafkaProducer.beginTransaction();
+                                        for (String destinationTopic : destinationTopics) {
+                                            ProducerRecord record = new ProducerRecord(
+                                                destinationTopic,
+                                                null,
+                                                key,
+                                                value,
+                                                consumerRecord.headers()
+                                            );
+                                            kafkaProducer.send(record, (metadata, exception) -> {
+                                                if (exception != null) {
+                                                    emitter.onError(exception);
+                                                } else {
+                                                    emitter.onNext(metadata);
+                                                }
+                                            });
+
+                                        }
+                                        kafkaProducer.commitTransaction();
+                                    }  catch (ProducerFencedException | OutOfOrderSequenceException | AuthorizationException e) {
+                                        //TODO: workd out handler
+                                    } catch (KafkaException e){
+                                        kafkaProducer.abortTransaction();
+                                    }
+                                    emitter.onComplete();
+                                }, BackpressureStrategy.ERROR);
+                            }
 
                             return Flowable.create(emitter -> {
                                 for (String destinationTopic : destinationTopics) {
@@ -640,7 +677,6 @@ public class KafkaConsumerProcessor
                                             value,
                                             consumerRecord.headers()
                                     );
-
                                     kafkaProducer.send(record, (metadata, exception) -> {
                                         if (exception != null) {
                                             emitter.onError(exception);
