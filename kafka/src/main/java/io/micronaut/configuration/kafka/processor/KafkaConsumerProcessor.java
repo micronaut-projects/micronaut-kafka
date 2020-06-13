@@ -73,6 +73,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -616,6 +617,7 @@ public class KafkaConsumerProcessor
             ConsumerRecord<?, ?> consumerRecord,
             Flowable<?> resultFlowable,
             boolean isBlocking) {
+        AtomicBoolean firstError = new AtomicBoolean(false);
         Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
                     String[] destinationTopics = method.stringValues(SendTo.class);
@@ -667,7 +669,7 @@ public class KafkaConsumerProcessor
                             consumerRecord
                     ));
 
-                    if (kafkaListener.isTrue("redelivery")) {
+                    if (kafkaListener.isTrue("redelivery") && !firstError.getAndSet(true)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
                         }
