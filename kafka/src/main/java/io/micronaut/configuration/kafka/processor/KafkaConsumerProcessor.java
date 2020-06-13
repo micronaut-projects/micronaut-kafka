@@ -621,6 +621,7 @@ public class KafkaConsumerProcessor
             ConsumerRecord<?, ?> consumerRecord,
             Flowable<?> resultFlowable,
             boolean isBlocking) {
+        AtomicBoolean firstError = new AtomicBoolean(false);
         Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
                     String[] destinationTopics = method.stringValues(SendTo.class);
@@ -660,8 +661,21 @@ public class KafkaConsumerProcessor
                                         }
                                         kafkaProducer.commitTransaction();
                                     }  catch (ProducerFencedException | OutOfOrderSequenceException | AuthorizationException e) {
-                                        //TODO: workd out handler
-                                    } catch (KafkaException e){
+                                        handleException(consumerBean, new KafkaListenerException(
+                                            "Unhandled exception [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + e.getMessage(),
+                                            e,
+                                            consumerBean,
+                                            kafkaConsumer,
+                                            consumerRecord
+                                        ));
+                                    } catch (KafkaException e) {
+                                        handleException(consumerBean, new KafkaListenerException(
+                                            "Error transaction aborted [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + e.getMessage(),
+                                            e,
+                                            consumerBean,
+                                            kafkaConsumer,
+                                            consumerRecord
+                                        ));
                                         kafkaProducer.abortTransaction();
                                     }
                                     emitter.onComplete();
@@ -677,6 +691,7 @@ public class KafkaConsumerProcessor
                                             value,
                                             consumerRecord.headers()
                                     );
+
                                     kafkaProducer.send(record, (metadata, exception) -> {
                                         if (exception != null) {
                                             emitter.onError(exception);
@@ -703,7 +718,7 @@ public class KafkaConsumerProcessor
                             consumerRecord
                     ));
 
-                    if (kafkaListener.isTrue("redelivery")) {
+                    if (kafkaListener.isTrue("redelivery") && !firstError.getAndSet(true)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
                         }
