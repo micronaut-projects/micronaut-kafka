@@ -22,7 +22,6 @@ import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.MetricsReporter;
 import org.apache.kafka.common.record.CompressionType;
 import org.apache.kafka.common.utils.AppInfoParser;
-import org.apache.kafka.common.utils.Crc32C;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
@@ -39,6 +38,7 @@ final class ChecksumFeature implements Feature {
         Class<?> c = access.findClassByName("java.util.zip.CRC32C");
         if (c != null) {
             RuntimeReflection.registerForReflectiveInstantiation(c);
+            RuntimeReflection.register(c);
         }
     }
 }
@@ -49,7 +49,7 @@ final class Java9ChecksumFactory {
 
     @Substitute
     public Checksum create() {
-        return (Checksum) InstantiationUtils.instantiate("java.util.zip.CRC32C", Crc32C.class.getClassLoader());
+        return (Checksum) InstantiationUtils.instantiate("java.util.zip.CRC32C", getClass().getClassLoader());
     }
 
 }
