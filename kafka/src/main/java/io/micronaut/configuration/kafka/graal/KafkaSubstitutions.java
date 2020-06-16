@@ -16,12 +16,12 @@
 package io.micronaut.configuration.kafka.graal;
 
 import com.oracle.svm.core.annotate.*;
+import io.micronaut.core.reflect.InstantiationUtils;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.MetricsReporter;
 import org.apache.kafka.common.record.CompressionType;
 import org.apache.kafka.common.utils.AppInfoParser;
-import org.apache.kafka.common.utils.PureJavaCrc32C;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
@@ -49,7 +49,7 @@ final class Java9ChecksumFactory {
 
     @Substitute
     public Checksum create() {
-        return new PureJavaCrc32C();
+        return (Checksum) InstantiationUtils.instantiate("java.util.zip.CRC32C", getClass().getClassLoader());
     }
 
 }
