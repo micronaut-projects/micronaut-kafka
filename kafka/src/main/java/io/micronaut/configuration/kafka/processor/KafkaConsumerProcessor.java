@@ -139,6 +139,20 @@ public class KafkaConsumerProcessor
         this.executorScheduler = Schedulers.from(executorService);
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
+        this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
+                        .forEach(definition -> {
+                            // pre-initialize singletons before processing
+                            if (definition.isSingleton()) {
+                                try {
+                                    beanContext.getBean(definition.getBeanType());
+                                } catch (Exception e) {
+                                    throw new MessagingSystemException(
+                                            "Error creating bean for @KafkaListener of type [" + definition.getBeanType() + "]: " + e.getMessage(),
+                                            e
+                                    );
+                                }
+                            }
+                        });
     }
 
     @Nonnull
