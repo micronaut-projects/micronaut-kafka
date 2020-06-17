@@ -28,14 +28,9 @@ abstract class AbstractTestContainersSpec extends Specification {
     ApplicationContext context
 
     @Shared
-    @AutoCleanup
-    static KafkaContainer kafkaContainer = new KafkaContainer("5.4.2")
+    static KafkaContainer kafkaContainer = KafkaSetup.init()
 
     def setupSpec() {
-        kafkaContainer.start()
-
-        createTopics(getTopics())
-
         List<Object> config = ["kafka.bootstrap.servers", "${kafkaContainer.getBootstrapServers()}"]
         config.addAll(getConfiguration())
 
@@ -58,25 +53,9 @@ abstract class AbstractTestContainersSpec extends Specification {
                 'kafka.streams.optimization-off.topology.optimization', 'none']
     }
 
-    //Override to create different topics on startup
-    protected List<String> getTopics() {
-        return [WordCountStream.INPUT,
-                WordCountStream.OUTPUT,
-                WordCountStream.NAMED_WORD_COUNT_INPUT,
-                WordCountStream.NAMED_WORD_COUNT_OUTPUT,
-                OptimizationStream.OPTIMIZATION_ON_INPUT,
-                OptimizationStream.OPTIMIZATION_OFF_INPUT]
-    }
-
-    private static void createTopics(List<String> topics) {
-        def newTopics = topics.collect { topic -> new NewTopic(topic, 1, (short) 1) }
-        def admin = AdminClient.create(["bootstrap.servers": kafkaContainer.getBootstrapServers()])
-        admin.createTopics(newTopics)
-    }
 
     def cleanupSpec() {
         try {
-            kafkaContainer.stop()
             embeddedServer.stop()
             log.warn("Stopped containers!")
         } catch (Exception ignore) {

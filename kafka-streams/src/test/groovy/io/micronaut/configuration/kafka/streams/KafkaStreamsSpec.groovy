@@ -75,15 +75,25 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
      */
     void "test kafka topology optimization"() {
         given:
-        OptimizationInteractiveQueryService interactiveQueryService = context.getBean(OptimizationInteractiveQueryService)
+        OptimizationInteractiveQueryService interactiveQueryService =
+                context.getBean(OptimizationInteractiveQueryService)
         PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
 
+
         when:
+
+        OptimizationListener optimizationListener = context.getBean(OptimizationListener)
+
+        then:
+        conditions.eventually {
+            optimizationListener.ready
+        }
+
         OptimizationClient optimizationClient = context.getBean(OptimizationClient)
+
         optimizationClient.publishOptimizationOffMessage("key", "off")
         optimizationClient.publishOptimizationOnMessage("key", "on")
 
-        OptimizationListener optimizationListener = context.getBean(OptimizationListener)
 
         then:
         conditions.eventually {

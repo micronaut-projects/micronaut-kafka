@@ -4,9 +4,16 @@ import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Context;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.common.TopicPartition;
+
+import javax.inject.Singleton;
+import java.util.Collection;
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "OptimizationListener")
-public class OptimizationListener {
+@Context
+public class OptimizationListener implements ConsumerRebalanceListener {
 
     private int optimizationOffChangelogMessageCount = 0;
 
@@ -19,6 +26,12 @@ public class OptimizationListener {
     private final String optimizationOnChangelogTopicName =
             OptimizationStream.STREAM_OPTIMIZATION_ON + "-" +
                     OptimizationStream.OPTIMIZATION_ON_STORE + "-changelog";
+
+    boolean ready = false;
+
+    public OptimizationListener() {
+        System.out.println("Constructed OptimizationListener");
+    }
 
     @Topic(optimizationOffChangelogTopicName)
     void optOffCount(@KafkaKey String key, String value) {
@@ -38,4 +51,17 @@ public class OptimizationListener {
         return optimizationOnChangelogMessageCount;
     }
 
+    @Override
+    public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+        ready = false;
+    }
+
+    @Override
+    public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+        ready = true;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
 }
