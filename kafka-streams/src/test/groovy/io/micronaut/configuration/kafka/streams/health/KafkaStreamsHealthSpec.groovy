@@ -9,7 +9,9 @@ import io.micronaut.management.health.indicator.HealthResult
 import io.micronaut.runtime.ApplicationConfiguration
 import io.reactivex.Single
 import org.apache.kafka.streams.KafkaStreams
+import spock.lang.Retry
 
+@Retry
 class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "should create object"() {

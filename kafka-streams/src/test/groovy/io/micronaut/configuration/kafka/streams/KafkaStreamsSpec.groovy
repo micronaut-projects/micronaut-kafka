@@ -11,8 +11,10 @@ import io.micronaut.configuration.kafka.streams.wordcount.WordCountListener
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
+import spock.lang.Retry
 import spock.util.concurrent.PollingConditions
 
+@Retry
 class KafkaStreamsSpec extends AbstractTestContainersSpec {
 
     void "test config"() {
