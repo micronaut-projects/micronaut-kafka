@@ -12,10 +12,12 @@ import io.reactivex.Flowable
 import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import spock.lang.AutoCleanup
+import spock.lang.Retry
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
+@Retry
 class KafkaBatchListenerSpec extends Specification {
 
     public static final String BOOKS_TOPIC = 'KafkaBatchListenerSpec-books'

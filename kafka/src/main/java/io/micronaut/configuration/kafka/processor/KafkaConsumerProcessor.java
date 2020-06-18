@@ -142,7 +142,7 @@ public class KafkaConsumerProcessor
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
     }
-    
+
     @Nonnull
     @Override
     public <K, V> Consumer<K, V> getConsumer(@Nonnull String id) {
