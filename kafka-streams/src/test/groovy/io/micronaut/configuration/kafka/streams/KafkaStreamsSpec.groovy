@@ -11,6 +11,7 @@ import io.micronaut.configuration.kafka.streams.wordcount.WordCountListener
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
+import spock.lang.IgnoreIf
 import spock.lang.Retry
 import spock.util.concurrent.PollingConditions
 
@@ -73,6 +74,7 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
      *
      * @author jgray1206
      */
+    @IgnoreIf({System.getenv("GITHUB_WORKFLOW")})
     void "test kafka topology optimization"() {
         given:
         OptimizationInteractiveQueryService interactiveQueryService =
