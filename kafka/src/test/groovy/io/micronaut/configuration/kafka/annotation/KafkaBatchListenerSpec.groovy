@@ -65,7 +65,7 @@ class KafkaBatchListenerSpec extends Specification {
         then:
         conditions.eventually {
             bookListener.books.size() == 2
-            bookListener.headers.size() == 2
+            !bookListener.headers.isEmpty()
             bookListener.headers.every() { it == "Bar" }
             bookListener.books.contains(new Book(title: "The Header"))
             bookListener.books.contains(new Book(title: "The Shining"))
