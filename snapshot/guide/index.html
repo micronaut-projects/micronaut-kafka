@@ -55,7 +55,7 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>6</strong><span>Running Kafka Applications</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>7</strong><span>Kafka Streams</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
                                 
@@ -128,11 +128,7 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>6.3</strong><span>Kafka Distributed Tracing</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>7</strong><span>Kafka Streams</span></a></div>
-        
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamInteractiveQuery"><a href="#kafkaStreamInteractiveQuery"><strong>7.1</strong><span>Interactive Query Service</span></a></div>
-        
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>7.2</strong><span>Kafka Stream Health Checks</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStream"><a href="#kafkaStream"><strong>7</strong><span>Building Kafka Stream Applications</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
         
@@ -150,7 +146,7 @@
 <h1 id="introduction"><a class="anchor" href="#introduction"></a>1 Introduction</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/introduction.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/introduction.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -168,32 +164,6 @@
 <div class="sect1">
 <h2 id="_release_history">Release History</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_2_1_0">2.1.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Micronaut 1.3.5 minimum version</p>
-</li>
-<li>
-<p>Upgrade to Kafka 2.5.0</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_2_0_0">2.0.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Micronaut 1.3.3 minimum version</p>
-</li>
-<li>
-<p>New Maven group ID <code>io.micronaut.kafka</code></p>
-</li>
-</ul>
-</div>
-</div>
 <div class="sect2">
 <h3 id="_1_4_0">1.4.0</h3>
 <div class="ulist">
@@ -291,7 +261,7 @@
 <h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>2 Using the Micronaut CLI</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaCli.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaCli.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -343,7 +313,7 @@ $ mn create-kafka-listener Message
 <h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>3 Kafka Quick Start</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaQuickStart.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaQuickStart.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -356,13 +326,13 @@ $ mn create-kafka-listener Message
 <p>        <div class="listingblock multi-language-sample">
 <div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.kafka:micronaut-kafka")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -548,7 +518,7 @@ public class ProductListener {
 <h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>4 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -564,7 +534,7 @@ public class ProductListener {
 <h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>4.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -626,39 +596,6 @@ public interface ProductClient {
 </div>
 <div class="paragraph">
 <p>If the <code>my.application.token</code> is not set then an error will occur creating the client.</p>
-</div>
-<div class="paragraph">
-<p>It is also possible to pass <code>Collection&lt;Header&gt;&gt;</code> or <code>Headers</code> object as method arguments as seen below.</p>
-</div>
-<div class="listingblock">
-<div class="title">Collection&lt;Header&gt; Argument</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Collection&lt;Header&gt; headers);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a href="https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Header.html">Kafka Header Javadocs</a></p>
-</div>
-<div class="listingblock">
-<div class="title">Headers Argument</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Headers headers);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a href="https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Headers.html">Kafka Headers Javadocs</a></p>
-</div>
-<div class="paragraph">
-<p>In the above examples, all of the key/value pairs in <code>headers</code> will be added to the list of headers produced to the topic.  <code>Header</code> and <code>Headers</code> are
-part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 <div class="sect2">
@@ -760,7 +697,7 @@ part of the <code>kafka-clients</code> library:</p>
 <h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>4.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -869,7 +806,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -931,7 +868,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 <h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>4.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1024,7 +961,7 @@ public void testBookSender() throws IOException {
 <h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>4.5 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1036,9 +973,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.5.0:test'
-testImplementation 'org.apache.kafka:kafka_2.12:2.5.0'
-testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.4.0:test'
+testImplementation 'org.apache.kafka:kafka_2.12:2.4.0'
+testImplementation 'org.apache.kafka:kafka_2.12:2.4.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1050,18 +987,18 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.4.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.4.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.4.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -1073,7 +1010,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>5 Kafka Consumers Using @KafkaListener</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1132,7 +1069,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>5.1 Defining @KafkaListener Methods</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1159,7 +1096,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <div class="listingblock">
 <div class="title">Specifying Multiple Topics</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic({"fun-products", "awesome-products"})</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("fun-products", "awesome-products")</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1405,7 +1342,7 @@ public Single&lt;Product&gt; receive(
 <h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>5.2 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1559,7 +1496,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>5.3 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1806,7 +1743,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 <h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>5.4 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1957,7 +1894,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 <h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>5.5 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2047,7 +1984,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <h2 id="kafkaExceptions"><a class="anchor" href="#kafkaExceptions"></a>5.6 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaExceptions.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaListener/kafkaExceptions.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2069,7 +2006,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>6 Running Kafka Applications</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaApplications.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2093,7 +2030,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>6.1 Kafka Health Checks</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2147,7 +2084,7 @@ By default, the details visible above are only shown to authenticated users. See
 <h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>6.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2163,7 +2100,7 @@ By default, the details visible above are only shown to authenticated users. See
 <h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>6.3 Kafka Distributed Tracing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2192,10 +2129,10 @@ By default, the details visible above are only shown to authenticated users. See
 </p>
 </div>
 
-<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>7 Kafka Streams</h1>
+<h1 id="kafkaStream"><a class="anchor" href="#kafkaStream"></a>7 Building Kafka Stream Applications</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaStream.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2240,13 +2177,13 @@ By default, the details visible above are only shown to authenticated users. See
 <p>        <div class="listingblock multi-language-sample">
 <div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.kafka:micronaut-kafka-streams")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka-streams")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -2391,7 +2328,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
 public class WordCountListener {
 
     private final Map&lt;String, Long&gt; wordCounts = new ConcurrentHashMap&lt;&gt;();
@@ -2441,18 +2378,6 @@ public class WordCountListener {
 <div class="paragraph">
 <p>You can then inject a <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
-</td>
-</tr>
-</table>
-</div>
 <div class="listingblock">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
@@ -2470,16 +2395,9 @@ KStream&lt;String, String&gt; myStream(
 </div>
 </div>
 </div>
-
-<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>7.1 Interactive Query Service</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
+<div class="sect1">
+<h2 id="_interactive_query_service">Interactive Query Service</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores">available here</a>.</p>
 </div>
@@ -2576,80 +2494,13 @@ public class InteractiveQueryServiceExample {
 }</code></pre>
 </div>
 </div>
-
-<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>7.2 Kafka Stream Health Checks</h2>
-
-<div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
-        <i class='fa fa-pencil-square-o'></i> Improve this doc
-    </button>
-</div>
-
-
-<div class="paragraph">
-<p>In addition to <code>http-server-netty</code>, if the <code>management</code> dependency is added, then Micronaut&#8217;s <a href="#healthEndpoint">Health Endpoint</a> can be used to expose the health status of the Kafka streams application.</p>
-</div>
-<div class="paragraph">
-<p>For example stream health at the <code>/health</code> endpoint will return:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "status": "UP",
-  "details": {
-    "kafkaStreams": {
-      "name": "my-application",
-      "status": "UP",
-      "details": {
-        "named-stream": {
-          "name": "my-application",
-          "status": "UP",
-          "details": {
-            "adminClientId": "my-consumer-id-admin",
-            "restoreConsumerClientId": "my-consumer-id-StreamThread-1-restore-consumer",
-            "threadState": "RUNNING",
-            "producerClientIds": [
-              "my-consumer-id-StreamThread-1-producer"
-            ],
-            "consumerClientId": "my-consumer-id-StreamThread-1-consumer",
-            "threadName": "my-consumer-id-StreamThread-1"
-          }
-        }
-      }
-    },
-    ...
-  }
-}</code></pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-By default, the details visible above are only shown to authenticated users. See the <a href="#healthEndpoint">Health Endpoint</a> documentation for how to configure that setting.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>If you wish to disable the Kafka streams health check while still using the <code>management</code> dependency you can set the property <code>kafka.streams.health.enabled</code> to <code>false</code> in your application configuration.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
-    streams:
-	    health:
-		    enabled: false</code></pre>
 </div>
 </div>
 
 <h1 id="repository"><a class="anchor" href="#repository"></a>8 Repository</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/repository.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/repository.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
