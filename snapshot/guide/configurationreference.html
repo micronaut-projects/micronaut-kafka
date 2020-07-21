@@ -46,14 +46,67 @@
         <div class="docs-content">
             <div class="project">
                 <h1>Configuration Reference</h1>
-                <p><strong>Version:</strong>1.4.1.BUILD-SNAPSHOT</p>
+                <p><strong>Version:</strong>2.1.1.BUILD-SNAPSHOT</p>
                 <p></p>
             </div>
 <div class="sect2">
 <h3 id="_kafka_config_properties">Kafka Config Properties</h3>
+<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key serializer.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value serializer.</p></td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<a id="io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration">&#128279;</a>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html">KafkaDefaultConfiguration</a></caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout. Default value (10 seconds).</p></td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
 <a id="io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration" href="#io.micronaut.configuration.kafka.embedded.KafkaEmbeddedConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 1. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
+<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/embedded/KafkaEmbeddedConfiguration.html">KafkaEmbeddedConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -87,7 +140,7 @@
 <div style="page-break-after: always;"></div>
 <a id="io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
+<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -110,59 +163,6 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.value-deserializer</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value deserializer.</p></td>
-</tr>
-</tbody>
-</table>
-<div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
-<table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the key serializer.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the default value serializer.</p></td>
-</tr>
-</tbody>
-</table>
-<div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration">&#128279;</a>
-<table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html">KafkaDefaultConfiguration</a></caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout. Default value (10 seconds).</p></td>
 </tr>
 </tbody>
 </table>
