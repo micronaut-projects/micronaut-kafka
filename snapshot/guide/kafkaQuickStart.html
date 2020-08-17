@@ -11,7 +11,7 @@
 
         gtag('config', 'UA-82213539-2');
     </script>
-    <title>3 Kafka Quick Start 2.1.1.BUILD-SNAPSHOT</title>
+    <title>3 Kafka Quick Start 1.4.1.BUILD-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -56,7 +56,7 @@ function addJsClass() {
                         <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaApplications.html"><strong>6</strong><span>Running Kafka Applications</span></a>
                         </div>
                         
-                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStreams.html"><strong>7</strong><span>Kafka Streams</span></a>
+                        <div class="toc-item" style="margin-left:0"><a href="../guide/kafkaStream.html"><strong>7</strong><span>Building Kafka Stream Applications</span></a>
                         </div>
                         
                         <div class="toc-item" style="margin-left:0"><a href="../guide/repository.html"><strong>8</strong><span>Repository</span></a>
@@ -93,7 +93,7 @@ function addJsClass() {
                 <div class="project">
                     <h1>3 Kafka Quick Start</h1>
 
-                    <p><strong>Version:</strong> 2.1.1.BUILD-SNAPSHOT</p>
+                    <p><strong>Version:</strong> 1.4.1.BUILD-SNAPSHOT</p>
                 </div>
 
                 
@@ -102,7 +102,7 @@ function addJsClass() {
 <h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>3 Kafka Quick Start</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaQuickStart.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/1.4.x/src/main/docs/guide/kafkaQuickStart.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -115,13 +115,13 @@ function addJsClass() {
 <p>        <div class="listingblock multi-language-sample">
 <div class="title"></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.kafka:micronaut-kafka")</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">implementation(<span class="hljs-string">"io.micronaut.configuration:micronaut-kafka")</span></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.micronaut.kafka&lt;/groupId&gt;
+    &lt;groupId&gt;io.micronaut.configuration&lt;/groupId&gt;
     &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
