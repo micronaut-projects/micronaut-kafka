@@ -60,6 +60,8 @@ public class DefaultKafkaConsumerConfiguration<K, V> extends AbstractKafkaConsum
     }
 
     private void init(AbstractKafkaConfiguration defaultConfiguration) {
+        this.setEnabled(defaultConfiguration.isEnabled());
+
         Properties config = getConfig();
         config.putAll(defaultConfiguration.getConfig());
     }

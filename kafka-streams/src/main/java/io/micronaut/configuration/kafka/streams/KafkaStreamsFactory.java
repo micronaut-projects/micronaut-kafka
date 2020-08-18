@@ -15,11 +15,13 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
@@ -39,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 1.0
  */
 @Factory
+@Requires(property = AbstractKafkaConfiguration.PREFIX + "." + AbstractKafkaConfiguration.ENABLED_CONFIG, value = "true", defaultValue = "true")
 public class KafkaStreamsFactory implements Closeable {
 
     private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();

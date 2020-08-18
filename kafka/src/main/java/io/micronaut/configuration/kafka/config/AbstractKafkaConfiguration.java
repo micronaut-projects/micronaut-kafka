@@ -15,6 +15,8 @@
  */
 package io.micronaut.configuration.kafka.config;
 
+import io.micronaut.core.util.Toggleable;
+
 import javax.annotation.Nonnull;
 import java.util.Properties;
 
@@ -26,7 +28,18 @@ import java.util.Properties;
  * @author Graeme Rocher
  * @since 1.0
  */
-public abstract class AbstractKafkaConfiguration<K, V> {
+public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
+
+    /**
+     * The global kafka enabled config item name.
+     */
+    public static final String ENABLED_CONFIG = "enabled";
+
+    /**
+     * The default enabled status.
+     */
+    public static final boolean DEFAULT_ENABLED = true;
+
     /**
      * The default kafka port.
      */
@@ -55,6 +68,7 @@ public abstract class AbstractKafkaConfiguration<K, V> {
      */
     public static final String DEFAULT_BOOTSTRAP_SERVERS = "localhost:" + DEFAULT_KAFKA_PORT;
 
+    private boolean enabled = DEFAULT_ENABLED;
     private final Properties config;
 
     /**
@@ -64,6 +78,21 @@ public abstract class AbstractKafkaConfiguration<K, V> {
      */
     protected AbstractKafkaConfiguration(Properties config) {
         this.config = config;
+    }
+
+    /**
+     * @return Whether kafka is enabled
+     */
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * @param enabled true if kafka is enabled
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     /**

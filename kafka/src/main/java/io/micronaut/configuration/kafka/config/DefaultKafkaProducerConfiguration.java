@@ -56,6 +56,8 @@ public class DefaultKafkaProducerConfiguration<K, V> extends AbstractKafkaProduc
     }
 
     private void init(AbstractKafkaConfiguration defaultConfiguration) {
+        this.setEnabled(defaultConfiguration.isEnabled());
+
         Properties config = getConfig();
         config.putAll(defaultConfiguration.getConfig());
 

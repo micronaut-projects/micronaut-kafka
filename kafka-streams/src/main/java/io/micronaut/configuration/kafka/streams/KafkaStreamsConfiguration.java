@@ -60,5 +60,6 @@ public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfigu
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(streamName, true);
         config.putAll(environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new));
         init(applicationConfiguration, environment, config);
+        this.setEnabled(defaultConfiguration.isEnabled());
     }
 }

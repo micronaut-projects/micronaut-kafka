@@ -58,6 +58,11 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
         );
+
+        if (getConfig().containsKey(ENABLED_CONFIG)) {
+            Optional<Boolean> enabledConfig = ConversionService.SHARED.convert(getConfig().get(ENABLED_CONFIG), Boolean.class);
+            enabledConfig.ifPresent(this::setEnabled);
+        }
     }
 
     /**

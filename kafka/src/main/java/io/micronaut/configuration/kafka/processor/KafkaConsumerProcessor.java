@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.*;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry;
 import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry;
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
@@ -87,6 +88,7 @@ import java.util.regex.Pattern;
  */
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
+@Requires(property = AbstractKafkaConfiguration.PREFIX + "." + AbstractKafkaConfiguration.ENABLED_CONFIG, value = "true", defaultValue = "true")
 @Context
 public class KafkaConsumerProcessor
         implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable, ConsumerRegistry {

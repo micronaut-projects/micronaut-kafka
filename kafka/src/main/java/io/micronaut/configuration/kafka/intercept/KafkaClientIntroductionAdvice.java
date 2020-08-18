@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.intercept;
 
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
+import io.micronaut.configuration.kafka.NoopProducer;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
@@ -599,6 +600,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             DefaultKafkaProducerConfiguration<?, ?> newConfiguration = new DefaultKafkaProducerConfiguration<>(
                     configuration
             );
+
+            if (!newConfiguration.isEnabled()) {
+                LOG.debug("Kafka is disabled, skipping producer configuration...");
+                return new NoopProducer();
+            }
 
             Properties newProperties = newConfiguration.getConfig();
 
