@@ -26,7 +26,6 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
-import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
@@ -87,7 +86,6 @@ import java.util.regex.Pattern;
  */
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
-@Context
 public class KafkaConsumerProcessor
         implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable, ConsumerRegistry {
 
@@ -141,6 +139,20 @@ public class KafkaConsumerProcessor
         this.executorScheduler = Schedulers.from(executorService);
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
+        this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
+                        .forEach(definition -> {
+                            // pre-initialize singletons before processing
+                            if (definition.isSingleton()) {
+                                try {
+                                    beanContext.getBean(definition.getBeanType());
+                                } catch (Exception e) {
+                                    throw new MessagingSystemException(
+                                            "Error creating bean for @KafkaListener of type [" + definition.getBeanType() + "]: " + e.getMessage(),
+                                            e
+                                    );
+                                }
+                            }
+                        });
     }
 
     @Nonnull
