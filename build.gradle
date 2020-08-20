@@ -14,6 +14,16 @@ subprojects { Project subproject ->
 
     apply plugin: "io.micronaut.build.common"
 
+    micronautBuild {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'org.apache.kafka') {
+                    details.useVersion kafkaVersion
+                }
+            }
+        }
+    }
+
     if (subproject.parent.name == "docs-examples" || subproject.name == "docs-examples") {
         return
     }
