@@ -49,7 +49,7 @@ public class CompositeSerdeRegistry implements SerdeRegistry {
                 registries != null ? Arrays.asList(registries) : Collections.emptyList()
         );
 
-        OrderUtil.sort(registries);
+        OrderUtil.sort(this.registries);
     }
 
     @SuppressWarnings("unchecked")
