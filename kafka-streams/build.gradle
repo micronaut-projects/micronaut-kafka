@@ -11,7 +11,7 @@ dependencies {
 
     testImplementation "io.micronaut:micronaut-management"
     testCompileOnly "io.micronaut:micronaut-inject-groovy"
-    testImplementation "io.micronaut.test:micronaut-test-spock:1.2.2"
+    testImplementation "io.micronaut.test:micronaut-test-spock:1.2.3"
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut:micronaut-inject"
     testImplementation "io.micronaut.configuration:micronaut-micrometer-core:1.3.1"
