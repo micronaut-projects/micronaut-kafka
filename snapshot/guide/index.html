@@ -45,19 +45,21 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaCli"><strong>2</strong><span>Using the Micronaut CLI</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#releaseHistory"><strong>2</strong><span>Release History</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaQuickStart"><strong>3</strong><span>Kafka Quick Start</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaCli"><strong>3</strong><span>Using the Micronaut CLI</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaClient"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaQuickStart"><strong>4</strong><span>Kafka Quick Start</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaListener"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaClient"><strong>5</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>6</strong><span>Running Kafka Applications</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>7</strong><span>Kafka Streams</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>9</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -90,51 +92,53 @@
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-introduction"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaCli"><a href="#kafkaCli"><strong>2</strong><span>Using the Micronaut CLI</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-releaseHistory"><a href="#releaseHistory"><strong>2</strong><span>Release History</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaQuickStart"><a href="#kafkaQuickStart"><strong>3</strong><span>Kafka Quick Start</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaCli"><a href="#kafkaCli"><strong>3</strong><span>Using the Micronaut CLI</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaClient"><a href="#kafkaClient"><strong>4</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaQuickStart"><a href="#kafkaQuickStart"><strong>4</strong><span>Kafka Quick Start</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientMethods"><a href="#kafkaClientMethods"><strong>4.1</strong><span>Defining @KafkaClient Methods</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaClient"><a href="#kafkaClient"><strong>5</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientConfiguration"><a href="#kafkaClientConfiguration"><strong>4.2</strong><span>Configuring @KafkaClient beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientMethods"><a href="#kafkaClientMethods"><strong>5.1</strong><span>Defining @KafkaClient Methods</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientBatch"><a href="#kafkaClientBatch"><strong>4.3</strong><span>Sending Records in Batch</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientConfiguration"><a href="#kafkaClientConfiguration"><strong>5.2</strong><span>Configuring @KafkaClient beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientScope"><a href="#kafkaClientScope"><strong>4.4</strong><span>Injecting Kafka Producer Beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientBatch"><a href="#kafkaClientBatch"><strong>5.3</strong><span>Sending Records in Batch</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaEmbedded"><a href="#kafkaEmbedded"><strong>4.5</strong><span>Embedding Kafka</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientScope"><a href="#kafkaClientScope"><strong>5.4</strong><span>Injecting Kafka Producer Beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>5</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaEmbedded"><a href="#kafkaEmbedded"><strong>5.5</strong><span>Embedding Kafka</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerMethods"><a href="#kafkaListenerMethods"><strong>5.1</strong><span>Defining @KafkaListener Methods</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>5.2</strong><span>Configuring @KafkaListener beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerMethods"><a href="#kafkaListenerMethods"><strong>6.1</strong><span>Defining @KafkaListener Methods</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>5.3</strong><span>Commiting Kafka Offsets</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>6.2</strong><span>Configuring @KafkaListener beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>5.4</strong><span>Kafka Batch Processing</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>6.3</strong><span>Commiting Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>5.5</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>6.4</strong><span>Kafka Batch Processing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaExceptions"><a href="#kafkaExceptions"><strong>5.6</strong><span>Handling Consumer Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>6.5</strong><span>Forwarding Messages with @SendTo</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>6</strong><span>Running Kafka Applications</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaExceptions"><a href="#kafkaExceptions"><strong>6.6</strong><span>Handling Consumer Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaHealth"><a href="#kafkaHealth"><strong>6.1</strong><span>Kafka Health Checks</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>6.2</strong><span>Kafka Metrics</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaHealth"><a href="#kafkaHealth"><strong>7.1</strong><span>Kafka Health Checks</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>6.3</strong><span>Kafka Distributed Tracing</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>7.2</strong><span>Kafka Metrics</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>7</strong><span>Kafka Streams</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>7.3</strong><span>Kafka Distributed Tracing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamInteractiveQuery"><a href="#kafkaStreamInteractiveQuery"><strong>7.1</strong><span>Interactive Query Service</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>7.2</strong><span>Kafka Stream Health Checks</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamInteractiveQuery"><a href="#kafkaStreamInteractiveQuery"><strong>8.1</strong><span>Interactive Query Service</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>8</strong><span>Repository</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>8.2</strong><span>Kafka Stream Health Checks</span></a></div>
+        
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>9</strong><span>Repository</span></a></div>
         
         </div>
     </div>
@@ -165,130 +169,24 @@
 <div class="paragraph">
 <p>With Micronaut&#8217;s efficient compile-time AOP and cloud native features, writing efficient Kafka consumer applications that use very little resources is a breeze.</p>
 </div>
-<div class="sect1">
-<h2 id="_release_history">Release History</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_2_1_0">2.1.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Micronaut 1.3.5 minimum version</p>
-</li>
-<li>
-<p>Upgrade to Kafka 2.5.0</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_2_0_0">2.0.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Micronaut 1.3.3 minimum version</p>
-</li>
-<li>
-<p>New Maven group ID <code>io.micronaut.kafka</code></p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_4_0">1.4.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.4.0</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_3_0">1.3.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.3.1</p>
-</li>
-<li>
-<p>Micronaut 1.2.x Minimum Version</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_2_0">1.2.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.3.0</p>
-</li>
-<li>
-<p>Micronaut 1.1.x Minimum Version</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_1_0">1.1.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.1.0</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_0_4">1.0.4</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.0.1</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_1_0_2">1.1.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Upgrade to Kafka 2.1.1</p>
-</li>
-<li>
-<p>Support for Open Tracing</p>
-</li>
-<li>
-<p>Support for Pausing / Resuming Consumers via <a href="../api/io/micronaut/configuration/kafka/ConsumerRegistry.html">ConsumerRegistry</a> interface</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_1_2_0_2">1.2.0</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Micronaut 1.1.x minimum version</p>
-</li>
-<li>
-<p>Upgrade to Kafka 2.3.0</p>
-</li>
-<li>
-<p>GraalVM Native Support (with Micronaut 1.2+)</p>
-</li>
-<li>
-<p>Better Exception Handling</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
+
+<h1 id="releaseHistory"><a class="anchor" href="#releaseHistory"></a>2 Release History</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/releaseHistory.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
 </div>
 
-<h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>2 Using the Micronaut CLI</h1>
+
+<div class="paragraph">
+<p>For this project, you can find a list of releases (with release notes) here:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/micronaut-projects/micronaut-kafka/releases">https://github.com/micronaut-projects/micronaut-kafka/releases</a></p>
+</div>
+
+<h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>3 Using the Micronaut CLI</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaCli.adoc"'>
@@ -340,7 +238,7 @@ $ mn create-kafka-listener Message
 </div>
 </div>
 
-<h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>3 Kafka Quick Start</h1>
+<h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>4 Kafka Quick Start</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaQuickStart.adoc"'>
@@ -545,7 +443,7 @@ public class ProductListener {
 </div>
 </div>
 
-<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>4 Kafka Producers Using @KafkaClient</h1>
+<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>5 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient.adoc"'>
@@ -561,7 +459,7 @@ public class ProductListener {
 <p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
 </div>
 
-<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>4.1 Defining @KafkaClient Methods</h2>
+<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>5.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
@@ -757,7 +655,7 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 
-<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>4.2 Configuring @KafkaClient beans</h2>
+<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>5.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
@@ -866,7 +764,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>4.3 Sending Records in Batch</h2>
+<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>5.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
@@ -928,7 +826,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 </div>
 </div>
 
-<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>4.4 Injecting Kafka Producer Beans</h2>
+<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>5.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
@@ -1021,7 +919,7 @@ public void testBookSender() throws IOException {
 <p>By using the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
-<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>4.5 Embedding Kafka</h2>
+<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>5.5 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
@@ -1070,7 +968,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <p>Note that because of the distributed nature of Kafka it is relatively slow to startup so it is generally better to do the initialization with <code>@BeforeClass</code> (or <code>setupSpec</code> in Spock) and have a large number of test methods rather than many test classes otherwise your test execution performance will suffer.</p>
 </div>
 
-<h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>5 Kafka Consumers Using @KafkaListener</h1>
+<h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>6 Kafka Consumers Using @KafkaListener</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener.adoc"'>
@@ -1129,7 +1027,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="{kafkaapi}/org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
 </div>
 
-<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>5.1 Defining @KafkaListener Methods</h2>
+<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
@@ -1402,7 +1300,7 @@ public Single&lt;Product&gt; receive(
 </div>
 </div>
 
-<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>5.2 Configuring @KafkaListener beans</h2>
+<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>6.2 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
@@ -1556,7 +1454,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>5.3 Commiting Kafka Offsets</h2>
+<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>6.3 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
@@ -1803,7 +1701,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 </div>
 </div>
 
-<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>5.4 Kafka Batch Processing</h2>
+<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>6.4 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
@@ -1954,7 +1852,7 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 </div>
 
-<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>5.5 Forwarding Messages with @SendTo</h2>
+<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>6.5 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
@@ -2044,7 +1942,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>In the reactive case the <code>poll</code> loop will continue and will not wait for the record to be sent unless you specifically annotate the method with <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a>.</p>
 </div>
 
-<h2 id="kafkaExceptions"><a class="anchor" href="#kafkaExceptions"></a>5.6 Handling Consumer Exceptions</h2>
+<h2 id="kafkaExceptions"><a class="anchor" href="#kafkaExceptions"></a>6.6 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaExceptions.adoc"'>
@@ -2066,7 +1964,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>The <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> receives an exception of type <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html">KafkaListenerException</a> which allows access to the original <code>ConsumerRecord</code>, if available.</p>
 </div>
 
-<h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>6 Running Kafka Applications</h1>
+<h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>7 Running Kafka Applications</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications.adoc"'>
@@ -2090,7 +1988,7 @@ public Single&lt;Integer&gt; receiveProduct(
 <p>No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the <code>KafkaConsumer</code> instances are closed correctly when the server is shutdown.</p>
 </div>
 
-<h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>6.1 Kafka Health Checks</h2>
+<h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>7.1 Kafka Health Checks</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
@@ -2144,7 +2042,7 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 </div>
 
-<h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>6.2 Kafka Metrics</h2>
+<h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>7.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
@@ -2160,7 +2058,7 @@ By default, the details visible above are only shown to authenticated users. See
 <p>If you do not wish to collect Kafka metrics, you can set <code>micronaut.metrics.binders.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.</p>
 </div>
 
-<h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>6.3 Kafka Distributed Tracing</h2>
+<h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>7.3 Kafka Distributed Tracing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
@@ -2192,7 +2090,7 @@ By default, the details visible above are only shown to authenticated users. See
 </p>
 </div>
 
-<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>7 Kafka Streams</h1>
+<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>8 Kafka Streams</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams.adoc"'>
@@ -2471,7 +2369,7 @@ KStream&lt;String, String&gt; myStream(
 </div>
 </div>
 
-<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>7.1 Interactive Query Service</h2>
+<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>8.1 Interactive Query Service</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
@@ -2577,7 +2475,7 @@ public class InteractiveQueryServiceExample {
 </div>
 </div>
 
-<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>7.2 Kafka Stream Health Checks</h2>
+<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>8.2 Kafka Stream Health Checks</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
@@ -2646,7 +2544,7 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 </div>
 
-<h1 id="repository"><a class="anchor" href="#repository"></a>8 Repository</h1>
+<h1 id="repository"><a class="anchor" href="#repository"></a>9 Repository</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/repository.adoc"'>
