@@ -1,4 +1,5 @@
 introduction: Introduction
+releaseHistory: Release History
 kafkaCli: Using the Micronaut CLI
 kafkaQuickStart: Kafka Quick Start
 kafkaClient:

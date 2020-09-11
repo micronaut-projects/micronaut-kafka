@@ -24,10 +24,6 @@ subprojects { Project subproject ->
         }
     }
 
-    if (subproject.parent.name == "docs-examples" || subproject.name == "docs-examples") {
-        return
-    }
-
     apply plugin: "io.micronaut.build.dependency-updates"
     apply plugin: "io.micronaut.build.publishing"
 }
