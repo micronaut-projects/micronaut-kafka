@@ -1,6 +1,6 @@
 dependencies {
-	annotationProcessor "io.micronaut:micronaut-inject-java"
-	annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
     api project(":kafka")
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-streams:${kafkaVersion}"
