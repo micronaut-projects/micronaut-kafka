@@ -11,17 +11,17 @@ dependencies {
 
     testImplementation "io.micronaut:micronaut-management"
     testCompileOnly "io.micronaut:micronaut-inject-groovy"
-    testImplementation "io.micronaut.test:micronaut-test-spock:1.1.5"
+    testImplementation "io.micronaut.test:micronaut-test-spock:1.2.3"
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut:micronaut-inject"
     testImplementation "io.micronaut.configuration:micronaut-micrometer-core:1.3.1"
-    testImplementation "io.projectreactor:reactor-core:3.3.5.RELEASE"
+    testImplementation "io.projectreactor:reactor-core:3.3.9.RELEASE"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
-    testImplementation "org.testcontainers:kafka:1.14.2" //Breaking change in java container after 1.12 see https://github.com/docker-java/docker-java/pull/1392
-    testImplementation "org.testcontainers:spock:1.14.2"
+    testImplementation "org.testcontainers:kafka:1.14.3" //Breaking change in java container after 1.12 see https://github.com/docker-java/docker-java/pull/1392
+    testImplementation "org.testcontainers:spock:1.14.3"
 
     testRuntimeOnly "io.micronaut:micronaut-runtime"
     testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
