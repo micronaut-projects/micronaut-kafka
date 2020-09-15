@@ -9,7 +9,7 @@ dependencies {
     api "org.apache.kafka:kafka-clients:${kafkaVersion}"
 
     compileOnly "io.micronaut:micronaut-management"
-    compileOnly "io.micronaut.micrometer:micronaut-micrometer-core:1.3.1"
+    compileOnly "io.micronaut.micrometer:micronaut-micrometer-core"
     compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     compileOnly "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
@@ -18,7 +18,7 @@ dependencies {
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut.test:micronaut-test-spock"
     testImplementation "io.micronaut:micronaut-inject-java"
-    testImplementation "io.micronaut.micrometer:micronaut-micrometer-core:1.3.1"
+    testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
     testImplementation "io.projectreactor:reactor-core:3.3.10.RELEASE"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "io.micronaut:micronaut-http-client"
