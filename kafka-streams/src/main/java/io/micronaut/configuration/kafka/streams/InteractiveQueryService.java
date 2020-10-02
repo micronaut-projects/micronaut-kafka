@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.streams;
 
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.QueryableStoreType;
 
@@ -57,7 +58,7 @@ public class InteractiveQueryService {
     public <T> Optional<T> getQueryableStore(String storeName, QueryableStoreType<T> storeType) {
         for (KafkaStreams kafkaStream : this.streams) {
             try {
-                T store = kafkaStream.store(storeName, storeType);
+                T store = kafkaStream.store(StoreQueryParameters.fromNameAndType(storeName, storeType));
                 if (store != null) {
                     return Optional.of(store);
                 }
