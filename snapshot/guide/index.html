@@ -453,7 +453,7 @@ public class ProductListener {
 
 
 <div class="paragraph">
-<p>The example in the quick start presented a trivial definition of an interface that be implemented automatically for you using the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation.</p>
+<p>The example in the quick start presented a trivial definition of an interface that will be implemented automatically for you using the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation.</p>
 </div>
 <div class="paragraph">
 <p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
@@ -526,7 +526,7 @@ public interface ProductClient {
 <p>If the <code>my.application.token</code> is not set then an error will occur creating the client.</p>
 </div>
 <div class="paragraph">
-<p>It is also possible to pass <code>Collection&lt;Header&gt;&gt;</code> or <code>Headers</code> object as method arguments as seen below.</p>
+<p>It is also possible to pass <code>Collection&lt;Header&gt;</code> or <code>Headers</code> object as method arguments as seen below.</p>
 </div>
 <div class="listingblock">
 <div class="title">Collection&lt;Header&gt; Argument</div>
@@ -2320,24 +2320,55 @@ public class WordCountListener {
 <h2 id="_configuring_kafka_streams">Configuring Kafka Streams</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>. For example in <code>application.yml</code>:</p>
+<div class="title">Configuring a single Stream on a Micronaut application.</div>
+<p>If you have a single Kafka Stream configured on your Micronaut service, then you should use the <code>default</code> key on the configuration.</p>
 </div>
 <div class="listingblock">
-<div class="title">Defining Per Stream Configuration</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     streams:
-        my-stream:
-            num:
-                stream:
-                    threads: 10</code></pre>
+       default:
+          processing.guarantee: "exactly_once"
+          auto.offset.reset: "earliest"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>10</code> for a stream named <code>my-stream</code>.</p>
+<p>The above configuration example sets the <code>processing.guarantee</code> and <code>auto.offset.reset</code> setting of the <code>default</code> Stream.</p>
 </div>
 <div class="paragraph">
-<p>You can then inject a <a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
+<div class="title">Configuring multiple Stream definitions on the same Micronaut Service.</div>
+<p>You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
+To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>.
+Assuming you have 2 or more Kafka Streams definitions on a single service, you will need to use the <code>default</code> key for at least one of them and then define <code>kafka.streams.[STREAM-NAME]</code> for the rest.</p>
+</div>
+<div class="paragraph">
+<p>For example in <code>application.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        default:
+          num:
+            stream:
+              threads: 1
+        my-other-stream:
+          num:
+            stream:
+              threads: 10</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>1</code> for the <code>default</code> stream, and the same setting to <code>10</code> for a stream named <code>my-stream</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can then inject an <code><a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a></code> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Named("my-other-stream")
+KStream&lt;String, String&gt; myOtherKStream(@Named("my-other-stream") ConfiguredStreamBuilder builder)  {...}</code></pre>
+</div>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -2346,7 +2377,7 @@ public class WordCountListener {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
 </td>
 </tr>
 </table>
