@@ -79,9 +79,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
     @Override
     public synchronized AbstractKafkaConfiguration onCreated(BeanCreatedEvent<AbstractKafkaConfiguration> event) {
 
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/");
-        }
+        LOG.warn("Embedded Kafka is deprecated. For Testing please use Test Containers instead: https://www.testcontainers.org/modules/kafka/");
 
         AbstractKafkaConfiguration config = event.getBean();
         if (kafkaServer != null) {
@@ -140,9 +138,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                         KafkaConfig kafkaConfig = new KafkaConfig(brokerProps);
                         this.kafkaServer = TestUtils.createServer(kafkaConfig, new MockTime());
                         final Integer numPartitions = kafkaConfig.numPartitions();
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Started Embedded Kafka on Port: {}", targetPort);
-                        }
+                        LOG.info("Started Embedded Kafka on Port: {}", targetPort);
 
                         createTopics(targetPort, numPartitions);
                         return config;
@@ -174,9 +170,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
     private void createTopics(int targetPort, Integer numPartitions) throws InterruptedException, java.util.concurrent.ExecutionException {
         List<String> topics = embeddedConfiguration.getTopics();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Creating Kafka Topics in Embedded Kafka: {}", topics);
-        }
+        LOG.debug("Creating Kafka Topics in Embedded Kafka: {}", topics);
         if (!topics.isEmpty()) {
             Properties properties = new Properties();
             properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, ("127.0.0.1:" + targetPort));
@@ -186,9 +180,7 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
             );
             result.all().get();
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Created Kafka Topics in Embedded Kafka: {}", topics);
-            }
+            LOG.info("Created Kafka Topics in Embedded Kafka: {}", topics);
         }
     }
 
@@ -200,22 +192,17 @@ public class KafkaEmbedded implements BeanCreatedEventListener<AbstractKafkaConf
                 try {
                     kafkaServer.shutdown();
                 } catch (Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Error shutting down embedded Kafka Server: " + e.getMessage(), e);
-                    }
+                    LOG.warn("Error shutting down embedded Kafka Server: {}", e.getMessage(), e);
                 }
             }
             if (zkServer != null) {
                 try {
                     zkServer.shutdown();
                 } catch (Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Error shutting down embedded ZooKeeper: " + e.getMessage(), e);
-                    }
+                    LOG.warn("Error shutting down embedded ZooKeeper: {}", e.getMessage(), e);
                 }
             }
         }, "embedded-kafka-shutdown-thread").start();
-
     }
 
     /**

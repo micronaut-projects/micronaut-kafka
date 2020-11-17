@@ -22,8 +22,6 @@ import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.serialization.Serializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -36,8 +34,6 @@ import java.util.Properties;
  */
 @Factory
 public class KafkaProducerFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerFactory.class);
 
     /**
      * Creates a new {@link KafkaProducer} for the given configuration.

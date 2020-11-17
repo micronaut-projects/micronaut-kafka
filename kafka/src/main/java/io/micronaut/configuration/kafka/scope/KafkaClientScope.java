@@ -157,7 +157,6 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
                 newConfig.setValueSerializer(valueSerializer);
             }
 
-
             if (hasId) {
                 properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
             }
@@ -171,9 +170,7 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
             try {
                 producer.close();
             } catch (Exception e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Error shutting down Kafka producer: " + e.getMessage(), e);
-                }
+                LOG.warn("Error shutting down Kafka producer: {}", e.getMessage(), e);
             }
         }
         clients.clear();
@@ -184,7 +181,6 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
     public <T> Optional<T> remove(BeanIdentifier identifier) {
         return Optional.empty();
     }
-
 
     /**
      * key for retrieving built producers.

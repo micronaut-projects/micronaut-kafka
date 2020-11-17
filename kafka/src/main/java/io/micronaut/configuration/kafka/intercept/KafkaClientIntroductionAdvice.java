@@ -331,9 +331,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 } else {
 
                     ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
-                    }
+                    LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
                     Argument finalBodyArgument = bodyArgument;
                     Object finalValue = value;
@@ -400,9 +398,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             for (Object o : batchValue) {
                                 ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
 
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
-                                }
+                                LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
                                 Object result;
                                 if (maxBlock != null) {
@@ -424,9 +420,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         }
                         ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
 
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
-                        }
+                        LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
                         Object result;
                         if (maxBlock != null) {
@@ -464,9 +458,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 try {
                     kafkaProducer.close();
                 } catch (Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Error closing Kafka producer: " + e.getMessage(), e);
-                    }
+                    LOG.warn("Error closing Kafka producer: {}", e.getMessage(), e);
                 }
             }
         } finally {
@@ -528,9 +520,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
         Flowable<Object> sendFlowable = valueFlowable.flatMap(o -> {
             ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
 
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
-            }
+            LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
             //noinspection unchecked
             return Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
@@ -626,9 +616,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     ann.getProperties("properties", "name")
             ).ifPresent(newProperties::putAll);
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Creating new KafkaProducer.");
-            }
+            LOG.debug("Creating new KafkaProducer.");
 
             if (!newProperties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
                 Serializer<?> keySerializer = newConfiguration.getKeySerializer().orElse(null);
@@ -639,9 +627,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         keySerializer = new ByteArraySerializer();
                     }
 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Using Kafka key serializer: {}", keySerializer);
-                    }
+                    LOG.debug("Using Kafka key serializer: {}", keySerializer);
                     newConfiguration.setKeySerializer((Serializer) keySerializer);
                 }
             }
@@ -653,9 +639,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     boolean batch = metadata.isTrue(KafkaClient.class, "batch");
                     valueSerializer = serdeRegistry.pickSerializer(batch ? bodyArgument.getFirstTypeVariable().orElse(bodyArgument) : bodyArgument);
 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Using Kafka value serializer: {}", valueSerializer);
-                    }
+                    LOG.debug("Using Kafka value serializer: {}", valueSerializer);
                     newConfiguration.setValueSerializer((Serializer) valueSerializer);
                 }
             }
