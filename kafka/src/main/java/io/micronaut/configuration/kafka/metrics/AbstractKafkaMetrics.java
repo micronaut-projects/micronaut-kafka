@@ -48,9 +48,7 @@ abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
         Properties props = event.getBean().getConfig();
         if (!props.containsKey(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG)) {
             props.put(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("Adding kafka property:value of %s:%s", ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName));
-            }
+            LOG.debug("Adding kafka property:value of {}:{}", ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
         }
         return event.getBean();
     }

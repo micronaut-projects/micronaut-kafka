@@ -49,9 +49,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
         final Throwable cause = exception.getCause();
         final Object consumerBean = exception.getKafkaListener();
         if (cause instanceof SerializationException) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Kafka consumer [" + consumerBean + "] failed to deserialize value: " + cause.getMessage(), cause);
-            }
+            LOG.error("Kafka consumer [{}] failed to deserialize value: {}", consumerBean, cause.getMessage(), cause);
 
             if (skipRecordOnDeserializationFailure) {
                 final Consumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
@@ -61,10 +59,9 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             if (LOG.isErrorEnabled()) {
                 Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
                 if (consumerRecord.isPresent()) {
-                    LOG.error("Error processing record [" + consumerRecord + "] for Kafka consumer [" + consumerBean + "] produced error: " + cause.getMessage(), cause);
-
+                    LOG.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord, consumerBean, cause.getMessage(), cause);
                 } else {
-                    LOG.error("Kafka consumer [" + consumerBean + "] produced error: " + cause.getMessage(), cause);
+                    LOG.error("Kafka consumer [{}] produced error: {}", consumerBean, cause.getMessage(), cause);
                 }
             }
         }
@@ -96,15 +93,11 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
                 final int partition = Integer.valueOf(matcher.group(2));
                 final int offset = Integer.valueOf(matcher.group(3));
                 TopicPartition tp = new TopicPartition(topic, partition);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Seeking past unserializable consumer record for partition {}-{} and offset {}", topic, partition, offset);
-                }
+                LOG.debug("Seeking past unserializable consumer record for partition {}-{} and offset {}", topic, partition, offset);
                 kafkaConsumer.seek(tp, offset + 1);
             }
         } catch (Throwable e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Kafka consumer [" + consumerBean + "] failed to seek past unserializable value: " + e.getMessage(), e);
-            }
+            LOG.error("Kafka consumer [{}] failed to seek past unserializable value: {}", consumerBean, e.getMessage(), e);
         }
     }
 }
