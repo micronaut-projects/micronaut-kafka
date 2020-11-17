@@ -13,17 +13,6 @@ subprojects { Project subproject ->
     group "io.micronaut.kafka"
 
     apply plugin: "io.micronaut.build.common"
-
-    micronautBuild {
-        resolutionStrategy {
-            eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == 'org.apache.kafka') {
-                    details.useVersion kafkaVersion
-                }
-            }
-        }
-    }
-
     apply plugin: "io.micronaut.build.dependency-updates"
     apply plugin: "io.micronaut.build.publishing"
 }
