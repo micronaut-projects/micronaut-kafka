@@ -15,7 +15,7 @@ class KafkaStreamsHealthDisabledSpec extends AbstractTestContainersSpec {
     @Override
     protected List<Object> getConfiguration() {
         List<Object> config = super.getConfiguration()
-        config.addAll(["kafka.streams.health.enabled", 'false'])
+        config.addAll(["kafka.health.streams.enabled", 'false'])
         return config
     }
 }
