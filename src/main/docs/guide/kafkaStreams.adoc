@@ -68,31 +68,58 @@ You can also define a ann:configuration.kafka.annotation.KafkaListener[] to list
 include::{testskafkastreams}/wordcount/WordCountListener.java[]
 ----
 
-
 == Configuring Kafka Streams
 
-You can define multiple Kafka streams each with their own unique configuration. To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`. For example in `application.yml`:
+.Configuring a single Stream on a Micronaut application.
+If you have a single Kafka Stream configured on your Micronaut service, then you should use the `default` key on the configuration.
 
-.Defining Per Stream Configuration
 [source,yaml]
 ----
 kafka:
     streams:
-        my-stream:
-            num:
-                stream:
-                    threads: 10
+       default:
+          processing.guarantee: "exactly_once"
+          auto.offset.reset: "earliest"
 ----
 
-The above configuration sets the `num.stream.threads` setting of the Kafka `StreamsConfig` to `10` for a stream named `my-stream`.
+The above configuration example sets the `processing.guarantee` and `auto.offset.reset` setting of the `default` Stream.
 
-You can then inject a api:configuration.kafka.streams.ConfiguredStreamBuilder[] specfically for the above configuration using `javax.inject.Named`:
+.Configuring multiple Stream definitions on the same Micronaut Service.
+You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
+To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`.
+Assuming you have 2 or more Kafka Streams definitions on a single service, you will need to use the `default` key for at least one of them and then define `kafka.streams.[STREAM-NAME]` for the rest.
 
-NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
+For example in `application.yml`:
+
+[source,yaml]
+----
+kafka:
+    streams:
+        default:
+          num:
+            stream:
+              threads: 1
+        my-other-stream:
+          num:
+            stream:
+              threads: 10
+----
+
+The above configuration sets the `num.stream.threads` setting of the Kafka `StreamsConfig` to `1` for the `default` stream, and the same setting to `10` for a stream named `my-stream`.
+
+You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specfically for the above configuration using `javax.inject.Named`:
+
+[source,java]
+----
+@Named("my-other-stream")
+KStream<String, String> myOtherKStream(@Named("my-other-stream") ConfiguredStreamBuilder builder)  {...}
+----
+
+NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
 [source,java]
 ----
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream, indent=0]
+include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream,indent=0]
 }
 ----

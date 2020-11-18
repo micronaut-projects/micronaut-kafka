@@ -76,7 +76,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-
 /**
  * <p>A {@link ExecutableMethodProcessor} that will process all beans annotated with {@link KafkaListener}
  * and create and subscribe the relevant methods as consumers to Kafka topics.</p>
@@ -251,7 +250,6 @@ public class KafkaConsumerProcessor
             AbstractKafkaConsumerConfiguration consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
                     .orElse(defaultConsumerConfiguration);
 
-
             DefaultKafkaConsumerConfiguration consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
 
             Properties properties = consumerConfiguration.getConfig();
@@ -302,15 +300,14 @@ public class KafkaConsumerProcessor
                 } else {
                     LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), method);
                 }
-                Optional vd = consumerConfiguration.getValueDeserializer();
 
+                Optional vd = consumerConfiguration.getValueDeserializer();
                 if (vd.isPresent()) {
                     LOG.debug("Using value deserializer [{}] for Kafka listener: {}", vd.get(), method);
                 } else {
                     LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), method);
                 }
             }
-
 
             for (int i = 0; i < consumerThreads; i++) {
                 String finalClientId;
@@ -324,7 +321,6 @@ public class KafkaConsumerProcessor
                 } else {
                     finalClientId = "kafka-consumer-" + clientIdGenerator.incrementAndGet();
                 }
-
 
                 Consumer kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
 
@@ -356,11 +352,8 @@ public class KafkaConsumerProcessor
                             kafkaConsumer.subscribe(topics);
                         }
 
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Kafka listener [{}] subscribed to topics: {}", method, topics);
-                        }
+                        LOG.info("Kafka listener [{}] subscribed to topics: {}", method, topics);
                     }
-
 
                     if (hasPatterns) {
                         for (String pattern : patterns) {
@@ -377,9 +370,7 @@ public class KafkaConsumerProcessor
                                 kafkaConsumer.subscribe(p);
                             }
 
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", method, pattern);
-                            }
+                            LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", method, pattern);
                         }
                     }
                 }
@@ -397,9 +388,7 @@ public class KafkaConsumerProcessor
                             try {
                                 if (!consumerPaused && paused.contains(finalClientId)) {
                                     consumerPaused = true;
-                                    if (LOG.isDebugEnabled()) {
-                                        LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                                    }
+                                    LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
                                     kafkaConsumer.pause(kafkaConsumer.assignment());
                                     pausedConsumers.put(finalClientId, kafkaConsumer);
                                 }
@@ -407,9 +396,7 @@ public class KafkaConsumerProcessor
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                                 boolean failed = false;
                                 if (consumerPaused && !paused.contains(finalClientId)) {
-                                    if (LOG.isDebugEnabled()) {
-                                        LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                                    }
+                                    LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
                                     kafkaConsumer.resume(
                                             kafkaConsumer.paused()
                                     );
@@ -487,9 +474,7 @@ public class KafkaConsumerProcessor
                                         ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
                                         for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
 
-                                            if (LOG.isTraceEnabled()) {
-                                                LOG.trace("Kafka consumer [{}] received record: {}", method, consumerRecord);
-                                            }
+                                            LOG.trace("Kafka consumer [{}] received record: {}", method, consumerRecord);
 
                                             if (trackPartitions) {
                                                 currentOffsets.put(new TopicPartition(
@@ -581,9 +566,7 @@ public class KafkaConsumerProcessor
                                 kafkaConsumer.commitSync();
                             }
                         } catch (Throwable e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Error committing Kafka offsets on shutdown: " + e.getMessage(), e);
-                            }
+                            LOG.warn("Error committing Kafka offsets on shutdown: {}", e.getMessage(), e);
                         } finally {
                             kafkaConsumer.close();
                         }
@@ -666,8 +649,6 @@ public class KafkaConsumerProcessor
                                 }
                                 emitter.onComplete();
                             }, BackpressureStrategy.ERROR);
-
-
                         }
                         return Flowable.empty();
                     }
@@ -682,13 +663,10 @@ public class KafkaConsumerProcessor
                     ));
 
                     if (kafkaListener.isTrue("redelivery")) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
-                        }
+                        LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
 
                         Object key = consumerRecord.key();
                         Object value = consumerRecord.value();
-
 
                         if (key != null && value != null) {
                             String groupId = kafkaListener.stringValue("groupId").orElse(null);
@@ -722,26 +700,19 @@ public class KafkaConsumerProcessor
                                     emitter.onComplete();
                                 }
                             }), BackpressureStrategy.ERROR);
-
-
                         }
                     }
                     return Flowable.empty();
                 });
 
-
         if (isBlocking) {
             recordMetadataProducer.blockingSubscribe(recordMetadata -> {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
-                }
+                LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
             });
         } else {
             //noinspection ResultOfMethodCallIgnored
             recordMetadataProducer.subscribe(recordMetadata -> {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
-                }
+                LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
             });
         }
     }
@@ -824,9 +795,7 @@ public class KafkaConsumerProcessor
             if (consumerBean instanceof OffsetCommitCallback) {
                 ((OffsetCommitCallback) consumerBean).onComplete(offsets, exception);
             } else if (exception != null) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Error asynchronously committing Kafka offsets [" + offsets + "]: " + exception.getMessage(), exception);
-                }
+                LOG.error("Error asynchronously committing Kafka offsets [{}]: {}", offsets, exception.getMessage(), exception);
             }
         };
     }

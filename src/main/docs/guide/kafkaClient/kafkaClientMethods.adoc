@@ -43,7 +43,7 @@ The above example will send a header called `X-Token` with the value read from t
 
 If the `my.application.token` is not set then an error will occur creating the client.
 
-It is also possible to pass `Collection<Header>>` or `Headers` object as method arguments as seen below.
+It is also possible to pass `Collection<Header>` or `Headers` object as method arguments as seen below.
 
 .Collection<Header> Argument
 [source,java]
