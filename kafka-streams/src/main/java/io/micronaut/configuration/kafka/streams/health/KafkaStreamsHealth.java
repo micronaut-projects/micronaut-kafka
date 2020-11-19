@@ -15,8 +15,8 @@
  */
 package io.micronaut.configuration.kafka.streams.health;
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
-import io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration;
 import io.micronaut.configuration.kafka.streams.KafkaStreamsFactory;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.Internal;
@@ -50,8 +50,10 @@ import java.util.stream.Stream;
  */
 @Singleton
 @Requires(classes = HealthIndicator.class)
-@Requires(property = KafkaStreamsConfiguration.PREFIX + ".health.enabled", value = "true", defaultValue = "true")
+@Requires(property = KafkaStreamsHealth.ENABLED_PROPERTY, value = "true", defaultValue = "true")
 public class KafkaStreamsHealth implements HealthIndicator {
+
+    public static final String ENABLED_PROPERTY = AbstractKafkaConfiguration.PREFIX + ".health.streams.enabled";
 
     private static final String NAME = "kafkaStreams";
 

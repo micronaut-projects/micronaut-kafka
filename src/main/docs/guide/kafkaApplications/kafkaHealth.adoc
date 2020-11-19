@@ -25,6 +25,6 @@ If you wish to disable the kafka health check while still using the `management`
 [source,yaml]
 ----
 kafka:
-	health:
-		enabled: false
+    health:
+        enabled: false
 ----
