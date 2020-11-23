@@ -19,7 +19,6 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.convert.ConversionService;
-import io.micronaut.core.naming.conventions.StringConvention;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
