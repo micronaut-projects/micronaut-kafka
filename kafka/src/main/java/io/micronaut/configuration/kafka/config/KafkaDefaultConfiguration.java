@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  * @since 1.0
  */
 @ConfigurationProperties(AbstractKafkaConfiguration.PREFIX)
-@Requires(AbstractKafkaConfiguration.PREFIX)
+@Requires(property = AbstractKafkaConfiguration.PREFIX)
 public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
 
     /**
