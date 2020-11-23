@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.intercept;
 
+import io.micronaut.aop.InterceptedMethod;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
@@ -71,7 +72,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -222,181 +222,210 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 }
             }
 
-            ReturnType<Object> returnType = context.getReturnType();
-            Class javaReturnType = returnType.getType();
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
             Long timestamp = client.isTrue("timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
-            boolean isReactiveReturnType = Publishers.isConvertibleToPublisher(javaReturnType);
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
 
-            boolean isReactiveValue =
-                    value != null && Publishers.isConvertibleToPublisher(value.getClass());
+            boolean isReactiveValue = value != null && Publishers.isConvertibleToPublisher(value.getClass());
             if (StringUtils.isEmpty(topic)) {
                 throw new MessagingClientException("No topic specified for method: " + context);
             }
 
-            if (isReactiveReturnType) {
-                Flowable returnFlowable;
-                if (isReactiveValue) {
-                    Optional<Argument<?>> firstTypeVariable = returnType.getFirstTypeVariable();
-                    returnFlowable = buildSendFlowable(
-                            context,
-                            topic,
-                            kafkaProducer,
-                            kafkaHeaders,
-                            firstTypeVariable.orElse(Argument.OBJECT_ARGUMENT),
-                            key,
-                            value,
-                            timestamp,
-                            maxBlock);
-
-                } else {
-                    if (isBatchSend) {
-                        Object batchValue;
-                        if (value != null && value.getClass().isArray()) {
-                            batchValue = Arrays.asList((Object[]) value);
-                        } else {
-                            batchValue = value;
-                        }
-
-                        Flowable<Object> bodyEmitter;
-                        if (batchValue instanceof Iterable) {
-                            bodyEmitter = Flowable.fromIterable((Iterable) batchValue);
-                        } else {
-                            bodyEmitter = Flowable.just(batchValue);
-                        }
-
-                        String finalTopic = topic;
-                        Argument finalBodyArgument = bodyArgument;
-                        Object finalKey = key;
-                        returnFlowable = bodyEmitter.flatMap(o ->
-                                buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, returnType, finalKey, o, timestamp)
-                        );
-
-                    } else {
-                        returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, returnType, key, value, timestamp);
-                    }
+            InterceptedMethod interceptedMethod = InterceptedMethod.of(context);
+            try {
+                Argument<?> reactiveTypeValue = interceptedMethod.returnTypeValue();
+                boolean returnTypeValueVoid = reactiveTypeValue.equalsType(Argument.VOID_OBJECT);
+                if (Argument.OBJECT_ARGUMENT.equalsType(reactiveTypeValue)) {
+                    reactiveTypeValue = Argument.of(RecordMetadata.class);
                 }
-                return Publishers.convertPublisher(returnFlowable, javaReturnType);
-            } else if (Future.class.isAssignableFrom(javaReturnType)) {
-                Optional<Argument<?>> firstTypeVariable = returnType.getFirstTypeVariable();
-                CompletableFuture completableFuture = new CompletableFuture();
+                switch (interceptedMethod.resultType()) {
+                    case COMPLETION_STAGE:
 
-                if (isReactiveValue) {
-                    Flowable sendFlowable = buildSendFlowable(
-                            context,
-                            topic,
-                            kafkaProducer,
-                            kafkaHeaders,
-                            firstTypeVariable.orElse(Argument.of(RecordMetadata.class)),
-                            key,
-                            value,
-                            timestamp,
-                            maxBlock);
+                        CompletableFuture completableFuture = new CompletableFuture();
 
-                    if (!Publishers.isSingle(value.getClass())) {
-                        sendFlowable = sendFlowable.toList().toFlowable();
-                    }
+                        if (isReactiveValue) {
+                            Flowable sendFlowable = buildSendFlowable(
+                                    context,
+                                    topic,
+                                    kafkaProducer,
+                                    kafkaHeaders,
+                                    reactiveTypeValue,
+                                    key,
+                                    value,
+                                    timestamp,
+                                    maxBlock);
 
-                    //noinspection SubscriberImplementation
-                    sendFlowable.subscribe(new Subscriber() {
-                        boolean completed = false;
-
-                        @Override
-                        public void onSubscribe(Subscription s) {
-                            s.request(1);
-                        }
-
-                        @Override
-                        public void onNext(Object o) {
-                            completableFuture.complete(o);
-                            completed = true;
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            completableFuture.completeExceptionally(wrapException(context, t));
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            if (!completed) {
-                                // empty publisher
-                                completableFuture.complete(null);
+                            if (!Publishers.isSingle(value.getClass())) {
+                                sendFlowable = sendFlowable.toList().toFlowable();
                             }
-                        }
-                    });
-                } else {
 
-                    ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
-                    LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
+                            //noinspection SubscriberImplementation
+                            sendFlowable.subscribe(new Subscriber() {
+                                boolean completed = false;
 
-                    Argument finalBodyArgument = bodyArgument;
-                    Object finalValue = value;
-                    kafkaProducer.send(record, (metadata, exception) -> {
-                        if (exception != null) {
-                            completableFuture.completeExceptionally(wrapException(context, exception));
-                        } else {
-                            if (firstTypeVariable.isPresent()) {
-                                Argument<?> argument = firstTypeVariable.get();
-                                Optional<?> converted = conversionService.convert(metadata, argument);
-                                if (converted.isPresent()) {
-                                    completableFuture.complete(converted.get());
-                                } else if (argument.getType() == finalBodyArgument.getType()) {
-                                    completableFuture.complete(finalValue);
+                                @Override
+                                public void onSubscribe(Subscription s) {
+                                    s.request(1);
                                 }
+
+                                @Override
+                                public void onNext(Object o) {
+                                    completableFuture.complete(o);
+                                    completed = true;
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    completableFuture.completeExceptionally(wrapException(context, t));
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    if (!completed) {
+                                        // empty publisher
+                                        completableFuture.complete(null);
+                                    }
+                                }
+                            });
+                        } else {
+
+                            ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
+                            }
+
+                            Argument finalReturnTypeValue = reactiveTypeValue;
+                            Argument finalBodyArgument = bodyArgument;
+                            Object finalValue = value;
+                            kafkaProducer.send(record, (metadata, exception) -> {
+                                if (exception != null) {
+                                    completableFuture.completeExceptionally(wrapException(context, exception));
+                                } else {
+                                    if (!returnTypeValueVoid) {
+                                        Optional<?> converted = conversionService.convert(metadata, finalReturnTypeValue);
+                                        if (converted.isPresent()) {
+                                            completableFuture.complete(converted.get());
+                                        } else if (finalReturnTypeValue.getType() == finalBodyArgument.getType()) {
+                                            completableFuture.complete(finalValue);
+                                        }
+                                    } else {
+                                        completableFuture.complete(null);
+                                    }
+                                }
+                            });
+                        }
+
+                        return interceptedMethod.handleResult(completableFuture);
+                    case PUBLISHER:
+                        Flowable returnFlowable;
+                        if (isReactiveValue) {
+                            returnFlowable = buildSendFlowable(
+                                    context,
+                                    topic,
+                                    kafkaProducer,
+                                    kafkaHeaders,
+                                    reactiveTypeValue,
+                                    key,
+                                    value,
+                                    timestamp,
+                                    maxBlock);
+
+                        } else {
+                            if (isBatchSend) {
+                                Object batchValue;
+                                if (value != null && value.getClass().isArray()) {
+                                    batchValue = Arrays.asList((Object[]) value);
+                                } else {
+                                    batchValue = value;
+                                }
+
+                                Flowable<Object> bodyEmitter;
+                                if (batchValue instanceof Iterable) {
+                                    bodyEmitter = Flowable.fromIterable((Iterable) batchValue);
+                                } else {
+                                    bodyEmitter = Flowable.just(batchValue);
+                                }
+
+                                String finalTopic = topic;
+                                Argument finalBodyArgument = bodyArgument;
+                                Object finalKey = key;
+                                Argument finalReactiveTypeValue = reactiveTypeValue;
+                                returnFlowable = bodyEmitter.flatMap(o ->
+                                        buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, finalKey, o, timestamp, finalReactiveTypeValue)
+                                );
+
                             } else {
-                                completableFuture.complete(null);
+                                returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, key, value, timestamp, reactiveTypeValue);
                             }
                         }
-                    });
-                }
+                        return interceptedMethod.handleResult(returnFlowable);
+                    case SYNCHRONOUS:
+                        ReturnType<Object> returnType = context.getReturnType();
+                        Class<Object> javaReturnType = returnType.getType();
+                        Argument<Object> returnTypeArgument = returnType.asArgument();
+                        if (isReactiveValue) {
+                            Flowable<Object> sendFlowable = buildSendFlowable(
+                                    context,
+                                    topic,
+                                    kafkaProducer,
+                                    kafkaHeaders,
+                                    returnTypeArgument,
+                                    key,
+                                    value,
+                                    timestamp,
+                                    maxBlock
+                            );
 
-                return completableFuture;
-            } else {
-
-                Argument<Object> returnTypeArgument = returnType.asArgument();
-                if (isReactiveValue) {
-                    Flowable<Object> sendFlowable = buildSendFlowable(
-                            context,
-                            topic,
-                            kafkaProducer,
-                            kafkaHeaders,
-                            returnTypeArgument,
-                            key,
-                            value,
-                            timestamp,
-                            maxBlock
-                    );
-
-                    if (Iterable.class.isAssignableFrom(javaReturnType)) {
-                        return conversionService
-                                .convert(sendFlowable.toList().blockingGet(), returnTypeArgument).orElse(null);
-                    } else if (void.class.isAssignableFrom(javaReturnType)) {
-                        // a maybe will return null, and not throw an exception
-                        Maybe<Object> maybe = sendFlowable.firstElement();
-                        return maybe.blockingGet();
-                    } else {
-                        return conversionService
-                                .convert(sendFlowable.blockingFirst(), returnTypeArgument).orElse(null);
-                    }
-                } else {
-                    try {
-                        if (isBatchSend) {
-                            Iterable batchValue;
-                            if (value != null && value.getClass().isArray()) {
-                                batchValue = Arrays.asList((Object[]) value);
-                            } else if (!(value instanceof Iterable)) {
-                                batchValue = Collections.singletonList(value);
+                            if (Iterable.class.isAssignableFrom(javaReturnType)) {
+                                return conversionService.convert(sendFlowable.toList().blockingGet(), returnTypeArgument).orElse(null);
+                            } else if (void.class.isAssignableFrom(javaReturnType)) {
+                                // a maybe will return null, and not throw an exception
+                                Maybe<Object> maybe = sendFlowable.firstElement();
+                                return maybe.blockingGet();
                             } else {
-                                batchValue = (Iterable) value;
+                                return conversionService.convert(sendFlowable.blockingFirst(), returnTypeArgument).orElse(null);
                             }
+                        } else {
+                            try {
+                                if (isBatchSend) {
+                                    Iterable batchValue;
+                                    if (value != null && value.getClass().isArray()) {
+                                        batchValue = Arrays.asList((Object[]) value);
+                                    } else if (!(value instanceof Iterable)) {
+                                        batchValue = Collections.singletonList(value);
+                                    } else {
+                                        batchValue = (Iterable) value;
+                                    }
 
-                            List results = new ArrayList();
-                            for (Object o : batchValue) {
-                                ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
+                                    List results = new ArrayList();
+                                    for (Object o : batchValue) {
+                                        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
+
+                                        if (LOG.isTraceEnabled()) {
+                                            LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
+                                        }
+
+                                        Object result;
+                                        if (maxBlock != null) {
+                                            result = kafkaProducer.send(record).get(maxBlock.toMillis(), TimeUnit.MILLISECONDS);
+                                        } else {
+                                            result = kafkaProducer.send(record).get();
+                                        }
+                                        results.add(result);
+                                    }
+                                    Argument finalBodyArgument = bodyArgument;
+                                    Object finalValue = value;
+                                    return conversionService.convert(results, returnTypeArgument).orElseGet(() -> {
+                                        if (javaReturnType == finalBodyArgument.getType()) {
+                                            return finalValue;
+                                        } else {
+                                            return null;
+                                        }
+                                    });
+                                }
+                                ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
 
                                 LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
@@ -406,43 +435,25 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 } else {
                                     result = kafkaProducer.send(record).get();
                                 }
-                                results.add(result);
+                                Argument finalBodyArgument = bodyArgument;
+                                Object finalValue = value;
+                                return conversionService.convert(result, returnTypeArgument).orElseGet(() -> {
+                                    if (javaReturnType == finalBodyArgument.getType()) {
+                                        return finalValue;
+                                    } else {
+                                        return null;
+                                    }
+                                });
+                            } catch (Exception e) {
+                                throw wrapException(context, e);
                             }
-                            Argument finalBodyArgument = bodyArgument;
-                            Object finalValue = value;
-                            return conversionService.convert(results, returnTypeArgument).orElseGet(() -> {
-                                if (javaReturnType == finalBodyArgument.getType()) {
-                                    return finalValue;
-                                } else {
-                                    return null;
-                                }
-                            });
                         }
-                        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
-
-                        LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
-
-                        Object result;
-                        if (maxBlock != null) {
-                            result = kafkaProducer.send(record).get(maxBlock.toMillis(), TimeUnit.MILLISECONDS);
-                        } else {
-                            result = kafkaProducer.send(record).get();
-                        }
-                        Argument finalBodyArgument = bodyArgument;
-                        Object finalValue = value;
-                        return conversionService.convert(result, returnTypeArgument).orElseGet(() -> {
-                            if (javaReturnType == finalBodyArgument.getType()) {
-                                return finalValue;
-                            } else {
-                                return null;
-                            }
-                        });
-                    } catch (Exception e) {
-                        throw wrapException(context, e);
-                    }
+                    default:
+                        return interceptedMethod.unsupported();
                 }
+            } catch (Exception e) {
+                return interceptedMethod.handleException(e);
             }
-
         } else {
             // can't be implemented so proceed
             return context.proceed();
@@ -472,24 +483,22 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Argument bodyArgument,
             Producer kafkaProducer,
             List<Header> kafkaHeaders,
-            ReturnType<Object> returnType,
             Object key,
             Object value,
-            Long timestamp) {
+            Long timestamp,
+            Argument reactiveValueType) {
         Flowable returnFlowable;
         ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
-        Optional<Argument<?>> firstTypeVariable = returnType.getFirstTypeVariable();
         returnFlowable = Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
                 emitter.onError(wrapException(context, exception));
             } else {
-                if (firstTypeVariable.isPresent()) {
-                    Argument<?> argument = firstTypeVariable.get();
-                    Optional<?> converted = conversionService.convert(metadata, argument);
+                if (!reactiveValueType.equalsType(Argument.VOID_OBJECT)) {
+                    Optional<?> converted = conversionService.convert(metadata, reactiveValueType);
 
                     if (converted.isPresent()) {
                         emitter.onNext(converted.get());
-                    } else if (argument.getType() == bodyArgument.getType()) {
+                    } else if (reactiveValueType.getType() == bodyArgument.getType()) {
                         emitter.onNext(value);
                     }
                 }
