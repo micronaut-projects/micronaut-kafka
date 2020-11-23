@@ -81,7 +81,7 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
     }
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
-        Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX, StringConvention.RAW) : Collections.emptyMap();
+        Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
         Properties properties = new Properties();
         values.entrySet().stream().filter(entry -> {
             String key = entry.getKey();
@@ -95,7 +95,6 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
                 }
             }
             properties.setProperty(entry.getKey(), value.toString());
-
         });
         return properties;
     }
