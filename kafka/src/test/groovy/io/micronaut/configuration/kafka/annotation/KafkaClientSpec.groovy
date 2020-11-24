@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Property
+import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.messaging.exceptions.MessagingClientException
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.header.Header
@@ -10,24 +11,37 @@ import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 import reactor.core.publisher.Mono
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
+
+import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
+import static io.micronaut.core.io.socket.SocketUtils.LOCALHOST
+import static java.util.concurrent.TimeUnit.SECONDS
 
 class KafkaClientSpec extends Specification {
 
+    private @Shared ApplicationContext ctx
+
+    void setupSpec() {
+        ctx = ApplicationContext.run(
+                Collections.singletonMap(
+                        'kafka.bootstrap.servers',
+                        LOCALHOST + ':' + SocketUtils.findAvailableTcpPort())
+        )
+    }
+
     void "test send message when Kafka is not available"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run()
         MyClient client = ctx.getBean(MyClient)
 
         when:
         client.sendSync("test", "hello-world", [new RecordHeader("hello", "world".bytes)])
 
         then:
-        def e = thrown(MessagingClientException)
+        thrown(MessagingClientException)
 
         cleanup:
         ctx.close()
@@ -35,27 +49,24 @@ class KafkaClientSpec extends Specification {
 
     void "test reactive send message when Kafka is not available"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run()
         MyClient client = ctx.getBean(MyClient)
 
         when:
         client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])).block()
 
         then:
-        def e = thrown(MessagingClientException)
+        thrown(MessagingClientException)
 
         cleanup:
         ctx.close()
-
     }
 
     void "test future send message when Kafka is not available"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run()
         MyClient client = ctx.getBean(MyClient)
 
         when:
-        client.sendSentence("test", "hello-world").get(1, TimeUnit.SECONDS)
+        client.sendSentence("test", "hello-world").get(1, SECONDS)
 
         then:
         def e = thrown(ExecutionException)
@@ -65,8 +76,9 @@ class KafkaClientSpec extends Specification {
         ctx.close()
     }
 
-    @KafkaClient(maxBlock  = '1s', acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(maxBlock = '1s', acks = ALL)
     static interface MyClient {
+
         @Topic("words")
         CompletableFuture<String> sendSentence(@KafkaKey String key, String sentence)
 
