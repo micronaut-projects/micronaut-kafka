@@ -8,7 +8,5 @@
     <!-- <suppress checks="FileLength" -->
               <!-- files="DefaultBeanContext.java|BeanDefinitionWriter.java|DefaultHttpClient.java"/> -->
 
-    <suppress checks="[a-zA-Z0-9]*" files="KafkaSubstitutions.java" />
-
     <suppress checks="MissingJavadocType" files=".*doc-examples.*" />
 </suppressions>
