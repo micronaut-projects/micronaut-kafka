@@ -934,9 +934,9 @@ public void testBookSender() throws IOException {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.5.0:test'
-testImplementation 'org.apache.kafka:kafka_2.12:2.5.0'
-testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.6.0:test'
+testImplementation 'org.apache.kafka:kafka_2.12:2.6.0'
+testImplementation 'org.apache.kafka:kafka_2.12:2.6.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -948,18 +948,18 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.5.0:test'</code></pre>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.6.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.6.0&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.5.0&lt;/version&gt;
+  &lt;version&gt;2.6.0&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -2037,8 +2037,8 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
-	health:
-		enabled: false</code></pre>
+    health:
+        enabled: false</code></pre>
 </div>
 </div>
 
@@ -2429,7 +2429,7 @@ KStream&lt;String, String&gt; myStream(
 public &lt;T&gt; Optional&lt;T&gt; getQueryableStore(String storeName, QueryableStoreType&lt;T&gt; storeType) {
     for (KafkaStreams kafkaStream : this.streams) {
         try {
-            T store = kafkaStream.store(storeName, storeType);
+            T store = kafkaStream.store(StoreQueryParameters.fromNameAndType(storeName, storeType));
             if (store != null) {
                 return Optional.of(store);
             }
@@ -2564,14 +2564,14 @@ By default, the details visible above are only shown to authenticated users. See
 </table>
 </div>
 <div class="paragraph">
-<p>If you wish to disable the Kafka streams health check while still using the <code>management</code> dependency you can set the property <code>kafka.streams.health.enabled</code> to <code>false</code> in your application configuration.</p>
+<p>If you wish to disable the Kafka streams health check while still using the <code>management</code> dependency you can set the property <code>kafka.health.streams.enabled</code> to <code>false</code> in your application configuration.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
-    streams:
-	    health:
-		    enabled: false</code></pre>
+    health:
+        streams:
+            enabled: false</code></pre>
 </div>
 </div>
 
