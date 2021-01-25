@@ -15,7 +15,7 @@ dependencies {
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut:micronaut-inject"
     testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.1"
+    testImplementation "io.projectreactor:reactor-core:3.4.2"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
