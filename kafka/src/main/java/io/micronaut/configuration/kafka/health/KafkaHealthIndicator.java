@@ -36,6 +36,7 @@ import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A {@link HealthIndicator} for Kafka.
@@ -50,6 +51,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
     private static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
+    private static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
     private final AdminClient adminClient;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
@@ -62,6 +64,18 @@ public class KafkaHealthIndicator implements HealthIndicator {
     public KafkaHealthIndicator(AdminClient adminClient, KafkaDefaultConfiguration defaultConfiguration) {
         this.adminClient = adminClient;
         this.defaultConfiguration = defaultConfiguration;
+    }
+
+    /**
+     * Retrieve the cluster "offsets.topic.replication.factor" for the given {@link Config}, falling back to
+     * "default.replication.factor" if required, in order to support Confluent Cloud hosted Kafka.
+     *
+     * @param config the cluster {@link Config}
+     * @return the cluster replication factor, or Integer.MAX_VALUE if none found
+     */
+    public static int getClusterReplicationFactor(Config config) {
+        ConfigEntry ce = Optional.ofNullable(config.get(REPLICATION_PROPERTY)).orElseGet(() -> config.get(DEFAULT_REPLICATION_PROPERTY));
+        return ce != null ? Integer.parseInt(ce.value()) : Integer.MAX_VALUE;
     }
 
     @Override
@@ -83,8 +97,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
             Flowable<Map<ConfigResource, Config>> configs = Flowable.fromFuture(configResult.all());
             return configs.switchMap(resources -> {
                 Config config = resources.get(configResource);
-                ConfigEntry ce = config.get(REPLICATION_PROPERTY);
-                int replicationFactor = Integer.parseInt(ce.value());
+                int replicationFactor = getClusterReplicationFactor(config);
                 return nodes.switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
                     HealthResult.Builder builder;

@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.health
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
@@ -7,6 +6,8 @@ import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.health.HealthStatus
 import io.micronaut.management.health.indicator.HealthResult
+import org.apache.kafka.clients.admin.Config
+import org.apache.kafka.clients.admin.ConfigEntry
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -74,5 +75,27 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         where:
         configvalue << [false, "false", "no", ""]
+    }
+
+    @Unroll
+    void "kafka health indicator handle missing replication factor config"() {
+        given:
+        Collection<ConfigEntry> configEntries = []
+        if (offsetFactor) { configEntries.add(new ConfigEntry(KafkaHealthIndicator.REPLICATION_PROPERTY, offsetFactor)) }
+        if (defaultFactor) { configEntries.add(new ConfigEntry(KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY, defaultFactor)) }
+        Config config = new Config(configEntries)
+
+        when:
+        int replicationFactor = KafkaHealthIndicator.getClusterReplicationFactor(config)
+
+        then:
+        replicationFactor == expected
+
+        where:
+        offsetFactor | defaultFactor | expected
+        "10"         | null          | 10
+        "10"         | "8"           | 10
+        null         | "8"           | 8
+        null         | null          | Integer.MAX_VALUE
     }
 }
