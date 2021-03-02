@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.docs.producer.headers;
 
 // tag::imports[]
@@ -12,4 +11,3 @@ import io.micronaut.messaging.annotation.Header;
 public interface ProductClient {
 // end::clazz[]
 }
-

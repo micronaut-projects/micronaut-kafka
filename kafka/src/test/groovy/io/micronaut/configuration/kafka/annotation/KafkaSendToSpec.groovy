@@ -1,7 +1,5 @@
-
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.SendTo
@@ -17,6 +15,10 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentLinkedDeque
+
+import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaSendToSpec extends Specification {
 
@@ -35,7 +37,7 @@ class KafkaSendToSpec extends Specification {
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
+                        EMBEDDED_TOPICS, [
                         TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO
                 ])
 
@@ -51,7 +53,6 @@ class KafkaSendToSpec extends Specification {
         quantityListener.quantities.clear()
 
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
 
         when:
         client.sendProductBlocking("Apple", new Product(name: "Apple", quantity: 5))
@@ -75,7 +76,6 @@ class KafkaSendToSpec extends Specification {
 
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
-
         when:
         client.sendProduct("Apple", new Product(name: "Apple", quantity: 5))
 
@@ -96,7 +96,6 @@ class KafkaSendToSpec extends Specification {
         productListener.products.clear()
         quantityListener.quantities.clear()
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
 
         when:
         client.sendProductForFlowable("Apple", new Product(name: "Apple", quantity: 5))
@@ -119,7 +118,6 @@ class KafkaSendToSpec extends Specification {
         quantityListener.quantities.clear()
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
-
         when:
         client.sendProductForFlux("Apple", new Product(name: "Apple", quantity: 5))
 
@@ -141,7 +139,6 @@ class KafkaSendToSpec extends Specification {
         quantityListener.quantities.clear()
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
-
         when:
         client.sendProductForMono("Apple", new Product(name: "Apple", quantity: 5))
 
@@ -154,7 +151,7 @@ class KafkaSendToSpec extends Specification {
         }
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(acks = ALL)
     static interface ProductClient {
         @Topic(KafkaSendToSpec.TOPIC_SINGLE)
         RecordMetadata sendProduct(@KafkaKey String name, Product product)
@@ -172,7 +169,7 @@ class KafkaSendToSpec extends Specification {
         RecordMetadata sendProductForMono(@KafkaKey String name, Product product)
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class ProductListener {
         Queue<Product> products = new ConcurrentLinkedDeque<>()
 
@@ -220,7 +217,7 @@ class KafkaSendToSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     @Topic(KafkaSendToSpec.TOPIC_QUANTITY)
     static class QuantityListener {
         Queue<Integer> quantities = new ConcurrentLinkedDeque<>()

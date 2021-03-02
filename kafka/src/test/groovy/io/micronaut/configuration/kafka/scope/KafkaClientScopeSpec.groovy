@@ -1,9 +1,7 @@
-
 package io.micronaut.configuration.kafka.scope
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.ApplicationContext
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import spock.lang.Specification
 
@@ -30,9 +28,10 @@ class KafkaClientScopeSpec extends Specification {
         ctx.close()
     }
 
-
     @Singleton
     static class MyClass {
-        @Inject @KafkaClient("foo") Producer<String, Integer> producer
+        @Inject
+        @KafkaClient("foo")
+        Producer<String, Integer> producer
     }
 }

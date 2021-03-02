@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.offsets
 
 import io.micronaut.configuration.kafka.ConsumerAware
@@ -20,16 +19,22 @@ import spock.util.concurrent.PollingConditions
 
 import javax.inject.Singleton
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class AssignToPartitionSpec extends Specification {
+
     public static final String TOPIC_SYNC = "AssignToPartitionSpec-products-sync"
+
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared @AutoCleanup ApplicationContext context
+
     def setupSpec() {
         kafkaContainer.start()
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
+                        EMBEDDED_TOPICS, [TOPIC_SYNC]
                 )
         )
     }
@@ -54,7 +59,6 @@ class AssignToPartitionSpec extends Specification {
 
     @KafkaClient
     static interface ProductClient {
-
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
         void send(Product product)
     }
@@ -64,12 +68,9 @@ class AssignToPartitionSpec extends Specification {
 
         List<Product> products = []
         Consumer kafkaConsumer
-
         Collection<TopicPartition> partitionsAssigned
-        @KafkaListener(
-                offsetReset = OffsetReset.EARLIEST
-        )
 
+        @KafkaListener(offsetReset = EARLIEST)
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
         void receive(Product product) {
             products.add(product)
@@ -77,17 +78,15 @@ class AssignToPartitionSpec extends Specification {
 
         @Override
         void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-
         }
 
         @Override
         void onPartitionsAssigned(Collection<TopicPartition> partitions) {
             partitionsAssigned = partitions
-            for(tp in partitions) {
+            for (tp in partitions) {
                 kafkaConsumer.seek(tp, 1)
             }
         }
-
     }
 
     static class Product {

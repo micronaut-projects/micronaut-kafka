@@ -1,15 +1,12 @@
-
 package io.micronaut.configuration.kafka.offsets
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
@@ -19,8 +16,14 @@ import spock.util.concurrent.PollingConditions
 
 import javax.inject.Singleton
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class ManualOffsetCommitSpec extends Specification {
+
     public static final String TOPIC_SYNC = "ManualOffsetCommitSpec-products-sync"
+
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared @AutoCleanup ApplicationContext context
 
@@ -29,7 +32,7 @@ class ManualOffsetCommitSpec extends Specification {
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
+                        EMBEDDED_TOPICS, [TOPIC_SYNC]
                 )
         )
     }
@@ -53,7 +56,6 @@ class ManualOffsetCommitSpec extends Specification {
 
     @KafkaClient
     static interface ProductClient {
-
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
         void send(Product product)
     }
@@ -63,22 +65,18 @@ class ManualOffsetCommitSpec extends Specification {
 
         List<Product> products = []
 
-        @KafkaListener(
-                offsetReset = OffsetReset.EARLIEST,
-                offsetStrategy = OffsetStrategy.DISABLED
-        )
+        @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
-        void receive(
-                Product product,
-                long offset,
-                int partition,
-                String topic,
-                Consumer kafkaConsumer) {
+        void receive(Product product,
+                     long offset,
+                     int partition,
+                     String topic,
+                     Consumer kafkaConsumer) {
             products.add(product)
 
             kafkaConsumer.commitSync(Collections.singletonMap(
                     new TopicPartition(topic, partition),
-                    new org.apache.kafka.clients.consumer.OffsetAndMetadata(offset + 1, "my metadata")
+                    new OffsetAndMetadata(offset + 1, "my metadata")
             ))
         }
     }

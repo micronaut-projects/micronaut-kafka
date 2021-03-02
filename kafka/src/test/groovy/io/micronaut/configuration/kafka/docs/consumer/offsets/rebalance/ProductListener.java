@@ -1,10 +1,10 @@
-
 package io.micronaut.configuration.kafka.docs.consumer.offsets.rebalance;
 
-import io.micronaut.configuration.kafka.ConsumerAware;
-import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 // tag::imports[]
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.ConsumerAware;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
@@ -12,7 +12,6 @@ import org.apache.kafka.common.TopicPartition;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 // end::imports[]
-
 
 // tag::clazz[]
 @KafkaListener

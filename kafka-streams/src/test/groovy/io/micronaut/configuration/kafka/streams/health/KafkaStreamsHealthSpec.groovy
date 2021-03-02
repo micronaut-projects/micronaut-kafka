@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.streams.health
 
 import io.micronaut.configuration.kafka.streams.AbstractTestContainersSpec
 import io.micronaut.configuration.kafka.streams.KafkaStreamsFactory
-import io.micronaut.health.HealthStatus
 import io.micronaut.management.health.aggregator.HealthAggregator
 import io.micronaut.management.health.aggregator.RxJavaHealthAggregator
 import io.micronaut.management.health.indicator.HealthResult
@@ -10,6 +9,8 @@ import io.micronaut.runtime.ApplicationConfiguration
 import io.reactivex.Single
 import org.apache.kafka.streams.KafkaStreams
 import spock.lang.Retry
+
+import static io.micronaut.health.HealthStatus.UP
 
 @Retry
 class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
@@ -32,7 +33,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         and:
@@ -40,7 +41,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
         assert ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
         HealthResult healthLevelTwo = ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
         healthLevelTwo.name == "micronaut-kafka-streams"
-        healthLevelTwo.status == HealthStatus.UP
+        healthLevelTwo.status == UP
         (healthLevelTwo.details as Map).size() == 8
         (healthLevelTwo.details as Map).containsKey("adminClientId")
         (healthLevelTwo.details as Map).containsKey("restoreConsumerClientId")
@@ -59,7 +60,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         and:
@@ -74,7 +75,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         then:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         when:

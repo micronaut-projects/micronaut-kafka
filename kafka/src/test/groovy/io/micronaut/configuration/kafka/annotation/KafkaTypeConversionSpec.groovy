@@ -1,7 +1,5 @@
-
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.ApplicationContext
@@ -17,6 +15,9 @@ import spock.util.concurrent.PollingConditions
 import javax.inject.Inject
 import java.util.concurrent.ConcurrentHashMap
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 @Stepwise
 class KafkaTypeConversionSpec extends Specification {
 
@@ -30,7 +31,7 @@ class KafkaTypeConversionSpec extends Specification {
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["uuids"]
+                        EMBEDDED_TOPICS, ["uuids"]
                 )
         )
     }
@@ -70,7 +71,7 @@ class KafkaTypeConversionSpec extends Specification {
         }
     }
 
-    @KafkaListener(groupId = "MyUuidGroup", offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "MyUuidGroup", offsetReset = EARLIEST)
     static class MyListener implements KafkaListenerExceptionHandler {
 
         Map<UUID, String> messages = new ConcurrentHashMap<>()

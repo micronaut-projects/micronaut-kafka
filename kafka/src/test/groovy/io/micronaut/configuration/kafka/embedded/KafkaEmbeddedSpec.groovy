@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.embedded
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
@@ -9,14 +8,15 @@ import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import spock.lang.Specification
 
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class KafkaEmbeddedSpec extends Specification {
 
     void "test run kafka embedded server"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(
-                Collections.singletonMap(
-                        AbstractKafkaConfiguration.EMBEDDED, true
-                )
+                Collections.singletonMap(EMBEDDED, true)
         )
 
         when:
@@ -25,7 +25,6 @@ class KafkaEmbeddedSpec extends Specification {
 
         then:
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
-
 
         when:
         KafkaEmbedded kafkaEmbedded = applicationContext.getBean(KafkaEmbedded)
@@ -45,9 +44,9 @@ class KafkaEmbeddedSpec extends Specification {
 
         ApplicationContext applicationContext = ApplicationContext.run(
                 [
-                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
-                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName,
-                        "kafka.embedded.properties.num.partitions"  : partitionNumber
+                        (EMBEDDED)                                : true,
+                        (EMBEDDED_TOPICS)                         : topicName,
+                        "kafka.embedded.properties.num.partitions": partitionNumber
                 ]
         )
 
@@ -77,8 +76,8 @@ class KafkaEmbeddedSpec extends Specification {
 
         ApplicationContext applicationContext = ApplicationContext.run(
                 [
-                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
-                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName
+                        (EMBEDDED)       : true,
+                        (EMBEDDED_TOPICS): topicName
                 ]
         )
 
@@ -96,7 +95,6 @@ class KafkaEmbeddedSpec extends Specification {
                 .describeTopics([topicName]).values()
                 .get(topicName).get()
                 .partitions().size() == 1
-
 
         cleanup:
         adminClient.close()

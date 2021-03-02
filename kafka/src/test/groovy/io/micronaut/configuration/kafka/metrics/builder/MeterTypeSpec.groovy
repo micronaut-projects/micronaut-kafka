@@ -1,11 +1,15 @@
-
 package io.micronaut.configuration.kafka.metrics.builder
 
 import spock.lang.Specification
 
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.FUNCTION_COUNTER
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.GAUGE
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.TIME_GAUGE
+
 class MeterTypeSpec extends Specification {
+
     def "test all the enums"() {
         expect:
-        MeterType.values() == [MeterType.GAUGE, MeterType.FUNCTION_COUNTER, MeterType.TIME_GAUGE]
+        MeterType.values() == [GAUGE, FUNCTION_COUNTER, TIME_GAUGE]
     }
 }

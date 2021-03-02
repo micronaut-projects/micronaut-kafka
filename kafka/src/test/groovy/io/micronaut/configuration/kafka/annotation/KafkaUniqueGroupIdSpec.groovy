@@ -1,7 +1,5 @@
-
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.http.client.DefaultHttpClientConfiguration
@@ -13,6 +11,9 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 import spock.util.concurrent.PollingConditions
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 @Stepwise
 class KafkaUniqueGroupIdSpec extends Specification {
@@ -37,11 +38,14 @@ class KafkaUniqueGroupIdSpec extends Specification {
         embeddedServer = ApplicationContext.run(EmbeddedServer,
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [KafkaUniqueGroupIdSpec.TOPIC]
+                        EMBEDDED_TOPICS, [KafkaUniqueGroupIdSpec.TOPIC]
                 )
         )
         context = embeddedServer.applicationContext
-        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+        httpClient = embeddedServer.applicationContext.createBean(
+                RxHttpClient,
+                embeddedServer.getURL(),
+                new DefaultHttpClientConfiguration(followRedirects: false))
     }
 
     void "test multiple consumers - single group id"() {
@@ -56,7 +60,9 @@ class KafkaUniqueGroupIdSpec extends Specification {
 
         then:
         conditions.eventually {
-            (myConsumer1_1.lastMessage == 'Test message 1' && myConsumer1_2.lastMessage == null) || (myConsumer1_1.lastMessage == null && myConsumer1_2.lastMessage == 'Test message 1')
+            (myConsumer1_1.lastMessage == 'Test message 1' && myConsumer1_2.lastMessage == null) ||
+            (myConsumer1_1.lastMessage == null && myConsumer1_2.lastMessage == 'Test message 1')
+
             myConsumer1_1.count + myConsumer1_2.count == 1
         }
     }
@@ -101,7 +107,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         void sendMessage(@KafkaKey String key, String message)
     }
 
-    @KafkaListener(groupId = "myGroup", offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "myGroup", offsetReset = EARLIEST)
     static class MyConsumer1_1 {
         Integer count = 0
         String lastMessage
@@ -113,7 +119,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
-    @KafkaListener(groupId = "myGroup", uniqueGroupId = false, offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "myGroup", uniqueGroupId = false, offsetReset = EARLIEST)
     static class MyConsumer1_2 {
         Integer count = 0
         String lastMessage
@@ -125,7 +131,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
-    @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_1 {
         Integer count = 0
         String lastMessage
@@ -137,7 +143,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
-    @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_2 {
         Integer count = 0
         String lastMessage
@@ -149,7 +155,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
-    @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_1 {
         Integer count = 0
         String lastMessage
@@ -161,7 +167,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
-    @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_2 {
         Integer count = 0
         String lastMessage
@@ -172,5 +178,4 @@ class KafkaUniqueGroupIdSpec extends Specification {
             count++
         }
     }
-
 }

@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
@@ -16,6 +15,8 @@ import spock.lang.Retry
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 
 @Retry
 class KafkaBatchListenerSpec extends Specification {
@@ -51,7 +52,6 @@ class KafkaBatchListenerSpec extends Specification {
         )
     }
 
-
     void "test send batch list with headers - blocking"() {
         given:
         MyBatchClient myBatchClient = context.getBean(MyBatchClient)
@@ -72,7 +72,6 @@ class KafkaBatchListenerSpec extends Specification {
         }
     }
 
-
     void "test send batch list - blocking"() {
         given:
         MyBatchClient myBatchClient = context.getBean(MyBatchClient)
@@ -90,7 +89,6 @@ class KafkaBatchListenerSpec extends Specification {
             bookListener.books.contains(new Book(title: "The Shining"))
         }
     }
-
 
     void "test send and forward batch list - blocking"() {
         given:
@@ -131,7 +129,6 @@ class KafkaBatchListenerSpec extends Specification {
             bookListener.books.contains(new Book(title: "The Watchmen"))
         }
     }
-
 
     void "test send and forward batch array - blocking"() {
         given:
@@ -211,7 +208,6 @@ class KafkaBatchListenerSpec extends Specification {
         }
     }
 
-
     void "test send batch flowable"() {
         given:
         MyBatchClient myBatchClient = context.getBean(MyBatchClient)
@@ -230,7 +226,7 @@ class KafkaBatchListenerSpec extends Specification {
         }
     }
 
-    @io.micronaut.configuration.kafka.annotation.KafkaClient(batch = true)
+    @KafkaClient(batch = true)
     @Topic(KafkaBatchListenerSpec.BOOKS_TOPIC)
     static interface MyBatchClient {
 
@@ -245,10 +241,10 @@ class KafkaBatchListenerSpec extends Specification {
         void sendAndForwardBooks(List<Book> books)
 
         @Topic(KafkaBatchListenerSpec.BOOKS_ARRAY_TOPIC)
-        void sendBooks(Book...books)
+        void sendBooks(Book... books)
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_ARRAY_TOPIC)
-        void sendAndForward(Book...books)
+        void sendAndForward(Book... books)
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_FLUX_TOPIC)
         Flux<Book> sendAndForwardFlux(Flux<Book> books)
@@ -261,13 +257,9 @@ class KafkaBatchListenerSpec extends Specification {
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
         void sendBooksFlowable(Flowable<Book> books)
-
     }
 
-    @KafkaListener(
-            batch = true,
-            offsetReset = OffsetReset.EARLIEST
-    )
+    @KafkaListener(batch = true, offsetReset = EARLIEST)
     @Topic(KafkaBatchListenerSpec.BOOKS_TOPIC)
     static class BookListener {
         List<Book> books = []
@@ -285,7 +277,7 @@ class KafkaBatchListenerSpec extends Specification {
         }
 
         @Topic(KafkaBatchListenerSpec.BOOKS_ARRAY_TOPIC)
-        void receiveArray(Book...books) {
+        void receiveArray(Book... books) {
             this.books.addAll Arrays.asList(books)
         }
 
@@ -295,13 +287,13 @@ class KafkaBatchListenerSpec extends Specification {
             this.books.addAll(books)
             return books*.title
         }
+
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_ARRAY_TOPIC)
         @SendTo(KafkaBatchListenerSpec.TITLES_TOPIC)
-        String[] receiveAndSendArray(Book...books) {
+        String[] receiveAndSendArray(Book... books) {
             this.books.addAll Arrays.asList(books)
             return books*.title as String[]
         }
-
 
         @SendTo(KafkaBatchListenerSpec.TITLES_TOPIC)
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_FLUX_TOPIC)
@@ -317,7 +309,6 @@ class KafkaBatchListenerSpec extends Specification {
             return books.map { Book book -> book.title }
         }
 
-
         @Topic(KafkaBatchListenerSpec.BOOKS_FLUX_TOPIC)
         void recieveFlux(Flux<Book> books) {
             this.books.addAll books.collectList().block()
@@ -329,15 +320,12 @@ class KafkaBatchListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(
-            batch = true,
-            offsetReset = OffsetReset.EARLIEST
-    )
+    @KafkaListener(batch = true, offsetReset = EARLIEST)
     static class TitleListener {
         List<String> titles = []
 
         @Topic(KafkaBatchListenerSpec.TITLES_TOPIC)
-        void receiveTitles(String...titles) {
+        void receiveTitles(String... titles) {
             this.titles.addAll(titles)
         }
     }

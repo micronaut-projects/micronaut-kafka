@@ -1,8 +1,6 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.configuration.kafka.ConsumerRegistry
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.Body
@@ -15,6 +13,9 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentSkipListSet
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaPauseResumeSpec extends Specification {
 
@@ -35,7 +36,7 @@ class KafkaPauseResumeSpec extends Specification {
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
                         "micrometer.metrics.enabled", true,
                         'endpoints.metrics.sensitive', false,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["fruits"]
+                        EMBEDDED_TOPICS, ["fruits"]
                 )
         )
         context = embeddedServer.applicationContext
@@ -89,15 +90,13 @@ class KafkaPauseResumeSpec extends Specification {
         }
     }
 
-
     @KafkaClient
     static interface FruitClient {
-
         @Topic("fruits")
         void send(@KafkaKey String company, @Body String fruit)
     }
 
-    @KafkaListener(clientId = "fruit-client", offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(clientId = "fruit-client", offsetReset = EARLIEST)
     static class FruitListener {
 
         Set<String> fruits = new ConcurrentSkipListSet<>()

@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.docs.producer.inject;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;

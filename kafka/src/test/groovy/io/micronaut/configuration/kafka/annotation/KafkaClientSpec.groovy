@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.context.ApplicationContext

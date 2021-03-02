@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.metrics.builder
 
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry
@@ -11,6 +10,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class KafkaMetricMeterTypeBuilderSpec extends Specification {
+
     def "building with no values is empty"() {
         expect:
         !KafkaMetricMeterTypeBuilder.newBuilder().build().isPresent()
@@ -42,7 +42,6 @@ class KafkaMetricMeterTypeBuilderSpec extends Specification {
         null   | "prefix" | createTagFunction() | createMetric() | new LoggingMeterRegistry() | true
         "name" | "prefix" | createTagFunction() | createMetric() | new LoggingMeterRegistry() | true
     }
-
 
     def createMetric() {
         return new KafkaMetric(new Object(),

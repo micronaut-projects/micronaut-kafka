@@ -1,7 +1,7 @@
-
 package io.micronaut.configuration.kafka.docs.consumer.config;
 
 public class Product {
+
     private String name;
     private int quantity;
 

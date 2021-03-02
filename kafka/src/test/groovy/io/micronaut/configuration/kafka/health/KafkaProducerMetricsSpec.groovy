@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.health
 
 import groovy.transform.EqualsAndHashCode
@@ -6,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
@@ -21,6 +19,8 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
+
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaProducerMetricsSpec extends Specification {
 
@@ -44,11 +44,14 @@ class KafkaProducerMetricsSpec extends Specification {
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
                         "micrometer.metrics.enabled", true,
                         'endpoints.metrics.sensitive', false,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
+                        EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
                 )
         )
         context = embeddedServer.applicationContext
-        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+        httpClient = embeddedServer.applicationContext.createBean(
+                RxHttpClient,
+                embeddedServer.getURL(),
+                new DefaultHttpClientConfiguration(followRedirects: false))
     }
 
     void "test simple producer"() {

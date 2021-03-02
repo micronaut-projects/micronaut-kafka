@@ -1,9 +1,7 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.reactivex.Flowable
@@ -20,9 +18,14 @@ import spock.util.concurrent.PollingConditions
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.Future
 
+import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class KafkaReactiveListenerSpec extends Specification{
 
     public static final String TOPIC_NAME = "KafkaReactiveListenerSpec-books"
+
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared @AutoCleanup ApplicationContext context
 
@@ -31,7 +34,7 @@ class KafkaReactiveListenerSpec extends Specification{
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_NAME]
+                        EMBEDDED_TOPICS, [TOPIC_NAME]
                 )
 
 
@@ -112,8 +115,6 @@ class KafkaReactiveListenerSpec extends Specification{
         }
     }
 
-
-
     void "test send and return single record metadata"() {
         given:
         BookClient bookClient = context.getBean(BookClient)
@@ -189,8 +190,6 @@ class KafkaReactiveListenerSpec extends Specification{
             listener.books.contains(new Book(title:  "The Shining"))
         }
     }
-
-
 
     void "test send and return single record metadata - future"() {
         given:
@@ -268,7 +267,6 @@ class KafkaReactiveListenerSpec extends Specification{
         }
     }
 
-
     void "test send and return single record metadata - block"() {
         given:
         BookClient bookClient = context.getBean(BookClient)
@@ -345,7 +343,6 @@ class KafkaReactiveListenerSpec extends Specification{
         }
     }
 
-
     void "test send and return single record metadata - block void"() {
         given:
         BookClient bookClient = context.getBean(BookClient)
@@ -416,7 +413,7 @@ class KafkaReactiveListenerSpec extends Specification{
         }
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(acks = ALL)
     @Topic(KafkaReactiveListenerSpec.TOPIC_NAME)
     static interface BookClient {
 
@@ -461,11 +458,10 @@ class KafkaReactiveListenerSpec extends Specification{
         Future sendMonoFuture(@KafkaKey String author, Mono<Book> book)
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     @Topic(KafkaReactiveListenerSpec.TOPIC_NAME)
     static class BookListener {
         Queue<Book> books = new ConcurrentLinkedDeque<>()
-
 
         void receiveSingle(Single<Book> book) {
             books.add( book.blockingGet() )

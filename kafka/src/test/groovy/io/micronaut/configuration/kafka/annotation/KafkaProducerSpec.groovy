@@ -1,8 +1,6 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.util.logging.Slf4j
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
@@ -10,13 +8,13 @@ import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 import org.testcontainers.containers.KafkaContainer
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.producer.Producer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -25,6 +23,10 @@ import spock.util.concurrent.PollingConditions
 import javax.inject.Singleton
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger
+
+import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaProducerSpec extends Specification {
 
@@ -61,13 +63,12 @@ class KafkaProducerSpec extends Specification {
                         "kafka.consumers.default.value-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
                         "kafka.consumers.default.valueDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [
+                        EMBEDDED_TOPICS, [
                         TOPIC_BLOCKING
                 ]
                 )
         ).singletons(mockTracer).start()
     }
-
 
     def "test customize defaults"() {
         given:
@@ -110,8 +111,8 @@ class KafkaProducerSpec extends Specification {
             userListener.others['Dell'] == 'PC'
         }
         and:
-            context.getBean(KafkaConsumerInstrumentation).counter.get() > 0
-            context.getBean(KafkaProducerInstrumentation).counter.get() > 0
+        context.getBean(KafkaConsumerInstrumentation).counter.get() > 0
+        context.getBean(KafkaProducerInstrumentation).counter.get() > 0
     }
 
     def "test collection of headers"() {
@@ -160,19 +161,19 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL, id = "named")
+    @KafkaClient(acks = ALL, id = "named")
     static interface NamedClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
         String sendUser(@KafkaKey String name, String user)
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(acks = ALL)
     static interface UserClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
         String sendUser(@KafkaKey String name, String user)
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(acks = ALL)
     static interface ProductClient {
         @Topic("ProducerSpec-my-products")
         void send(@KafkaKey String brand, String name)
@@ -183,7 +184,7 @@ class KafkaProducerSpec extends Specification {
         void send3(@Topic String topic, @KafkaKey String key, String name)
     }
 
-    @KafkaClient(acks = KafkaClient.Acknowledge.ALL)
+    @KafkaClient(acks = ALL)
     static interface BicycleClient {
         @Topic("ProducerSpec-my-bicycles")
         void send(@KafkaKey String brand, String name, Collection<Header> headers)
@@ -192,7 +193,7 @@ class KafkaProducerSpec extends Specification {
         void send2(@KafkaKey String key, String name, Headers headers)
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class UserListener {
         Queue<String> users = new ConcurrentLinkedDeque<>()
         Queue<String> keys = new ConcurrentLinkedDeque<>()
@@ -206,12 +207,13 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     @Slf4j
     static class ProductListener {
 
         Map<String, String> brands = [:]
         Map<String, String> others = [:]
+
         @Topic("ProducerSpec-my-products")
         void receive(@KafkaKey String brand, String name) {
             log.info("Got Product - {} by {}", brand, name)
@@ -225,7 +227,7 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     @Slf4j
     static class BicycleListener {
 
@@ -270,6 +272,5 @@ class KafkaProducerSpec extends Specification {
             counter.incrementAndGet()
             return event.getBean()
         }
-
     }
 }

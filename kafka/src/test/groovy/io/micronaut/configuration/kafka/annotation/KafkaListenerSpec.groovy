@@ -1,9 +1,7 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
 import io.micrometer.core.instrument.MeterRegistry
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
@@ -33,6 +31,9 @@ import spock.util.concurrent.PollingConditions
 
 import javax.annotation.Nullable
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 @Stepwise
 class KafkaListenerSpec extends Specification {
 
@@ -52,14 +53,15 @@ class KafkaListenerSpec extends Specification {
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
                         "micrometer.metrics.enabled", true,
                         'endpoints.metrics.sensitive', false,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
+                        EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
                 )
         )
         context = embeddedServer.applicationContext
-        httpClient = embeddedServer.applicationContext.createBean(RxHttpClient, embeddedServer.getURL(), new DefaultHttpClientConfiguration(followRedirects: false))
+        httpClient = embeddedServer.applicationContext.createBean(
+                RxHttpClient,
+                embeddedServer.getURL(),
+                new DefaultHttpClientConfiguration(followRedirects: false))
     }
-
-
 
     void "test simple consumer"() {
         given:
@@ -175,9 +177,7 @@ class KafkaListenerSpec extends Specification {
 
         cleanup:
         producer?.close()
-
     }
-
 
     void "test POJO consumer record"() {
 
@@ -200,7 +200,6 @@ class KafkaListenerSpec extends Specification {
 
         cleanup:
         producer?.close()
-
     }
 
     void "test @Header annotation with optional"() {
@@ -234,7 +233,7 @@ class KafkaListenerSpec extends Specification {
         void sendBook(@KafkaKey String key, @Nullable @Body Book book)
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer {
         int wordCount
         String lastTopic
@@ -246,7 +245,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer2 {
         int wordCount
         String key
@@ -258,7 +257,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer3 {
         int wordCount
         String key
@@ -270,7 +269,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer4 {
         String body
 
@@ -280,21 +279,23 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer5 {
         boolean missingHeader
         String sentence
         String topic
 
         @Topic("words")
-        void countWord(@Body String sentence, @Header Optional<String> topic, @Header Optional<String> missing) {
+        void countWord(@Body String sentence,
+                       @Header Optional<String> topic,
+                       @Header Optional<String> missing) {
             missingHeader = !missing.isPresent()
             this.sentence = sentence
             this.topic = topic.get()
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class PojoConsumer2 {
         Book lastBook
         String topic
@@ -308,7 +309,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class PojoConsumer {
         Book lastBook
         MessageHeaders messageHeaders

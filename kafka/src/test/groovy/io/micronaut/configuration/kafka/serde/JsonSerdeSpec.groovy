@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.serde
 
 import groovy.transform.EqualsAndHashCode
@@ -17,13 +16,12 @@ class JsonSerdeSpec extends Specification {
         def json = '{"title":"The Stand"}'
 
         then:
-        new String( serde.serialize("foo", book)) == json
+        new String(serde.serialize("foo", book)) == json
         serde.deserialize("foo", json.bytes) == book
 
         cleanup:
         context.close()
     }
-
 
     @EqualsAndHashCode
     static class Book {

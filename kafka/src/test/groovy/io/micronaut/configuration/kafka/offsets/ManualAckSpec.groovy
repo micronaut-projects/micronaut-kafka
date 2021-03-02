@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.offsets
 
 import io.micronaut.configuration.kafka.Acknowledgement
@@ -18,8 +17,14 @@ import spock.util.concurrent.PollingConditions
 
 import javax.inject.Singleton
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class ManualAckSpec extends Specification {
+
     public static final String TOPIC_SYNC = "ManualOffsetCommitSpec-products-sync"
+
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared @AutoCleanup ApplicationContext context
 
@@ -28,7 +33,7 @@ class ManualAckSpec extends Specification {
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
+                        EMBEDDED_TOPICS, [TOPIC_SYNC]
                 )
         )
     }
@@ -52,7 +57,6 @@ class ManualAckSpec extends Specification {
 
     @KafkaClient
     static interface ProductClient {
-
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
         void send(Product product)
     }
@@ -62,14 +66,9 @@ class ManualAckSpec extends Specification {
 
         List<Product> products = []
 
-        @KafkaListener(
-                offsetReset = OffsetReset.EARLIEST,
-                offsetStrategy = OffsetStrategy.DISABLED
-        )
+        @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
         @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
-        void receive(
-                Product product,
-                Acknowledgement acknowledgement) {
+        void receive(Product product, Acknowledgement acknowledgement) {
             products.add(product)
 
             acknowledgement.ack()
@@ -80,4 +79,3 @@ class ManualAckSpec extends Specification {
         String name
     }
 }
-

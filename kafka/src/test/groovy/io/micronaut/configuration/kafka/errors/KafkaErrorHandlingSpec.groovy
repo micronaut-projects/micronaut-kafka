@@ -1,20 +1,13 @@
-
 package io.micronaut.configuration.kafka.errors
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
-import io.micronaut.messaging.MessageHeaders
 import io.micronaut.runtime.server.EmbeddedServer
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
@@ -23,6 +16,10 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.atomic.AtomicInteger
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaErrorHandlingSpec extends Specification {
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
@@ -35,7 +32,7 @@ class KafkaErrorHandlingSpec extends Specification {
         embeddedServer = ApplicationContext.run(EmbeddedServer,
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["errors"]
+                        EMBEDDED_TOPICS, ["errors"]
                 )
         )
     }
@@ -56,11 +53,9 @@ class KafkaErrorHandlingSpec extends Specification {
             myConsumer.received.size() == 2
             myConsumer.count.get() == 3
         }
-
-
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.SYNC)
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
     static class ErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
         List<String> received = []

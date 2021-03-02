@@ -1,7 +1,5 @@
-
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -12,6 +10,9 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentLinkedDeque
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaTimestampSpec extends Specification {
 
@@ -27,7 +28,7 @@ class KafkaTimestampSpec extends Specification {
         context = ApplicationContext.run(
                 CollectionUtils.mapOf(
                         "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS,
+                        EMBEDDED_TOPICS,
                         [TOPIC_WORDS]
                 )
         )
@@ -41,7 +42,10 @@ class KafkaTimestampSpec extends Specification {
         listener.sentences.clear()
         listener.timestamps.clear()
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-        ProducerRecord pr = Spy(ProducerRecord, constructorArgs: [TOPIC_WORDS, null, null, "key", "sentence", new ArrayList()]) as ProducerRecord
+        ProducerRecord pr = Spy(
+                ProducerRecord,
+                constructorArgs: [TOPIC_WORDS, null, null, "key", "sentence", new ArrayList()]
+        ) as ProducerRecord
 
         when:
         client.sendSentence("key", "sentence")
@@ -55,7 +59,6 @@ class KafkaTimestampSpec extends Specification {
             listener.timestamps.size() == 1
             listener.timestamps.iterator().next() != null
         }
-
     }
 
     def "test client with timestamp"() {
@@ -152,7 +155,7 @@ class KafkaTimestampSpec extends Specification {
         void sendSentence(@KafkaKey String key, String sentence, @KafkaTimestamp Long timestamp)
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class SentenceListener {
         Queue<String> keys = new ConcurrentLinkedDeque<>()
         Queue<String> sentences = new ConcurrentLinkedDeque<>()
@@ -165,5 +168,4 @@ class KafkaTimestampSpec extends Specification {
             timestamps << timestamp
         }
     }
-
 }
