@@ -1,10 +1,11 @@
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.util.logging.Slf4j
+import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Requires
 import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
-import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
@@ -17,8 +18,6 @@ import org.apache.kafka.common.header.internals.RecordHeaders
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import javax.inject.Singleton
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -28,45 +27,37 @@ import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledg
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaProducerSpec extends Specification {
+class KafkaProducerSpec extends AbstractKafkaSpec {
 
     public static final String TOPIC_BLOCKING = "ProducerSpec-users-blocking"
     public static final String TOPIC_QUANTITY = "ProducerSpec-users-quantity"
 
-    @Shared
-    MockTracer mockTracer = new MockTracer()
-
+    @Shared MockTracer mockTracer = new MockTracer()
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
+    @Shared @AutoCleanup ApplicationContext context
 
     def setupSpec() {
         kafkaContainer.start()
         context =  ApplicationContext.build(
-                CollectionUtils.mapOf(
-                        'micronaut.application.name', 'test-app',
-                        "kafka.schema.registry.url", "http://localhot:8081",
-                        "kafka.producers.named.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.named.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.key.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.key-serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.keySerializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.value.serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.value-serializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.producers.default.valueSerializer", "org.apache.kafka.common.serialization.StringSerializer",
-                        "kafka.consumers.default.key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.consumers.default.key-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.consumers.default.keyDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.consumers.default.value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.consumers.default.value-deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.consumers.default.valueDeserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS, [
-                        TOPIC_BLOCKING
-                ]
-                )
+                getConfiguration() +
+                ['micronaut.application.name'                : 'test-app',
+                 "kafka.schema.registry.url"                 : "http://localhot:8081",
+                 "kafka.producers.named.key.serializer"      : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.named.value.serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.key.serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.key-serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.keySerializer"     : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.value.serializer"  : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.value-serializer"  : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.producers.default.valueSerializer"   : "org.apache.kafka.common.serialization.StringSerializer",
+                 "kafka.consumers.default.key.deserializer"  : "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.consumers.default.key-deserializer"  : "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.consumers.default.keyDeserializer"   : "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.consumers.default.value.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.consumers.default.value-deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.consumers.default.valueDeserializer" : "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.bootstrap.servers"                   : kafkaContainer.getBootstrapServers(),
+                 (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
         ).singletons(mockTracer).start()
     }
 
@@ -76,7 +67,6 @@ class KafkaProducerSpec extends Specification {
         UserListener userListener = context.getBean(UserListener)
         userListener.users.clear()
         userListener.keys.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendUser("Bob", "Robert")
@@ -97,7 +87,6 @@ class KafkaProducerSpec extends Specification {
         ProductListener userListener = context.getBean(ProductListener)
         userListener.brands.clear()
         userListener.others.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.send("Apple", "iMac")
@@ -122,7 +111,6 @@ class KafkaProducerSpec extends Specification {
         listener.brands.clear()
         listener.others.clear()
         listener.additionalInfo.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.send("Raleigh", "Professional", [new RecordHeader("size", "60cm".bytes)])
@@ -145,7 +133,6 @@ class KafkaProducerSpec extends Specification {
         listener.brands.clear()
         listener.others.clear()
         listener.additionalInfo.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.send2("Raleigh", "International", new RecordHeaders([new RecordHeader("year", "1971".bytes)]))
@@ -161,18 +148,21 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaClient(acks = ALL, id = "named")
     static interface NamedClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
         String sendUser(@KafkaKey String name, String user)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaClient(acks = ALL)
     static interface UserClient {
         @Topic(KafkaProducerSpec.TOPIC_BLOCKING)
         String sendUser(@KafkaKey String name, String user)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaClient(acks = ALL)
     static interface ProductClient {
         @Topic("ProducerSpec-my-products")
@@ -184,6 +174,7 @@ class KafkaProducerSpec extends Specification {
         void send3(@Topic String topic, @KafkaKey String key, String name)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaClient(acks = ALL)
     static interface BicycleClient {
         @Topic("ProducerSpec-my-bicycles")
@@ -193,6 +184,7 @@ class KafkaProducerSpec extends Specification {
         void send2(@KafkaKey String key, String name, Headers headers)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class UserListener {
         Queue<String> users = new ConcurrentLinkedDeque<>()
@@ -207,6 +199,7 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     @Slf4j
     static class ProductListener {
@@ -227,6 +220,7 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     @Slf4j
     static class BicycleListener {
@@ -250,6 +244,7 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @Singleton
     static class KafkaConsumerInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
 
@@ -262,6 +257,7 @@ class KafkaProducerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @Singleton
     static class KafkaProducerInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
 

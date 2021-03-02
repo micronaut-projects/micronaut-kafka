@@ -1,7 +1,9 @@
 package io.micronaut.configuration.kafka.annotation
 
+import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.messaging.exceptions.MessagingClientException
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -11,7 +13,6 @@ import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 import reactor.core.publisher.Mono
 import spock.lang.Shared
-import spock.lang.Specification
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
@@ -20,16 +21,14 @@ import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledg
 import static io.micronaut.core.io.socket.SocketUtils.LOCALHOST
 import static java.util.concurrent.TimeUnit.SECONDS
 
-class KafkaClientSpec extends Specification {
+class KafkaClientSpec extends AbstractKafkaSpec {
 
     private @Shared ApplicationContext ctx
 
     void setupSpec() {
         ctx = ApplicationContext.run(
-                Collections.singletonMap(
-                        'kafka.bootstrap.servers',
-                        LOCALHOST + ':' + SocketUtils.findAvailableTcpPort())
-        )
+                getConfiguration() +
+                ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort()])
     }
 
     void "test send message when Kafka is not available"() {
@@ -75,6 +74,7 @@ class KafkaClientSpec extends Specification {
         ctx.close()
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaClientSpec')
     @KafkaClient(maxBlock = '1s', acks = ALL)
     static interface MyClient {
 

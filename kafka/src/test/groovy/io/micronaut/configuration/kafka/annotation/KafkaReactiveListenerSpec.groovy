@@ -2,18 +2,13 @@ package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
+import io.micronaut.context.annotation.Requires
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.Future
@@ -22,23 +17,13 @@ import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledg
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaReactiveListenerSpec extends Specification{
+class KafkaReactiveListenerSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_NAME = "KafkaReactiveListenerSpec-books"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS, [TOPIC_NAME]
-                )
-
-
-        )
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): [TOPIC_NAME]]
     }
 
     void "test send and return single"() {
@@ -49,7 +34,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         Book book = bookClient.sendSingle("Stephen King", Single.just(new Book(title: "It"))).blockingGet()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         book.title == "It"
@@ -67,7 +51,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         Book book = bookClient.sendMono("Stephen King", Mono.just(new Book(title: "It"))).block()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         book.title == "It"
@@ -86,7 +69,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<Book> book = bookClient.sendFlowable("Stephen King", flowable).toList().blockingGet()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         book.size() == 2
@@ -105,7 +87,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<Book> book = bookClient.sendFlux("Stephen King", flowable).collectList().block()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         book.size() == 2
@@ -123,7 +104,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendSingleGetRecord("Stephen King", Single.just(new Book(title: "It"))).blockingGet()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -141,7 +121,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendMonoGetRecord("Stephen King", Mono.just(new Book(title: "It"))).block()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -160,7 +139,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFlowableGetRecord("Stephen King", flowable).toList().blockingGet()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -180,7 +158,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFluxGetRecord("Stephen King", flowable).collectList().block()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -199,7 +176,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendSingleFuture("Stephen King", Single.just(new Book(title: "It"))).get()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -217,7 +193,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendMonoFuture("Stephen King", Mono.just(new Book(title: "It"))).get()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -236,7 +211,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFlowableFuture("Stephen King", flowable).get()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -256,7 +230,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFluxFuture("Stephen King", flowable).get()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -275,7 +248,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendSingleRM("Stephen King", Single.just(new Book(title: "It")))
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -293,7 +265,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         RecordMetadata recordMetadata = bookClient.sendMonoRM("Stephen King", Mono.just(new Book(title: "It")))
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         recordMetadata != null
@@ -312,7 +283,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFlowableRM("Stephen King", flowable).toList()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -332,7 +302,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         List<RecordMetadata> result = bookClient.sendFluxRM("Stephen King", flowable)
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         result.size() == 2
@@ -351,7 +320,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         bookClient.sendSingleVoid("Stephen King", Single.just(new Book(title: "It")))
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         conditions.eventually {
@@ -368,7 +336,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         bookClient.sendMonoVoid("Stephen King", Mono.just(new Book(title: "It")))
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         conditions.eventually {
@@ -386,7 +353,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         bookClient.sendFlowableVoid("Stephen King", flowable)
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         conditions.eventually {
@@ -404,7 +370,6 @@ class KafkaReactiveListenerSpec extends Specification{
 
         when:
         bookClient.sendFluxVoid("Stephen King", flowable)
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         then:
         conditions.eventually {
@@ -413,6 +378,7 @@ class KafkaReactiveListenerSpec extends Specification{
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaReactiveListenerSpec')
     @KafkaClient(acks = ALL)
     @Topic(KafkaReactiveListenerSpec.TOPIC_NAME)
     static interface BookClient {
@@ -458,13 +424,15 @@ class KafkaReactiveListenerSpec extends Specification{
         Future sendMonoFuture(@KafkaKey String author, Mono<Book> book)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaReactiveListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     @Topic(KafkaReactiveListenerSpec.TOPIC_NAME)
     static class BookListener {
+
         Queue<Book> books = new ConcurrentLinkedDeque<>()
 
         void receiveSingle(Single<Book> book) {
-            books.add( book.blockingGet() )
+            books.add(book.blockingGet())
         }
 
         void receiveFlowable(Flowable<Book> book) {

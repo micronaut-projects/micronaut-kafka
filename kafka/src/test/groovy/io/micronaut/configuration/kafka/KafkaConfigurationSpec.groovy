@@ -5,7 +5,6 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguratio
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
 import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import spock.lang.Specification
 

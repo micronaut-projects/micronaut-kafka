@@ -1,37 +1,20 @@
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
+import io.micronaut.context.annotation.Requires
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaTimestampSpec extends Specification {
+class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_WORDS = "KafkaTimestampSpec-words"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS,
-                        [TOPIC_WORDS]
-                )
-        )
+    protected Map<String, Object> getConfiguration() {
+        super.configuration + [(EMBEDDED_TOPICS): [TOPIC_WORDS]]
     }
 
     def "test client without timestamp"() {
@@ -41,7 +24,7 @@ class KafkaTimestampSpec extends Specification {
         listener.keys.clear()
         listener.sentences.clear()
         listener.timestamps.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+
         ProducerRecord pr = Spy(
                 ProducerRecord,
                 constructorArgs: [TOPIC_WORDS, null, null, "key", "sentence", new ArrayList()]
@@ -68,7 +51,6 @@ class KafkaTimestampSpec extends Specification {
         listener.keys.clear()
         listener.sentences.clear()
         listener.timestamps.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendSentence("key", "sentence")
@@ -82,7 +64,6 @@ class KafkaTimestampSpec extends Specification {
             listener.timestamps.size() == 1
             listener.timestamps.iterator().next() != null
         }
-
     }
 
     def "test client with custom timestamp"() {
@@ -92,7 +73,6 @@ class KafkaTimestampSpec extends Specification {
         listener.keys.clear()
         listener.sentences.clear()
         listener.timestamps.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendSentence("key", "sentence", 111111)
@@ -115,7 +95,6 @@ class KafkaTimestampSpec extends Specification {
         listener.keys.clear()
         listener.sentences.clear()
         listener.timestamps.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendSentence("key", "sentence", 111111)
@@ -131,30 +110,35 @@ class KafkaTimestampSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTimestampSpec')
     @KafkaClient(timestamp = false)
     static interface ClientWithoutClientTimestamp {
         @Topic(KafkaTimestampSpec.TOPIC_WORDS)
         void sendSentence(@KafkaKey String key, String sentence)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTimestampSpec')
     @KafkaClient(timestamp = true)
     static interface ClientWithClientTimestamp {
         @Topic(KafkaTimestampSpec.TOPIC_WORDS)
         void sendSentence(@KafkaKey String key, String sentence)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTimestampSpec')
     @KafkaClient
     static interface ClientWithTimestampAsParameter {
         @Topic(KafkaTimestampSpec.TOPIC_WORDS)
         void sendSentence(@KafkaKey String key, String sentence, @KafkaTimestamp Long timestamp)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTimestampSpec')
     @KafkaClient(timestamp = true)
     static interface ClientWithClientTimestampAndTimestampAsParameter {
         @Topic(KafkaTimestampSpec.TOPIC_WORDS)
         void sendSentence(@KafkaKey String key, String sentence, @KafkaTimestamp Long timestamp)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTimestampSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class SentenceListener {
         Queue<String> keys = new ConcurrentLinkedDeque<>()

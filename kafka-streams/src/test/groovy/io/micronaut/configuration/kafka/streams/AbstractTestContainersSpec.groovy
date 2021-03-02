@@ -38,7 +38,6 @@ abstract class AbstractTestContainersSpec extends Specification {
                 'kafka.streams.optimization-off.topology.optimization', 'none']
     }
 
-
     def cleanupSpec() {
         try {
             embeddedServer.stop()

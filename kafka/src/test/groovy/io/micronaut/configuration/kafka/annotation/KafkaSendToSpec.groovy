@@ -1,18 +1,13 @@
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
+import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.SendTo
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.testcontainers.containers.KafkaContainer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -20,7 +15,7 @@ import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledg
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaSendToSpec extends Specification {
+class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_SINGLE = "KafkaSendToSpec-products-single"
     public static final String TOPIC_BLOCKING = "KafkaSendToSpec-products-blocking"
@@ -29,19 +24,9 @@ class KafkaSendToSpec extends Specification {
     public static final String TOPIC_MONO = "KafkaSendToSpec-products-mono"
     public static final String TOPIC_QUANTITY = "KafkaSendToSpec-quantity"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS, [
-                        TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO
-                ])
-
-        )
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): [TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO]]
     }
 
     void "test send to another topic - blocking"() {
@@ -51,8 +36,6 @@ class KafkaSendToSpec extends Specification {
         QuantityListener quantityListener = context.getBean(QuantityListener)
         productListener.products.clear()
         quantityListener.quantities.clear()
-
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendProductBlocking("Apple", new Product(name: "Apple", quantity: 5))
@@ -74,8 +57,6 @@ class KafkaSendToSpec extends Specification {
         productListener.products.clear()
         quantityListener.quantities.clear()
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         when:
         client.sendProduct("Apple", new Product(name: "Apple", quantity: 5))
 
@@ -95,7 +76,6 @@ class KafkaSendToSpec extends Specification {
         QuantityListener quantityListener = context.getBean(QuantityListener)
         productListener.products.clear()
         quantityListener.quantities.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendProductForFlowable("Apple", new Product(name: "Apple", quantity: 5))
@@ -116,7 +96,6 @@ class KafkaSendToSpec extends Specification {
         QuantityListener quantityListener = context.getBean(QuantityListener)
         productListener.products.clear()
         quantityListener.quantities.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendProductForFlux("Apple", new Product(name: "Apple", quantity: 5))
@@ -137,7 +116,6 @@ class KafkaSendToSpec extends Specification {
         QuantityListener quantityListener = context.getBean(QuantityListener)
         productListener.products.clear()
         quantityListener.quantities.clear()
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.sendProductForMono("Apple", new Product(name: "Apple", quantity: 5))
@@ -151,6 +129,7 @@ class KafkaSendToSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaSendToSpec')
     @KafkaClient(acks = ALL)
     static interface ProductClient {
         @Topic(KafkaSendToSpec.TOPIC_SINGLE)
@@ -169,6 +148,7 @@ class KafkaSendToSpec extends Specification {
         RecordMetadata sendProductForMono(@KafkaKey String name, Product product)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaSendToSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class ProductListener {
         Queue<Product> products = new ConcurrentLinkedDeque<>()
@@ -217,6 +197,7 @@ class KafkaSendToSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaSendToSpec')
     @KafkaListener(offsetReset = EARLIEST)
     @Topic(KafkaSendToSpec.TOPIC_QUANTITY)
     static class QuantityListener {

@@ -1,48 +1,30 @@
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
+import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
-import io.micronaut.runtime.server.EmbeddedServer
-import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.concurrent.PollingConditions
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 @Stepwise
-class KafkaUniqueGroupIdSpec extends Specification {
+class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
 
     static final String TOPIC = "groupid-topic"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
+    @Shared @AutoCleanup RxHttpClient httpClient
 
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    @Shared
-    @AutoCleanup
-    RxHttpClient httpClient
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): [KafkaUniqueGroupIdSpec.TOPIC]]
+    }
 
     def setupSpec() {
-        kafkaContainer.start()
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS, [KafkaUniqueGroupIdSpec.TOPIC]
-                )
-        )
-        context = embeddedServer.applicationContext
-        httpClient = embeddedServer.applicationContext.createBean(
+        httpClient = context.createBean(
                 RxHttpClient,
                 embeddedServer.getURL(),
                 new DefaultHttpClientConfiguration(followRedirects: false))
@@ -50,7 +32,6 @@ class KafkaUniqueGroupIdSpec extends Specification {
 
     void "test multiple consumers - single group id"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer1_1 myConsumer1_1 = context.getBean(MyConsumer1_1)
         MyConsumer1_2 myConsumer1_2 = context.getBean(MyConsumer1_2)
@@ -69,7 +50,6 @@ class KafkaUniqueGroupIdSpec extends Specification {
 
     void "test multiple consumers - multiple unique group ids - group id defined"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer2_1 myConsumer2_1 = context.getBean(MyConsumer2_1)
         MyConsumer2_2 myConsumer2_2 = context.getBean(MyConsumer2_2)
@@ -86,7 +66,6 @@ class KafkaUniqueGroupIdSpec extends Specification {
 
     void "test multiple consumers - multiple unique group ids - group id not defined"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer3_1 myConsumer3_1 = context.getBean(MyConsumer3_1)
         MyConsumer3_2 myConsumer3_2 = context.getBean(MyConsumer3_2)
@@ -101,12 +80,14 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaClient
     static interface MyClient {
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
         void sendMessage(@KafkaKey String key, String message)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", offsetReset = EARLIEST)
     static class MyConsumer1_1 {
         Integer count = 0
@@ -119,6 +100,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = false, offsetReset = EARLIEST)
     static class MyConsumer1_2 {
         Integer count = 0
@@ -131,6 +113,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_1 {
         Integer count = 0
@@ -143,6 +126,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_2 {
         Integer count = 0
@@ -155,6 +139,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_1 {
         Integer count = 0
@@ -167,6 +152,7 @@ class KafkaUniqueGroupIdSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_2 {
         Integer count = 0

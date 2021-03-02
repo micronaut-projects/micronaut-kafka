@@ -2,32 +2,28 @@ package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
 import io.micrometer.core.instrument.MeterRegistry
+import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
 import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.Body
 import io.micronaut.messaging.annotation.Header
-import io.micronaut.runtime.server.EmbeddedServer
 import io.reactivex.Single
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
-import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.concurrent.PollingConditions
 
 import javax.annotation.Nullable
 
@@ -35,37 +31,27 @@ import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 @Stepwise
-class KafkaListenerSpec extends Specification {
+class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
-    @Shared
-    @AutoCleanup
-    RxHttpClient httpClient
+    @Shared @AutoCleanup RxHttpClient httpClient
+
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                ['micrometer.metrics.enabled': true,
+                 'endpoints.metrics.sensitive': false,
+                 (EMBEDDED_TOPICS): ['words', 'books', 'words-records', 'books-records']]
+    }
 
     def setupSpec() {
-        kafkaContainer.start()
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        "micrometer.metrics.enabled", true,
-                        'endpoints.metrics.sensitive', false,
-                        EMBEDDED_TOPICS, ["words", "books", "words-records", "books-records"]
-                )
-        )
-        context = embeddedServer.applicationContext
-        httpClient = embeddedServer.applicationContext.createBean(
+        httpClient = context.createBean(
                 RxHttpClient,
                 embeddedServer.getURL(),
-                new DefaultHttpClientConfiguration(followRedirects: false))
+                new DefaultHttpClientConfiguration(followRedirects: false)
+        )
     }
 
     void "test simple consumer"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         MyClient myClient = context.getBean(MyClient)
         MyConsumer myConsumer = context.getBean(MyConsumer)
         context.containsBean(KafkaHealthIndicator)
@@ -100,9 +86,8 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         Book book = myClient.sendReactive("Stephen King", new Book(title: "The Stand")).blockingGet()
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         PojoConsumer myConsumer = context.getBean(PojoConsumer)
+
         then:
         conditions.eventually {
             myConsumer.lastBook == book
@@ -115,9 +100,8 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         myClient.sendBook("Stephen King", null)
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         PojoConsumer myConsumer = context.getBean(PojoConsumer)
+
         then:
         conditions.eventually {
             myConsumer.lastBook == null
@@ -130,9 +114,8 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         RecordMetadata metadata = myClient.sendGetRecordMetadata("key", "hello world")
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyConsumer2 myConsumer = context.getBean(MyConsumer2)
+
         then:
         metadata != null
         metadata.topic() == "words"
@@ -147,9 +130,8 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         RecordMetadata metadata = myClient.sendGetRecordMetadata("key", "hello world")
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyConsumer4 myConsumer = context.getBean(MyConsumer4)
+
         then:
         metadata != null
         metadata.topic() == "words"
@@ -166,9 +148,8 @@ class KafkaListenerSpec extends Specification {
         Producer producer = context.createBean(Producer, config)
         producer.send(new ProducerRecord("words-records", "key", "hello world")).get()
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyConsumer3 myConsumer = context.getBean(MyConsumer3)
+
         then:
         conditions.eventually {
             myConsumer.wordCount == 2
@@ -180,7 +161,6 @@ class KafkaListenerSpec extends Specification {
     }
 
     void "test POJO consumer record"() {
-
         when:
         def config = context.getBean(AbstractKafkaProducerConfiguration)
         config.setKeySerializer(new StringSerializer())
@@ -188,9 +168,8 @@ class KafkaListenerSpec extends Specification {
         Producer producer = context.createBean(Producer, config)
         producer.send(new ProducerRecord("books-records", "Stephen King", new Book(title: "The Stand"))).get()
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         PojoConsumer2 myConsumer = context.getBean(PojoConsumer2)
+
         then:
         conditions.eventually {
             myConsumer.lastBook == new Book(title: "The Stand")
@@ -207,9 +186,8 @@ class KafkaListenerSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         myClient.sendSentence("key", "Hello, world!", "words")
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyConsumer5 myConsumer = context.getBean(MyConsumer5)
+
         then:
         conditions.eventually {
             myConsumer.sentence == "Hello, world!"
@@ -218,6 +196,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaClient
     static interface MyClient {
         @Topic("words")
@@ -233,6 +212,7 @@ class KafkaListenerSpec extends Specification {
         void sendBook(@KafkaKey String key, @Nullable @Body Book book)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer {
         int wordCount
@@ -245,6 +225,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer2 {
         int wordCount
@@ -257,6 +238,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer3 {
         int wordCount
@@ -269,6 +251,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer4 {
         String body
@@ -279,6 +262,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class MyConsumer5 {
         boolean missingHeader
@@ -295,6 +279,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class PojoConsumer2 {
         Book lastBook
@@ -309,6 +294,7 @@ class KafkaListenerSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class PojoConsumer {
         Book lastBook

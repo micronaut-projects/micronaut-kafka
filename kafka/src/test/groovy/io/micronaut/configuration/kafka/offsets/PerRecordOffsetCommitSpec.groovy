@@ -1,15 +1,10 @@
 package io.micronaut.configuration.kafka.offsets
 
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
+import io.micronaut.context.annotation.Requires
 
 import javax.inject.Singleton
 
@@ -17,28 +12,19 @@ import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC_PER_RECORD
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class PerRecordOffsetCommitSpec extends Specification {
+class PerRecordOffsetCommitSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_SYNC = "PerRecordOffsetCommitSpec-products-sync"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        EMBEDDED_TOPICS, [TOPIC_SYNC]
-                )
-        )
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): [TOPIC_SYNC]]
     }
 
     void "test sync per record"() {
         given:
         ProductClient client = context.getBean(ProductClient)
         ProductListener listener = context.getBean(ProductListener)
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.send(new Product(name: "Apple"))
@@ -51,12 +37,14 @@ class PerRecordOffsetCommitSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'PerRecordOffsetCommitSpec')
     @KafkaClient
     static interface ProductClient {
         @Topic(PerRecordOffsetCommitSpec.TOPIC_SYNC)
         void send(Product product)
     }
 
+    @Requires(property = 'spec.name', value = 'PerRecordOffsetCommitSpec')
     @Singleton
     static class ProductListener {
 
