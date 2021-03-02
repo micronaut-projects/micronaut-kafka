@@ -6,5 +6,5 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 @KafkaClient
 public interface DisabledClient {
     @Topic("disabled-topic")
-    public abstract void send(String message);
+    void send(String message);
 }

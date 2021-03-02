@@ -11,7 +11,7 @@ public class DisabledConsumer {
 
     @KafkaListener
     @Topic("disable-topic")
-    void receive(@KafkaKey String key,  String value) {
+    void receive(@KafkaKey String key, String value) {
         throw new UnsupportedOperationException();
     }
 

@@ -6,6 +6,12 @@ import spock.lang.Specification
 
 import javax.inject.Singleton
 
+/**
+ * Test that micronaut-kafka can be disabled by setting 'kafka.enabled': 'false'.
+ *
+ * Note that this test and associated classes are in a different package so that they are not affected by the package-level
+ * annotation which would otherwise disable them.
+ */
 class DisabledSpec extends Specification {
 
     void "Starting app with kafka disabled works correctly"() {
