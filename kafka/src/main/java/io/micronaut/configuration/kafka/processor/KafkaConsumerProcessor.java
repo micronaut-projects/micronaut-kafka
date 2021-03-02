@@ -220,6 +220,8 @@ public class KafkaConsumerProcessor
 
             boolean isBatch = method.isTrue(KafkaListener.class, "batch");
 
+            boolean isPausedOnStart = method.isTrue(KafkaListener.class, "paused");
+
             Optional<Argument> consumerArg = Arrays.stream(method.getArguments()).filter(arg -> Consumer.class.isAssignableFrom(arg.getType())).findFirst();
             Optional<Argument> ackArg = Arrays.stream(method.getArguments())
                     .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()) ||
@@ -331,6 +333,13 @@ public class KafkaConsumerProcessor
                 if (consumerBean instanceof ConsumerAware) {
                     //noinspection unchecked
                     ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
+                }
+
+                if (isPausedOnStart) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Kafka listener [{}] is starting in paused state", method);
+                    }
+                    pause(finalClientId);
                 }
 
                 for (AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
