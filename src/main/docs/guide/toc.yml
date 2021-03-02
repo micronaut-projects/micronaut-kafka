@@ -22,6 +22,7 @@ kafkaApplications:
   kafkaHealth: Kafka Health Checks
   kafkaMetrics: Kafka Metrics
   kafkaTracing: Kafka Distributed Tracing
+  kafkaDisabled: Disabling Micronaut-Kafka
 kafkaStreams:
   title: Kafka Streams
   kafkaStreamInteractiveQuery: Interactive Query Service

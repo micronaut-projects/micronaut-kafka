@@ -1,0 +1,57 @@
+package io.micronaut.test
+
+
+import io.micronaut.context.ApplicationContext
+import spock.lang.Specification
+
+import javax.inject.Singleton
+
+class DisabledSpec extends Specification {
+
+    void "Starting app with kafka disabled works correctly"() {
+        given:
+        ApplicationContext ctx = ApplicationContext.run([
+                "kafka.enabled": "false"
+        ])
+
+        when: "test that the service has been created correctly"
+        DisabledTestService service = ctx.getBean(DisabledTestService)
+
+        then:
+        service != null
+
+        when: "test that the fallback client has been injected"
+        service.disabledClient instanceof DisabledClientFallback
+        service.send()
+
+        then:
+        noExceptionThrown()
+
+        and: "test that the consumer bean is still created correctly"
+        service.getNum() == 1
+
+        cleanup:
+        ctx.close()
+    }
+
+    @Singleton
+    static class DisabledTestService {
+        private final DisabledClient disabledClient
+        private final DisabledConsumer disabledConsumer
+
+        DisabledTestService(DisabledClient disabledClient, DisabledConsumer disabledConsumer) {
+            this.disabledClient = disabledClient
+            this.disabledConsumer = disabledConsumer
+        }
+
+        void send() {
+            disabledClient.send("Hello, World!")
+        }
+
+        int getNum() {
+            return disabledConsumer.getNum()
+        }
+    }
+
+
+}
