@@ -780,7 +780,7 @@ public class KafkaConsumerProcessor
                     boolean batch = method.isTrue(KafkaListener.class, "batch");
 
                     consumerConfiguration.setValueDeserializer(
-                            serdeRegistry.pickDeserializer(batch ? bodyArgument.getFirstTypeVariable().orElse(bodyArgument) : bodyArgument)
+                            serdeRegistry.pickDeserializer(batch ? getComponentType(bodyArgument) : bodyArgument)
                     );
                 }
             } else {
@@ -788,6 +788,13 @@ public class KafkaConsumerProcessor
                 consumerConfiguration.setValueDeserializer(new StringDeserializer());
             }
         }
+    }
+
+    private Argument<?> getComponentType(Argument<?> argument) {
+        Class<?> argumentType = argument.getType();
+        return argumentType.isArray()
+                ? Argument.of(argumentType.getComponentType())
+                : argument.getFirstTypeVariable().orElse(argument);
     }
 
     private OffsetCommitCallback resolveCommitCallback(Object consumerBean) {
