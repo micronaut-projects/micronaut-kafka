@@ -1,22 +1,21 @@
-
 package io.micronaut.configuration.kafka.scope
 
+import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.ApplicationContext
-import org.apache.kafka.clients.producer.KafkaProducer
+import io.micronaut.context.annotation.Requires
 import org.apache.kafka.clients.producer.Producer
-import spock.lang.Specification
 
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class KafkaClientScopeSpec extends Specification {
+class KafkaClientScopeSpec extends AbstractKafkaSpec {
 
     void "test inject kafka producer"() {
         given:
         ApplicationContext ctx = ApplicationContext.run(
-                "kafka.producers.foo.acks":"all"
-        )
+                getConfiguration() +
+                ["kafka.producers.foo.acks": "all"])
 
         when:
         MyClass myClass = ctx.getBean(MyClass)
@@ -30,9 +29,11 @@ class KafkaClientScopeSpec extends Specification {
         ctx.close()
     }
 
-
+    @Requires(property = 'spec.name', value = 'KafkaClientScopeSpec')
     @Singleton
     static class MyClass {
-        @Inject @KafkaClient("foo") Producer<String, Integer> producer
+        @Inject
+        @KafkaClient("foo")
+        Producer<String, Integer> producer
     }
 }

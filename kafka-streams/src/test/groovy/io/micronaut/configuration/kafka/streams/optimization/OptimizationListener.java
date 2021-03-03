@@ -8,7 +8,6 @@ import io.micronaut.context.annotation.Context;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 
-import javax.inject.Singleton;
 import java.util.Collection;
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "OptimizationListener")
@@ -16,7 +15,6 @@ import java.util.Collection;
 public class OptimizationListener implements ConsumerRebalanceListener {
 
     private int optimizationOffChangelogMessageCount = 0;
-
     private int optimizationOnChangelogMessageCount = 0;
 
     private final String optimizationOffChangelogTopicName =

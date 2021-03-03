@@ -4,16 +4,17 @@ import io.micronaut.configuration.kafka.streams.listeners.BeforeStartKafkaStream
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationClient
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationInteractiveQueryService
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationListener
-import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
 import io.micronaut.configuration.kafka.streams.wordcount.InteractiveQueryServiceExample
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountClient
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountListener
-import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
 import spock.lang.IgnoreIf
 import spock.lang.Retry
-import spock.util.concurrent.PollingConditions
+
+import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_OFF_STORE
+import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_ON_STORE
+import static io.micronaut.configuration.kafka.streams.wordcount.WordCountStream.WORD_COUNT_STORE
 
 @Retry
 class KafkaStreamsSpec extends AbstractTestContainersSpec {
@@ -39,7 +40,6 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
     void "test kafka stream application"() {
         given:
         InteractiveQueryServiceExample interactiveQueryService = context.getBean(InteractiveQueryServiceExample)
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
 
         when:
         WordCountClient wordCountClient = context.getBean(WordCountClient)
@@ -51,16 +51,15 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         conditions.eventually {
             countListener.getCount("fox") > 0
             countListener.getCount("jumps") > 0
-            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "fox") > 0
-            interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "jumps") > 0
-            interactiveQueryService.<String, Long> getGenericKeyValue(WordCountStream.WORD_COUNT_STORE, "the") > 0
+            interactiveQueryService.getWordCount(WORD_COUNT_STORE, "fox") > 0
+            interactiveQueryService.getWordCount(WORD_COUNT_STORE, "jumps") > 0
+            interactiveQueryService.<String, Long> getGenericKeyValue(WORD_COUNT_STORE, "the") > 0
 
             println countListener.wordCounts
-            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "fox")
-            println interactiveQueryService.getWordCount(WordCountStream.WORD_COUNT_STORE, "jumps")
-            println interactiveQueryService.<String, Long> getGenericKeyValue(WordCountStream.WORD_COUNT_STORE, "the")
+            println interactiveQueryService.getWordCount(WORD_COUNT_STORE, "fox")
+            println interactiveQueryService.getWordCount(WORD_COUNT_STORE, "jumps")
+            println interactiveQueryService.<String, Long> getGenericKeyValue(WORD_COUNT_STORE, "the")
         }
-
     }
 
     /**
@@ -79,11 +78,8 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         given:
         OptimizationInteractiveQueryService interactiveQueryService =
                 context.getBean(OptimizationInteractiveQueryService)
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
-
 
         when:
-
         OptimizationListener optimizationListener = context.getBean(OptimizationListener)
 
         then:
@@ -96,21 +92,20 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         optimizationClient.publishOptimizationOffMessage("key", "off")
         optimizationClient.publishOptimizationOnMessage("key", "on")
 
-
         then:
         conditions.eventually {
             optimizationListener.getOptimizationOnChangelogMessageCount() == 0
             //no changelog should be created/used when topology optimization is enabled
             optimizationListener.getOptimizationOffChangelogMessageCount() == 1
-            interactiveQueryService.getValue(OptimizationStream.OPTIMIZATION_OFF_STORE, "key") == "off"
-            interactiveQueryService.getValue(OptimizationStream.OPTIMIZATION_ON_STORE, "key") == "on"
+            interactiveQueryService.getValue(OPTIMIZATION_OFF_STORE, "key") == "off"
+            interactiveQueryService.getValue(OPTIMIZATION_ON_STORE, "key") == "on"
         }
-
     }
 
     void "test BeforeStartKafkaStreamsListener execution"() {
         when:
         def builder = context.getBean(BeforeStartKafkaStreamsListenerImp)
+
         then:
         builder.executed
     }

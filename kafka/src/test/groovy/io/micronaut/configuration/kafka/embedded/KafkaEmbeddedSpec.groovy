@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.embedded
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
@@ -7,17 +6,19 @@ import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import spock.lang.AutoCleanup
 import spock.lang.Specification
+
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaEmbeddedSpec extends Specification {
 
+    @AutoCleanup ApplicationContext applicationContext
+
     void "test run kafka embedded server"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(
-                Collections.singletonMap(
-                        AbstractKafkaConfiguration.EMBEDDED, true
-                )
-        )
+        run()
 
         when:
         AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
@@ -26,16 +27,12 @@ class KafkaEmbeddedSpec extends Specification {
         then:
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
 
-
         when:
         KafkaEmbedded kafkaEmbedded = applicationContext.getBean(KafkaEmbedded)
 
         then:
         kafkaEmbedded.kafkaServer.isPresent()
         kafkaEmbedded.zkPort.isPresent()
-
-        cleanup:
-        applicationContext.close()
     }
 
     void "test run kafka embedded server with multi partition topic"() {
@@ -43,12 +40,9 @@ class KafkaEmbeddedSpec extends Specification {
         int partitionNumber = 10
         String topicName = "multi-partition-topic"
 
-        ApplicationContext applicationContext = ApplicationContext.run(
-                [
-                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
-                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName,
-                        "kafka.embedded.properties.num.partitions"  : partitionNumber
-                ]
+        run(
+            (EMBEDDED_TOPICS): topicName,
+            "kafka.embedded.properties.num.partitions": partitionNumber
         )
 
         AdminClient adminClient = createAdminClient()
@@ -68,19 +62,13 @@ class KafkaEmbeddedSpec extends Specification {
 
         cleanup:
         adminClient.close()
-        applicationContext.close()
     }
 
     void "test run kafka embedded server with single partition topic"() {
         given:
         String topicName = "single-partition-topic"
 
-        ApplicationContext applicationContext = ApplicationContext.run(
-                [
-                        (AbstractKafkaConfiguration.EMBEDDED)       : true,
-                        (AbstractKafkaConfiguration.EMBEDDED_TOPICS): topicName
-                ]
-        )
+        run((EMBEDDED_TOPICS): topicName)
 
         AdminClient adminClient = createAdminClient()
 
@@ -97,16 +85,17 @@ class KafkaEmbeddedSpec extends Specification {
                 .get(topicName).get()
                 .partitions().size() == 1
 
-
         cleanup:
         adminClient.close()
-        applicationContext.close()
     }
 
     private static AdminClient createAdminClient() {
-        Properties properties = new Properties()
-        properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS)
-        AdminClient adminClient = AdminClient.create(properties)
-        adminClient
+        AdminClient.create((CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG): AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS)
+    }
+
+    private void run(Map<String, Object> extraProps = [:]) {
+        applicationContext = ApplicationContext.run(
+                [(EMBEDDED): true] + extraProps
+        )
     }
 }

@@ -1,49 +1,27 @@
-
 package io.micronaut.configuration.kafka.annotation
 
+import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.ConsumerRegistry
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.Body
-import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentSkipListSet
 
-class KafkaPauseResumeSpec extends Specification {
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
-
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        "micrometer.metrics.enabled", true,
-                        'endpoints.metrics.sensitive', false,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["fruits"]
-                )
-        )
-        context = embeddedServer.applicationContext
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                ['micrometer.metrics.enabled' : true,
+                 'endpoints.metrics.sensitive': false,
+                 (EMBEDDED_TOPICS)            : ['fruits']]
     }
 
     void "test pause / resume listener"() {
         given:
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         ConsumerRegistry registry = context.getBean(ConsumerRegistry)
         FruitClient client = context.getBean(FruitClient)
         FruitListener listener = context.getBean(FruitListener)
@@ -74,10 +52,11 @@ class KafkaPauseResumeSpec extends Specification {
 
         when:
         client.send("test", "Banana")
-        sleep(5000)
 
         then:
-        listener.fruits.size() == 1
+        conditions.eventually {
+            listener.fruits.size() == 1
+        }
 
         when:
         registry.resume("fruit-client")
@@ -89,15 +68,15 @@ class KafkaPauseResumeSpec extends Specification {
         }
     }
 
-
+    @Requires(property = 'spec.name', value = 'KafkaPauseResumeSpec')
     @KafkaClient
     static interface FruitClient {
-
         @Topic("fruits")
         void send(@KafkaKey String company, @Body String fruit)
     }
 
-    @KafkaListener(clientId = "fruit-client", offsetReset = OffsetReset.EARLIEST)
+    @Requires(property = 'spec.name', value = 'KafkaPauseResumeSpec')
+    @KafkaListener(clientId = "fruit-client", offsetReset = EARLIEST)
     static class FruitListener {
 
         Set<String> fruits = new ConcurrentSkipListSet<>()

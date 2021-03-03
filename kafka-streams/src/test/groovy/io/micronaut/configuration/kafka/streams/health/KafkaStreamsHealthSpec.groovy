@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.streams.health
 
 import io.micronaut.configuration.kafka.streams.AbstractTestContainersSpec
 import io.micronaut.configuration.kafka.streams.KafkaStreamsFactory
-import io.micronaut.health.HealthStatus
 import io.micronaut.management.health.aggregator.HealthAggregator
 import io.micronaut.management.health.aggregator.RxJavaHealthAggregator
 import io.micronaut.management.health.indicator.HealthResult
@@ -11,12 +10,14 @@ import io.reactivex.Single
 import org.apache.kafka.streams.KafkaStreams
 import spock.lang.Retry
 
+import static io.micronaut.health.HealthStatus.UP
+
 @Retry
 class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "should create object"() {
         given:
-        def kafkaStreamsFactory = embeddedServer.getApplicationContext().getBean(KafkaStreamsFactory)
+        def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
         HealthAggregator healthAggregator = new RxJavaHealthAggregator(Mock(ApplicationConfiguration))
 
         when:
@@ -28,19 +29,19 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "should check health"() {
         given:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         and:
         def healthLevelOne = Single.fromPublisher(streamsHealth.getResult()).blockingGet()
-        assert ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
-        HealthResult healthLevelTwo = ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
+        assert ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
+        HealthResult healthLevelTwo = ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
         healthLevelTwo.name == "micronaut-kafka-streams"
-        healthLevelTwo.status == HealthStatus.UP
+        healthLevelTwo.status == UP
         (healthLevelTwo.details as Map).size() == 8
         (healthLevelTwo.details as Map).containsKey("adminClientId")
         (healthLevelTwo.details as Map).containsKey("restoreConsumerClientId")
@@ -54,12 +55,12 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "test default if empty kafkaStream name"() {
         given:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
-        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = context.getBeansOfType(KafkaStreams).first()
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         and:
@@ -69,12 +70,12 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "test default if thread stopped"() {
         when:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
-        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = context.getBeansOfType(KafkaStreams).first()
 
         then:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == HealthStatus.UP
+            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
         }
 
         when:

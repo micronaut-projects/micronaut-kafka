@@ -1,13 +1,9 @@
 package io.micronaut.configuration.kafka.streams
 
 import groovy.util.logging.Slf4j
-import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
-import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
 import io.micronaut.runtime.server.EmbeddedServer
-import org.apache.kafka.clients.admin.AdminClient
-import org.apache.kafka.clients.admin.NewTopic
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -19,26 +15,15 @@ abstract class AbstractTestContainersSpec extends Specification {
 
     PollingConditions conditions = new PollingConditions(timeout: 60, delay: 1)
 
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
-
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    @Shared
-    static KafkaContainer kafkaContainer = KafkaSetup.init()
+    @Shared @AutoCleanup EmbeddedServer embeddedServer
+    @Shared @AutoCleanup ApplicationContext context
+    @Shared static KafkaContainer kafkaContainer = KafkaSetup.init()
 
     def setupSpec() {
-        List<Object> config = ["kafka.bootstrap.servers", "${kafkaContainer.getBootstrapServers()}"]
+        List<Object> config = ["kafka.bootstrap.servers", kafkaContainer.bootstrapServers]
         config.addAll(getConfiguration())
 
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        (config as Object[])
-                )
-        )
+        embeddedServer = ApplicationContext.run(EmbeddedServer, CollectionUtils.mapOf(config as Object[]))
 
         context = embeddedServer.getApplicationContext()
     }
@@ -53,7 +38,6 @@ abstract class AbstractTestContainersSpec extends Specification {
                 'kafka.streams.optimization-off.topology.optimization', 'none']
     }
 
-
     def cleanupSpec() {
         try {
             embeddedServer.stop()
@@ -61,8 +45,6 @@ abstract class AbstractTestContainersSpec extends Specification {
         } catch (Exception ignore) {
             log.error("Could not stop containers")
         }
-        if (embeddedServer != null) {
-            embeddedServer.close()
-        }
+        embeddedServer?.close()
     }
 }

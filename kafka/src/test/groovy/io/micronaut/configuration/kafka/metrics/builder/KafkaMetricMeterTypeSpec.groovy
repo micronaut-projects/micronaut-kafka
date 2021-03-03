@@ -1,9 +1,13 @@
-
 package io.micronaut.configuration.kafka.metrics.builder
 
 import spock.lang.Specification
 
-import java.util.concurrent.TimeUnit
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.FUNCTION_COUNTER
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.GAUGE
+import static io.micronaut.configuration.kafka.metrics.builder.MeterType.TIME_GAUGE
+import static java.util.concurrent.TimeUnit.DAYS
+import static java.util.concurrent.TimeUnit.MILLISECONDS
+import static java.util.concurrent.TimeUnit.SECONDS
 
 class KafkaMetricMeterTypeSpec extends Specification {
 
@@ -12,53 +16,53 @@ class KafkaMetricMeterTypeSpec extends Specification {
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType()
 
         then:
-        kafkaMetricMeterType.meterType == MeterType.GAUGE
+        kafkaMetricMeterType.meterType == GAUGE
         kafkaMetricMeterType.baseUnit == null
-        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
+        kafkaMetricMeterType.timeUnit == MILLISECONDS
         kafkaMetricMeterType.description == null
     }
 
     def "should be able to construct with some args"() {
         when:
-        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test")
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test")
 
         then:
-        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.meterType == FUNCTION_COUNTER
         kafkaMetricMeterType.baseUnit == null
-        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
+        kafkaMetricMeterType.timeUnit == MILLISECONDS
         kafkaMetricMeterType.description == "test"
     }
 
     def "should be able to construct with more args"() {
         when:
-        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test", "test2")
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test", "test2")
 
         then:
-        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.meterType == FUNCTION_COUNTER
         kafkaMetricMeterType.baseUnit == "test2"
-        kafkaMetricMeterType.timeUnit == TimeUnit.MILLISECONDS
+        kafkaMetricMeterType.timeUnit == MILLISECONDS
         kafkaMetricMeterType.description == "test"
     }
 
     def "should be able to construct with even more args"() {
         when:
-        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.FUNCTION_COUNTER, "test", TimeUnit.SECONDS)
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test", SECONDS)
 
         then:
-        kafkaMetricMeterType.meterType == MeterType.FUNCTION_COUNTER
+        kafkaMetricMeterType.meterType == FUNCTION_COUNTER
         kafkaMetricMeterType.baseUnit == null
-        kafkaMetricMeterType.timeUnit == TimeUnit.SECONDS
+        kafkaMetricMeterType.timeUnit == SECONDS
         kafkaMetricMeterType.description == "test"
     }
 
     def "should be able to construct with args"() {
         when:
-        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(MeterType.TIME_GAUGE, "a", TimeUnit.DAYS, "c")
+        KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(TIME_GAUGE, "a", DAYS, "c")
 
         then:
-        kafkaMetricMeterType.meterType == MeterType.TIME_GAUGE
+        kafkaMetricMeterType.meterType == TIME_GAUGE
         kafkaMetricMeterType.baseUnit == "c"
-        kafkaMetricMeterType.timeUnit == TimeUnit.DAYS
+        kafkaMetricMeterType.timeUnit == DAYS
         kafkaMetricMeterType.description == "a"
     }
 }

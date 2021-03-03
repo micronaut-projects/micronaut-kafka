@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.docs.producer.config;
 
 // tag::imports[]
@@ -9,7 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 
 // tag::clazz[]
 @KafkaClient(
-    id="product-client",
+    id = "product-client",
     acks = KafkaClient.Acknowledge.ALL,
     properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")
 )

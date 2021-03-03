@@ -1,43 +1,31 @@
-
 package io.micronaut.configuration.kafka.offsets
 
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.Acknowledgement
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
+import io.micronaut.context.annotation.Requires
 
 import javax.inject.Singleton
 
-class ManualAckSpec extends Specification {
-    public static final String TOPIC_SYNC = "ManualOffsetCommitSpec-products-sync"
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared @AutoCleanup ApplicationContext context
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, [TOPIC_SYNC]
-                )
-        )
+class ManualAckSpec extends AbstractKafkaContainerSpec {
+
+    public static final String TOPIC_SYNC = "ManualAckSpec-products-sync"
+
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): [TOPIC_SYNC]]
     }
 
     void "test manual ack"() {
         given:
         ProductClient client = context.getBean(ProductClient)
         ProductListener listener = context.getBean(ProductListener)
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         when:
         client.send(new Product(name: "Apple"))
@@ -50,26 +38,22 @@ class ManualAckSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'ManualAckSpec')
     @KafkaClient
     static interface ProductClient {
-
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(ManualAckSpec.TOPIC_SYNC)
         void send(Product product)
     }
 
+    @Requires(property = 'spec.name', value = 'ManualAckSpec')
     @Singleton
     static class ProductListener {
 
         List<Product> products = []
 
-        @KafkaListener(
-                offsetReset = OffsetReset.EARLIEST,
-                offsetStrategy = OffsetStrategy.DISABLED
-        )
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
-        void receive(
-                Product product,
-                Acknowledgement acknowledgement) {
+        @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
+        @Topic(ManualAckSpec.TOPIC_SYNC)
+        void receive(Product product, Acknowledgement acknowledgement) {
             products.add(product)
 
             acknowledgement.ack()
@@ -80,4 +64,3 @@ class ManualAckSpec extends Specification {
         String name
     }
 }
-

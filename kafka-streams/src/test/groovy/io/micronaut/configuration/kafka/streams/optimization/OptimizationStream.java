@@ -1,6 +1,5 @@
 package io.micronaut.configuration.kafka.streams.optimization;
 
-
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -31,8 +30,10 @@ public class OptimizationStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KTable<String, String> table = builder
-                .table(OPTIMIZATION_ON_INPUT, Materialized.as(OPTIMIZATION_ON_STORE));
+        KTable<String, String> table = builder.table(
+                OPTIMIZATION_ON_INPUT,
+                Materialized.as(OPTIMIZATION_ON_STORE)
+        );
 
         return table.toStream();
     }
@@ -51,8 +52,10 @@ public class OptimizationStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KTable<String, String> table = builder
-                .table(OPTIMIZATION_OFF_INPUT, Materialized.as(OPTIMIZATION_OFF_STORE));
+        KTable<String, String> table = builder.table(
+                OPTIMIZATION_OFF_INPUT,
+                Materialized.as(OPTIMIZATION_OFF_STORE)
+        );
 
         return table.toStream();
     }
