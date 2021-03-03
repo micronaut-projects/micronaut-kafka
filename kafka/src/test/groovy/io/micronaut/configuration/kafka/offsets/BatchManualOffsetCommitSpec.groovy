@@ -43,7 +43,7 @@ class BatchManualOffsetCommitSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'BatchManualOffsetCommitSpec')
     @KafkaClient
     static interface ProductClient {
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(BatchManualOffsetCommitSpec.TOPIC_SYNC)
         void send(Product product)
     }
 
@@ -54,7 +54,7 @@ class BatchManualOffsetCommitSpec extends AbstractKafkaContainerSpec {
         List<Product> products = []
 
         @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true)
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(BatchManualOffsetCommitSpec.TOPIC_SYNC)
         void receive(List<Product> products,
                      List<Long> offsets,
                      List<Integer> partitions,

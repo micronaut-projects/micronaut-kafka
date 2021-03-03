@@ -15,7 +15,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 
 class ManualAckSpec extends AbstractKafkaContainerSpec {
 
-    public static final String TOPIC_SYNC = "ManualOffsetCommitSpec-products-sync"
+    public static final String TOPIC_SYNC = "ManualAckSpec-products-sync"
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -41,7 +41,7 @@ class ManualAckSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'ManualAckSpec')
     @KafkaClient
     static interface ProductClient {
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(ManualAckSpec.TOPIC_SYNC)
         void send(Product product)
     }
 
@@ -52,7 +52,7 @@ class ManualAckSpec extends AbstractKafkaContainerSpec {
         List<Product> products = []
 
         @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(ManualAckSpec.TOPIC_SYNC)
         void receive(Product product, Acknowledgement acknowledgement) {
             products.add(product)
 

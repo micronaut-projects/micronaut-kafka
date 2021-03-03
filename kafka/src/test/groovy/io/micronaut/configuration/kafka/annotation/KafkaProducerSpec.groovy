@@ -31,8 +31,8 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 
 class KafkaProducerSpec extends AbstractKafkaSpec {
 
-    public static final String TOPIC_BLOCKING = "ProducerSpec-users-blocking"
-    public static final String TOPIC_QUANTITY = "ProducerSpec-users-quantity"
+    public static final String TOPIC_BLOCKING = "KafkaProducerSpec-users-blocking"
+    public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
 
     @Shared MockTracer mockTracer = new MockTracer()
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()

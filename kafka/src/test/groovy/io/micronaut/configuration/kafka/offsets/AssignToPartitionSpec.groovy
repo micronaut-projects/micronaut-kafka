@@ -44,7 +44,7 @@ class AssignToPartitionSpec extends AbstractKafkaContainerSpec {
     @KafkaClient
     @Requires(property = 'spec.name', value = 'AssignToPartitionSpec')
     static interface ProductClient {
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(AssignToPartitionSpec.TOPIC_SYNC)
         void send(Product product)
     }
 
@@ -57,7 +57,7 @@ class AssignToPartitionSpec extends AbstractKafkaContainerSpec {
         Collection<TopicPartition> partitionsAssigned
 
         @KafkaListener(offsetReset = EARLIEST)
-        @Topic(ManualOffsetCommitSpec.TOPIC_SYNC)
+        @Topic(AssignToPartitionSpec.TOPIC_SYNC)
         void receive(Product product) {
             products.add(product)
         }
