@@ -68,6 +68,11 @@
 </a></div>
 <!-- ========= END OF TOP NAVBAR ========= -->
 <div class="header">
+<p>@Configuration
+ @Requires(property="kafka.enabled",
+          notEquals="false",
+          defaultValue="true")
+</p>
 <h1 title="Package" class="title">Package&nbsp;io.micronaut.configuration.kafka</h1>
 <div class="docSummary">
 <div class="block">Contains classes, interfaces and annotations that provide integration with Apache Kafka.</div>
