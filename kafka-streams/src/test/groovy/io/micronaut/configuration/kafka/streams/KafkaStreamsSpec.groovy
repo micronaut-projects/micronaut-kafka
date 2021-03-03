@@ -11,7 +11,6 @@ import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams
 import spock.lang.IgnoreIf
 import spock.lang.Retry
-import spock.util.concurrent.PollingConditions
 
 import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_OFF_STORE
 import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_ON_STORE
@@ -41,7 +40,6 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
     void "test kafka stream application"() {
         given:
         InteractiveQueryServiceExample interactiveQueryService = context.getBean(InteractiveQueryServiceExample)
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
 
         when:
         WordCountClient wordCountClient = context.getBean(WordCountClient)
@@ -80,7 +78,6 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         given:
         OptimizationInteractiveQueryService interactiveQueryService =
                 context.getBean(OptimizationInteractiveQueryService)
-        PollingConditions conditions = new PollingConditions(timeout: 40, delay: 1)
 
         when:
         OptimizationListener optimizationListener = context.getBean(OptimizationListener)

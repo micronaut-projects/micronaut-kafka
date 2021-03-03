@@ -12,7 +12,7 @@ import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 import reactor.core.publisher.Mono
-import spock.lang.Shared
+import spock.lang.AutoCleanup
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
@@ -23,9 +23,9 @@ import static java.util.concurrent.TimeUnit.SECONDS
 
 class KafkaClientSpec extends AbstractKafkaSpec {
 
-    private @Shared ApplicationContext ctx
+    private @AutoCleanup ApplicationContext ctx
 
-    void setupSpec() {
+    void setup() {
         ctx = ApplicationContext.run(
                 getConfiguration() +
                 ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort()])
@@ -40,9 +40,6 @@ class KafkaClientSpec extends AbstractKafkaSpec {
 
         then:
         thrown(MessagingClientException)
-
-        cleanup:
-        ctx.close()
     }
 
     void "test reactive send message when Kafka is not available"() {
@@ -54,9 +51,6 @@ class KafkaClientSpec extends AbstractKafkaSpec {
 
         then:
         thrown(MessagingClientException)
-
-        cleanup:
-        ctx.close()
     }
 
     void "test future send message when Kafka is not available"() {
@@ -69,9 +63,6 @@ class KafkaClientSpec extends AbstractKafkaSpec {
         then:
         def e = thrown(ExecutionException)
         e.cause instanceof MessagingClientException
-
-        cleanup:
-        ctx.close()
     }
 
     @Requires(property = 'spec.name', value = 'KafkaClientSpec')

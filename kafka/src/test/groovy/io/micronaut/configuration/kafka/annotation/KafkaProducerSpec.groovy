@@ -15,6 +15,8 @@ import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -42,20 +44,20 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
                 getConfiguration() +
                 ['micronaut.application.name'                : 'test-app',
                  "kafka.schema.registry.url"                 : "http://localhot:8081",
-                 "kafka.producers.named.key.serializer"      : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.named.value.serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.key.serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.key-serializer"    : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.keySerializer"     : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.value.serializer"  : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.value-serializer"  : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.producers.default.valueSerializer"   : "org.apache.kafka.common.serialization.StringSerializer",
-                 "kafka.consumers.default.key.deserializer"  : "org.apache.kafka.common.serialization.StringDeserializer",
-                 "kafka.consumers.default.key-deserializer"  : "org.apache.kafka.common.serialization.StringDeserializer",
-                 "kafka.consumers.default.keyDeserializer"   : "org.apache.kafka.common.serialization.StringDeserializer",
-                 "kafka.consumers.default.value.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
-                 "kafka.consumers.default.value-deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
-                 "kafka.consumers.default.valueDeserializer" : "org.apache.kafka.common.serialization.StringDeserializer",
+                 "kafka.producers.named.key.serializer"      : StringSerializer.name,
+                 "kafka.producers.named.value.serializer"    : StringSerializer.name,
+                 "kafka.producers.default.key.serializer"    : StringSerializer.name,
+                 "kafka.producers.default.key-serializer"    : StringSerializer.name,
+                 "kafka.producers.default.keySerializer"     : StringSerializer.name,
+                 "kafka.producers.default.value.serializer"  : StringSerializer.name,
+                 "kafka.producers.default.value-serializer"  : StringSerializer.name,
+                 "kafka.producers.default.valueSerializer"   : StringSerializer.name,
+                 "kafka.consumers.default.key.deserializer"  : StringDeserializer.name,
+                 "kafka.consumers.default.key-deserializer"  : StringDeserializer.name,
+                 "kafka.consumers.default.keyDeserializer"   : StringDeserializer.name,
+                 "kafka.consumers.default.value.deserializer": StringDeserializer.name,
+                 "kafka.consumers.default.value-deserializer": StringDeserializer.name,
+                 "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
                  "kafka.bootstrap.servers"                   : kafkaContainer.getBootstrapServers(),
                  (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
         ).singletons(mockTracer).start()
@@ -233,14 +235,18 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         void receive(@KafkaKey String brand, String name, MessageHeaders messageHeaders) {
             log.info("Got Bicycle - {} by {}", brand, name)
             brands[brand] = name
-            messageHeaders.each { header -> additionalInfo.put(header.key, new String(header.value[0])) }
+            for (header in messageHeaders) {
+                additionalInfo[header.key] = new String(header.value[0])
+            }
         }
 
         @Topic("ProducerSpec-my-bicycles-2")
         void receive2(@KafkaKey String key, String name, MessageHeaders messageHeaders) {
             log.info("Got Bicycle info - {} by {}", key, name)
             others[key] = name
-            messageHeaders.each { header -> additionalInfo.put(header.key, new String(header.value[0])) }
+            for (header in messageHeaders) {
+                additionalInfo[header.key] = new String(header.value[0])
+            }
         }
     }
 
@@ -248,7 +254,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
     @Singleton
     static class KafkaConsumerInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
 
-        final AtomicInteger counter = new AtomicInteger(0);
+        final AtomicInteger counter = new AtomicInteger(0)
 
         @Override
         Consumer<?, ?> onCreated(BeanCreatedEvent<Consumer<?, ?>> event) {
@@ -261,7 +267,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
     @Singleton
     static class KafkaProducerInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
 
-        final AtomicInteger counter = new AtomicInteger(0);
+        final AtomicInteger counter = new AtomicInteger(0)
 
         @Override
         Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {

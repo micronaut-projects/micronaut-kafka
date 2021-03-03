@@ -90,7 +90,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", offsetReset = EARLIEST)
     static class MyConsumer1_1 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
@@ -103,7 +103,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = false, offsetReset = EARLIEST)
     static class MyConsumer1_2 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
@@ -116,7 +116,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_1 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
@@ -129,7 +129,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(groupId = "myGroup", uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer2_2 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
@@ -142,7 +142,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_1 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)
@@ -155,7 +155,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaUniqueGroupIdSpec')
     @KafkaListener(/* No group ID defined */ uniqueGroupId = true, offsetReset = EARLIEST)
     static class MyConsumer3_2 {
-        Integer count = 0
+        int count = 0
         String lastMessage
 
         @Topic(KafkaUniqueGroupIdSpec.TOPIC)

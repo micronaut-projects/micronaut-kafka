@@ -52,10 +52,11 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
 
         when:
         client.send("test", "Banana")
-        sleep(5000)
 
         then:
-        listener.fruits.size() == 1
+        conditions.eventually {
+            listener.fruits.size() == 1
+        }
 
         when:
         registry.resume("fruit-client")

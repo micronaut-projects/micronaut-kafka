@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.health
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
-import io.micronaut.core.util.CollectionUtils
 import io.micronaut.management.health.indicator.HealthResult
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
@@ -11,6 +10,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
 import static io.micronaut.health.HealthStatus.UP
 
@@ -60,9 +61,8 @@ class KafkaHealthIndicatorSpec extends Specification {
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        EMBEDDED, true,
-                        "kafka.health.enabled", configvalue)
+                (EMBEDDED)            : true,
+                "kafka.health.enabled": configvalue
         )
 
         when:
@@ -82,8 +82,8 @@ class KafkaHealthIndicatorSpec extends Specification {
     void "kafka health indicator handle missing replication factor config"() {
         given:
         Collection<ConfigEntry> configEntries = []
-        if (offsetFactor) { configEntries.add(new ConfigEntry(KafkaHealthIndicator.REPLICATION_PROPERTY, offsetFactor)) }
-        if (defaultFactor) { configEntries.add(new ConfigEntry(KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY, defaultFactor)) }
+        if (offsetFactor) { configEntries.add(new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)) }
+        if (defaultFactor) { configEntries.add(new ConfigEntry(DEFAULT_REPLICATION_PROPERTY, defaultFactor)) }
         Config config = new Config(configEntries)
 
         when:

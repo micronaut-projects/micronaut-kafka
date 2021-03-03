@@ -17,7 +17,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "should create object"() {
         given:
-        def kafkaStreamsFactory = embeddedServer.getApplicationContext().getBean(KafkaStreamsFactory)
+        def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
         HealthAggregator healthAggregator = new RxJavaHealthAggregator(Mock(ApplicationConfiguration))
 
         when:
@@ -29,7 +29,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "should check health"() {
         given:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
 
         expect:
         conditions.eventually {
@@ -38,8 +38,8 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         and:
         def healthLevelOne = Single.fromPublisher(streamsHealth.getResult()).blockingGet()
-        assert ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
-        HealthResult healthLevelTwo = ((HashMap<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
+        assert ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
+        HealthResult healthLevelTwo = ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
         healthLevelTwo.name == "micronaut-kafka-streams"
         healthLevelTwo.status == UP
         (healthLevelTwo.details as Map).size() == 8
@@ -55,8 +55,8 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "test default if empty kafkaStream name"() {
         given:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
-        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = context.getBeansOfType(KafkaStreams).first()
 
         expect:
         conditions.eventually {
@@ -70,8 +70,8 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     def "test default if thread stopped"() {
         when:
-        def streamsHealth = embeddedServer.getApplicationContext().getBean(KafkaStreamsHealth)
-        KafkaStreams kafkaStreams = embeddedServer.getApplicationContext().getBeansOfType(KafkaStreams).first()
+        def streamsHealth = context.getBean(KafkaStreamsHealth)
+        KafkaStreams kafkaStreams = context.getBeansOfType(KafkaStreams).first()
 
         then:
         conditions.eventually {

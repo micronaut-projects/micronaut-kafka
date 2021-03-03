@@ -289,12 +289,12 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         }
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FLUX_TOPIC)
-        void recieveFlux(Flux<Book> books) {
+        void receiveFlux(Flux<Book> books) {
             this.books.addAll books.collectList().block()
         }
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
-        void recieveFlowable(Flowable<Book> books) {
+        void receiveFlowable(Flowable<Book> books) {
             this.books.addAll books.toList().blockingGet()
         }
     }
