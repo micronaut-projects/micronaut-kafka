@@ -19,4 +19,10 @@
  * @author graemerocher
  * @since 1.0
  */
+@Configuration
+@Requires(property = "kafka.enabled", notEquals = StringUtils.FALSE, defaultValue = StringUtils.TRUE)
 package io.micronaut.configuration.kafka;
+
+import io.micronaut.context.annotation.Configuration;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.core.util.StringUtils;
