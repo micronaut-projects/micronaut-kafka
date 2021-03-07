@@ -150,7 +150,7 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> <select style='max-width: 200px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option selected='selected' value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.1.0/guide/index.html'>3.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.0.0/guide/index.html'>3.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.1/guide/index.html'>2.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0/guide/index.html'>2.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0.RC1/guide/index.html'>2.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.0.0/guide/index.html'>2.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.4.0/guide/index.html'>1.4.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select></p>
+        <p><strong>Version:</strong> <select style='max-width: 200px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.1.0/guide/index.html'>3.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.0.0/guide/index.html'>3.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.1/guide/index.html'>2.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0/guide/index.html'>2.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0.RC1/guide/index.html'>2.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.0.0/guide/index.html'>2.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.4.0/guide/index.html'>1.4.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select></p>
     </div>
     
 <h1 id="introduction"><a class="anchor" href="#introduction"></a>1 Introduction</h1>
@@ -681,7 +681,7 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="sect2">
 <h3 id="_kafkaclient_and_producer_properties">@KafkaClient and Producer Properties</h3>
 <div class="paragraph">
-<p>There are a number of ways to pass configuration properties to the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a>. You can set default producer properties using <code>kafka.producers.default</code> in <code>application.yml</code>:</p>
+<p>There are a number of ways to pass configuration properties to the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a>. You can set default producer properties using <code>kafka.producers.default</code> in <code>application.yml</code>:</p>
 </div>
 <div class="listingblock">
 <div class="title">Applying Default Configuration</div>
@@ -693,7 +693,7 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Any property in the <a href="{kafkaapi}/org/apache/kafka/clients/producer/ProducerConfig.html">ProducerConfig</a> class can be set. The above example will set the default number of times to retry sending a record.</p>
+<p>Any property in the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/ProducerConfig.html">ProducerConfig</a> class can be set. The above example will set the default number of times to retry sending a record.</p>
 </div>
 </div>
 <div class="sect2">
@@ -743,7 +743,7 @@ public interface ProductClient {
 <div class="sect2">
 <h3 id="_kafkaclient_and_serializers">@KafkaClient and Serializers</h3>
 <div class="paragraph">
-<p>When serializing keys and values Micronaut will by default attempt to automatically pick a <a href="{kafkaapi}/org/apache/kafka/common/serialization/Serializer.html">Serializer</a> to use. This is done via the <a href="../api/io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html">CompositeSerdeRegistry</a> bean.</p>
+<p>When serializing keys and values Micronaut will by default attempt to automatically pick a <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/common/serialization/Serializer.html">Serializer</a> to use. This is done via the <a href="../api/io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html">CompositeSerdeRegistry</a> bean.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -805,7 +805,7 @@ void sendBooks(Book...books);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Instead of a sending a serialized array you may wish to instead send batches of <a href="{kafkaapi}/org/apache/kafka/clients/producer/ProducerRecord.html">ProducerRecord</a> either synchronously or asynchronously.</p>
+<p>Instead of a sending a serialized array you may wish to instead send batches of <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/ProducerRecord.html">ProducerRecord</a> either synchronously or asynchronously.</p>
 </div>
 <div class="paragraph">
 <p>To do this you can specify a value of <code>true</code> to the <code>batch</code> member of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation:</p>
@@ -852,7 +852,7 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 
 
 <div class="paragraph">
-<p>If you need maximum flexibility and don&#8217;t want to use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> support you can use the <code>@KafkaClient</code> annotation as qualifier for dependency injection of <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> instances.</p>
+<p>If you need maximum flexibility and don&#8217;t want to use the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> support you can use the <code>@KafkaClient</code> annotation as qualifier for dependency injection of <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> instances.</p>
 </div>
 <div class="paragraph">
 <p>Consider the following example:</p>
@@ -935,7 +935,7 @@ public void testBookSender() {
 </table>
 </div>
 <div class="paragraph">
-<p>By using the <a href="{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
+<p>By using the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
 <h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>5.5 Embedding Kafka</h2>
@@ -1002,7 +1002,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.7.0:test'</code></pre>
 <p>The quick start section presented a trivial example of what is possible with the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation.</p>
 </div>
 <div class="paragraph">
-<p>Using the <code>@KafkaListener</code> annotation Micronaut will build a <a href="{kafkaapi}/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer</a> and start the <code>poll</code> loop by running the <code>KafkaConsumer</code> in a special <code>consumer</code> thread pool. You can configure the size of the thread pool based on the number of consumers in your application in <code>application.yml</code> as desired:</p>
+<p>Using the <code>@KafkaListener</code> annotation Micronaut will build a <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer</a> and start the <code>poll</code> loop by running the <code>KafkaConsumer</code> in a special <code>consumer</code> thread pool. You can configure the size of the thread pool based on the number of consumers in your application in <code>application.yml</code> as desired:</p>
 </div>
 <div class="listingblock">
 <div class="title">Configuring the <code>consumer</code> thread pool</div>
@@ -1030,7 +1030,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.7.0:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The above example will create 10 <a href="{kafkaapi}/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer</a> instances, each running in a unique thread and participating in the <code>myGroup</code> consumer group.</p>
+<p>The above example will create 10 <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer</a> instances, each running in a unique thread and participating in the <code>myGroup</code> consumer group.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1045,7 +1045,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.7.0:test'</code></pre>
 </table>
 </div>
 <div class="paragraph">
-<p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="{kafkaapi}/org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
+<p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
 </div>
 
 <h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
@@ -1646,7 +1646,7 @@ void receive(Product product,
 <p>For example if you store offsets in a database you may wish to read the offsets from the database when the consumer starts and start reading from the position stored in the database.</p>
 </div>
 <div class="paragraph">
-<p>To support this use case your consumer bean can implement the <a href="{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html">ConsumerRebalanceListener</a> and <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> interfaces:</p>
+<p>To support this use case your consumer bean can implement the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html">ConsumerRebalanceListener</a> and <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> interfaces:</p>
 </div>
 <div class="listingblock">
 <div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
@@ -1742,10 +1742,10 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 
 
 <div class="paragraph">
-<p>By default <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> listener methods will receive each <a href="{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRecord.html">ConsumerRecord</a> one by one.</p>
+<p>By default <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> listener methods will receive each <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRecord.html">ConsumerRecord</a> one by one.</p>
 </div>
 <div class="paragraph">
-<p>There may be cases where you prefer to receive all of the <a href="{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRecord.html">ConsumerRecord</a> data from the <a href="{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRecords.html">ConsumerRecords</a> holder object in one go.</p>
+<p>There may be cases where you prefer to receive all of the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRecord.html">ConsumerRecord</a> data from the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRecords.html">ConsumerRecords</a> holder object in one go.</p>
 </div>
 <div class="paragraph">
 <p>To achieve this you can set the <code>batch</code> member of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> to <code>true</code> and specify a container type (typically <code>List</code>) to receive all of the data:</p>
