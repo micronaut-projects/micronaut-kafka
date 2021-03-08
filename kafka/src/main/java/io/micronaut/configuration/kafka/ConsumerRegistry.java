@@ -43,8 +43,17 @@ public interface ConsumerRegistry {
     <K, V> Consumer<K, V> getConsumer(@Nonnull String id);
 
     /**
-     * Returns a managed Consumer's assignment info. Note that the consumer should not be interacted with directly from a
-     * different thread to the poll loop!
+     * Returns a managed Consumer's subscriptions.
+     *
+     * @param id The id of the producer.
+     * @return The consumer subscription
+     * @throws IllegalArgumentException If no consumer exists for the given ID
+     */
+    @Nonnull
+    Set<String> getConsumerSubscription(@Nonnull String id);
+
+    /**
+     * Returns a managed Consumer's assignment info.
      *
      * @param id The id of the producer.
      * @return The consumer assignment

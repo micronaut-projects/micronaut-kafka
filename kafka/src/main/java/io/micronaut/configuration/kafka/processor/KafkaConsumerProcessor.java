@@ -121,6 +121,7 @@ public class KafkaConsumerProcessor
     private final BeanContext beanContext;
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
     private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> consumerSubscriptions = new ConcurrentHashMap<>();
     private final Map<String, Set<TopicPartition>> consumerAssignments = new ConcurrentHashMap<>();
     private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
     private final Set<String> paused = new ConcurrentSkipListSet<>();
@@ -194,10 +195,21 @@ public class KafkaConsumerProcessor
 
     @Nonnull
     @Override
+    public Set<String> getConsumerSubscription(@Nonnull final String id) {
+        ArgumentUtils.requireNonNull("id", id);
+        final Set<String> subscriptions = consumerSubscriptions.get(id);
+        if (subscriptions == null || subscriptions.isEmpty()) {
+            throw new IllegalArgumentException("No consumer subscription found for ID: " + id);
+        }
+        return subscriptions;
+    }
+
+    @Nonnull
+    @Override
     public Set<TopicPartition> getConsumerAssignment(@Nonnull final String id) {
         ArgumentUtils.requireNonNull("id", id);
         final Set<TopicPartition> assignment = consumerAssignments.get(id);
-        if (assignment == null) {
+        if (assignment == null || assignment.isEmpty()) {
             throw new IllegalArgumentException("No consumer assignment found for ID: " + id);
         }
         return assignment;
@@ -412,6 +424,7 @@ public class KafkaConsumerProcessor
                         }
                     }
                 }
+                consumerSubscriptions.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.subscription()));
                 executorService.submit(() -> {
                     try {
 
@@ -423,6 +436,7 @@ public class KafkaConsumerProcessor
 
                         //noinspection InfiniteLoopStatement
                         while (true) {
+                            consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
                             try {
                                 if (!consumerPaused && paused.contains(finalClientId)) {
                                     consumerPaused = true;
@@ -431,7 +445,6 @@ public class KafkaConsumerProcessor
                                     pausedConsumers.put(finalClientId, kafkaConsumer);
                                 }
 
-                                consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                                 boolean failed = false;
                                 if (consumerPaused && !paused.contains(finalClientId)) {
