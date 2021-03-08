@@ -76,7 +76,6 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -241,14 +240,14 @@ public class KafkaConsumerProcessor
         final String clientId = consumerAnnotation.stringValue("clientId")
             .filter(StringUtils::isNotEmpty)
             .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
-        final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class).orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
+        final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
+            .orElse(OffsetStrategy.AUTO);
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
                 .orElse(defaultConsumerConfiguration);
-        final DefaultKafkaConsumerConfiguration consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
-        Properties properties = createConsumerProperties(method, consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
+        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
+        final Properties properties = createConsumerProperties(method, consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
-        debugSerdeConfiguration(method, consumerConfiguration, properties);
-        startConsumerThreads(method, clientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, properties, beanType);
+        submitConsumerThreads(method, clientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, properties, beanType);
     }
 
     @Override
@@ -273,17 +272,21 @@ public class KafkaConsumerProcessor
         properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, String.valueOf(offsetStrategy == OffsetStrategy.AUTO));
 
         method.getValue(KafkaListener.class, "heartbeatInterval", Duration.class)
-            .ifPresent(heartbeatInterval -> properties.putIfAbsent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, String.valueOf(heartbeatInterval.toMillis())));
+            .map(Duration::toMillis)
+            .map(String::valueOf)
+            .ifPresent(heartbeatInterval -> properties.putIfAbsent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval));
 
         method.getValue(KafkaListener.class, "sessionTimeout", Duration.class)
-            .ifPresent(sessionTimeout -> properties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, String.valueOf(sessionTimeout.toMillis())));
+            .map(Duration::toMillis)
+            .map(String::valueOf)
+            .ifPresent(sessionTimeout -> properties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout));
 
-        final boolean hasUniqueGroupId = consumerAnnotation.isTrue("uniqueGroupId");
-        String uniqueGroupId = groupId + "_" + UUID.randomUUID().toString();
-        if (hasUniqueGroupId) {
-            uniqueGroupId += "_" + UUID.randomUUID().toString();
+        if (consumerAnnotation.isTrue("uniqueGroupId")) {
+            final String uniqueGroupId = groupId + "_" + UUID.randomUUID().toString();
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, uniqueGroupId);
+        } else {
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         }
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, hasUniqueGroupId ? uniqueGroupId : groupId);
 
         if (clientId != null) {
             properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
@@ -293,30 +296,31 @@ public class KafkaConsumerProcessor
         return properties;
     }
 
-    private void debugSerdeConfiguration(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration, final Properties properties) {
-        if (LOG.isDebugEnabled()) {
-            Optional<Deserializer<?>> kd = consumerConfiguration.getKeyDeserializer();
-            if (kd.isPresent()) {
-                LOG.debug("Using key deserializer [{}] for Kafka listener: {}", kd.get(), method);
-            } else {
-                LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), method);
-            }
-
-            Optional<Deserializer<?>> vd = consumerConfiguration.getValueDeserializer();
-            if (vd.isPresent()) {
-                LOG.debug("Using value deserializer [{}] for Kafka listener: {}", vd.get(), method);
-            } else {
-                LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), method);
-            }
+    private void debugDeserializationConfiguration(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
+                                                   final Properties properties) {
+        if (!LOG.isDebugEnabled()) {
+            return;
+        }
+        final Optional keyDeserializer = consumerConfiguration.getKeyDeserializer();
+        if (consumerConfiguration.getKeyDeserializer().isPresent()) {
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), method);
+        } else {
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), method);
+        }
+        final Optional valueDeserializer = consumerConfiguration.getValueDeserializer();
+        if (valueDeserializer.isPresent()) {
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), method);
+        } else {
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), method);
         }
     }
 
-    private void startConsumerThreads(final ExecutableMethod<?, ?> method, final String clientId, final OffsetStrategy offsetStrategy,
-                                      final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                      final DefaultKafkaConsumerConfiguration consumerConfiguration, final Properties properties, final Class<?> beanType) {
-        int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
+    private void submitConsumerThreads(final ExecutableMethod<?, ?> method, final String clientId, final OffsetStrategy offsetStrategy,
+                                       final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
+                                       final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration, final Properties properties, final Class<?> beanType) {
+        final int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
         for (int i = 0; i < consumerThreads; i++) {
-            String finalClientId;
+            final String finalClientId;
             if (clientId != null) {
                 if (consumerThreads > 1) {
                     finalClientId = clientId + '-' + clientIdGenerator.incrementAndGet();
@@ -327,29 +331,25 @@ public class KafkaConsumerProcessor
             } else {
                 finalClientId = "kafka-consumer-" + clientIdGenerator.incrementAndGet();
             }
-            startConsumerThread(method, finalClientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, beanType);
+            submitConsumerThread(method, finalClientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, beanType);
         }
     }
 
-    private void startConsumerThread(final ExecutableMethod<?, ?> method, final String finalClientId, final OffsetStrategy offsetStrategy,
-                                     final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                     final DefaultKafkaConsumerConfiguration consumerConfiguration, final Class<?> beanType) {
-
-        Consumer kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
-
+    private void submitConsumerThread(final ExecutableMethod<?, ?> method, final String finalClientId, final OffsetStrategy offsetStrategy,
+                                      final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
+                                      final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration, final Class<?> beanType) {
+        final Consumer<?, ?> kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
         consumers.put(finalClientId, kafkaConsumer);
-
-        Object consumerBean = beanContext.getBean(beanType);
-
+        final Object consumerBean = beanContext.getBean(beanType);
         if (consumerBean instanceof ConsumerAware) {
             //noinspection unchecked
             ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
         }
-
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
         executorService.submit(() -> createConsumerThreadPollLoop(method, finalClientId, offsetStrategy, consumerAnnotation, consumerBean, kafkaConsumer));
     }
 
+    @SuppressWarnings("squid:S2189")
     private void createConsumerThreadPollLoop(final ExecutableMethod<?, ?> method, final String finalClientId, final OffsetStrategy offsetStrategy,
                                               final AnnotationValue<KafkaListener> consumerAnnotation, final Object consumerBean, final Consumer<?, ?> kafkaConsumer) {
 
@@ -380,13 +380,10 @@ public class KafkaConsumerProcessor
                         kafkaConsumer.pause(kafkaConsumer.assignment());
                         pausedConsumers.put(finalClientId, kafkaConsumer);
                     }
-
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                     if (consumerPaused && !paused.contains(finalClientId)) {
                         LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                        kafkaConsumer.resume(
-                            kafkaConsumer.paused()
-                        );
+                        kafkaConsumer.resume(kafkaConsumer.paused());
                         pausedConsumers.remove(finalClientId);
                         consumerPaused = false;
                     }
@@ -419,7 +416,6 @@ public class KafkaConsumerProcessor
                 } catch (Throwable e) {
                     handleException(kafkaConsumer, consumerBean, null, e);
                 }
-
             }
         } catch (WakeupException e) {
             // ignore for shutdown
@@ -530,8 +526,8 @@ public class KafkaConsumerProcessor
         return true;
     }
 
-    private void setupConsumerSubscription(final ExecutableMethod<?, ?> method, final List<AnnotationValue<Topic>> topicAnnotations,
-                                           final Object consumerBean, final Consumer<?, ?> kafkaConsumer) {
+    private static void setupConsumerSubscription(final ExecutableMethod<?, ?> method, final List<AnnotationValue<Topic>> topicAnnotations,
+                                                  final Object consumerBean, final Consumer<?, ?> kafkaConsumer) {
         for (final AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
 
             final String[] topicNames = topicAnnotation.stringValues();
@@ -572,12 +568,12 @@ public class KafkaConsumerProcessor
         }
     }
 
-    private void handleException(Consumer kafkaConsumer, Object consumerBean, ConsumerRecord<?, ?> consumerRecord, Throwable e) {
-        KafkaListenerException kafkaListenerException = new KafkaListenerException(e, consumerBean, kafkaConsumer, consumerRecord);
+    private void handleException(final Consumer<?, ?> kafkaConsumer, final Object consumerBean, final ConsumerRecord<?, ?> consumerRecord, final Throwable e) {
+        final KafkaListenerException kafkaListenerException = new KafkaListenerException(e, consumerBean, kafkaConsumer, consumerRecord);
         handleException(consumerBean, kafkaListenerException);
     }
 
-    private void handleException(Object consumerBean, KafkaListenerException kafkaListenerException) {
+    private void handleException(final Object consumerBean, final KafkaListenerException kafkaListenerException) {
         if (consumerBean instanceof KafkaListenerExceptionHandler) {
             ((KafkaListenerExceptionHandler) consumerBean).handle(kafkaListenerException);
         } else {
@@ -698,87 +694,72 @@ public class KafkaConsumerProcessor
         }
     }
 
-    private Argument findBodyArgument(ExecutableMethod<?, ?> method) {
+    private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
                 .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(Body.class))
                 .findFirst()
-                .orElseGet(() ->
-                        Arrays.stream(method.getArguments())
-                                .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
-                                .findFirst()
-                                .orElse(null)
-                );
+                .orElseGet(() -> Arrays.stream(method.getArguments())
+                        .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
+                        .findFirst()
+                        .orElse(null));
     }
 
-    private void configureDeserializers(ExecutableMethod<?, ?> method, DefaultKafkaConsumerConfiguration consumerConfiguration) {
-        Properties properties = consumerConfiguration.getConfig();
+    private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration) {
+        final Properties properties = consumerConfiguration.getConfig();
         // figure out the Key deserializer
-        Argument bodyArgument = findBodyArgument(method);
+        final Argument<?> bodyArgument = findBodyArgument(method);
 
-        if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG)) {
-            if (!consumerConfiguration.getKeyDeserializer().isPresent()) {
-                Optional<Argument> keyArgument = Arrays.stream(method.getArguments())
-                        .filter(arg -> arg.isAnnotationPresent(KafkaKey.class)).findFirst();
-
-                if (keyArgument.isPresent()) {
-                    consumerConfiguration.setKeyDeserializer(
-                            serdeRegistry.pickDeserializer(keyArgument.get())
-                    );
-                } else {
-                    //noinspection SingleStatementInBlock
-                    if (bodyArgument != null && ConsumerRecord.class.isAssignableFrom(bodyArgument.getType())) {
-                        Optional<Argument<?>> keyType = bodyArgument.getTypeVariable("K");
-                        if (keyType.isPresent()) {
-                            consumerConfiguration.setKeyDeserializer(
-                                    serdeRegistry.pickDeserializer(keyType.get())
-                            );
-                        } else {
-                            consumerConfiguration.setKeyDeserializer(new ByteArrayDeserializer());
-                        }
+        if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getKeyDeserializer().isPresent()) {
+            final Optional<Argument> keyArgument = Arrays.stream(method.getArguments())
+                    .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
+                    .findFirst();
+            if (keyArgument.isPresent()) {
+                consumerConfiguration.setKeyDeserializer(serdeRegistry.pickDeserializer(keyArgument.get()));
+            } else {
+                //noinspection SingleStatementInBlock
+                if (bodyArgument != null && ConsumerRecord.class.isAssignableFrom(bodyArgument.getType())) {
+                    final Optional<Argument<?>> keyType = bodyArgument.getTypeVariable("K");
+                    if (keyType.isPresent()) {
+                        consumerConfiguration.setKeyDeserializer(serdeRegistry.pickDeserializer(keyType.get()));
                     } else {
                         consumerConfiguration.setKeyDeserializer(new ByteArrayDeserializer());
                     }
+                } else {
+                    consumerConfiguration.setKeyDeserializer(new ByteArrayDeserializer());
                 }
             }
         }
 
         // figure out the Value deserializer
         if (!properties.containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getValueDeserializer().isPresent()) {
-
-            if (bodyArgument != null) {
-
+            if (bodyArgument == null) {
+                //noinspection SingleStatementInBlock
+                consumerConfiguration.setValueDeserializer(new StringDeserializer());
+            } else {
                 if (ConsumerRecord.class.isAssignableFrom(bodyArgument.getType())) {
-                    Optional<Argument<?>> valueType = bodyArgument.getTypeVariable("V");
+                    final Optional<Argument<?>> valueType = bodyArgument.getTypeVariable("V");
                     if (valueType.isPresent()) {
-                        consumerConfiguration.setValueDeserializer(
-                                serdeRegistry.pickDeserializer(valueType.get())
-                        );
+                        consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(valueType.get()));
                     } else {
                         consumerConfiguration.setValueDeserializer(new StringDeserializer());
                     }
-
                 } else {
-                    boolean batch = method.isTrue(KafkaListener.class, "batch");
-
-                    consumerConfiguration.setValueDeserializer(
-                            serdeRegistry.pickDeserializer(batch ? getComponentType(bodyArgument) : bodyArgument)
-                    );
+                    final boolean batch = method.isTrue(KafkaListener.class, "batch");
+                    consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(batch ? getComponentType(bodyArgument) : bodyArgument));
                 }
-            } else {
-                //noinspection SingleStatementInBlock
-                consumerConfiguration.setValueDeserializer(new StringDeserializer());
             }
         }
+        debugDeserializationConfiguration(method, consumerConfiguration, properties);
     }
 
-    private Argument<?> getComponentType(Argument<?> argument) {
-        Class<?> argumentType = argument.getType();
+    private static Argument getComponentType(final Argument<?> argument) {
+        final Class<?> argumentType = argument.getType();
         return argumentType.isArray()
                 ? Argument.of(argumentType.getComponentType())
                 : argument.getFirstTypeVariable().orElse(argument);
     }
 
-    private OffsetCommitCallback resolveCommitCallback(Object consumerBean) {
+    private static OffsetCommitCallback resolveCommitCallback(final Object consumerBean) {
         return (offsets, exception) -> {
             if (consumerBean instanceof OffsetCommitCallback) {
                 ((OffsetCommitCallback) consumerBean).onComplete(offsets, exception);
