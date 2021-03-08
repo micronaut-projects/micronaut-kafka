@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka;
 
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.common.TopicPartition;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -35,11 +36,22 @@ public interface ConsumerRegistry {
      * @param id The id of the producer.
      * @param <K> The key generic type
      * @param <V> The value generic type
-     * @return The producer
+     * @return The consumer
      * @throws IllegalArgumentException If no consumer exists for the given ID
      */
     @Nonnull
     <K, V> Consumer<K, V> getConsumer(@Nonnull String id);
+
+    /**
+     * Returns a managed Consumer's assignment info. Note that the consumer should not be interacted with directly from a
+     * different thread to the poll loop!
+     *
+     * @param id The id of the producer.
+     * @return The consumer assignment
+     * @throws IllegalArgumentException If no consumer exists for the given ID
+     */
+    @Nonnull
+    Set<TopicPartition> getConsumerAssignment(@Nonnull String id);
 
     /**
      * The IDs of the available consumers.

@@ -15,8 +15,16 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
-import io.micronaut.configuration.kafka.*;
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.Acknowledgement;
+import io.micronaut.configuration.kafka.ConsumerAware;
+import io.micronaut.configuration.kafka.ConsumerRegistry;
+import io.micronaut.configuration.kafka.KafkaAcknowledgement;
+import io.micronaut.configuration.kafka.ProducerRegistry;
+import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry;
 import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
@@ -31,7 +39,9 @@ import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Blocking;
 import io.micronaut.core.async.publisher.Publishers;
-import io.micronaut.core.bind.*;
+import io.micronaut.core.bind.BoundExecutable;
+import io.micronaut.core.bind.DefaultExecutableBinder;
+import io.micronaut.core.bind.ExecutableBinder;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
@@ -52,7 +62,14 @@ import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.consumer.CommitFailedException;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -69,7 +86,16 @@ import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
@@ -95,6 +121,7 @@ public class KafkaConsumerProcessor
     private final BeanContext beanContext;
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
     private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
+    private final Map<String, Set<TopicPartition>> consumerAssignments = new ConcurrentHashMap<>();
     private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
     private final Set<String> paused = new ConcurrentSkipListSet<>();
     private final ConsumerRecordBinderRegistry binderRegistry;
@@ -163,6 +190,17 @@ public class KafkaConsumerProcessor
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
         return consumer;
+    }
+
+    @Nonnull
+    @Override
+    public Set<TopicPartition> getConsumerAssignment(@Nonnull final String id) {
+        ArgumentUtils.requireNonNull("id", id);
+        final Set<TopicPartition> assignment = consumerAssignments.get(id);
+        if (assignment == null) {
+            throw new IllegalArgumentException("No consumer assignment found for ID: " + id);
+        }
+        return assignment;
     }
 
     @Nonnull
@@ -393,6 +431,7 @@ public class KafkaConsumerProcessor
                                     pausedConsumers.put(finalClientId, kafkaConsumer);
                                 }
 
+                                consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                                 boolean failed = false;
                                 if (consumerPaused && !paused.contains(finalClientId)) {
