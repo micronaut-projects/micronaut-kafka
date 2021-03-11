@@ -83,6 +83,13 @@ public @interface KafkaClient {
     boolean batch() default false;
 
     /**
+     * When set will allow the producer to perform transactional requests. Will set {@link org.apache.kafka.clients.producer.KafkaProducer#initTransactions()}.
+     *
+     * @return Whether transactional is set or not
+     */
+    boolean transactional() default false;
+
+    /**
      * Additional properties to configure with for Consumer.
      *
      * @return The properties

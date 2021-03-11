@@ -114,6 +114,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             AnnotationValue<KafkaClient> client = context.findAnnotation(KafkaClient.class).orElseThrow(() -> new IllegalStateException("No @KafkaClient annotation present on method: " + context));
 
             boolean isBatchSend = client.isTrue("batch");
+            boolean isTransactional = client.isTrue("transactional");
 
             String topic = context.stringValue(Topic.class)
                     .orElse(null);
@@ -223,6 +224,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             }
 
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
+            if (isTransactional) {
+                kafkaProducer.initTransactions();
+            }
 
             Long timestamp = client.isTrue("timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
