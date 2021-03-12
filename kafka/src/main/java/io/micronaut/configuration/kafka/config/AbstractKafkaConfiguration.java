@@ -15,6 +15,8 @@
  */
 package io.micronaut.configuration.kafka.config;
 
+import io.micronaut.core.util.Toggleable;
+
 import javax.annotation.Nonnull;
 import java.util.Properties;
 
@@ -26,7 +28,7 @@ import java.util.Properties;
  * @author Graeme Rocher
  * @since 1.0
  */
-public abstract class AbstractKafkaConfiguration<K, V> {
+public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
     /**
      * The default kafka port.
      */
