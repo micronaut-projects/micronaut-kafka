@@ -83,6 +83,7 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
+     * @param name     The configuration name
      * @param builder  The builder
      * @param kStreams The KStream definitions
      * @return The {@link KafkaStreams} bean
@@ -101,7 +102,7 @@ public class KafkaStreamsFactory implements Closeable {
         );
         eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
         streams.put(kafkaStreams, builder);
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Initializing Application {} with topology:\n{}", name, topology.describe().toString());
         }
         kafkaStreams.start();
