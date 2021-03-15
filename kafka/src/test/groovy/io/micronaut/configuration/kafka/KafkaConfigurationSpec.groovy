@@ -2,10 +2,15 @@ package io.micronaut.configuration.kafka
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration
+import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
+import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration
+import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration
+import io.micronaut.configuration.kafka.processor.KafkaConsumerProcessor
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
+import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import spock.lang.AutoCleanup
@@ -232,6 +237,36 @@ class KafkaConfigurationSpec extends Specification {
         then:
         props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333'
     }
+
+    void "test disabled"() {
+        given:
+        applicationContext = ApplicationContext.run(["kafka.enabled": false])
+
+        when:
+        applicationContext.getBean(AbstractKafkaConfiguration)
+
+        then:
+        thrown(NoSuchBeanException)
+
+        when:
+        applicationContext.getBean(ConsumerRegistry)
+
+        then:
+        thrown(NoSuchBeanException)
+
+        when:
+        applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        thrown(NoSuchBeanException)
+
+        when:
+        applicationContext.getBean(AbstractKafkaProducerConfiguration)
+
+        then:
+        thrown(NoSuchBeanException)
+    }
+
 }
 
 class FakeYamlPropertySource extends MapPropertySource {

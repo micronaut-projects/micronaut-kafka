@@ -19,6 +19,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.convert.ConversionService;
+import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
  */
 @ConfigurationProperties(AbstractKafkaConfiguration.PREFIX)
 @Requires(property = AbstractKafkaConfiguration.PREFIX)
+@Requires(property = AbstractKafkaConfiguration.PREFIX + ".enabled", notEquals = StringUtils.FALSE)
 public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
 
     /**
