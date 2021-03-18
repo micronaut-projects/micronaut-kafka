@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -136,24 +136,36 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;org.apache.kafka.common.TopicPartition&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerAssignment-java.lang.String-">getConsumerAssignment</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Returns a managed Consumer's assignment info.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerIds--">getConsumerIds</a></span>()</code>
 <div class="block">The IDs of the available consumers.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#getConsumerSubscription-java.lang.String-">getConsumerSubscription</a></span>(java.lang.String&nbsp;id)</code>
+<div class="block">Returns a managed Consumer's subscriptions.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-">isPaused</a></span>(java.lang.String&nbsp;id)</code>
 <div class="block">Is the consumer with the given ID paused.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#pause-java.lang.String-">pause</a></span>(java.lang.String&nbsp;id)</code>
 <div class="block">Pause the consumer for the given ID.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#resume-java.lang.String-">resume</a></span>(java.lang.String&nbsp;id)</code>
 <div class="block">Resume the consumer for the given ID.</div>
@@ -192,7 +204,47 @@ var activeTableTab = "activeTableTab";
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>id</code> - The id of the producer.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>The producer</dd>
+<dd>The consumer</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalArgumentException</code> - If no consumer exists for the given ID</dd>
+</dl>
+</li>
+</ul>
+<a name="getConsumerSubscription-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConsumerSubscription</h4>
+<pre>@Nonnull
+java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerSubscription(@Nonnull
+                                                                 java.lang.String&nbsp;id)</pre>
+<div class="block">Returns a managed Consumer's subscriptions.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - The id of the producer.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The consumer subscription</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalArgumentException</code> - If no consumer exists for the given ID</dd>
+</dl>
+</li>
+</ul>
+<a name="getConsumerAssignment-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConsumerAssignment</h4>
+<pre>@Nonnull
+java.util.Set&lt;org.apache.kafka.common.TopicPartition&gt;&nbsp;getConsumerAssignment(@Nonnull
+                                                                                     java.lang.String&nbsp;id)</pre>
+<div class="block">Returns a managed Consumer's assignment info.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>id</code> - The id of the producer.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The consumer assignment</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code> - If no consumer exists for the given ID</dd>
 </dl>
