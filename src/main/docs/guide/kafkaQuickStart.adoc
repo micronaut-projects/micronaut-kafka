@@ -98,3 +98,12 @@ include::{testskafka}/quickstart/ProductListener.java[tags=clazz, indent=0]
 <2> The ann:configuration.kafka.annotation.Topic[] annotation is again used to indicate which topic(s) to subscribe to.
 <3> The `receive` method defines 2 arguments: The argument that will receive the key and the argument that will receive the value.
 
+== Disabling Kafka
+If for some reason, you need to disable the creation of kafka consumers, or producers, you can through configuration:
+
+.Disabling Kafka
+[source,yaml]
+----
+kafka:
+  enabled: false
+----

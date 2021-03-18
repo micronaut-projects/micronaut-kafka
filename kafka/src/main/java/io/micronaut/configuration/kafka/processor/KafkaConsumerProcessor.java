@@ -121,6 +121,8 @@ public class KafkaConsumerProcessor
     private final BeanContext beanContext;
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
     private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> consumerSubscriptions = new ConcurrentHashMap<>();
+    private final Map<String, Set<TopicPartition>> consumerAssignments = new ConcurrentHashMap<>();
     private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
     private final Set<String> paused = new ConcurrentSkipListSet<>();
     private final ConsumerRecordBinderRegistry binderRegistry;
@@ -189,6 +191,28 @@ public class KafkaConsumerProcessor
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
         return consumer;
+    }
+
+    @Nonnull
+    @Override
+    public Set<String> getConsumerSubscription(@Nonnull final String id) {
+        ArgumentUtils.requireNonNull("id", id);
+        final Set<String> subscriptions = consumerSubscriptions.get(id);
+        if (subscriptions == null || subscriptions.isEmpty()) {
+            throw new IllegalArgumentException("No consumer subscription found for ID: " + id);
+        }
+        return subscriptions;
+    }
+
+    @Nonnull
+    @Override
+    public Set<TopicPartition> getConsumerAssignment(@Nonnull final String id) {
+        ArgumentUtils.requireNonNull("id", id);
+        final Set<TopicPartition> assignment = consumerAssignments.get(id);
+        if (assignment == null || assignment.isEmpty()) {
+            throw new IllegalArgumentException("No consumer assignment found for ID: " + id);
+        }
+        return assignment;
     }
 
     @Nonnull
@@ -346,6 +370,7 @@ public class KafkaConsumerProcessor
             ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
         }
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
+        consumerSubscriptions.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.subscription()));
         executorService.submit(() -> createConsumerThreadPollLoop(method, finalClientId, offsetStrategy, consumerAnnotation, consumerBean, kafkaConsumer));
     }
 
@@ -373,6 +398,7 @@ public class KafkaConsumerProcessor
 
             //noinspection InfiniteLoopStatement
             while (true) {
+                consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
                 try {
                     if (!consumerPaused && paused.contains(finalClientId)) {
                         consumerPaused = true;
