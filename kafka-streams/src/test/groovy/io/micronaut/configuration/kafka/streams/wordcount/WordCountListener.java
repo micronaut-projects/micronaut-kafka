@@ -1,12 +1,16 @@
 package io.micronaut.configuration.kafka.streams.wordcount;
 
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.Topic;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST;
+
+@KafkaListener(offsetReset = EARLIEST, groupId = "WordCountListener")
 public class WordCountListener {
 
     private final Map<String, Long> wordCounts = new ConcurrentHashMap<>();

@@ -1,7 +1,6 @@
 package io.micronaut.configuration.kafka.streams.wordcount;
 
 // tag::imports[]
-
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -41,8 +40,7 @@ public class WordCountStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        KStream<String, String> source = builder
-                .stream(INPUT);
+        KStream<String, String> source = builder.stream(INPUT);
 
         KTable<String, Long> groupedByWord = source
                 .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))

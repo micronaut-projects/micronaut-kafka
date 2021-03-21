@@ -1,8 +1,9 @@
-
 package io.micronaut.configuration.kafka.docs.quickstart;
 
 // tag::imports[]
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.Topic;
 // end::imports[]
 
 // tag::clazz[]

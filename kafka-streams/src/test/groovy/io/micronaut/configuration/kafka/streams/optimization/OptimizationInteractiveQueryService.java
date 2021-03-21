@@ -27,5 +27,4 @@ public class OptimizationInteractiveQueryService {
         Optional<ReadOnlyKeyValueStore<String, String>> queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
         return queryableStore.map(kvReadOnlyKeyValueStore -> kvReadOnlyKeyValueStore.get(key)).orElse("");
     }
-
 }

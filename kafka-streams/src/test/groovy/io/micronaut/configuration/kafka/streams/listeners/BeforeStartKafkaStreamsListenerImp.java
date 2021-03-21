@@ -6,7 +6,8 @@ import io.micronaut.runtime.event.annotation.EventListener;
 import javax.inject.Singleton;
 
 @Singleton
-public class BeforeStartKafkaStreamsListenerImp  {
+public class BeforeStartKafkaStreamsListenerImp {
+
     private boolean executed = false;
 
     @EventListener

@@ -7,6 +7,7 @@ import org.apache.kafka.clients.admin.NewTopic
 import org.testcontainers.containers.KafkaContainer
 
 class KafkaSetup {
+
     static KafkaContainer kafkaContainer
 
     static KafkaContainer init() {

@@ -1,53 +1,32 @@
-
 package io.micronaut.configuration.kafka.errors
 
+import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
-import io.micronaut.messaging.MessageHeaders
-import io.micronaut.runtime.server.EmbeddedServer
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.TopicPartition
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.atomic.AtomicInteger
 
-class KafkaErrorHandlingSpec extends Specification {
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-    def setupSpec() {
-        kafkaContainer.start()
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["errors"]
-                )
-        )
+class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
+
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): ["errors"]]
     }
 
     void "test an exception that is thrown is not committed"() {
         when:"A consumer throws an exception"
-        def context = embeddedServer.getApplicationContext()
         ErrorClient myClient = context.getBean(ErrorClient)
         myClient.sendMessage("One")
         myClient.sendMessage("Two")
-
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         ErrorCausingConsumer myConsumer = context.getBean(ErrorCausingConsumer)
 
@@ -56,11 +35,10 @@ class KafkaErrorHandlingSpec extends Specification {
             myConsumer.received.size() == 2
             myConsumer.count.get() == 3
         }
-
-
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.SYNC)
+    @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
     static class ErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
         List<String> received = []
@@ -84,6 +62,7 @@ class KafkaErrorHandlingSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
     @KafkaClient
     static interface ErrorClient {
         @Topic("errors")

@@ -1,10 +1,11 @@
-
 package io.micronaut.configuration.kafka.docs.producer.inject;
 
-import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
-import org.apache.kafka.clients.producer.*;
+import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import javax.inject.Singleton;
 import java.util.concurrent.Future;

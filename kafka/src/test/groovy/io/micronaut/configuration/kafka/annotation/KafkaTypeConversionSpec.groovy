@@ -1,38 +1,24 @@
-
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
+import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.errors.SerializationException
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
 import spock.lang.Stepwise
-import spock.util.concurrent.PollingConditions
 
 import javax.inject.Inject
 import java.util.concurrent.ConcurrentHashMap
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 @Stepwise
-class KafkaTypeConversionSpec extends Specification {
+class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    def setupSpec() {
-        kafkaContainer.start()
-        context = ApplicationContext.run(
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["uuids"]
-                )
-        )
+    protected Map<String, Object> getConfiguration() {
+        super.configuration +
+                [(EMBEDDED_TOPICS): ['uuids']]
     }
 
     void "test send valid UUID key"() {
@@ -40,8 +26,6 @@ class KafkaTypeConversionSpec extends Specification {
         MyClient myClient = context.getBean(MyClient)
         def uuid = UUID.randomUUID()
         myClient.send(uuid.toString(), "test")
-
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
 
         MyListener myConsumer = context.getBean(MyListener)
 
@@ -57,8 +41,6 @@ class KafkaTypeConversionSpec extends Specification {
         def uuid = "bunch 'o junk"
         myClient.send(uuid, "test")
 
-        PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
-
         MyListener myConsumer = context.getBean(MyListener)
 
         then:
@@ -70,7 +52,8 @@ class KafkaTypeConversionSpec extends Specification {
         }
     }
 
-    @KafkaListener(groupId = "MyUuidGroup", offsetReset = OffsetReset.EARLIEST)
+    @Requires(property = 'spec.name', value = 'KafkaTypeConversionSpec')
+    @KafkaListener(groupId = "MyUuidGroup", offsetReset = EARLIEST)
     static class MyListener implements KafkaListenerExceptionHandler {
 
         Map<UUID, String> messages = new ConcurrentHashMap<>()
@@ -91,6 +74,7 @@ class KafkaTypeConversionSpec extends Specification {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaTypeConversionSpec')
     @KafkaClient
     static interface MyClient {
         @Topic("uuids")

@@ -1,0 +1,19 @@
+If you want to disable micronaut-kafka entirely, you can set `kafka.enabled` to `false` in `application.yml`.
+
+This will prevent the instantiation of all kafka-related beans.
+
+You must, however, provide your own replacement implementations of any `@KafkaClient` interfaces:
+
+.Creating Replacement KafkaClient Implementations
+[source,java]
+----
+include::{testskafka}/producer/fallback/MessageClientFallback.java[tags=imports, indent=0]
+
+include::{testskafka}/producer/fallback/MessageClientFallback.java[tags=clazz, indent=0]
+----
+
+<1> Only instantiate when `kafka.enabled` is set to `false`
+<2> Replace the `@KafkaClient` interface
+<3> Implement the interface
+<4> Provide an alternative implementation for all client methods
+

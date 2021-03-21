@@ -1,8 +1,8 @@
-
 package io.micronaut.configuration.kafka.docs.consumer.batch;
 
 // tag::imports[]
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -26,7 +26,6 @@ public class BookListener {
     }
     // end::method[]
 
-
     // tag::reactive[]
     @Topic("all-the-books")
     public Flux<Book> receiveFlux(Flux<Book> books) {
@@ -38,12 +37,12 @@ public class BookListener {
 
     // tag::manual[]
     @Topic("all-the-books")
-    public void receive(
-            List<Book> books,
-            List<Long> offsets,
-            List<Integer> partitions,
-            List<String> topics,
-            Consumer kafkaConsumer) { // <1>
+    public void receive(List<Book> books,
+                        List<Long> offsets,
+                        List<Integer> partitions,
+                        List<String> topics,
+                        Consumer kafkaConsumer) { // <1>
+
         for (int i = 0; i < books.size(); i++) {
 
             // process the book
@@ -62,5 +61,4 @@ public class BookListener {
         }
     }
     // end::manual[]
-
 }

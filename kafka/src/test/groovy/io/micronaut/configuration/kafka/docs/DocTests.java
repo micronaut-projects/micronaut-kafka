@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.docs;
 
 import io.micronaut.configuration.kafka.docs.quickstart.ProductClient;
@@ -29,7 +28,6 @@ public class DocTests {
         applicationContext.stop();
         kafkaContainer.stop();
     }
-
 
     @Test
     public void testSendProduct() {

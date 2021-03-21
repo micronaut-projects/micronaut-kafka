@@ -1,4 +1,3 @@
-
 package io.micronaut.configuration.kafka.docs.producer.inject;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
@@ -6,7 +5,6 @@ import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
 import io.micronaut.context.ApplicationContext;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -14,7 +12,7 @@ public class BookSenderTest {
 
     // tag::test[]
     @Test
-    public void testBookSender() throws IOException {
+    public void testBookSender() {
         Map<String, Object> config = Collections.singletonMap( // <1>
                 AbstractKafkaConfiguration.EMBEDDED, true
         );
