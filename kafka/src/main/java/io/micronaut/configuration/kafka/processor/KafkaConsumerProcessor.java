@@ -426,6 +426,7 @@ public class KafkaConsumerProcessor
                 }
                 consumerSubscriptions.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.subscription()));
                 executorService.submit(() -> {
+                    boolean failed = false;
                     try {
 
                         boolean trackPartitions = ackArg.isPresent() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
@@ -446,7 +447,6 @@ public class KafkaConsumerProcessor
                                 }
 
                                 ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
-                                boolean failed = false;
                                 if (consumerPaused && !paused.contains(finalClientId)) {
                                     LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
                                     kafkaConsumer.resume(
@@ -614,7 +614,9 @@ public class KafkaConsumerProcessor
                         // ignore for shutdown
                     } finally {
                         try {
-                            if (offsetStrategy != OffsetStrategy.DISABLED) {
+                            if (offsetStrategy != OffsetStrategy.DISABLED &&
+                                   ! ((offsetStrategy == OffsetStrategy.SYNC || offsetStrategy == OffsetStrategy.ASYNC) && failed)) {
+
                                 kafkaConsumer.commitSync();
                             }
                         } catch (Throwable e) {
