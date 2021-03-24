@@ -391,7 +391,7 @@ public class KafkaConsumerProcessor
                     boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
 
                     if (!hasTopics && !hasPatterns) {
-                        throw new MessagingSystemException("Either a topic or a topic must be specified for method: " + method);
+                        throw new MessagingSystemException("Either a topic name or a topic pattern must be specified for method: " + method);
                     }
 
                     if (hasTopics) {
@@ -672,37 +672,34 @@ public class KafkaConsumerProcessor
                         Object key = consumerRecord.key();
                         Object value = o;
 
-                        if (value != null) {
-                            String groupId = kafkaListener.stringValue("groupId").orElse(null);
-                            Producer kafkaProducer = producerRegistry.getProducer(
-                                    StringUtils.isNotEmpty(groupId) ? groupId : null,
-                                    Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
-                                    Argument.of(value.getClass())
-                            );
+                        String groupId = kafkaListener.stringValue("groupId").orElse(null);
+                        Producer kafkaProducer = producerRegistry.getProducer(
+                                StringUtils.isNotEmpty(groupId) ? groupId : null,
+                                Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
+                                Argument.of(value.getClass())
+                        );
 
-                            return Flowable.create(emitter -> {
-                                for (String destinationTopic : destinationTopics) {
-                                    ProducerRecord record = new ProducerRecord(
-                                            destinationTopic,
-                                            null,
-                                            key,
-                                            value,
-                                            consumerRecord.headers()
-                                    );
+                        return Flowable.create(emitter -> {
+                            for (String destinationTopic : destinationTopics) {
+                                ProducerRecord record = new ProducerRecord(
+                                        destinationTopic,
+                                        null,
+                                        key,
+                                        value,
+                                        consumerRecord.headers()
+                                );
 
-                                    kafkaProducer.send(record, (metadata, exception) -> {
-                                        if (exception != null) {
-                                            emitter.onError(exception);
-                                        } else {
-                                            emitter.onNext(metadata);
-                                        }
-                                    });
+                                kafkaProducer.send(record, (metadata, exception) -> {
+                                    if (exception != null) {
+                                        emitter.onError(exception);
+                                    } else {
+                                        emitter.onNext(metadata);
+                                    }
+                                });
 
-                                }
-                                emitter.onComplete();
-                            }, BackpressureStrategy.ERROR);
-                        }
-                        return Flowable.empty();
+                            }
+                            emitter.onComplete();
+                        }, BackpressureStrategy.ERROR);
                     }
                     return Flowable.empty();
                 }).onErrorResumeNext((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {

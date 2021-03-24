@@ -8,13 +8,16 @@ import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import spock.lang.Unroll
 
+import javax.annotation.Nullable
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
+@Unroll
 class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_SINGLE = "KafkaSendToSpec-products-single"
@@ -38,15 +41,20 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProductBlocking("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProductBlocking(key, message)
 
         then:
         conditions.eventually {
             productListener.products.size() == 1
-            productListener.products.iterator().next().name == "Apple"
+            productListener.products.iterator().next().name == key
             quantityListener.quantities.size() == 1
-            quantityListener.quantities.iterator().next() == 5
+            quantityListener.quantities.iterator().next() == quantity
         }
+
+        where:
+        message                                 | key    | quantity
+        new Product(name: "Apple", quantity: 5) | "Apple" | 5
+        null                                    | "null"  | 0
     }
 
     void "test send to another topic - single"() {
@@ -58,15 +66,20 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProduct("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProduct(key, message)
 
         then:
         conditions.eventually {
             productListener.products.size() == 1
-            productListener.products.iterator().next().name == "Apple"
+            productListener.products.iterator().next().name == key
             quantityListener.quantities.size() == 1
-            quantityListener.quantities.iterator().next() == 5
+            quantityListener.quantities.iterator().next() == quantity
         }
+
+        where:
+        message                                 | key     | quantity
+        new Product(name: "Apple", quantity: 5) | "Apple" | 5
+        null                                    | "null"  | 0
     }
 
     void "test send to another topic - flowable"() {
@@ -78,15 +91,20 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProductForFlowable("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProductForFlowable(key, message)
 
         then:
         conditions.eventually {
             productListener.products.size() == 1
-            productListener.products.iterator().next().name == "Apple"
+            productListener.products.iterator().next().name == key
             quantityListener.quantities.size() == 1
-            quantityListener.quantities.iterator().next() == 5
+            quantityListener.quantities.iterator().next() == quantity
         }
+
+        where:
+        message                                 | key     | quantity
+        new Product(name: "Apple", quantity: 5) | "Apple" | 5
+        null                                    | "null"  | 0
     }
 
     void "test send to another topic - flux"() {
@@ -98,15 +116,20 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProductForFlux("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProductForFlux(key, message)
 
         then:
         conditions.eventually {
             productListener.products.size() == 1
-            productListener.products.iterator().next().name == "Apple"
+            productListener.products.iterator().next().name == key
             quantityListener.quantities.size() == 1
-            quantityListener.quantities.iterator().next() == 5
+            quantityListener.quantities.iterator().next() == quantity
         }
+
+        where:
+        message                                 | key     | quantity
+        new Product(name: "Apple", quantity: 5) | "Apple" | 5
+        null                                    | "null"  | 0
     }
 
     void "test send to another topic - mono"() {
@@ -118,34 +141,39 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProductForMono("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProductForMono(key, message)
 
         then:
         conditions.eventually {
             productListener.products.size() == 1
-            productListener.products.iterator().next().name == "Apple"
+            productListener.products.iterator().next().name == key
             quantityListener.quantities.size() == 1
-            quantityListener.quantities.iterator().next() == 5
+            quantityListener.quantities.iterator().next() == quantity
         }
+
+        where:
+        message                                 | key     | quantity
+        new Product(name: "Apple", quantity: 5) | "Apple" | 5
+        null                                    | "null"  | 0
     }
 
     @Requires(property = 'spec.name', value = 'KafkaSendToSpec')
     @KafkaClient(acks = ALL)
     static interface ProductClient {
         @Topic(KafkaSendToSpec.TOPIC_SINGLE)
-        RecordMetadata sendProduct(@KafkaKey String name, Product product)
+        RecordMetadata sendProduct(@KafkaKey String name, @Nullable Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_BLOCKING)
-        RecordMetadata sendProductBlocking(@KafkaKey String name, Product product)
+        RecordMetadata sendProductBlocking(@KafkaKey String name, @Nullable Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_FLOWABLE)
-        RecordMetadata sendProductForFlowable(@KafkaKey String name, Product product)
+        RecordMetadata sendProductForFlowable(@KafkaKey String name, @Nullable Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_FLUX)
-        RecordMetadata sendProductForFlux(@KafkaKey String name, Product product)
+        RecordMetadata sendProductForFlux(@KafkaKey String name, @Nullable Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_MONO)
-        RecordMetadata sendProductForMono(@KafkaKey String name, Product product)
+        RecordMetadata sendProductForMono(@KafkaKey String name, @Nullable Product product)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaSendToSpec')
@@ -155,44 +183,69 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
         @Topic(KafkaSendToSpec.TOPIC_BLOCKING)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Integer receive(Product product) {
-            products << product
-            return product.quantity
+        Integer receive(@KafkaKey String name, @Nullable Product product) {
+            if (product) {
+                products << product
+            } else {
+                products << new Product(name: name, quantity: 0)
+            }
+
+            return product?.quantity ?: 0
         }
 
         @Topic(KafkaSendToSpec.TOPIC_SINGLE)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Single<Integer> receiveSingle(Single<Product> product) {
-            product.map({ Product p ->
-                products << p
-                p.quantity
-            })
+        Single<Integer> receiveSingle(@KafkaKey String name, @Nullable Single<Product> product) {
+            if (product) {
+                return product.map({ Product p ->
+                    products << p
+                    p.quantity
+                })
+            } else {
+                products << new Product(name: name, quantity: 0)
+                return Single.just(0)
+            }
         }
 
         @Topic(KafkaSendToSpec.TOPIC_FLOWABLE)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Flowable<Integer> receiveFlowable(Flowable<Product> product) {
-            product.map{ Product p ->
-                products << p
-                return p.quantity
+        Flowable<Integer> receiveFlowable(@KafkaKey String name, @Nullable Flowable<Product> product) {
+            if (product) {
+                return product.map({ Product p ->
+                    products << p
+                    p.quantity
+                })
+            } else {
+                products << new Product(name: name, quantity: 0)
+                return Flowable.just(0)
             }
         }
 
         @Topic(KafkaSendToSpec.TOPIC_FLUX)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Flux<Integer> receiveFlux(Flux<Product> product) {
-            product.map{ Product p ->
-                products << p
-                return p.quantity
+        Flux<Integer> receiveFlux(@KafkaKey String name, @Nullable Flux<Product> product) {
+            if (product) {
+                return product.map({ Product p ->
+                    products << p
+                    p.quantity
+                })
+            } else {
+                products << new Product(name: name, quantity: 0)
+                return Flux.just(0)
             }
         }
 
         @Topic(KafkaSendToSpec.TOPIC_MONO)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Mono<Integer> receiveMono(Mono<Product> product) {
-            product.map{ Product p ->
-                products << p
-                return p.quantity
+        Mono<Integer> receiveMono(@KafkaKey String name, @Nullable Mono<Product> product) {
+            if (product) {
+                return product.map({ Product p ->
+                    products << p
+                    p.quantity
+                })
+            } else {
+                products << new Product(name: name, quantity: 0)
+                return Mono.just(0)
             }
         }
     }
