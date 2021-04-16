@@ -20,9 +20,13 @@ import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
@@ -40,6 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Factory
 public class KafkaStreamsFactory implements Closeable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsFactory.class);
 
     private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();
 
@@ -77,6 +83,7 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
+     * @param name     The configuration name
      * @param builder  The builder
      * @param kStreams The KStream definitions
      * @return The {@link KafkaStreams} bean
@@ -84,15 +91,20 @@ public class KafkaStreamsFactory implements Closeable {
     @EachBean(ConfiguredStreamBuilder.class)
     @Context
     KafkaStreams kafkaStreams(
+            @Parameter String name,
             ConfiguredStreamBuilder builder,
             KStream<?, ?>... kStreams
     ) {
+        Topology topology = builder.build(builder.getConfiguration());
         KafkaStreams kafkaStreams = new KafkaStreams(
-                builder.build(builder.getConfiguration()),
+                topology,
                 builder.getConfiguration()
         );
         eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
         streams.put(kafkaStreams, builder);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Initializing Application {} with topology:\n{}", name, topology.describe().toString());
+        }
         kafkaStreams.start();
         eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
         return kafkaStreams;
