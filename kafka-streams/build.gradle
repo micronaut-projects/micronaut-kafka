@@ -20,7 +20,7 @@ dependencies {
     testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
-    testImplementation "org.testcontainers:kafka:1.15.2" //Breaking change in java container after 1.12 see https://github.com/docker-java/docker-java/pull/1392
+    testImplementation "org.testcontainers:kafka:1.15.3" //Breaking change in java container after 1.12 see https://github.com/docker-java/docker-java/pull/1392
     testImplementation "org.testcontainers:spock:1.15.2"
 
     testRuntimeOnly "io.micronaut:micronaut-runtime"

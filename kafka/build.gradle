@@ -27,7 +27,7 @@ dependencies {
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
-    testImplementation "org.testcontainers:kafka:1.15.2"
+    testImplementation "org.testcontainers:kafka:1.15.3"
     testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.15'
     testImplementation 'io.opentracing:opentracing-mock:0.33.0'
 
