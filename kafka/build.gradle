@@ -18,7 +18,7 @@ dependencies {
     testImplementation "io.micronaut.test:micronaut-test-spock"
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.4"
+    testImplementation "io.projectreactor:reactor-core:3.4.5"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "io.micronaut:micronaut-http-client"
     testImplementation "io.micronaut:micronaut-inject-groovy"
@@ -27,7 +27,7 @@ dependencies {
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
     testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
-    testImplementation "org.testcontainers:kafka:1.15.2"
+    testImplementation "org.testcontainers:kafka:1.15.3"
     testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.15'
     testImplementation 'io.opentracing:opentracing-mock:0.33.0'
 
