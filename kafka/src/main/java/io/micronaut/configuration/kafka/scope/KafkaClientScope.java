@@ -38,8 +38,8 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.Map;
@@ -117,7 +117,7 @@ public class KafkaClientScope implements CustomScope<KafkaClient>, LifeCycle<Kaf
         return getKafkaProducer(id, keyArgument, valueArgument);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public <K, V> Producer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType) {
         return getKafkaProducer(id, keyType, valueType);

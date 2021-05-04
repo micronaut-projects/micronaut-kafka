@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 
 /**
  * Interface for {@link io.micronaut.configuration.kafka.annotation.KafkaListener} instances to implement
@@ -38,10 +38,10 @@ public interface KafkaConsumerAware<K, V> extends ConsumerAware<K, V> {
      *
      * @param consumer The consumer
      */
-    void setKafkaConsumer(@Nonnull KafkaConsumer<K, V> consumer);
+    void setKafkaConsumer(@NonNull KafkaConsumer<K, V> consumer);
 
     @Override
-    default void setKafkaConsumer(@Nonnull Consumer<K, V> consumer) {
+    default void setKafkaConsumer(@NonNull Consumer<K, V> consumer) {
         if (consumer instanceof KafkaConsumer) {
             setKafkaConsumer((KafkaConsumer<K, V>) consumer);
         }

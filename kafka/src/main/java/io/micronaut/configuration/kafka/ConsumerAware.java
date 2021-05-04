@@ -16,8 +16,7 @@
 package io.micronaut.configuration.kafka;
 
 import org.apache.kafka.clients.consumer.Consumer;
-
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 
 /**
  * Interface for {@link io.micronaut.configuration.kafka.annotation.KafkaListener} instances to implement
@@ -39,5 +38,5 @@ public interface ConsumerAware<K, V> {
      *
      * @param consumer The consumer
      */
-    void setKafkaConsumer(@Nonnull Consumer<K, V> consumer);
+    void setKafkaConsumer(@NonNull Consumer<K, V> consumer);
 }

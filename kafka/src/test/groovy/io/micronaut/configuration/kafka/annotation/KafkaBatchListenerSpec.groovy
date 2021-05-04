@@ -4,7 +4,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
-import io.micronaut.messaging.annotation.Header
+import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.messaging.annotation.SendTo
 import io.reactivex.Flowable
 import reactor.core.publisher.Flux
@@ -212,7 +212,7 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         void sendBooks(List<Book> books)
 
         @Topic(KafkaBatchListenerSpec.BOOKS_HEADERS_TOPIC)
-        @Header(name = "X-Foo", value = "Bar")
+        @MessageHeader(name = "X-Foo", value = "Bar")
         void sendBooksAndHeaders(List<Book> books)
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_LIST_TOPIC)
@@ -250,7 +250,7 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         }
 
         @Topic(KafkaBatchListenerSpec.BOOKS_HEADERS_TOPIC)
-        void receiveList(List<Book> books, @Header("X-Foo") List<String> foos) {
+        void receiveList(List<Book> books, @MessageHeader("X-Foo") List<String> foos) {
             this.books.addAll books
             this.headers = foos
         }

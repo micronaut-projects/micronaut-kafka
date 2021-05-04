@@ -9,7 +9,7 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Collection;
 // end::imports[]
 
@@ -20,7 +20,7 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
     private Consumer consumer;
 
     @Override
-    public void setKafkaConsumer(@Nonnull Consumer consumer) { // <1>
+    public void setKafkaConsumer(@NonNull Consumer consumer) { // <1>
         this.consumer = consumer;
     }
 
