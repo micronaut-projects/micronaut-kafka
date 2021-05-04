@@ -192,8 +192,8 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getConsumer</h4>
-<pre>@Nonnull
-&lt;K,V&gt;&nbsp;org.apache.kafka.clients.consumer.Consumer&lt;K,V&gt;&nbsp;getConsumer(@Nonnull
+<pre>@NonNull
+&lt;K,V&gt;&nbsp;org.apache.kafka.clients.consumer.Consumer&lt;K,V&gt;&nbsp;getConsumer(@NonNull
                                                                            java.lang.String&nbsp;id)</pre>
 <div class="block">Returns a managed Consumer. Note that the consumer should not be interacted with directly from a
  different thread to the poll loop!</div>
@@ -216,8 +216,8 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>getConsumerSubscription</h4>
-<pre>@Nonnull
-java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerSubscription(@Nonnull
+<pre>@NonNull
+java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerSubscription(@NonNull
                                                                  java.lang.String&nbsp;id)</pre>
 <div class="block">Returns a managed Consumer's subscriptions.</div>
 <dl>
@@ -236,8 +236,8 @@ java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerSubscription(@Nonnull
 <ul class="blockList">
 <li class="blockList">
 <h4>getConsumerAssignment</h4>
-<pre>@Nonnull
-java.util.Set&lt;org.apache.kafka.common.TopicPartition&gt;&nbsp;getConsumerAssignment(@Nonnull
+<pre>@NonNull
+java.util.Set&lt;org.apache.kafka.common.TopicPartition&gt;&nbsp;getConsumerAssignment(@NonNull
                                                                                      java.lang.String&nbsp;id)</pre>
 <div class="block">Returns a managed Consumer's assignment info.</div>
 <dl>
@@ -256,7 +256,7 @@ java.util.Set&lt;org.apache.kafka.common.TopicPartition&gt;&nbsp;getConsumerAssi
 <ul class="blockList">
 <li class="blockList">
 <h4>getConsumerIds</h4>
-<pre>@Nonnull
+<pre>@NonNull
 java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerIds()</pre>
 <div class="block">The IDs of the available consumers.</div>
 <dl>
@@ -271,7 +271,7 @@ java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerIds()</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>isPaused</h4>
-<pre>boolean&nbsp;isPaused(@Nonnull
+<pre>boolean&nbsp;isPaused(@NonNull
                  java.lang.String&nbsp;id)</pre>
 <div class="block">Is the consumer with the given ID paused.</div>
 <dl>
@@ -288,7 +288,7 @@ java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerIds()</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>pause</h4>
-<pre>void&nbsp;pause(@Nonnull
+<pre>void&nbsp;pause(@NonNull
            java.lang.String&nbsp;id)</pre>
 <div class="block">Pause the consumer for the given ID. Note that this method will request that the consumer is paused, however
  does not block until the consumer is actually paused. You can use the <a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-"><code>isPaused(String)</code></a> method to
@@ -305,7 +305,7 @@ java.util.Set&lt;java.lang.String&gt;&nbsp;getConsumerIds()</pre>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>resume</h4>
-<pre>void&nbsp;resume(@Nonnull
+<pre>void&nbsp;resume(@NonNull
             java.lang.String&nbsp;id)</pre>
 <div class="block">Resume the consumer for the given ID. Note that this method will request that the consumer is resumed, however
  does not block until the consumer is actually resumed. You can use the <a href="../../../../io/micronaut/configuration/kafka/ConsumerRegistry.html#isPaused-java.lang.String-"><code>isPaused(String)</code></a> method to

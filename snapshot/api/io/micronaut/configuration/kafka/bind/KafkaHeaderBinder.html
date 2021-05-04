@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":42,"i1":42};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -114,8 +114,10 @@ var activeTableTab = "activeTableTab";
 <dd><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Header,T&gt;, <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">ConsumerRecordBinder</a>&lt;T&gt;, io.micronaut.core.bind.ArgumentBinder&lt;T,org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&gt;</dd>
 </dl>
 <hr>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <br>
 <pre>@Singleton
+ @Deprecated
 public class <span class="typeNameLabel">KafkaHeaderBinder&lt;T&gt;</span>
 extends java.lang.Object
 implements <a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Header,T&gt;</pre>
@@ -159,7 +161,9 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#KafkaHeaderBinder--">KafkaHeaderBinder</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#KafkaHeaderBinder--">KafkaHeaderBinder</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -171,19 +175,23 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>java.lang.Class&lt;io.micronaut.messaging.annotation.Header&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#annotationType--">annotationType</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#annotationType--">annotationType</a></span>()</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>io.micronaut.core.bind.ArgumentBinder.BindingResult&lt;<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind</a></span>(io.micronaut.core.convert.ArgumentConversionContext&lt;<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt;&nbsp;context,
-    org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;source)</code>&nbsp;</td>
+    org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;source)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -214,6 +222,7 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <li class="blockList">
 <h4>KafkaHeaderBinder</h4>
 <pre>public&nbsp;KafkaHeaderBinder()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>
@@ -231,6 +240,7 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <li class="blockList">
 <h4>annotationType</h4>
 <pre>public&nbsp;java.lang.Class&lt;io.micronaut.messaging.annotation.Header&gt;&nbsp;annotationType()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html#annotationType--">annotationType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Header,<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt;</code></dd>
@@ -247,6 +257,7 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <h4>bind</h4>
 <pre>public&nbsp;io.micronaut.core.bind.ArgumentBinder.BindingResult&lt;<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt;&nbsp;bind(io.micronaut.core.convert.ArgumentConversionContext&lt;<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt;&nbsp;context,
                                                                    org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&nbsp;source)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>bind</code>&nbsp;in interface&nbsp;<code>io.micronaut.core.bind.ArgumentBinder&lt;<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>,org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&gt;</code></dd>
