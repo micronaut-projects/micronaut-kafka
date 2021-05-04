@@ -10,7 +10,7 @@ import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
-import io.micronaut.messaging.annotation.Header
+import io.micronaut.messaging.annotation.MessageHeader
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
 import spock.lang.AutoCleanup
@@ -63,7 +63,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface MyClientMetrics {
         @Topic("words-metrics")
-        void sendSentence(@KafkaKey String key, String sentence, @Header String topic)
+        void sendSentence(@KafkaKey String key, String sentence, @MessageHeader String topic)
 
         @Topic("words-metrics-two")
         RecordMetadata sendGetRecordMetadata(@KafkaKey String key, String sentence)

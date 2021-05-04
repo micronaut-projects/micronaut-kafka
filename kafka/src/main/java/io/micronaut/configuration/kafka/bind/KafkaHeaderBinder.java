@@ -33,6 +33,7 @@ import java.util.Optional;
  * @since 1.0
  */
 @Singleton
+@Deprecated
 public class KafkaHeaderBinder<T> implements AnnotatedConsumerRecordBinder<Header, T> {
 
     @Override

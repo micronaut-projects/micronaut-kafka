@@ -8,7 +8,7 @@ import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
-import io.micronaut.messaging.annotation.Header
+import io.micronaut.messaging.annotation.MessageHeader
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -63,7 +63,7 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
         String lastTopic
 
         @Topic("words-metrics")
-        void countWord(String sentence, @Header String topic) {
+        void countWord(String sentence, @MessageHeader String topic) {
             wordCount += sentence.split(/\s/).size()
             lastTopic = topic
         }
