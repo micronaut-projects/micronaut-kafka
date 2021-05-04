@@ -19,7 +19,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.util.Toggleable;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -65,7 +65,7 @@ public class KafkaEmbeddedConfiguration implements Toggleable {
     /**
      * @return The broker properties.
      */
-    public @Nonnull Properties getProperties() {
+    public @NonNull Properties getProperties() {
         return properties;
     }
 

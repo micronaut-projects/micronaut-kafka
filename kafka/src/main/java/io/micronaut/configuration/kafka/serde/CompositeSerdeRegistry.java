@@ -22,7 +22,7 @@ import io.micronaut.core.serialize.exceptions.SerializationException;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +54,7 @@ public class CompositeSerdeRegistry implements SerdeRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    @Nonnull
+    @NonNull
     public <T> Serde<T> getSerde(Class<T> type) {
         Serde serde = serdeMap.get(type);
 

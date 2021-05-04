@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.producer.Producer;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 
 /**
  * A registry of managed {@link Producer} instances key by id and type.
@@ -37,6 +37,6 @@ public interface ProducerRegistry {
      * @param <V> The value generic type
      * @return The producer
      */
-    @Nonnull
+    @NonNull
     <K, V> Producer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType);
 }

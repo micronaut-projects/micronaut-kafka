@@ -23,7 +23,7 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -82,9 +82,9 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
      * @param kafkaConsumer The kafka consumer
      */
     protected void seekPastDeserializationError(
-            @Nonnull SerializationException cause,
-            @Nonnull Object consumerBean,
-            @Nonnull Consumer<?, ?> kafkaConsumer) {
+            @NonNull SerializationException cause,
+            @NonNull Object consumerBean,
+            @NonNull Consumer<?, ?> kafkaConsumer) {
         try {
             final String message = cause.getMessage();
             final Matcher matcher = SERIALIZATION_EXCEPTION_MESSAGE_PATTERN.matcher(message);

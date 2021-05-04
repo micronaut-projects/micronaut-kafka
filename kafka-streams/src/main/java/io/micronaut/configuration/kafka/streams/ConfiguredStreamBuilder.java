@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.streams;
 
 import org.apache.kafka.streams.StreamsBuilder;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Properties;
 
 /**
@@ -44,7 +44,7 @@ public class ConfiguredStreamBuilder extends StreamsBuilder {
      *
      * @return The configuration
      */
-    public @Nonnull Properties getConfiguration() {
+    public @NonNull Properties getConfiguration() {
         return configuration;
     }
 }

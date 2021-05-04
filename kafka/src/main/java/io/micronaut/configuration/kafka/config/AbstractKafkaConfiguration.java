@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.config;
 
 import io.micronaut.core.util.Toggleable;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Properties;
 
 /**
@@ -71,7 +71,7 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
     /**
      * @return The Kafka configuration
      */
-    public @Nonnull Properties getConfig() {
+    public @NonNull Properties getConfig() {
         if (config != null) {
             return config;
         }
