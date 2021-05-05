@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.producer.KafkaProducer;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 
 /**
  * A registry of managed {@link KafkaProducer} instances key by id and type.
@@ -41,5 +41,5 @@ public interface KafkaProducerRegistry extends ProducerRegistry {
      * @return The producer
      */
     @Override
-    @Nonnull <K, V> KafkaProducer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType);
+    @NonNull <K, V> KafkaProducer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType);
 }

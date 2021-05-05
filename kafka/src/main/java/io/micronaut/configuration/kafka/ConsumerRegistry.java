@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import java.util.Set;
 
 /**
@@ -39,8 +39,8 @@ public interface ConsumerRegistry {
      * @return The consumer
      * @throws IllegalArgumentException If no consumer exists for the given ID
      */
-    @Nonnull
-    <K, V> Consumer<K, V> getConsumer(@Nonnull String id);
+    @NonNull
+    <K, V> Consumer<K, V> getConsumer(@NonNull String id);
 
     /**
      * Returns a managed Consumer's subscriptions.
@@ -49,8 +49,8 @@ public interface ConsumerRegistry {
      * @return The consumer subscription
      * @throws IllegalArgumentException If no consumer exists for the given ID
      */
-    @Nonnull
-    Set<String> getConsumerSubscription(@Nonnull String id);
+    @NonNull
+    Set<String> getConsumerSubscription(@NonNull String id);
 
     /**
      * Returns a managed Consumer's assignment info.
@@ -59,15 +59,15 @@ public interface ConsumerRegistry {
      * @return The consumer assignment
      * @throws IllegalArgumentException If no consumer exists for the given ID
      */
-    @Nonnull
-    Set<TopicPartition> getConsumerAssignment(@Nonnull String id);
+    @NonNull
+    Set<TopicPartition> getConsumerAssignment(@NonNull String id);
 
     /**
      * The IDs of the available consumers.
      *
      * @return The consumers
      */
-    @Nonnull Set<String> getConsumerIds();
+    @NonNull Set<String> getConsumerIds();
 
     /**
      * Is the consumer with the given ID paused.
@@ -75,7 +75,7 @@ public interface ConsumerRegistry {
      * @param id True it is paused
      * @return True if it is paused
      */
-    boolean isPaused(@Nonnull String id);
+    boolean isPaused(@NonNull String id);
 
     /**
      * Pause the consumer for the given ID. Note that this method will request that the consumer is paused, however
@@ -84,7 +84,7 @@ public interface ConsumerRegistry {
      *
      * @param id The id of the consumer
      */
-    void pause(@Nonnull String id);
+    void pause(@NonNull String id);
 
 
     /**
@@ -94,5 +94,5 @@ public interface ConsumerRegistry {
      *
      * @param id The id of the consumer
      */
-    void resume(@Nonnull String id);
+    void resume(@NonNull String id);
 }

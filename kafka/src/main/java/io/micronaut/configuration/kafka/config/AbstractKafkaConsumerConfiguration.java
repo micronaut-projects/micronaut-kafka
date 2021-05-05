@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.config;
 
 import org.apache.kafka.common.serialization.Deserializer;
 
-import javax.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 import java.util.Optional;
 import java.util.Properties;
 

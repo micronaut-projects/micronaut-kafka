@@ -81,7 +81,7 @@ import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import io.micronaut.core.annotation.NonNull;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -182,9 +182,9 @@ public class KafkaConsumerProcessor
                         });
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public <K, V> Consumer<K, V> getConsumer(@Nonnull String id) {
+    public <K, V> Consumer<K, V> getConsumer(@NonNull String id) {
         ArgumentUtils.requireNonNull("id", id);
         final Consumer consumer = consumers.get(id);
         if (consumer == null) {
@@ -193,9 +193,9 @@ public class KafkaConsumerProcessor
         return consumer;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Set<String> getConsumerSubscription(@Nonnull final String id) {
+    public Set<String> getConsumerSubscription(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
         final Set<String> subscriptions = consumerSubscriptions.get(id);
         if (subscriptions == null || subscriptions.isEmpty()) {
@@ -204,9 +204,9 @@ public class KafkaConsumerProcessor
         return subscriptions;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Set<TopicPartition> getConsumerAssignment(@Nonnull final String id) {
+    public Set<TopicPartition> getConsumerAssignment(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
         final Set<TopicPartition> assignment = consumerAssignments.get(id);
         if (assignment == null || assignment.isEmpty()) {
@@ -215,14 +215,14 @@ public class KafkaConsumerProcessor
         return assignment;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Set<String> getConsumerIds() {
         return Collections.unmodifiableSet(consumers.keySet());
     }
 
     @Override
-    public boolean isPaused(@Nonnull String id) {
+    public boolean isPaused(@NonNull String id) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
             return paused.contains(id) && pausedConsumers.containsKey(id);
         }
@@ -230,7 +230,7 @@ public class KafkaConsumerProcessor
     }
 
     @Override
-    public void pause(@Nonnull String id) {
+    public void pause(@NonNull String id) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
             paused.add(id);
         } else {
@@ -239,7 +239,7 @@ public class KafkaConsumerProcessor
     }
 
     @Override
-    public void resume(@Nonnull String id) {
+    public void resume(@NonNull String id) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
             paused.remove(id);
         } else {

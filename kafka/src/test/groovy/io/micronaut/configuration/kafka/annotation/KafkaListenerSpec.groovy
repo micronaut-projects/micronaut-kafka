@@ -13,8 +13,8 @@ import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.RxHttpClient
 import io.micronaut.messaging.MessageHeaders
-import io.micronaut.messaging.annotation.Body
-import io.micronaut.messaging.annotation.Header
+import io.micronaut.messaging.annotation.MessageBody
+import io.micronaut.messaging.annotation.MessageHeader
 import io.reactivex.Single
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.Producer
@@ -200,7 +200,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface MyClient {
         @Topic("words")
-        void sendSentence(@KafkaKey String key, String sentence, @Header String topic)
+        void sendSentence(@KafkaKey String key, String sentence, @MessageHeader String topic)
 
         @Topic("words")
         RecordMetadata sendGetRecordMetadata(@KafkaKey String key, String sentence)
@@ -209,7 +209,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         Single<Book> sendReactive(@KafkaKey String key, Book book)
 
         @Topic("books")
-        void sendBook(@KafkaKey String key, @Nullable @Body Book book)
+        void sendBook(@KafkaKey String key, @Nullable @MessageBody Book book)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
@@ -219,7 +219,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         String lastTopic
 
         @Topic("words")
-        void countWord(String sentence, @Header String topic) {
+        void countWord(String sentence, @MessageHeader String topic) {
             wordCount += sentence.split(/\s/).size()
             lastTopic = topic
         }
@@ -257,7 +257,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         String body
 
         @Topic("words")
-        void countWord(@Body String body) {
+        void countWord(@MessageBody String body) {
             this.body = body
         }
     }
@@ -270,9 +270,9 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         String topic
 
         @Topic("words")
-        void countWord(@Body String sentence,
-                       @Header Optional<String> topic,
-                       @Header Optional<String> missing) {
+        void countWord(@MessageBody String sentence,
+                       @MessageHeader Optional<String> topic,
+                       @MessageHeader Optional<String> missing) {
             missingHeader = !missing.isPresent()
             this.sentence = sentence
             this.topic = topic.get()

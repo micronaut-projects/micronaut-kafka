@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2021 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,19 @@ import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.messaging.annotation.Header;
+import io.micronaut.messaging.annotation.MessageHeader;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Headers;
 
 import javax.inject.Singleton;
 import java.util.Optional;
 
-/**
- * Binds Kafka headers to arguments.
- *
- * @param <T> The target type
- * @author Graeme Rocher
- * @since 1.0
- */
 @Singleton
-@Deprecated
-public class KafkaHeaderBinder<T> implements AnnotatedConsumerRecordBinder<Header, T> {
+public class KafkaMessageHeaderBinder<T> implements AnnotatedConsumerRecordBinder<MessageHeader, T> {
 
     @Override
-    public Class<Header> annotationType() {
-        return Header.class;
+    public Class<MessageHeader> annotationType() {
+        return MessageHeader.class;
     }
 
     @Override
@@ -46,9 +39,10 @@ public class KafkaHeaderBinder<T> implements AnnotatedConsumerRecordBinder<Heade
         Headers headers = source.headers();
         AnnotationMetadata annotationMetadata = context.getAnnotationMetadata();
 
-        String name = annotationMetadata.getValue(Header.class, "name", String.class)
-                                        .orElseGet(() -> annotationMetadata.getValue(Header.class, String.class)
-                                                                           .orElse(context.getArgument().getName()));
+        // use deprecated versions as that is what is stored in metadata
+        String name = annotationMetadata.stringValue(Header.class, "name")
+                .orElseGet(() -> annotationMetadata.stringValue(Header.class)
+                        .orElse(context.getArgument().getName()));
         Iterable<org.apache.kafka.common.header.Header> value = headers.headers(name);
 
         if (value.iterator().hasNext()) {
