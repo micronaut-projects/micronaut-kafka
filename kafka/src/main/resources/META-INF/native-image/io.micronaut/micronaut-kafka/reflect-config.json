@@ -1,0 +1,26 @@
+[
+  {
+    "name":"org.apache.kafka.clients.consumer.RangeAssignor",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.apache.kafka.clients.producer.internals.DefaultPartitioner",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.apache.kafka.common.security.authenticator.AbstractLogin$DefaultLoginCallbackHandler",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.apache.kafka.common.security.authenticator.DefaultLogin",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"org.apache.kafka.common.security.plain.PlainLoginModule",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  }
+]
