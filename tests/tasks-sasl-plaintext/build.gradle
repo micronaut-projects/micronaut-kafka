@@ -1,0 +1,27 @@
+plugins {
+    id "java"
+    id "groovy"
+    id "io.micronaut.application"
+}
+
+application {
+    mainClass = "example.Application"
+}
+
+micronaut {
+    version project.ext.micronautVersion
+    runtime "netty"
+    testRuntime "spock"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":kafka")
+    testImplementation "io.micronaut:micronaut-http-client"
+    testImplementation platform("org.testcontainers:testcontainers-bom:$testContainersVersion")
+    testImplementation "org.testcontainers:kafka"
+    testImplementation "org.testcontainers:spock"
+}
