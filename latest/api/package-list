@@ -8,6 +8,7 @@ io.micronaut.configuration.kafka.convert
 io.micronaut.configuration.kafka.embedded
 io.micronaut.configuration.kafka.exceptions
 io.micronaut.configuration.kafka.executor
+io.micronaut.configuration.kafka.graal
 io.micronaut.configuration.kafka.health
 io.micronaut.configuration.kafka.intercept
 io.micronaut.configuration.kafka.metrics
