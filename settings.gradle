@@ -1,4 +1,12 @@
+pluginManagement {
+    plugins {
+        id 'io.micronaut.application' version getProperty("micronautGradlePluginVersion")
+        id 'io.micronaut.library' version getProperty("micronautGradlePluginVersion")
+    }
+}
+
 rootProject.name = 'kafka'
 
 include 'kafka'
 include 'kafka-streams'
+include 'tests:tasks-sasl-plaintext'
