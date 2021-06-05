@@ -102,7 +102,7 @@ Flowable<Book> sendBooks(
 
 The implementation will return a rx:Flowable[] that when subscribed to will subscribe to the passed rx:Flowable[] and for each emitted item will send a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
-==== Flowable Value and Return Type
+==== Flux Value and Return Type
 
 [source,java]
 ----
