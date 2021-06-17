@@ -44,6 +44,7 @@ public class BraveKafkaProducerTracingInstrumentation implements BeanCreatedEven
 
     @Override
     public Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
-        return kafkaTracing.producer(event.getBean());
+        final Producer<?, ?> producer = event.getBean();
+        return kafkaTracing.producer(producer);
     }
 }

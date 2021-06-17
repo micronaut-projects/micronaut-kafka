@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.tracing;
 
 import io.micronaut.configuration.kafka.tracing.brave.BraveKafkaProducerTracingInstrumentation;
+import io.micronaut.context.BeanProvider;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
@@ -23,7 +24,6 @@ import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
@@ -38,19 +38,23 @@ import javax.inject.Singleton;
 @Requires(classes = TracingKafkaProducer.class)
 public class KafkaProducerTracingInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
 
-    private final Provider<Tracer> tracerProvider;
+    private final BeanProvider<Tracer> tracerProvider;
 
     /**
      * Default constructor.
      * @param tracerProvider The tracer provider
      */
-    protected KafkaProducerTracingInstrumentation(Provider<Tracer> tracerProvider) {
+    protected KafkaProducerTracingInstrumentation(BeanProvider<Tracer> tracerProvider) {
         this.tracerProvider = tracerProvider;
     }
 
     @Override
     public Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
         final Producer<?, ?> kafkaProducer = event.getBean();
-        return new TracingKafkaProducer<>(kafkaProducer, tracerProvider.get());
+        if (kafkaProducer instanceof TracingKafkaProducer) {
+            return kafkaProducer;
+        } else {
+            return new TracingKafkaProducer<>(kafkaProducer, tracerProvider.get());
+        }
     }
 }

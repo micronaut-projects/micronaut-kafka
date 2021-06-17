@@ -79,7 +79,7 @@ public class KafkaProducerFactory implements ProducerRegistry {
      * @return The consumer
      */
     @Bean
-    public <K, V> KafkaProducer<K, V> getProducer(
+    public <K, V> Producer<K, V> getProducer(
             @Nullable InjectionPoint<KafkaProducer<K, V>> injectionPoint,
             @Nullable @Parameter AbstractKafkaProducerConfiguration<K, V> producerConfiguration) {
         if (injectionPoint == null) {

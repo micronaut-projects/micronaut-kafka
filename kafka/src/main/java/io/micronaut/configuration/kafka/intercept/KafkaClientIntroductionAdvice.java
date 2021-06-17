@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.intercept;
 
 import io.micronaut.aop.InterceptedMethod;
+import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
@@ -58,7 +59,6 @@ import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.Nullable;
 import javax.annotation.PreDestroy;
-import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ import java.util.concurrent.TimeUnit;
  * @see io.micronaut.configuration.kafka.annotation.KafkaClient
  * @since 1.0
  */
-@Singleton
+@InterceptorBean(KafkaClient.class)
 public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaClientIntroductionAdvice.class);
 
@@ -111,9 +111,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     public final Object intercept(MethodInvocationContext<Object, Object> context) {
 
         if (context.hasAnnotation(KafkaClient.class)) {
-            AnnotationValue<KafkaClient> client = context.findAnnotation(KafkaClient.class).orElseThrow(() -> new IllegalStateException("No @KafkaClient annotation present on method: " + context));
+            if (!context.hasAnnotation(KafkaClient.class)) {
+                throw new IllegalStateException("No @KafkaClient annotation present on method: " + context);
+            }
 
-            boolean isBatchSend = client.isTrue("batch");
+            boolean isBatchSend = context.isTrue(KafkaClient.class, "batch");
 
             String topic = context.stringValue(Topic.class)
                     .orElse(null);
@@ -224,7 +226,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
-            Long timestamp = client.isTrue("timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
+            Long timestamp = context.isTrue(KafkaClient.class, "timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
 
@@ -579,7 +581,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     @SuppressWarnings("unchecked")
     private Producer getProducer(Argument bodyArgument, @Nullable Argument keyArgument, AnnotationMetadata metadata) {
         Class keyType = keyArgument != null ? keyArgument.getType() : byte[].class;
-        String clientId = metadata.getValue(KafkaClient.class, String.class).orElse(null);
+        String clientId = metadata.stringValue(KafkaClient.class).orElse(null);
         ProducerKey key = new ProducerKey(keyType, bodyArgument.getType(), clientId);
         return producerMap.computeIfAbsent(key, producerKey -> {
             String producerId = producerKey.id;
@@ -611,7 +613,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             String.valueOf(maxBlock.toMillis())
                     ));
 
-            Integer ack = metadata.getValue(KafkaClient.class, "acks", Integer.class).orElse(KafkaClient.Acknowledge.DEFAULT);
+            Integer ack = metadata.intValue(KafkaClient.class, "acks").orElse(KafkaClient.Acknowledge.DEFAULT);
 
             if (ack != KafkaClient.Acknowledge.DEFAULT) {
                 String acksValue = ack == -1 ? "all" : String.valueOf(ack);
