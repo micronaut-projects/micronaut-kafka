@@ -26,6 +26,10 @@ import org.apache.kafka.common.header.Headers;
 import javax.inject.Singleton;
 import java.util.Optional;
 
+/**
+ * Binds message headers.
+ * @param <T> The generic type
+ */
 @Singleton
 public class KafkaMessageHeaderBinder<T> implements AnnotatedConsumerRecordBinder<MessageHeader, T> {
 
