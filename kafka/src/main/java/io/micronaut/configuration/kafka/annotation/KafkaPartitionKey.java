@@ -22,8 +22,9 @@ import java.lang.annotation.*;
 /**
  * Parameter level annotation for Kafka producers to indicate which parameter to compute the Kafka Partition from.
  *
- * <p>The partition is computed by first serializing the object and using the {@code murmur2} algorithm over the result,
- * yielding exactly the same values as Kafka's own {@code DefaultStrategy}.<p/>
+ * <p>The partition is computed by first serializing the object, using an appropriate serializer from
+ * {@link io.micronaut.configuration.kafka.serde.SerdeRegistry} as determined by, and then computing the partition
+ * number using the same algorithm as Kafka's own {@code DefaultStrategy} ({@code murmur2})<p/>
  *
  * <p>If the provided value is {@code null} then the configured/default partitioning strategy takes place.</p>
  *
