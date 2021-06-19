@@ -20,6 +20,8 @@ import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.KafkaPartition;
+import io.micronaut.configuration.kafka.annotation.KafkaPartitionKey;
 import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
@@ -51,6 +53,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.utils.Utils;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
@@ -73,6 +76,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Implementation of the {@link io.micronaut.configuration.kafka.annotation.KafkaClient} advice annotation.
@@ -142,6 +146,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Object key = null;
             Object value = null;
             Long timestampArgument = null;
+            Function<Producer, Integer> partitionSupplier = producer -> null;
             for (int i = 0; i < arguments.length; i++) {
                 Argument argument = arguments[i];
                 if (ProducerRecord.class.isAssignableFrom(argument.getType()) || argument.isAnnotationPresent(Body.class)) {
@@ -159,6 +164,20 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     Object o = parameterValues[i];
                     if (o instanceof Long) {
                         timestampArgument = (Long) o;
+                    }
+                } else if (argument.isAnnotationPresent(KafkaPartition.class)) {
+                    Object o = parameterValues[i];
+                    if (o != null && Integer.class.isAssignableFrom(o.getClass())) {
+                        partitionSupplier = __ -> (Integer) o;
+                    }
+                } else if (argument.isAnnotationPresent(KafkaPartitionKey.class)) {
+                    String finalTopic = topic;
+                    Object partitionKey = parameterValues[i];
+                    if (partitionKey != null) {
+                        byte[] partitionKeyBytes = Optional.ofNullable(serdeRegistry.pickSerializer(argument))
+                                .orElseGet(ByteArraySerializer::new)
+                                .serialize(finalTopic, parameterValues[i]);
+                        partitionSupplier = producer -> Utils.toPositive(Utils.murmur2(partitionKeyBytes)) % producer.partitionsFor(finalTopic).size();
                     }
                 } else if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
@@ -224,6 +243,8 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
+            Integer partition = partitionSupplier.apply(kafkaProducer);
+
             Long timestamp = client.isTrue("timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);
@@ -253,6 +274,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                     kafkaHeaders,
                                     reactiveTypeValue,
                                     key,
+                                    partition,
                                     value,
                                     timestamp,
                                     maxBlock);
@@ -291,7 +313,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             });
                         } else {
 
-                            ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
+                            ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, value, timestamp);
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
                             }
@@ -328,6 +350,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                     kafkaHeaders,
                                     reactiveTypeValue,
                                     key,
+                                    partition,
                                     value,
                                     timestamp,
                                     maxBlock);
@@ -351,13 +374,14 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 String finalTopic = topic;
                                 Argument finalBodyArgument = bodyArgument;
                                 Object finalKey = key;
+                                Integer finalPartition = partition;
                                 Argument finalReactiveTypeValue = reactiveTypeValue;
                                 returnFlowable = bodyEmitter.flatMap(o ->
-                                        buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, finalKey, o, timestamp, finalReactiveTypeValue)
+                                        buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, finalKey, finalPartition, o, timestamp, finalReactiveTypeValue)
                                 );
 
                             } else {
-                                returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, key, value, timestamp, reactiveTypeValue);
+                                returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, key, partition, value, timestamp, reactiveTypeValue);
                             }
                         }
                         return interceptedMethod.handleResult(returnFlowable);
@@ -373,6 +397,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                     kafkaHeaders,
                                     returnTypeArgument,
                                     key,
+                                    partition,
                                     value,
                                     timestamp,
                                     maxBlock
@@ -401,7 +426,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
                                     List results = new ArrayList();
                                     for (Object o : batchValue) {
-                                        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
+                                        ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, o, timestamp);
 
                                         if (LOG.isTraceEnabled()) {
                                             LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
@@ -425,7 +450,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                         }
                                     });
                                 }
-                                ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
+                                ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, value, timestamp);
 
                                 LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
@@ -484,11 +509,12 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Producer kafkaProducer,
             List<Header> kafkaHeaders,
             Object key,
+            Integer partition,
             Object value,
             Long timestamp,
             Argument reactiveValueType) {
         Flowable returnFlowable;
-        ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, value, timestamp);
+        ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, value, timestamp);
         returnFlowable = Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
                 emitter.onError(wrapException(context, exception));
@@ -515,6 +541,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             List<Header> kafkaHeaders,
             Argument<?> returnType,
             Object key,
+            Integer partition,
             Object value,
             Long timestamp,
             Duration maxBlock) {
@@ -527,7 +554,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
         Class<?> finalJavaReturnType = javaReturnType;
         Flowable<Object> sendFlowable = valueFlowable.flatMap(o -> {
-            ProducerRecord record = buildProducerRecord(topic, kafkaHeaders, key, o, timestamp);
+            ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, o, timestamp);
 
             LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
@@ -565,10 +592,10 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     }
 
     @SuppressWarnings("unchecked")
-    private ProducerRecord buildProducerRecord(String topic, List<Header> kafkaHeaders, Object key, Object value, Long timestamp) {
+    private ProducerRecord buildProducerRecord(String topic, Integer partition, List<Header> kafkaHeaders, Object key, Object value, Long timestamp) {
         return new ProducerRecord(
                 topic,
-                null,
+                partition,
                 timestamp,
                 key,
                 value,
@@ -660,7 +687,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
     /**
      * Key used to cache {@link org.apache.kafka.clients.producer.Producer} instances.
      */
-    private final class ProducerKey {
+    private static final class ProducerKey {
         final Class keyType;
         final Class valueType;
         final String id;
