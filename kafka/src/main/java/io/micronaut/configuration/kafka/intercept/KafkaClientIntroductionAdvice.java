@@ -174,9 +174,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     String finalTopic = topic;
                     Object partitionKey = parameterValues[i];
                     if (partitionKey != null) {
-                        byte[] partitionKeyBytes = Optional.ofNullable(serdeRegistry.pickSerializer(argument))
-                                .orElseGet(ByteArraySerializer::new)
-                                .serialize(finalTopic, parameterValues[i]);
+                        Serializer serializer = serdeRegistry.pickSerializer(argument);
+                        if (serializer == null) {
+                            serializer = new ByteArraySerializer();
+                        }
+                        byte[] partitionKeyBytes = serializer.serialize(finalTopic, parameterValues[i]);
                         partitionSupplier = producer -> Utils.toPositive(Utils.murmur2(partitionKeyBytes)) % producer.partitionsFor(finalTopic).size();
                     }
                 } else if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
