@@ -3,8 +3,9 @@ package io.micronaut.configuration.kafka.annotation
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
 
-import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.ConcurrentHashMap
 
+import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
@@ -24,8 +25,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithoutPartition client = context.getBean(ClientWithoutPartition)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence("key1", "sentence1")
@@ -34,14 +34,10 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 2 // "key1" happens to result in this
-            listener.partitions[1] == 2 // "key2" happens to result in this
-            listener.partitions[2] == 1 // "key3" happens to result in this
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"] == 2 // "key1" happens to result in this
+            listener.entries["sentence2"] == 2 // "key2" happens to result in this
+            listener.entries["sentence3"] == 1 // "key3" happens to result in this
         }
     }
 
@@ -49,8 +45,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithIntegerPartition client = context.getBean(ClientWithIntegerPartition)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence(1, "key1", "sentence1")
@@ -59,14 +54,10 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 1
-            listener.partitions[1] == 2
-            listener.partitions[2] == 2
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"] == 1
+            listener.entries["sentence2"] == 2
+            listener.entries["sentence3"] == 2
         }
     }
 
@@ -74,8 +65,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithIntegerPartition client = context.getBean(ClientWithIntegerPartition)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence(null, "key1", "sentence1")
@@ -84,14 +74,10 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 2 // "key1" happens to result in this
-            listener.partitions[1] == 2 // "key2" happens to result in this
-            listener.partitions[2] == 1 // "key3" happens to result in this
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"] == 2 // "key1" happens to result in this
+            listener.entries["sentence2"] == 2 // "key2" happens to result in this
+            listener.entries["sentence3"] == 1 // "key3" happens to result in this
         }
     }
 
@@ -99,8 +85,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithIntPartition client = context.getBean(ClientWithIntPartition)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence(1, "key1", "sentence1")
@@ -109,14 +94,10 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 1
-            listener.partitions[1] == 2
-            listener.partitions[2] == 2
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"]  == 1
+            listener.entries["sentence2"]  == 2
+            listener.entries["sentence3"]  == 2
         }
     }
 
@@ -124,8 +105,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithPartitionKey client = context.getBean(ClientWithPartitionKey)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence("par-key1", "key1", "sentence1")
@@ -134,14 +114,10 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 2 // "par-key1" happens to result in this
-            listener.partitions[1] == 0 // "par-key2" happens to result in this
-            listener.partitions[2] == 2 // "par-key3" happens to result in this
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"] == 2 // "par-key1" happens to result in this
+            listener.entries["sentence2"] == 0 // "par-key2" happens to result in this
+            listener.entries["sentence3"] == 2 // "par-key3" happens to result in this
         }
     }
 
@@ -149,8 +125,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         given:
         ClientWithPartitionKey client = context.getBean(ClientWithPartitionKey)
         SentenceListener listener = context.getBean(SentenceListener)
-        listener.partitions.clear()
-        listener.sentences.clear()
+        listener.entries.clear()
 
         when:
         client.sendSentence(null, "key1", "sentence1")
@@ -159,40 +134,36 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
 
         then:
         conditions.eventually {
-            listener.partitions.size() == 3
-            listener.partitions[0] == 2 // "key1" happens to result in this
-            listener.partitions[1] == 2 // "key2" happens to result in this
-            listener.partitions[2] == 1 // "key3" happens to result in this
-            listener.sentences.size() == 3
-            listener.sentences[0] == "sentence1"
-            listener.sentences[1] == "sentence2"
-            listener.sentences[2] == "sentence3"
+            listener.entries.size() == 3
+            listener.entries["sentence1"] == 2 // "key1" happens to result in this
+            listener.entries["sentence2"] == 2 // "key2" happens to result in this
+            listener.entries["sentence3"] == 1 // "key3" happens to result in this
         }
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
-    @KafkaClient
+    @KafkaClient(acks = ALL)
     static interface ClientWithoutPartition {
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void sendSentence(@KafkaKey String key, String sentence)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
-    @KafkaClient
+    @KafkaClient(acks = ALL)
     static interface ClientWithIntPartition {
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void sendSentence(@KafkaPartition int partition, @KafkaKey String key, String sentence)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
-    @KafkaClient
+    @KafkaClient(acks = ALL)
     static interface ClientWithIntegerPartition {
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void sendSentence(@KafkaPartition Integer partition, @KafkaKey String key, String sentence)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
-    @KafkaClient
+    @KafkaClient(acks = ALL)
     static interface ClientWithPartitionKey {
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void sendSentence(@KafkaPartitionKey String partitionKey, @KafkaKey String key, String sentence)
@@ -201,13 +172,11 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class SentenceListener {
-        Queue<Integer> partitions = new ConcurrentLinkedDeque<>()
-        Queue<String> sentences = new ConcurrentLinkedDeque<>()
+        ConcurrentHashMap<String, Integer> entries = new ConcurrentHashMap<>()
 
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void receive(@KafkaPartition int partition, String sentence) {
-            partitions << partition
-            sentences << sentence
+            entries.put(sentence, partition)
         }
     }
 }
