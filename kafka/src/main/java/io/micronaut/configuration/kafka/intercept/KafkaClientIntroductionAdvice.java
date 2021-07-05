@@ -248,7 +248,6 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Producer kafkaProducer = getProducer(bodyArgument, keyArgument, context);
 
             Integer partition = partitionSupplier.apply(kafkaProducer);
-
             Long timestamp = context.isTrue(KafkaClient.class, "timestamp") ? Long.valueOf(System.currentTimeMillis()) : timestampArgument;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class)
                     .orElse(null);

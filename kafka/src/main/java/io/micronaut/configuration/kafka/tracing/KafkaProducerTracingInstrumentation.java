@@ -25,7 +25,6 @@ import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 
-
 /**
  * Instruments Kafka producers with Open Tracing support.
  *
