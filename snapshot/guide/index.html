@@ -716,7 +716,7 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This serves 2 purposes. Firstly it sets the value of the <code>client.id</code> setting used to build the <code>KafkaProducer</code>. Secondly, it allows you to apply per producer configuration in <code>application.yml</code>:</p>
+<p>This serves 2 purposes. Firstly it sets the value of the <code>client.id</code> setting used to build the <code>Producer</code>. Secondly, it allows you to apply per producer configuration in <code>application.yml</code>:</p>
 </div>
 <div class="listingblock">
 <div class="title">Applying Default Configuration</div>
@@ -872,7 +872,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.concurrent.Future;
 
 @Singleton
@@ -896,11 +896,11 @@ public class BookSender {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>KafkaProducer</code> is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.</td>
+<td>The <code>Producer</code> is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>KafkaProducer</code> is used to send records</td>
+<td>The <code>Producer</code> is used to send records</td>
 </tr>
 </table>
 </div>
@@ -915,16 +915,21 @@ public class BookSender {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Test
 public void testBookSender() {
-    Map&lt;String, Object&gt; config = Collections.singletonMap( <i class="conum" data-value="1"></i><b>(1)</b>
-            AbstractKafkaConfiguration.EMBEDDED, true
-    );
+    try (KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))) {
+        container.start();
+        Map&lt;String, Object&gt; config = Collections.singletonMap( <i class="conum" data-value="1"></i><b>(1)</b>
+           AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS,
+           container.getBootstrapServers()
+        );
 
-    try (ApplicationContext ctx = ApplicationContext.run(config)) {
-        BookSender bookSender = ctx.getBean(BookSender.class); <i class="conum" data-value="2"></i><b>(2)</b>
-        Book book = new Book();
-        book.setTitle("The Stand");
-        bookSender.send("Stephen King", book);
+        try (ApplicationContext ctx = ApplicationContext.run(config)) {
+            BookSender bookSender = ctx.getBean(BookSender.class); <i class="conum" data-value="2"></i><b>(2)</b>
+            Book book = new Book();
+            book.setTitle("The Stand");
+            bookSender.send("Stephen King", book);
+        }
     }
+
 }</code></pre>
 </div>
 </div>
@@ -2267,8 +2272,8 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -2453,7 +2458,7 @@ Assuming you have 2 or more Kafka Streams definitions on a single service, you w
 <p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>1</code> for the <code>default</code> stream, and the same setting to <code>10</code> for a stream named <code>my-stream</code>.</p>
 </div>
 <div class="paragraph">
-<p>You can then inject an <code><a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a></code> specfically for the above configuration using <code>javax.inject.Named</code>:</p>
+<p>You can then inject an <code><a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a></code> specfically for the above configuration using <code>jakarta.inject.Named</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2543,7 +2548,7 @@ import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 
 /**
