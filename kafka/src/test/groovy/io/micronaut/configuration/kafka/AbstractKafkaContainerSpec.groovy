@@ -7,7 +7,7 @@ import spock.lang.Shared
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer().withEnv(getEnvVariables())
     @Shared @AutoCleanup ApplicationContext context
 
     void setupSpec() {
@@ -17,4 +17,9 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
                         ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
         )
     }
+
+    protected Map<String, String> getEnvVariables() {
+        return [:]
+    }
+
 }
