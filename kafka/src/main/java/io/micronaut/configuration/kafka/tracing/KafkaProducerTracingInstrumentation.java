@@ -22,9 +22,9 @@ import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 
-import javax.inject.Singleton;
 
 /**
  * Instruments Kafka producers with Open Tracing support.

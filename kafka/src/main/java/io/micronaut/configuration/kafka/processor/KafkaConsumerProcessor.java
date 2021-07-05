@@ -15,7 +15,6 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
-import io.micronaut.configuration.kafka.Acknowledgement;
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
@@ -52,6 +51,7 @@ import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import io.micronaut.messaging.Acknowledgement;
 import io.micronaut.messaging.annotation.Body;
 import io.micronaut.messaging.annotation.SendTo;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
@@ -62,6 +62,8 @@ import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -83,8 +85,6 @@ import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.NonNull;
 import javax.annotation.PreDestroy;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -112,7 +112,7 @@ import java.util.regex.Pattern;
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
 public class KafkaConsumerProcessor
-        implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable, ConsumerRegistry {
+        implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
 
@@ -385,7 +385,7 @@ public class KafkaConsumerProcessor
             .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
             .findFirst();
         final Optional<Argument> ackArg = Arrays.stream(method.getArguments())
-            .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()) || io.micronaut.messaging.Acknowledgement.class.isAssignableFrom(arg.getType()))
+            .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
             .findFirst();
 
         try {

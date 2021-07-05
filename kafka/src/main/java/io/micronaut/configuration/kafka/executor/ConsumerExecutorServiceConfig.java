@@ -22,9 +22,8 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.executor.ExecutorConfiguration;
 import io.micronaut.scheduling.executor.ExecutorType;
 import io.micronaut.scheduling.executor.UserExecutorConfiguration;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 /**
  * Configures a {@link java.util.concurrent.ScheduledExecutorService} for running {@link io.micronaut.configuration.kafka.annotation.KafkaListener} instances.

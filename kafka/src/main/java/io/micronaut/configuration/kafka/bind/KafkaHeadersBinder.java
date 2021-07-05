@@ -19,9 +19,9 @@ import io.micronaut.configuration.kafka.KafkaHeaders;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.type.Argument;
 import io.micronaut.messaging.MessageHeaders;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import javax.inject.Singleton;
 import java.util.Optional;
 
 /**

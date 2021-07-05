@@ -7,11 +7,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class DocTests {
 
     static ApplicationContext applicationContext;
-    static KafkaContainer kafkaContainer = new KafkaContainer();
+    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"));
 
     @BeforeClass
     public static void setup() {

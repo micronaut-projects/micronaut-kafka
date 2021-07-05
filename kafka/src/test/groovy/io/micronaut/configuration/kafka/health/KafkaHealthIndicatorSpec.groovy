@@ -1,15 +1,16 @@
 package io.micronaut.configuration.kafka.health
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.management.health.indicator.HealthResult
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
@@ -60,8 +61,10 @@ class KafkaHealthIndicatorSpec extends Specification {
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
+        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
+        container.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                (EMBEDDED)            : true,
+                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.getBootstrapServers(),
                 "kafka.health.enabled": configvalue
         )
 
@@ -73,6 +76,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
+        container.stop()
 
         where:
         configvalue << [false, "false", "no", ""]

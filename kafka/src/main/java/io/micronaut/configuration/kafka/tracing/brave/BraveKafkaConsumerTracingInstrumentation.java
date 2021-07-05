@@ -19,9 +19,9 @@ import brave.kafka.clients.KafkaTracing;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 
-import javax.inject.Singleton;
 
 /**
  * Kafka consumer tracing instrumentation using Brave.

@@ -4,7 +4,7 @@ import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Optional;
 
 @Singleton

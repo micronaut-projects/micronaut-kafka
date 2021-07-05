@@ -15,6 +15,7 @@ subprojects { Project subproject ->
         return
     }
 
+
     group "io.micronaut.kafka"
 
     apply plugin: "io.micronaut.build.internal.common"

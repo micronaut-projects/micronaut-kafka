@@ -29,5 +29,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 @Bindable
+@Inherited
 public @interface KafkaTimestamp {
 }

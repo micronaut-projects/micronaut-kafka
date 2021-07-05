@@ -21,7 +21,7 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import org.apache.kafka.clients.admin.AdminClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * Creates the Kakfa {@link org.apache.kafka.clients.admin.AdminClient}.

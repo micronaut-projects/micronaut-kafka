@@ -17,10 +17,10 @@ package io.micronaut.configuration.kafka.serde;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.core.reflect.ClassUtils;
+import jakarta.inject.Singleton;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
-import javax.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

@@ -21,7 +21,7 @@ import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger
 

@@ -23,6 +23,7 @@ import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
 import io.reactivex.Flowable;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.Config;
 import org.apache.kafka.clients.admin.ConfigEntry;
@@ -32,7 +33,6 @@ import org.apache.kafka.clients.admin.DescribeConfigsResult;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.config.ConfigResource;
 
-import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

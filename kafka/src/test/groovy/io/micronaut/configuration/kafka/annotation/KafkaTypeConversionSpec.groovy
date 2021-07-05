@@ -7,7 +7,7 @@ import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.errors.SerializationException
 import spock.lang.Stepwise
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import java.util.concurrent.ConcurrentHashMap
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST

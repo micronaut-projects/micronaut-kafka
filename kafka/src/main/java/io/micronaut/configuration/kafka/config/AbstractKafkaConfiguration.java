@@ -39,11 +39,6 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
     public static final String PREFIX = "kafka";
 
     /**
-     * The property to use to enable embedded Kafka.
-     */
-    public static final String EMBEDDED = "kafka.embedded.enabled";
-
-    /**
      * The topics that should be created.
      */
     public static final String TOPICS = "kafka.topics";
