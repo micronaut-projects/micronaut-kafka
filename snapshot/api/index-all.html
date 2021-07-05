@@ -163,6 +163,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaMessagingBodyBinder</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaPartitionBinder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaClientScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaClientScope</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html#argumentType--">argumentType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeadersBinder</a></dt>
@@ -204,6 +206,8 @@
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaMessageHeaderBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaMessageHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaMessageHeaderBinder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaMessagingBodyBinder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaPartitionBinder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave"><span class="typeNameLink">BraveKafkaConsumerTracingInstrumentation</span></a> - Class in <a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a></dt>
 <dd>
@@ -915,6 +919,20 @@
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html#KafkaMetricMeterTypeBuilder--">KafkaMetricMeterTypeBuilder()</a></span> - Constructor for class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html" title="class in io.micronaut.configuration.kafka.metrics.builder">KafkaMetricMeterTypeBuilder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/KafkaPartition.html" title="annotation in io.micronaut.configuration.kafka.annotation"><span class="typeNameLink">KafkaPartition</span></a> - Annotation Type in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
+<dd>
+<div class="block">Parameter level annotation to indicate which parameter is bound to the Kafka Partition.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="class in io.micronaut.configuration.kafka.bind"><span class="typeNameLink">KafkaPartitionBinder</span></a>&lt;<a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="type parameter in KafkaPartitionBinder">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
+<dd>
+<div class="block">Binder for binding the parameters that is designated the <a href="io/micronaut/configuration/kafka/annotation/KafkaPartition.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaPartition</code></a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html#KafkaPartitionBinder--">KafkaPartitionBinder()</a></span> - Constructor for class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaPartitionBinder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/KafkaPartitionKey.html" title="annotation in io.micronaut.configuration.kafka.annotation"><span class="typeNameLink">KafkaPartitionKey</span></a> - Annotation Type in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
+<dd>
+<div class="block">Parameter level annotation for Kafka producers to indicate which parameter to compute the Kafka Partition from.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config"><span class="typeNameLink">KafkaProducerConfiguration</span></a>&lt;<a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html" title="type parameter in KafkaProducerConfiguration">K</a>,<a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html" title="type parameter in KafkaProducerConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
 <div class="block">Configuration for Apache Kafka Producer.</div>
