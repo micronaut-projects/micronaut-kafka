@@ -18,9 +18,9 @@ package io.micronaut.configuration.kafka.bind;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.messaging.annotation.Body;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import javax.inject.Singleton;
 import java.util.Optional;
 
 /**

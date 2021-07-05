@@ -4,6 +4,8 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
 import io.micronaut.context.ApplicationContext;
 import org.junit.Test;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
 import java.util.Map;
@@ -13,16 +15,21 @@ public class BookSenderTest {
     // tag::test[]
     @Test
     public void testBookSender() {
-        Map<String, Object> config = Collections.singletonMap( // <1>
-                AbstractKafkaConfiguration.EMBEDDED, true
-        );
+        try (KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))) {
+            container.start();
+            Map<String, Object> config = Collections.singletonMap( // <1>
+               AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS,
+               container.getBootstrapServers()
+            );
 
-        try (ApplicationContext ctx = ApplicationContext.run(config)) {
-            BookSender bookSender = ctx.getBean(BookSender.class); // <2>
-            Book book = new Book();
-            book.setTitle("The Stand");
-            bookSender.send("Stephen King", book);
+            try (ApplicationContext ctx = ApplicationContext.run(config)) {
+                BookSender bookSender = ctx.getBean(BookSender.class); // <2>
+                Book book = new Book();
+                book.setTitle("The Stand");
+                bookSender.send("Stephen King", book);
+            }
         }
+
     }
     // end::test[]
 }

@@ -23,7 +23,7 @@ import io.micronaut.messaging.Acknowledgement;
  * @author James Kleeh
  * @since 1.1.0
  */
-public interface KafkaAcknowledgement extends Acknowledgement, io.micronaut.configuration.kafka.Acknowledgement {
+public interface KafkaAcknowledgement extends Acknowledgement {
 
     /**
      * Kafka does not support rejection of messages explicitly.

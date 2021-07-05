@@ -18,8 +18,8 @@ package io.micronaut.configuration.kafka.config;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.annotation.Requires;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.Properties;
 
 /**

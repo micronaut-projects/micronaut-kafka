@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.context.annotation.AliasFor;
+import io.micronaut.context.annotation.Executable;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.messaging.annotation.MessageMapping;
 
@@ -32,6 +33,9 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 @Bindable
 @Repeatable(Topics.class)
+@Executable
+@MessageMapping
+@Inherited
 public @interface Topic {
 
     /**

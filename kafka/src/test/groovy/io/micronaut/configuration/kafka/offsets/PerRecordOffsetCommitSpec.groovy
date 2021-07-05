@@ -6,7 +6,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC_PER_RECORD

@@ -22,6 +22,7 @@ import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.TypeHint;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
@@ -81,7 +82,7 @@ public class KafkaConsumerFactory {
      * @return The consumer
      */
     @Prototype
-    public <K, V> KafkaConsumer<K, V> createConsumer(
+    public <K, V> Consumer<K, V> createConsumer(
             @Parameter AbstractKafkaConsumerConfiguration<K, V> consumerConfiguration) {
 
         Optional<Deserializer<K>> keyDeserializer = consumerConfiguration.getKeyDeserializer();

@@ -18,13 +18,13 @@ package io.micronaut.configuration.kafka.serde;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
+import io.micronaut.core.annotation.Creator;
 import io.micronaut.core.serialize.exceptions.SerializationException;
 import io.micronaut.jackson.serialize.JacksonObjectSerializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
-import javax.inject.Inject;
 import java.util.Map;
 
 /**
@@ -47,7 +47,7 @@ public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
      * @param objectSerializer The {@link JacksonObjectSerializer}
      * @param type The target type
      */
-    @Inject
+    @Creator
     public JsonSerde(JacksonObjectSerializer objectSerializer, @Parameter Class<T> type) {
         this.objectSerializer = objectSerializer;
         this.type = type;

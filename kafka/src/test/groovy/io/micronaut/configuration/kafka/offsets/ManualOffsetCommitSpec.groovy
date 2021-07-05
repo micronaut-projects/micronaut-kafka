@@ -9,7 +9,7 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED

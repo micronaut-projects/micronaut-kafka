@@ -4,7 +4,7 @@ package io.micronaut.test
 import io.micronaut.context.ApplicationContext
 import spock.lang.Specification
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 /**
  * Test that micronaut-kafka can be disabled by setting 'kafka.enabled': 'false'.

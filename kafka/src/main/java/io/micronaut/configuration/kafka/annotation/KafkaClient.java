@@ -16,14 +16,11 @@
 package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.aop.Introduction;
-import io.micronaut.configuration.kafka.intercept.KafkaClientIntroductionAdvice;
 import io.micronaut.context.annotation.AliasFor;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.context.annotation.Type;
 import io.micronaut.retry.annotation.Recoverable;
+import jakarta.inject.Singleton;
 
-import javax.inject.Scope;
-import javax.inject.Singleton;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
@@ -35,13 +32,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Graeme Rocher
  * @since 1.0
- * @see KafkaClientIntroductionAdvice
+ * @see io.micronaut.configuration.kafka.intercept.KafkaClientIntroductionAdvice
  */
 @Documented
 @Retention(RUNTIME)
-@Scope
 @Introduction
-@Type(KafkaClientIntroductionAdvice.class)
 @Recoverable
 @Singleton
 public @interface KafkaClient {
@@ -92,7 +87,7 @@ public @interface KafkaClient {
     /**
      * @return The {@code ack} setting for the client, which impacts message delivery durability.
      *
-     * @see org.apache.kafka.clients.producer.ProducerConfig#ACKS_DOC
+     * @see org.apache.kafka.clients.producer.ProducerConfig#ACKS_CONFIG
      * @see Acknowledge
      */
     int acks() default Acknowledge.DEFAULT;
@@ -100,7 +95,7 @@ public @interface KafkaClient {
     /**
      * Constants for the {@code ack} setting for the client, which impacts message delivery durability.
      *
-     * @see org.apache.kafka.clients.producer.ProducerConfig#ACKS_DOC
+     * @see org.apache.kafka.clients.producer.ProducerConfig#ACKS_CONFIG
      */
     @SuppressWarnings("WeakerAccess")
     class Acknowledge {

@@ -27,7 +27,7 @@ package io.micronaut.configuration.kafka.annotation;
  */
 public enum OffsetStrategy {
     /**
-     * Automatically commit offsets with the {@link org.apache.kafka.clients.consumer.Consumer#poll(long)} loop.
+     * Automatically commit offsets with the {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)} loop.
      */
     AUTO,
     /**

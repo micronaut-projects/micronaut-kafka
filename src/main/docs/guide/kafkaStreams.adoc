@@ -107,7 +107,7 @@ kafka:
 
 The above configuration sets the `num.stream.threads` setting of the Kafka `StreamsConfig` to `1` for the `default` stream, and the same setting to `10` for a stream named `my-stream`.
 
-You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specfically for the above configuration using `javax.inject.Named`:
+You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specfically for the above configuration using `jakarta.inject.Named`:
 
 [source,java]
 ----

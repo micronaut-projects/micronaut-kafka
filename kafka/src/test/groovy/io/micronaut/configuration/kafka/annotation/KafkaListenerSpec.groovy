@@ -25,7 +25,7 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
 
-import javax.annotation.Nullable
+import io.micronaut.core.annotation.Nullable
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS

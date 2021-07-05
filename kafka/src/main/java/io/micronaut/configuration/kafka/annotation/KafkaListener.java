@@ -88,7 +88,7 @@ public @interface KafkaListener {
      * for a consumer you can alter this setting. Note that this means that multiple partitions will
      * be allocated to a single application.
      *
-     * <p>NOTE: When using this setting if your bean is {@link javax.inject.Singleton} then local state will be s
+     * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be s
      * shared between invocations from different consumer threads</p>
      *
      * @return The number of threads
@@ -96,7 +96,7 @@ public @interface KafkaListener {
     int threads() default 1;
 
     /**
-     * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(long)}.
+     * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)}.
      *
      * @return The timeout. Defaults to 100ms
      */

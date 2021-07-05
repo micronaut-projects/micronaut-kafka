@@ -23,7 +23,7 @@ To configure different properties for each client, you should set a `@KafkaClien
 @KafkaClient("product-client")
 ----
 
-This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `KafkaProducer`. Secondly, it allows you to apply per producer configuration in `application.yml`:
+This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `Producer`. Secondly, it allows you to apply per producer configuration in `application.yml`:
 
 .Applying Default Configuration
 [source,yaml]
