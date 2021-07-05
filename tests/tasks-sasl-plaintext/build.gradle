@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     implementation project(":kafka")
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.0'
     testImplementation "io.micronaut:micronaut-http-client"
     testImplementation platform("org.testcontainers:testcontainers-bom:$testContainersVersion")
     testImplementation "org.testcontainers:kafka"
