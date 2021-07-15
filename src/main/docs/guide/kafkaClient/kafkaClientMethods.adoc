@@ -136,6 +136,14 @@ The following table summarizes the annotations and their purpose, with an exampl
 | Allows specifying the parameter that is the Kafka key
 |`@KafkaKey String key`
 
+|ann:configuration.kafka.annotation.KafkaPartition[]
+| Allows specifying the parameter that is the partition number
+|`@KafkaPartition Integer partition`
+
+|ann:configuration.kafka.annotation.KafkaPartitionKey[]
+| Allows specifying the parameter that is used to compute a partition number independently from the Message Key.
+|`@KafkaPartition String partitionKey`
+
 |===
 
 For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation to bind a parameter value to a header in the `ProducerRecord`.
