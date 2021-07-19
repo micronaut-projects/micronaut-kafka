@@ -5,7 +5,7 @@ import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.CollectionUtils
-import io.micronaut.messaging.annotation.Body
+import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
@@ -99,7 +99,7 @@ class ConsumerRegistrySpec extends Specification {
     static interface BicycleClient {
 
         @Topic("bicycles")
-        void send(@KafkaKey String make, @Body String model)
+        void send(@KafkaKey String make, @MessageBody String model)
     }
 
     @KafkaListener(clientId = "bicycle-client", offsetReset = OffsetReset.EARLIEST)
@@ -108,7 +108,7 @@ class ConsumerRegistrySpec extends Specification {
         Set<String> bicycles = new ConcurrentSkipListSet<>()
 
         @Topic("bicycles")
-        void receive(@Body String model) {
+        void receive(@MessageBody String model) {
             println "RECEIVED BICYCLE $model"
             bicycles.add(model)
         }

@@ -17,12 +17,12 @@ package io.micronaut.configuration.kafka.health;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
+import io.micronaut.configuration.kafka.reactor.KafkaReactorUtil;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
-import io.reactivex.Flowable;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.Config;
@@ -32,6 +32,8 @@ import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.DescribeConfigsResult;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.config.ConfigResource;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -79,26 +81,26 @@ public class KafkaHealthIndicator implements HealthIndicator {
     }
 
     @Override
-    public Flowable<HealthResult> getResult() {
+    public Flux<HealthResult> getResult() {
         DescribeClusterResult result = adminClient.describeCluster(
                 new DescribeClusterOptions().timeoutMs(
                         (int) defaultConfiguration.getHealthTimeout().toMillis()
                 )
         );
 
-        Flowable<String> clusterId = Flowable.fromFuture(result.clusterId());
-        Flowable<Collection<Node>> nodes = Flowable.fromFuture(result.nodes());
-        Flowable<Node> controller = Flowable.fromFuture(result.controller());
+        Mono<String> clusterId = KafkaReactorUtil.fromKafkaFuture(result::clusterId);
+        Mono<Collection<Node>> nodes = KafkaReactorUtil.fromKafkaFuture(result::nodes);
+        Mono<Node> controller = KafkaReactorUtil.fromKafkaFuture(result::controller);
 
-        return controller.switchMap(node -> {
+        return controller.flux().switchMap(node -> {
             String brokerId = node.idString();
             ConfigResource configResource = new ConfigResource(ConfigResource.Type.BROKER, brokerId);
             DescribeConfigsResult configResult = adminClient.describeConfigs(Collections.singletonList(configResource));
-            Flowable<Map<ConfigResource, Config>> configs = Flowable.fromFuture(configResult.all());
-            return configs.switchMap(resources -> {
+            Mono<Map<ConfigResource, Config>> configs = KafkaReactorUtil.fromKafkaFuture(configResult::all);
+            return configs.flux().switchMap(resources -> {
                 Config config = resources.get(configResource);
                 int replicationFactor = getClusterReplicationFactor(config);
-                return nodes.switchMap(nodeList -> clusterId.map(clusterIdString -> {
+                return nodes.flux().switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
                     HealthResult.Builder builder;
                     if (nodeCount >= replicationFactor) {
@@ -114,9 +116,9 @@ public class KafkaHealthIndicator implements HealthIndicator {
                             )).build();
                 }));
             });
-        }).onErrorReturn(throwable ->
-                HealthResult.builder(ID, HealthStatus.DOWN)
-                        .exception(throwable).build()
+        }).onErrorResume(throwable ->
+                Mono.just(HealthResult.builder(ID, HealthStatus.DOWN)
+                        .exception(throwable).build())
         );
     }
 

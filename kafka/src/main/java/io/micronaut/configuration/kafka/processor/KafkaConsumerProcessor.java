@@ -52,16 +52,11 @@ import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.Acknowledgement;
-import io.micronaut.messaging.annotation.Body;
+import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.annotation.SendTo;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
 import io.micronaut.runtime.ApplicationConfiguration;
 import io.micronaut.scheduling.TaskExecutors;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Scheduler;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.CommitFailedException;
@@ -84,6 +79,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.NonNull;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+
 import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Arrays;
@@ -100,6 +100,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -163,7 +164,7 @@ public class KafkaConsumerProcessor
         this.binderRegistry = binderRegistry;
         this.batchBinderRegistry = batchBinderRegistry;
         this.serdeRegistry = serdeRegistry;
-        this.executorScheduler = Schedulers.from(executorService);
+        this.executorScheduler = Schedulers.fromExecutor(executorService);
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
@@ -381,10 +382,10 @@ public class KafkaConsumerProcessor
         final boolean isBatch = method.isTrue(KafkaListener.class, "batch");
         final Duration pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class)
             .orElseGet(() -> Duration.ofMillis(100));
-        final Optional<Argument> consumerArg = Arrays.stream(method.getArguments())
+        final Optional<Argument<?>> consumerArg = Arrays.stream(method.getArguments())
             .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
             .findFirst();
-        final Optional<Argument> ackArg = Arrays.stream(method.getArguments())
+        final Optional<Argument<?>> ackArg = Arrays.stream(method.getArguments())
             .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
             .findFirst();
 
@@ -461,7 +462,7 @@ public class KafkaConsumerProcessor
     private boolean processConsumerRecords(final ExecutableMethod<?, ?> method, final OffsetStrategy offsetStrategy, final Object consumerBean,
                                            final Consumer<?, ?> kafkaConsumer, final AnnotationValue<KafkaListener> consumerAnnotation,
                                            final Map<Argument<?>, Object> boundArguments, final boolean trackPartitions,
-                                           final Optional<Argument> ackArg, final ConsumerRecords<?, ?> consumerRecords) {
+                                           final Optional<Argument<?>> ackArg, final ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = trackPartitions ? new HashMap<>() : null;
         for (final ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
@@ -480,16 +481,16 @@ public class KafkaConsumerProcessor
                 final BoundExecutable boundExecutable = executableBinder.bind(method, binderRegistry, consumerRecord);
                 final Object result = boundExecutable.invoke(consumerBean);
                 if (result != null) {
-                    final Flowable<?> resultFlowable;
+                    final Flux<?> resultFlowable;
                     final boolean isBlocking;
                     if (Publishers.isConvertibleToPublisher(result)) {
-                        resultFlowable = Publishers.convertPublisher(result, Flowable.class);
+                        resultFlowable = Flux.from(Publishers.convertPublisher(result, Publisher.class));
                         isBlocking = method.hasAnnotation(Blocking.class);
                     } else {
-                        resultFlowable = Flowable.just(result);
+                        resultFlowable = Flux.just(result);
                         isBlocking = true;
                     }
-                    handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, resultFlowable, isBlocking);
+                    handleResultFlux(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, resultFlowable, isBlocking);
                 }
             } catch (Throwable e) {
                 handleException(kafkaConsumer, consumerBean, consumerRecord, e);
@@ -522,29 +523,30 @@ public class KafkaConsumerProcessor
             }
 
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
-            final Flowable<?> resultFlowable;
+            final Flux<?> resultFlux;
             if (result instanceof Iterable) {
-                resultFlowable = Flowable.fromIterable((Iterable) result);
+                resultFlux = Flux.fromIterable((Iterable) result);
             } else if (isPublisher) {
-                resultFlowable = Publishers.convertPublisher(result, Flowable.class);
+                resultFlux = Flux.from(Publishers.convertPublisher(result, Publisher.class));
             } else {
-                resultFlowable = Flowable.just(result);
+                resultFlux = Flux.just(result);
             }
 
             final Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
             final boolean isBlocking = !isPublisher || method.hasAnnotation(Blocking.class);
             if (isBlocking) {
-                resultFlowable.blockingSubscribe(o -> {
+                List<?> objects = resultFlux.collectList().block();
+                for (Object object : objects) {
                     if (iterator.hasNext()) {
                         final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-                        handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flowable.just(o), isBlocking);
+                        handleResultFlux(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flux.just(object), isBlocking);
                     }
-                });
+                }
             } else {
-                resultFlowable.forEach(o -> {
+                resultFlux.subscribe(o -> {
                     if (iterator.hasNext()) {
                         final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-                        handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flowable.just(o), isBlocking);
+                        handleResultFlux(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flux.just(o), isBlocking);
                     }
                 });
             }
@@ -608,15 +610,15 @@ public class KafkaConsumerProcessor
     }
 
     @SuppressWarnings({"SubscriberImplementation", "unchecked"})
-    private void handleResultFlowable(
+    private void handleResultFlux(
             AnnotationValue<KafkaListener> kafkaListener,
             Object consumerBean,
             ExecutableMethod<?, ?> method,
             Consumer kafkaConsumer,
             ConsumerRecord<?, ?> consumerRecord,
-            Flowable<?> resultFlowable,
+            Flux<?> resultFlowable,
             boolean isBlocking) {
-        Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
+        Flux<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
                     String[] destinationTopics = method.stringValues(SendTo.class);
                     if (ArrayUtils.isNotEmpty(destinationTopics)) {
@@ -631,7 +633,7 @@ public class KafkaConsumerProcessor
                                     Argument.of(value.getClass())
                             );
 
-                            return Flowable.create(emitter -> {
+                            return Flux.create(emitter -> {
                                 for (String destinationTopic : destinationTopics) {
                                     ProducerRecord record = new ProducerRecord(
                                             destinationTopic,
@@ -643,20 +645,20 @@ public class KafkaConsumerProcessor
 
                                     kafkaProducer.send(record, (metadata, exception) -> {
                                         if (exception != null) {
-                                            emitter.onError(exception);
+                                            emitter.error(exception);
                                         } else {
-                                            emitter.onNext(metadata);
+                                            emitter.next(metadata);
                                         }
                                     });
 
                                 }
-                                emitter.onComplete();
-                            }, BackpressureStrategy.ERROR);
+                                emitter.complete();
+                            }, FluxSink.OverflowStrategy.ERROR);
                         }
-                        return Flowable.empty();
+                        return Flux.empty();
                     }
-                    return Flowable.empty();
-                }).onErrorResumeNext((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {
+                    return Flux.empty();
+                }).onErrorResume((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {
                     handleException(consumerBean, new KafkaListenerException(
                             "Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
                             throwable,
@@ -687,7 +689,7 @@ public class KafkaConsumerProcessor
                                     consumerRecord.headers()
                             );
 
-                            return Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
+                            return Flux.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
                                 if (exception != null) {
                                     handleException(consumerBean, new KafkaListenerException(
                                             "Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
@@ -697,23 +699,21 @@ public class KafkaConsumerProcessor
                                             consumerRecord
                                     ));
 
-                                    emitter.onComplete();
+                                    emitter.complete();
                                 } else {
-                                    emitter.onNext(metadata);
-                                    emitter.onComplete();
+                                    emitter.next(metadata);
+                                    emitter.complete();
                                 }
-                            }), BackpressureStrategy.ERROR);
+                            }), FluxSink.OverflowStrategy.ERROR);
                         }
                     }
-                    return Flowable.empty();
+                    return Flux.empty();
                 });
 
         if (isBlocking) {
-            recordMetadataProducer.blockingSubscribe(recordMetadata -> {
-                LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
-            });
+            RecordMetadata recordMetadata = recordMetadataProducer.blockFirst();
+            LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
         } else {
-            //noinspection ResultOfMethodCallIgnored
             recordMetadataProducer.subscribe(recordMetadata -> {
                 LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
             });
@@ -722,7 +722,7 @@ public class KafkaConsumerProcessor
 
     private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(Body.class))
+                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
                 .findFirst()
                 .orElseGet(() -> Arrays.stream(method.getArguments())
                         .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
@@ -736,7 +736,7 @@ public class KafkaConsumerProcessor
         final Argument<?> bodyArgument = findBodyArgument(method);
 
         if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getKeyDeserializer().isPresent()) {
-            final Optional<Argument> keyArgument = Arrays.stream(method.getArguments())
+            final Optional<Argument<?>> keyArgument = Arrays.stream(method.getArguments())
                     .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
                     .findFirst();
             if (keyArgument.isPresent()) {

@@ -6,7 +6,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 import io.micronaut.messaging.annotation.SendTo;
-import io.reactivex.Single;
+import reactor.core.publisher.Mono;
 // end::imports[]
 
 @KafkaListener
@@ -26,8 +26,8 @@ public class ProductListener {
     // tag::reactive[]
     @Topic("awesome-products") // <1>
     @SendTo("product-quantities") // <2>
-    public Single<Integer> receiveProduct(@KafkaKey String brand,
-                                          Single<Product> productSingle) {
+    public Mono<Integer> receiveProduct(@KafkaKey String brand,
+                                        Mono<Product> productSingle) {
 
         return productSingle.map(product -> {
             System.out.println("Got Product - " + product.getName() + " by " + brand);

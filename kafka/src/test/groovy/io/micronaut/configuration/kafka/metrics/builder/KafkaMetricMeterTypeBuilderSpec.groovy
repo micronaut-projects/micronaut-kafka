@@ -5,7 +5,7 @@ import org.apache.kafka.common.MetricName
 import org.apache.kafka.common.metrics.KafkaMetric
 import org.apache.kafka.common.metrics.MetricConfig
 import org.apache.kafka.common.metrics.stats.Avg
-import org.apache.kafka.common.utils.MockTime
+import org.apache.kafka.common.utils.Time
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -48,7 +48,7 @@ class KafkaMetricMeterTypeBuilderSpec extends Specification {
                 new MetricName("name", "group", "description", [:]),
                 new Avg(),
                 new MetricConfig(),
-                new MockTime())
+                Mock(Time))
     }
 
     def createTagFunction() {

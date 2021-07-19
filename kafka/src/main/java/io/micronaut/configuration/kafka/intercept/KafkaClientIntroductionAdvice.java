@@ -39,11 +39,9 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import io.micronaut.messaging.annotation.Body;
+import io.micronaut.messaging.annotation.MessageBody;
+import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.messaging.exceptions.MessagingClientException;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -55,12 +53,17 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Utils;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
+
 import javax.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -127,9 +130,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Argument keyArgument = null;
             Argument bodyArgument = null;
             List<Header> kafkaHeaders = new ArrayList<>();
-            List<AnnotationValue<io.micronaut.messaging.annotation.Header>> headers = context.getAnnotationValuesByType(io.micronaut.messaging.annotation.Header.class);
+            List<AnnotationValue<MessageHeader>> headers = context.getAnnotationValuesByType(MessageHeader.class);
 
-            for (AnnotationValue<io.micronaut.messaging.annotation.Header> header : headers) {
+            for (AnnotationValue<MessageHeader> header : headers) {
                 String name = header.stringValue("name").orElse(null);
                 String value = header.stringValue().orElse(null);
 
@@ -151,7 +154,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Function<Producer, Integer> partitionSupplier = producer -> null;
             for (int i = 0; i < arguments.length; i++) {
                 Argument argument = arguments[i];
-                if (ProducerRecord.class.isAssignableFrom(argument.getType()) || argument.isAnnotationPresent(Body.class)) {
+                if (ProducerRecord.class.isAssignableFrom(argument.getType()) || argument.isAnnotationPresent(MessageBody.class)) {
                     bodyArgument = argument;
                     value = parameterValues[i];
                 } else if (argument.isAnnotationPresent(KafkaKey.class)) {
@@ -183,13 +186,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         byte[] partitionKeyBytes = serializer.serialize(finalTopic, parameterValues[i]);
                         partitionSupplier = producer -> Utils.toPositive(Utils.murmur2(partitionKeyBytes)) % producer.partitionsFor(finalTopic).size();
                     }
-                } else if (argument.isAnnotationPresent(io.micronaut.messaging.annotation.Header.class)) {
+                } else if (argument.isAnnotationPresent(MessageHeader.class)) {
                     final AnnotationMetadata annotationMetadata = argument.getAnnotationMetadata();
                     String argumentName = argument.getName();
                     String name = annotationMetadata
-                            .stringValue(io.micronaut.messaging.annotation.Header.class, "name")
+                            .stringValue(MessageHeader.class, "name")
                             .orElseGet(() ->
-                                    annotationMetadata.stringValue(io.micronaut.messaging.annotation.Header.class).orElse(argumentName));
+                                    annotationMetadata.stringValue(MessageHeader.class).orElse(argumentName));
                     Object v = parameterValues[i];
 
                     if (v != null) {
@@ -270,7 +273,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         CompletableFuture completableFuture = new CompletableFuture();
 
                         if (isReactiveValue) {
-                            Flowable sendFlowable = buildSendFlowable(
+                            Flux sendFlowable = buildSendFlux(
                                     context,
                                     topic,
                                     kafkaProducer,
@@ -283,7 +286,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                     maxBlock);
 
                             if (!Publishers.isSingle(value.getClass())) {
-                                sendFlowable = sendFlowable.toList().toFlowable();
+                                sendFlowable = sendFlowable.collectList().flux();
                             }
 
                             //noinspection SubscriberImplementation
@@ -344,9 +347,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
                         return interceptedMethod.handleResult(completableFuture);
                     case PUBLISHER:
-                        Flowable returnFlowable;
+                        Flux returnFlowable;
                         if (isReactiveValue) {
-                            returnFlowable = buildSendFlowable(
+                            returnFlowable = buildSendFlux(
                                     context,
                                     topic,
                                     kafkaProducer,
@@ -367,11 +370,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                     batchValue = value;
                                 }
 
-                                Flowable<Object> bodyEmitter;
+                                Flux<Object> bodyEmitter;
                                 if (batchValue instanceof Iterable) {
-                                    bodyEmitter = Flowable.fromIterable((Iterable) batchValue);
+                                    bodyEmitter = Flux.fromIterable((Iterable) batchValue);
                                 } else {
-                                    bodyEmitter = Flowable.just(batchValue);
+                                    bodyEmitter = Flux.just(batchValue);
                                 }
 
                                 String finalTopic = topic;
@@ -380,11 +383,11 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                                 Integer finalPartition = partition;
                                 Argument finalReactiveTypeValue = reactiveTypeValue;
                                 returnFlowable = bodyEmitter.flatMap(o ->
-                                        buildSendFlowable(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, finalKey, finalPartition, o, timestamp, finalReactiveTypeValue)
+                                        buildSendFlux(context, finalTopic, finalBodyArgument, kafkaProducer, kafkaHeaders, finalKey, finalPartition, o, timestamp, finalReactiveTypeValue)
                                 );
 
                             } else {
-                                returnFlowable = buildSendFlowable(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, key, partition, value, timestamp, reactiveTypeValue);
+                                returnFlowable = buildSendFlux(context, topic, bodyArgument, kafkaProducer, kafkaHeaders, key, partition, value, timestamp, reactiveTypeValue);
                             }
                         }
                         return interceptedMethod.handleResult(returnFlowable);
@@ -393,7 +396,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                         Class<Object> javaReturnType = returnType.getType();
                         Argument<Object> returnTypeArgument = returnType.asArgument();
                         if (isReactiveValue) {
-                            Flowable<Object> sendFlowable = buildSendFlowable(
+                            Flux<Object> sendFlowable = buildSendFlux(
                                     context,
                                     topic,
                                     kafkaProducer,
@@ -407,13 +410,13 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                             );
 
                             if (Iterable.class.isAssignableFrom(javaReturnType)) {
-                                return conversionService.convert(sendFlowable.toList().blockingGet(), returnTypeArgument).orElse(null);
+                                return conversionService.convert(sendFlowable.collectList().block(), returnTypeArgument).orElse(null);
                             } else if (void.class.isAssignableFrom(javaReturnType)) {
                                 // a maybe will return null, and not throw an exception
-                                Maybe<Object> maybe = sendFlowable.firstElement();
-                                return maybe.blockingGet();
+                                Mono<Object> maybe = sendFlowable.next();
+                                return maybe.block();
                             } else {
-                                return conversionService.convert(sendFlowable.blockingFirst(), returnTypeArgument).orElse(null);
+                                return conversionService.convert(sendFlowable.blockFirst(), returnTypeArgument).orElse(null);
                             }
                         } else {
                             try {
@@ -505,7 +508,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
         }
     }
 
-    private Flowable buildSendFlowable(
+    private Flux buildSendFlux(
             MethodInvocationContext<Object, Object> context,
             String topic,
             Argument bodyArgument,
@@ -516,28 +519,28 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Object value,
             Long timestamp,
             Argument reactiveValueType) {
-        Flowable returnFlowable;
+        Flux returnFlowable;
         ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, value, timestamp);
-        returnFlowable = Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
+        returnFlowable = Flux.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
-                emitter.onError(wrapException(context, exception));
+                emitter.error(wrapException(context, exception));
             } else {
                 if (!reactiveValueType.equalsType(Argument.VOID_OBJECT)) {
                     Optional<?> converted = conversionService.convert(metadata, reactiveValueType);
 
                     if (converted.isPresent()) {
-                        emitter.onNext(converted.get());
+                        emitter.next(converted.get());
                     } else if (reactiveValueType.getType() == bodyArgument.getType()) {
-                        emitter.onNext(value);
+                        emitter.next(value);
                     }
                 }
-                emitter.onComplete();
+                emitter.complete();
             }
-        }), BackpressureStrategy.ERROR);
+        }), FluxSink.OverflowStrategy.ERROR);
         return returnFlowable;
     }
 
-    private Flowable<Object> buildSendFlowable(
+    private Flux<Object> buildSendFlux(
             MethodInvocationContext<Object, Object> context,
             String topic,
             Producer kafkaProducer,
@@ -548,7 +551,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             Object value,
             Long timestamp,
             Duration maxBlock) {
-        Flowable<?> valueFlowable = Publishers.convertPublisher(value, Flowable.class);
+        Flux<?> valueFlowable = Flux.from(Publishers.convertPublisher(value, Publisher.class));
         Class<?> javaReturnType = returnType.getType();
 
         if (Iterable.class.isAssignableFrom(javaReturnType)) {
@@ -556,34 +559,34 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
         }
 
         Class<?> finalJavaReturnType = javaReturnType;
-        Flowable<Object> sendFlowable = valueFlowable.flatMap(o -> {
+        Flux<Object> sendFlowable = valueFlowable.flatMap(o -> {
             ProducerRecord record = buildProducerRecord(topic, partition, kafkaHeaders, key, o, timestamp);
 
             LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
 
             //noinspection unchecked
-            return Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
+            return Flux.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
                 if (exception != null) {
-                    emitter.onError(wrapException(context, exception));
+                    emitter.error(wrapException(context, exception));
                 } else {
                     if (RecordMetadata.class.isAssignableFrom(finalJavaReturnType)) {
-                        emitter.onNext(metadata);
+                        emitter.next(metadata);
                     } else if (finalJavaReturnType.isInstance(o)) {
-                        emitter.onNext(o);
+                        emitter.next(o);
                     } else {
                         Optional converted = conversionService.convert(metadata, finalJavaReturnType);
                         if (converted.isPresent()) {
-                            emitter.onNext(converted.get());
+                            emitter.next(converted.get());
                         }
                     }
 
-                    emitter.onComplete();
+                    emitter.complete();
                 }
-            }), BackpressureStrategy.BUFFER);
+            }), FluxSink.OverflowStrategy.BUFFER);
         });
 
         if (maxBlock != null) {
-            sendFlowable = sendFlowable.timeout(maxBlock.toMillis(), TimeUnit.MILLISECONDS);
+            sendFlowable = sendFlowable.timeout(maxBlock);
         }
         return sendFlowable;
     }

@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.bind;
 
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.convert.ArgumentConversionContext;
-import io.micronaut.messaging.annotation.Body;
+import io.micronaut.messaging.annotation.MessageBody;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -31,11 +31,11 @@ import java.util.Optional;
  * @since 1.0
  */
 @Singleton
-public class KafkaMessagingBodyBinder<T> implements AnnotatedConsumerRecordBinder<Body, T> {
+public class KafkaMessagingBodyBinder<T> implements AnnotatedConsumerRecordBinder<MessageBody, T> {
 
     @Override
-    public Class<Body> annotationType() {
-        return Body.class;
+    public Class<MessageBody> annotationType() {
+        return MessageBody.class;
     }
 
     @Override

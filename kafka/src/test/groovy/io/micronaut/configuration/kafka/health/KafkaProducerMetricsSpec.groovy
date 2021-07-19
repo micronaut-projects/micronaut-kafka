@@ -9,10 +9,11 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.annotation.MessageHeader
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -20,7 +21,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 
 class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -31,7 +32,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
     def setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
+                HttpClient,
                 embeddedServer.getURL(),
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
@@ -49,7 +50,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
         then:
         conditions.eventually {
-            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            def response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
             !result.names.contains("kafka.consumer.record-error-rate")
             result.names.contains("kafka.producer.count")

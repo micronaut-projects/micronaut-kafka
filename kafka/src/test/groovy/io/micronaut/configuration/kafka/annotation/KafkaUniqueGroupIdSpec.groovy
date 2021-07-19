@@ -3,7 +3,7 @@ package io.micronaut.configuration.kafka.annotation
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
@@ -16,7 +16,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
 
     static final String TOPIC = "groupid-topic"
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -25,7 +25,7 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
 
     def setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
+                HttpClient,
                 embeddedServer.getURL(),
                 new DefaultHttpClientConfiguration(followRedirects: false))
     }

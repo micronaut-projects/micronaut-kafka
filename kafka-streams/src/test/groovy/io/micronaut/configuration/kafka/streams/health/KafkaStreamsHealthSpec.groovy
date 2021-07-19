@@ -2,12 +2,12 @@ package io.micronaut.configuration.kafka.streams.health
 
 import io.micronaut.configuration.kafka.streams.AbstractTestContainersSpec
 import io.micronaut.configuration.kafka.streams.KafkaStreamsFactory
+import io.micronaut.management.health.aggregator.DefaultHealthAggregator
 import io.micronaut.management.health.aggregator.HealthAggregator
-import io.micronaut.management.health.aggregator.RxJavaHealthAggregator
 import io.micronaut.management.health.indicator.HealthResult
 import io.micronaut.runtime.ApplicationConfiguration
-import io.reactivex.Single
 import org.apache.kafka.streams.KafkaStreams
+import reactor.core.publisher.Mono
 import spock.lang.Retry
 
 import static io.micronaut.health.HealthStatus.UP
@@ -18,7 +18,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
     def "should create object"() {
         given:
         def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-        HealthAggregator healthAggregator = new RxJavaHealthAggregator(Mock(ApplicationConfiguration))
+        HealthAggregator healthAggregator = new DefaultHealthAggregator(Mock(ApplicationConfiguration))
 
         when:
         KafkaStreamsHealth kafkaStreamsHealth = new KafkaStreamsHealth(kafkaStreamsFactory, healthAggregator)
@@ -33,11 +33,11 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
+            Mono.from(streamsHealth.getResult()).block().status == UP
         }
 
         and:
-        def healthLevelOne = Single.fromPublisher(streamsHealth.getResult()).blockingGet()
+        def healthLevelOne = Mono.from(streamsHealth.getResult()).block()
         assert ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }
         HealthResult healthLevelTwo = ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
         healthLevelTwo.name == "micronaut-kafka-streams"
@@ -60,7 +60,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         expect:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
+            Mono.from(streamsHealth.getResult()).block().status == UP
         }
 
         and:
@@ -75,7 +75,7 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
         then:
         conditions.eventually {
-            Single.fromPublisher(streamsHealth.getResult()).blockingGet().status == UP
+            Mono.from(streamsHealth.getResult()).block().status == UP
         }
 
         when:

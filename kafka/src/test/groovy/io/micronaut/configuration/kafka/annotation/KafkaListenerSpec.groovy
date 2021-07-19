@@ -11,7 +11,7 @@ import io.micronaut.configuration.kafka.serde.JsonSerde
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
@@ -21,6 +21,7 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
+import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
@@ -33,7 +34,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 @Stepwise
 class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -44,7 +45,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     def setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
+                HttpClient,
                 embeddedServer.getURL(),
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
@@ -73,7 +74,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
         and:
         conditions.eventually {
-            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            def response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")
