@@ -44,8 +44,12 @@ The following table summarizes the annotations and their purpose, with an exampl
 |`@Header("X-My-Header") String myHeader`
 
 |ann:configuration.kafka.annotation.KafkaKey[]
-| Allows specifying the parameter that is the key
-|`@KafkaKey String key`
+| Allows binding a parameter to the message key
+|`@KafkaKey String messageKey`
+
+|ann:configuration.kafka.annotation.KafkaPartition[]
+| Allows binding a parameter to the partition the message was received from
+|`@KafkaPartition Integer partition`
 
 |===
 
