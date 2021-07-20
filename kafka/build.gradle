@@ -7,25 +7,22 @@ dependencies {
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.13.3'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-clients:${kafkaVersion}"
+    implementation 'io.projectreactor:reactor-core:3.4.8'
     implementation 'jakarta.inject:jakarta.inject-api:2.0.0'
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.micrometer:micronaut-micrometer-core"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    compileOnly "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    testImplementation("io.micronaut.rxjava2:micronaut-rxjava2:1.0.0-M1")
     testImplementation "io.micronaut.test:micronaut-test-spock"
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.7"
+    testImplementation "io.projectreactor:reactor-core:3.4.8"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "io.micronaut:micronaut-http-client"
     testImplementation "io.micronaut:micronaut-inject-groovy"
     testImplementation "io.micronaut:micronaut-management"
-    testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
 
     testImplementation "org.testcontainers:kafka:$testContainersVersion"
     testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.15'

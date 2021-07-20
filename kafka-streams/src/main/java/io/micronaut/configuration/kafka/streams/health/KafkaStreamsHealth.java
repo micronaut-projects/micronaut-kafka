@@ -24,7 +24,6 @@ import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.aggregator.HealthAggregator;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
-import io.reactivex.Flowable;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.processor.TaskMetadata;
@@ -32,6 +31,8 @@ import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
 import jakarta.inject.Singleton;
+import reactor.core.publisher.Flux;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -81,16 +82,16 @@ public class KafkaStreamsHealth implements HealthIndicator {
 
     @Override
     public Publisher<HealthResult> getResult() {
-        Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
+        Flux<HealthResult> kafkaStreamHealth = Flux.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
                 .map(kafkaStreams -> Pair.of(getApplicationId(kafkaStreams), kafkaStreams))
-                .flatMap(pair -> Flowable.just(pair)
+                .flatMap(pair -> Flux.just(pair)
                         .filter(p -> p.getValue().state().isRunningOrRebalancing())
                         .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
                                 .details(buildDetails(p.getValue())))
                         .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
                                 .details(buildDownDetails(pair.getValue().state())))
-                        .onErrorReturn(e -> HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(e.getMessage(), pair.getValue().state()))))
+                        .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
+                                .details(buildDownDetails(e.getMessage(), pair.getValue().state())))))
                 .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
     }

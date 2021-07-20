@@ -20,6 +20,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguratio
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.annotation.Any;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
@@ -79,6 +80,7 @@ public class KafkaProducerFactory implements ProducerRegistry {
      * @return The consumer
      */
     @Bean
+    @Any
     public <K, V> Producer<K, V> getProducer(
             @Nullable InjectionPoint<KafkaProducer<K, V>> injectionPoint,
             @Nullable @Parameter AbstractKafkaProducerConfiguration<K, V> producerConfiguration) {

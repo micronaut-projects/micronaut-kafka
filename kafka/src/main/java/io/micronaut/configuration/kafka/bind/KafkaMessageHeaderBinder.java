@@ -18,7 +18,6 @@ package io.micronaut.configuration.kafka.bind;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
-import io.micronaut.messaging.annotation.Header;
 import io.micronaut.messaging.annotation.MessageHeader;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -44,8 +43,8 @@ public class KafkaMessageHeaderBinder<T> implements AnnotatedConsumerRecordBinde
         AnnotationMetadata annotationMetadata = context.getAnnotationMetadata();
 
         // use deprecated versions as that is what is stored in metadata
-        String name = annotationMetadata.stringValue(Header.class, "name")
-                .orElseGet(() -> annotationMetadata.stringValue(Header.class)
+        String name = annotationMetadata.stringValue(MessageHeader.class, "name")
+                .orElseGet(() -> annotationMetadata.stringValue(MessageHeader.class)
                         .orElse(context.getArgument().getName()));
         Iterable<org.apache.kafka.common.header.Header> value = headers.headers(name);
 

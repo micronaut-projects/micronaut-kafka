@@ -28,7 +28,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         when:
         KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
-        HealthResult result = healthIndicator.result.firstElement().blockingGet()
+        HealthResult result = healthIndicator.result.next().block()
 
         then:
         // report down because the not enough nodes to meet replication factor
@@ -48,7 +48,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         when:
         KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
-        HealthResult result = healthIndicator.result.firstElement().blockingGet()
+        HealthResult result = healthIndicator.result.next().block()
 
         then:
         // report down because the not enough nodes to meet replication factor
