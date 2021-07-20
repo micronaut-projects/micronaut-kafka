@@ -111,14 +111,14 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Body,T&gt;, <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">ConsumerRecordBinder</a>&lt;T&gt;, io.micronaut.core.bind.ArgumentBinder&lt;T,org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&gt;</dd>
+<dd><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.MessageBody,T&gt;, <a href="../../../../../io/micronaut/configuration/kafka/bind/ConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">ConsumerRecordBinder</a>&lt;T&gt;, io.micronaut.core.bind.ArgumentBinder&lt;T,org.apache.kafka.clients.consumer.ConsumerRecord&lt;?,?&gt;&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>@Singleton
 public class <span class="typeNameLabel">KafkaMessagingBodyBinder&lt;T&gt;</span>
 extends java.lang.Object
-implements <a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Body,T&gt;</pre>
+implements <a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.MessageBody,T&gt;</pre>
 <div class="block">The default binder that binds the body of a ConsumerRecord.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
@@ -177,7 +177,7 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>java.lang.Class&lt;io.micronaut.messaging.annotation.Body&gt;</code></td>
+<td class="colFirst"><code>java.lang.Class&lt;io.micronaut.messaging.annotation.MessageBody&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html#annotationType--">annotationType</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -230,10 +230,10 @@ implements <a href="../../../../../io/micronaut/configuration/kafka/bind/Annotat
 <ul class="blockList">
 <li class="blockList">
 <h4>annotationType</h4>
-<pre>public&nbsp;java.lang.Class&lt;io.micronaut.messaging.annotation.Body&gt;&nbsp;annotationType()</pre>
+<pre>public&nbsp;java.lang.Class&lt;io.micronaut.messaging.annotation.MessageBody&gt;&nbsp;annotationType()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html#annotationType--">annotationType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.Body,<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html" title="type parameter in KafkaMessagingBodyBinder">T</a>&gt;</code></dd>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html#annotationType--">annotationType</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a>&lt;io.micronaut.messaging.annotation.MessageBody,<a href="../../../../../io/micronaut/configuration/kafka/bind/KafkaMessagingBodyBinder.html" title="type parameter in KafkaMessagingBodyBinder">T</a>&gt;</code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The annotation type</dd>
 </dl>

@@ -1297,8 +1297,8 @@ public void receive(ConsumerRecord&lt;String, Product&gt; record) { <i class="co
 <div class="title">Using Reactive Types</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("reactive-products")
-public Single&lt;Product&gt; receive(@KafkaKey String brand,  <i class="conum" data-value="1"></i><b>(1)</b>
-                               Single&lt;Product&gt; productFlowable) { <i class="conum" data-value="2"></i><b>(2)</b>
+public Mono&lt;Product&gt; receive(@KafkaKey String brand,  <i class="conum" data-value="1"></i><b>(1)</b>
+                             Mono&lt;Product&gt; productFlowable) { <i class="conum" data-value="2"></i><b>(2)</b>
     return productFlowable.doOnSuccess((product) -&gt;
             System.out.println("Got Product - " + product.getName() + " by " + brand) <i class="conum" data-value="3"></i><b>(3)</b>
     );
@@ -1927,7 +1927,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 import io.micronaut.messaging.annotation.SendTo;
-import io.reactivex.Single;
+import reactor.core.publisher.Mono;
 
 @Topic("awesome-products") <i class="conum" data-value="1"></i><b>(1)</b>
 @SendTo("product-quantities") <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1963,8 +1963,8 @@ public int receive(@KafkaKey String brand,
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("awesome-products") <i class="conum" data-value="1"></i><b>(1)</b>
 @SendTo("product-quantities") <i class="conum" data-value="2"></i><b>(2)</b>
-public Single&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
-                                      Single&lt;Product&gt; productSingle) {
+public Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
+                                    Mono&lt;Product&gt; productSingle) {
 
     return productSingle.map(product -&gt; {
         System.out.println("Got Product - " + product.getName() + " by " + brand);

@@ -234,10 +234,11 @@ implements <a href="../../../../io/micronaut/configuration/kafka/ProducerRegistr
 <li class="blockList">
 <h4>getProducer</h4>
 <pre>@Bean
+ @Any
 public&nbsp;&lt;K,V&gt;&nbsp;org.apache.kafka.clients.producer.Producer&lt;K,V&gt;&nbsp;getProducer(@Nullable
-                                                                               io.micronaut.inject.InjectionPoint&lt;org.apache.kafka.clients.producer.KafkaProducer&lt;K,V&gt;&gt;&nbsp;injectionPoint,
-                                                                               @Nullable @Parameter
-                                                                               <a href="../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,V&gt;&nbsp;producerConfiguration)</pre>
+                                                                                     io.micronaut.inject.InjectionPoint&lt;org.apache.kafka.clients.producer.KafkaProducer&lt;K,V&gt;&gt;&nbsp;injectionPoint,
+                                                                                     @Nullable @Parameter
+                                                                                     <a href="../../../../io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,V&gt;&nbsp;producerConfiguration)</pre>
 <div class="block">Creates a new <code>KafkaProducer</code> for the given configuration.</div>
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>

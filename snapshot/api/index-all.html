@@ -140,10 +140,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html#annotationType--">annotationType()</a></span> - Method in interface io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/AnnotatedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">AnnotatedConsumerRecordBinder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeaderBinder</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaKeyBinder.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaKeyBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaKeyBinder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaMessageHeaderBinder.html#annotationType--">annotationType()</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaMessageHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaMessageHeaderBinder</a></dt>
@@ -178,10 +174,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaDefaultBinder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeaderBinder</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;MessageHeaders&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeadersBinder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaKeyBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaKeyBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaKeyBinder</a></dt>
@@ -396,6 +388,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html#findArgumentBinder-io.micronaut.core.type.Argument-org.apache.kafka.clients.consumer.ConsumerRecord-">findArgumentBinder(Argument&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind">ConsumerRecordBinderRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html#fromKafkaFuture-java.util.function.Supplier-">fromKafkaFuture(Supplier&lt;KafkaFuture&lt;T&gt;&gt;)</a></span> - Static method in class io.micronaut.configuration.kafka.reactor.<a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor">KafkaReactorUtil</a></dt>
+<dd>
+<div class="block">Factory for creating Mono instances from Kafka Future instances.</div>
+</dd>
 </dl>
 <a name="I:G">
 <!--   -->
@@ -601,6 +597,8 @@
 <dd>
 <div class="block">Contains the implementation of <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/reactor/package-summary.html">io.micronaut.configuration.kafka.reactor</a> - package io.micronaut.configuration.kafka.reactor</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/package-summary.html">io.micronaut.configuration.kafka.serde</a> - package io.micronaut.configuration.kafka.serde</dt>
 <dd>
 <div class="block">Classes for looking up Kafka <code>Serde</code> instances.</div>
@@ -734,14 +732,6 @@
 <dd>
 <div class="block">Constructs the default Kafka configuration.</div>
 </dd>
-<dt><a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind"><span class="typeNameLink">KafkaHeaderBinder</span></a>&lt;<a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="type parameter in KafkaHeaderBinder">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-</dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html#KafkaHeaderBinder--">KafkaHeaderBinder()</a></span> - Constructor for class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeaderBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeaderBinder</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html" title="class in io.micronaut.configuration.kafka.convert"><span class="typeNameLink">KafkaHeaderConverter</span></a> - Class in <a href="io/micronaut/configuration/kafka/convert/package-summary.html">io.micronaut.configuration.kafka.convert</a></dt>
 <dd>
 <div class="block">Converts header values.</div>
@@ -866,6 +856,12 @@
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor"><span class="typeNameLink">KafkaReactorUtil</span></a> - Class in <a href="io/micronaut/configuration/kafka/reactor/package-summary.html">io.micronaut.configuration.kafka.reactor</a></dt>
+<dd>
+<div class="block">Utility methods for working with Kafka and Reactor.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html#KafkaReactorUtil--">KafkaReactorUtil()</a></span> - Constructor for class io.micronaut.configuration.kafka.reactor.<a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor">KafkaReactorUtil</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams"><span class="typeNameLink">KafkaStreamsConfiguration</span></a>&lt;<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="type parameter in KafkaStreamsConfiguration">K</a>,<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="type parameter in KafkaStreamsConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/streams/package-summary.html">io.micronaut.configuration.kafka.streams</a></dt>
 <dd>
 <div class="block">The default configuration passed to <code>KafkaStreams</code>.</div>

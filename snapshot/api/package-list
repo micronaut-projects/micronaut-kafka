@@ -13,6 +13,7 @@ io.micronaut.configuration.kafka.intercept
 io.micronaut.configuration.kafka.metrics
 io.micronaut.configuration.kafka.metrics.builder
 io.micronaut.configuration.kafka.processor
+io.micronaut.configuration.kafka.reactor
 io.micronaut.configuration.kafka.serde
 io.micronaut.configuration.kafka.streams
 io.micronaut.configuration.kafka.streams.event
