@@ -35,13 +35,13 @@ The following table summarizes the annotations and their purpose, with an exampl
 |===
 |Annotation |Description |Example
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html[@Body]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html[@MessageBody]
 | Allows explicitly indicating the body of the message
-|`@Body Product product`
+|`@MessageBody Product product`
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader]
 | Allows binding a parameter to a message header
-|`@Header("X-My-Header") String myHeader`
+|`@MessageHeader("X-My-Header") String myHeader`
 
 |ann:configuration.kafka.annotation.KafkaKey[]
 | Allows binding a parameter to the message key
@@ -53,7 +53,7 @@ The following table summarizes the annotations and their purpose, with an exampl
 
 |===
 
-For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation to bind a parameter value from a header contained within a `ConsumerRecord`.
+For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader] annotation to bind a parameter value from a header contained within a `ConsumerRecord`.
 
 
 == Topics, Partitions and Offsets
