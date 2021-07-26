@@ -126,7 +126,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
-    void "test @Body annotation"() {
+    void "test @MessageBody annotation"() {
         when:
         MyClient myClient = context.getBean(MyClient)
         RecordMetadata metadata = myClient.sendGetRecordMetadata("key", "hello world")
@@ -182,7 +182,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         producer?.close()
     }
 
-    void "test @Header annotation with optional"() {
+    void "test @MessageHeader annotation with optional"() {
         when:
         MyClient myClient = context.getBean(MyClient)
         myClient.sendSentence("key", "Hello, world!", "words")
