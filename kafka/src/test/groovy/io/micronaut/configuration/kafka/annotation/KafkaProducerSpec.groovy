@@ -40,7 +40,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
 
     def setupSpec() {
         kafkaContainer.start()
-        context =  ApplicationContext.build(
+        context =  ApplicationContext.builder(
                 getConfiguration() +
                 ['micronaut.application.name'                : 'test-app',
                  "kafka.schema.registry.url"                 : "http://localhot:8081",
