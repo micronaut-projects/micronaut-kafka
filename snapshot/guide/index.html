@@ -496,7 +496,7 @@ public class ProductListener {
 <p>The Kafka key can be specified by providing a parameter annotated with <code>@KafkaKey</code>. If no such parameter is specified the record is sent with a <code>null</code> key.</p>
 </div>
 <div class="paragraph">
-<p>The value to send is resolved by selecting the argument annotated with <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
+<p>The value to send is resolved by selecting the argument annotated with <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html">@MessageBody</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -511,7 +511,7 @@ void sendProduct(@KafkaKey String brand, String name);</code></pre>
 <div class="sect2">
 <h3 id="_including_message_headers">Including Message Headers</h3>
 <div class="paragraph">
-<p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation and include a value when calling the method:</p>
+<p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a> annotation and include a value when calling the method:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -519,7 +519,7 @@ void sendProduct(@KafkaKey String brand, String name);</code></pre>
 void sendProduct(
     @KafkaKey String brand,
     String name,
-    @Header("My-Header") String myHeader);</code></pre>
+    @MessageHeader("My-Header") String myHeader);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -656,14 +656,14 @@ part of the <code>kafka-clients</code> library:</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html">@MessageBody</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message to sent</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@MessageBody Product product</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows specifying a parameter that should be sent as a header</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@MessageHeader("X-My-Header") String myHeader</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/KafkaKey.html">@KafkaKey</a></p></td>
@@ -683,7 +683,7 @@ part of the <code>kafka-clients</code> library:</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value to a header in the <code>ProducerRecord</code>.</p>
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a> annotation to bind a parameter value to a header in the <code>ProducerRecord</code>.</p>
 </div>
 </div>
 
@@ -1136,14 +1136,14 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.8.0:test'</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html">@Body</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html">@MessageBody</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows explicitly indicating the body of the message</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Body Product product</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@MessageBody Product product</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Allows binding a parameter to a message header</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@Header("X-My-Header") String myHeader</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@MessageHeader("X-My-Header") String myHeader</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/KafkaKey.html">@KafkaKey</a></p></td>
@@ -1158,7 +1158,7 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.8.0:test'</code></pre>
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html">@Header</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
+<p>For example, you can use the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a> annotation to bind a parameter value from a header contained within a <code>ConsumerRecord</code>.</p>
 </div>
 </div>
 </div>
