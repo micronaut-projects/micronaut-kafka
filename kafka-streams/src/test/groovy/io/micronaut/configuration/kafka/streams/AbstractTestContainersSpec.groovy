@@ -61,14 +61,11 @@ abstract class AbstractTestContainersSpec extends Specification {
     static def purgeLocalStreamsState(final streamsConfiguration) throws IOException {
         final String tmpDir = System.getProperty("java.io.tmpdir");
         final String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
-        log.warn("tmp {} path {}", tmpDir, path)
         if (path != null) {
             final File node = Paths.get(path).normalize().toFile();
-            log.warn("File {}", node.getAbsolutePath())
             // Only purge state when it's under java.io.tmpdir.  This is a safety net to prevent accidentally
             // deleting important local directory trees.
             if (node.getAbsolutePath().startsWith(tmpDir)) {
-                log.warn("Deleting state in {}", node.getAbsolutePath())
                 Utils.delete(new File(node.getAbsolutePath()));
             }
         }

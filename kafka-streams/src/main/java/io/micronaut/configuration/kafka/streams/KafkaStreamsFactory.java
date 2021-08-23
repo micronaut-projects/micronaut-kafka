@@ -82,9 +82,10 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Builds the default {@link KafkaStreams} bean from the configuration and the supplied {@link ConfiguredStreamBuilder}.
      *
-     * @param name     The configuration name
-     * @param builder  The builder
-     * @param kStreams The KStream definitions
+     * @param name                 The configuration name
+     * @param builder              The builder
+     * @param kafkaClientSupplier  The kafka client supplier used to create consumers and producers in the streams app
+     * @param kStreams             The KStream definitions
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
@@ -122,7 +123,7 @@ public class KafkaStreamsFactory implements Closeable {
     }
 
     /**
-     * Provide a default kafka client supplier which is overridable
+     * Provide a default kafka client supplier which is overridable.
      * @return DefaultKafkaClientSupplier
      */
     @Singleton
