@@ -29,6 +29,7 @@ public class OptimizationStream {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
         KTable<String, String> table = builder.table(
                 OPTIMIZATION_ON_INPUT,
@@ -51,6 +52,7 @@ public class OptimizationStream {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
         KTable<String, String> table = builder.table(
                 OPTIMIZATION_OFF_INPUT,

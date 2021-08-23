@@ -15,9 +15,11 @@
  */
 package io.micronaut.configuration.kafka.metrics;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.slf4j.Logger;
@@ -33,7 +35,7 @@ import java.util.Properties;
  * @since 1.0
  */
 @Internal
-abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
+public abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractKafkaMetrics.class);
 
@@ -44,11 +46,26 @@ abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
      * @param kafkaMetricsReporterClassName The class name to use for kafka metrics registration
      * @return The bean
      */
-    T addKafkaMetrics(BeanCreatedEvent<T> event, String kafkaMetricsReporterClassName) {
+    protected T addKafkaMetrics(BeanCreatedEvent<T> event, String kafkaMetricsReporterClassName) {
+        return addKafkaMetrics(event, kafkaMetricsReporterClassName, null);
+    }
+
+    /**
+     * Method to add a default metric reporter if not otherwise defined.
+     *
+     * @param event                         The event for bean created of type AbstractKafkaConfiguration
+     * @param kafkaMetricsReporterClassName The class name to use for kafka metrics registration
+     * @param meterRegistry                 The meter registry instance to send metrics to
+     * @return The bean
+     */
+    protected T addKafkaMetrics(BeanCreatedEvent<T> event, String kafkaMetricsReporterClassName, @Nullable MeterRegistry meterRegistry) {
         Properties props = event.getBean().getConfig();
         if (!props.containsKey(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG)) {
             props.put(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
             LOG.debug("Adding kafka property:value of {}:{}", ProducerConfig.METRIC_REPORTER_CLASSES_CONFIG, kafkaMetricsReporterClassName);
+        }
+        if (meterRegistry != null) {
+            props.put("meter.registry", meterRegistry);
         }
         return event.getBean();
     }
