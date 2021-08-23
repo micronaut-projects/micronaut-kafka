@@ -16,9 +16,7 @@
 package io.micronaut.configuration.kafka.streams.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.metrics.AbstractKafkaMetrics;
-import io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter;
 import io.micronaut.configuration.kafka.streams.AbstractKafkaStreamsConfiguration;
 import io.micronaut.configuration.metrics.annotation.RequiresMetrics;
 import io.micronaut.context.BeanLocator;
@@ -26,8 +24,6 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-
-import javax.annotation.PreDestroy;
 
 import java.util.Optional;
 
