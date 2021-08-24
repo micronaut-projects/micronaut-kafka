@@ -114,10 +114,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
      * @return The tags to include
      */
     protected Set<String> getIncludedTags() {
-        HashSet<String> tags = new HashSet<>();
-        tags.add("client-id");
-        tags.add("topic");
-        return tags;
+        return Collections.singleton("client-id");
     }
 
     /**
