@@ -54,6 +54,16 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
             !result.names.contains("kafka.producer.record-error-rate")
             !result.names.contains("kafka.producer.bytes-consumed-total")
             !result.names.contains("kafka.count")
+
+            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.preferred-read-replica", Map)).block()
+            Map metricBody = preferredReadReplica.body()
+            metricBody.availableTags.size() == 3
+            metricBody.availableTags*.tag == ["partition", "topic", "client-id"]
+
+            def requestRate = Mono.from(httpClient.exchange("/metrics/kafka.consumer.request-rate", Map)).block()
+            Map requestRateBody = requestRate.body()
+            requestRateBody.availableTags.size() == 2
+            requestRateBody.availableTags*.tag == ["node-id", "client-id"]
         }
     }
 
