@@ -576,6 +576,8 @@ public class KafkaConsumerProcessor
                                                 break;
                                             }
 
+                                            // if we got here no exception was encountered so make sure failed is false
+                                            failed = false;
                                             if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
                                                 try {
                                                     kafkaConsumer.commitSync(
