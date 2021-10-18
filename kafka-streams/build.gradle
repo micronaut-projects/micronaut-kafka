@@ -4,7 +4,7 @@ dependencies {
     api project(":kafka")
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-streams:${kafkaVersion}"
-    implementation 'jakarta.inject:jakarta.inject-api:2.0.0'
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
     implementation 'io.projectreactor:reactor-core:3.4.8'
     compileOnly "io.micronaut:micronaut-management"
 
