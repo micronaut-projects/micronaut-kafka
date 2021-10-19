@@ -2009,7 +2009,7 @@ public Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
 <p>If you wish to replace this default exception handling with another implementation you can use the Micronaut&#8217;s <a href="#replaces">Bean Replacement</a> feature to define a bean that replaces it: <code>@Replaces(DefaultKafkaListenerExceptionHandler.class)</code>.</p>
 </div>
 <div class="paragraph">
-<p>You can also define per bean exception handling logic by implementation the <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> interface in your <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> class.</p>
+<p>You can also define per bean exception handling logic by implementing the <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> interface in your <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> class.</p>
 </div>
 <div class="paragraph">
 <p>The <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> receives an exception of type <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html">KafkaListenerException</a> which allows access to the original <code>ConsumerRecord</code>, if available.</p>
