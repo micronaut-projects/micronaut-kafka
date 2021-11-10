@@ -1,6 +1,6 @@
 package io.micronaut.configuration.kafka.docs.producer.inject;
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
 import io.micronaut.context.ApplicationContext;
 import org.junit.Test;
@@ -18,7 +18,7 @@ public class BookSenderTest {
         try (KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))) {
             container.start();
             Map<String, Object> config = Collections.singletonMap( // <1>
-               AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS,
+               ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                container.getBootstrapServers()
             );
 
