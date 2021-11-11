@@ -19,6 +19,8 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 
 import io.micronaut.core.annotation.NonNull;
+
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -72,10 +74,18 @@ public interface ConsumerRegistry {
     /**
      * Is the consumer with the given ID paused.
      *
-     * @param id True it is paused
+     * @param id the consumers id
      * @return True if it is paused
      */
     boolean isPaused(@NonNull String id);
+
+    /**
+     * Is the consumer with the given ID paused to consume from the given topic partitions.
+     *
+     * @param id the consumers id
+     * @return True if it is paused for the topic partitions
+     */
+    boolean isPaused(@NonNull String id, Collection<TopicPartition> topicPartitions);
 
     /**
      * Pause the consumer for the given ID. Note that this method will request that the consumer is paused, however
@@ -86,6 +96,18 @@ public interface ConsumerRegistry {
      */
     void pause(@NonNull String id);
 
+    /**
+     * Pause the consumer for the given ID to consume from the given topic partitions.
+     * Note that this method will request that the consumer is paused, however
+     * does not block until the consumer is actually paused.
+     * You can use the {@link #isPaused(String, Collection<TopicPartition>)} method to
+     * establish when the consumer has actually been paused for the topic partitions.
+     *
+     * @param id The id of the consumer
+     * @param topicPartitions The topic partitions to pause consuming from
+     */
+    void pause(@NonNull String id, Collection<TopicPartition> topicPartitions);
+
 
     /**
      * Resume the consumer for the given ID. Note that this method will request that the consumer is resumed, however
@@ -95,4 +117,18 @@ public interface ConsumerRegistry {
      * @param id The id of the consumer
      */
     void resume(@NonNull String id);
+
+    /**
+     * Resume the consumer for the given ID to consume from the given topic partitions.
+     * Note that this method will request that the consumer is resumed, however
+     * does not block until the consumer is actually resumed.
+     * You can use the {@link #isPaused(String, Collection<TopicPartition>)} method to
+     * establish when the consumer has actually been resumed to consume from the given topic partitions.
+     *
+     * @param id The id of the consumer
+     * @param topicPartitions The topic partitions to pause consuming from
+     */
+    void resume(@NonNull String id, Collection<TopicPartition> topicPartitions);
+
+
 }
