@@ -231,7 +231,7 @@ public class KafkaConsumerProcessor
     }
 
     @Override
-    public boolean isPaused(@NonNull String id, Collection<TopicPartition> topicPartitions) {
+    public boolean isPaused(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
             return pauseRequests.containsKey(id) && pauseRequests.get(id).containsAll(topicPartitions)
                 && pausedTopicPartitions.containsKey(id) && pausedTopicPartitions.get(id).containsAll(topicPartitions);
@@ -245,7 +245,7 @@ public class KafkaConsumerProcessor
     }
 
     @Override
-    public void pause(@NonNull String id, Collection<TopicPartition> topicPartitions) {
+    public void pause(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
             final Set<TopicPartition> consumerPauseRequests = pauseRequests.computeIfAbsent(id, s -> new HashSet<>());
             consumerPauseRequests.addAll(topicPartitions);
@@ -264,7 +264,7 @@ public class KafkaConsumerProcessor
     }
 
     @Override
-    public void resume(@NonNull String id, Collection<TopicPartition> topicPartitions) {
+    public void resume(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id) && pauseRequests.containsKey(id)) {
             final Set<TopicPartition> consumerPauseRequests = pauseRequests.get(id);
             consumerPauseRequests.removeAll(topicPartitions);

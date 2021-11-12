@@ -84,8 +84,9 @@ public interface ConsumerRegistry {
      *
      * @param id the consumers id
      * @return True if it is paused for the topic partitions
+     * @since 4.0.1
      */
-    boolean isPaused(@NonNull String id, Collection<TopicPartition> topicPartitions);
+    boolean isPaused(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions);
 
     /**
      * Pause the consumer for the given ID. Note that this method will request that the consumer is paused, however
@@ -105,8 +106,9 @@ public interface ConsumerRegistry {
      *
      * @param id The id of the consumer
      * @param topicPartitions The topic partitions to pause consuming from
+     * @since 4.0.1
      */
-    void pause(@NonNull String id, Collection<TopicPartition> topicPartitions);
+    void pause(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions);
 
 
     /**
@@ -127,8 +129,9 @@ public interface ConsumerRegistry {
      *
      * @param id The id of the consumer
      * @param topicPartitions The topic partitions to pause consuming from
+     * @since 4.0.1
      */
-    void resume(@NonNull String id, Collection<TopicPartition> topicPartitions);
+    void resume(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions);
 
 
 }
