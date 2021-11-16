@@ -227,7 +227,7 @@ public class KafkaConsumerProcessor
 
     @Override
     public boolean isPaused(@NonNull String id) {
-       return isPaused(id, getConsumerAssignment(id));
+       return isPaused(id, consumerAssignments.getOrDefault(id, Collections.emptySet()));
     }
 
     @Override
@@ -241,7 +241,7 @@ public class KafkaConsumerProcessor
 
     @Override
     public void pause(@NonNull String id) {
-       pause(id, getConsumerAssignment(id));
+       pause(id, consumerAssignments.getOrDefault(id, Collections.emptySet()));
     }
 
     @Override

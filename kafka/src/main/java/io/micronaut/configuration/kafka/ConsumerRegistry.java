@@ -83,6 +83,7 @@ public interface ConsumerRegistry {
      * Is the consumer with the given ID paused to consume from the given topic partitions.
      *
      * @param id the consumers id
+     * @param topicPartitions The topic partitions to check if paused
      * @return True if it is paused for the topic partitions
      * @since 4.0.1
      */
@@ -132,6 +133,4 @@ public interface ConsumerRegistry {
      * @since 4.0.1
      */
     void resume(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions);
-
-
 }
