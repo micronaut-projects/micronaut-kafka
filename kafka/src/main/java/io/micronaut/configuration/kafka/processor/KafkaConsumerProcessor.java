@@ -87,8 +87,10 @@ import reactor.core.scheduler.Schedulers;
 import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,11 +99,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>A {@link ExecutableMethodProcessor} that will process all beans annotated with {@link KafkaListener}
@@ -124,8 +126,9 @@ public class KafkaConsumerProcessor
     private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> consumerSubscriptions = new ConcurrentHashMap<>();
     private final Map<String, Set<TopicPartition>> consumerAssignments = new ConcurrentHashMap<>();
-    private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
-    private final Set<String> paused = new ConcurrentSkipListSet<>();
+    private final Map<String, Set<TopicPartition>> pausedTopicPartitions = new ConcurrentHashMap<>();
+    private final Map<String, Set<TopicPartition>> pauseRequests = new ConcurrentHashMap<>();
+
     private final ConsumerRecordBinderRegistry binderRegistry;
     private final SerdeRegistry serdeRegistry;
     private final Scheduler executorScheduler;
@@ -224,16 +227,28 @@ public class KafkaConsumerProcessor
 
     @Override
     public boolean isPaused(@NonNull String id) {
+       return isPaused(id, consumerAssignments.getOrDefault(id, Collections.emptySet()));
+    }
+
+    @Override
+    public boolean isPaused(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            return paused.contains(id) && pausedConsumers.containsKey(id);
+            return pauseRequests.containsKey(id) && pauseRequests.get(id).containsAll(topicPartitions)
+                && pausedTopicPartitions.containsKey(id) && pausedTopicPartitions.get(id).containsAll(topicPartitions);
         }
         return false;
     }
 
     @Override
     public void pause(@NonNull String id) {
+       pause(id, consumerAssignments.getOrDefault(id, Collections.emptySet()));
+    }
+
+    @Override
+    public void pause(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            paused.add(id);
+            final Set<TopicPartition> consumerPauseRequests = pauseRequests.computeIfAbsent(id, s -> new HashSet<>());
+            consumerPauseRequests.addAll(topicPartitions);
         } else {
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
@@ -242,7 +257,18 @@ public class KafkaConsumerProcessor
     @Override
     public void resume(@NonNull String id) {
         if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            paused.remove(id);
+            pauseRequests.remove(id);
+        } else {
+            throw new IllegalArgumentException("No consumer found for ID: " + id);
+        }
+    }
+
+    @Override
+    public void resume(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
+        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id) && pauseRequests.containsKey(id)) {
+            final Set<TopicPartition> consumerPauseRequests = pauseRequests.get(id);
+            consumerPauseRequests.removeAll(topicPartitions);
+            pauseRequests.remove(id);
         } else {
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
@@ -395,25 +421,14 @@ public class KafkaConsumerProcessor
             final Map<Argument<?>, Object> boundArguments = new HashMap<>(2);
             consumerArg.ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
-            boolean consumerPaused = false;
-
             //noinspection InfiniteLoopStatement
             while (true) {
                 consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
                 try {
-                    if (!consumerPaused && paused.contains(finalClientId)) {
-                        consumerPaused = true;
-                        LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                        kafkaConsumer.pause(kafkaConsumer.assignment());
-                        pausedConsumers.put(finalClientId, kafkaConsumer);
-                    }
+
+                    pauseTopicPartitions(finalClientId, kafkaConsumer);
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
-                    if (consumerPaused && !paused.contains(finalClientId)) {
-                        LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                        kafkaConsumer.resume(kafkaConsumer.paused());
-                        pausedConsumers.remove(finalClientId);
-                        consumerPaused = false;
-                    }
+                    resumeTopicPartitions(finalClientId, kafkaConsumer);
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
                         continue; // No consumer records to process
@@ -456,6 +471,30 @@ public class KafkaConsumerProcessor
             } finally {
                 kafkaConsumer.close();
             }
+        }
+    }
+
+    private void resumeTopicPartitions(String finalClientId, Consumer<?, ?> kafkaConsumer) {
+        if (pausedTopicPartitions.containsKey(finalClientId)) {
+            final Set<TopicPartition> clientPauseRequests = pauseRequests.getOrDefault(finalClientId, Collections.emptySet());
+            final List<TopicPartition> toResume = kafkaConsumer.paused().stream()
+                .filter(topicPartition -> !clientPauseRequests.contains(topicPartition))
+                .collect(Collectors.toList());
+            LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, toResume);
+            kafkaConsumer.resume(toResume);
+            toResume.forEach(pausedTopicPartitions.get(finalClientId)::remove);
+            if (pausedTopicPartitions.get(finalClientId).isEmpty()) {
+                pausedTopicPartitions.remove(finalClientId);
+            }
+        }
+    }
+
+    private void pauseTopicPartitions(String finalClientId, Consumer<?, ?> kafkaConsumer) {
+        if (pauseRequests.containsKey(finalClientId)) {
+            final Set<TopicPartition> clientPauseRequests = pauseRequests.get(finalClientId);
+            kafkaConsumer.pause(clientPauseRequests);
+            LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
+            pausedTopicPartitions.put(finalClientId, pauseRequests.get(finalClientId));
         }
     }
 
