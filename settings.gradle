@@ -1,8 +1,12 @@
 pluginManagement {
-    plugins {
-        id 'io.micronaut.application' version getProperty("micronautGradlePluginVersion")
-        id 'io.micronaut.library' version getProperty("micronautGradlePluginVersion")
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
     }
+}
+
+plugins {
+    id 'io.micronaut.build.shared.settings' version '4.2.6'
 }
 
 rootProject.name = 'kafka'
