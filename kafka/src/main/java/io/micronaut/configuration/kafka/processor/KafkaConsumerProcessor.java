@@ -413,9 +413,7 @@ public class KafkaConsumerProcessor
                 .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
                 .findFirst();
 
-        Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer;
-
-        try {
+        try (Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer) {
 
             final boolean trackPartitions = ackArg.isPresent() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
             final Map<Argument<?>, Object> boundArguments = new HashMap<>(2);
@@ -426,11 +424,10 @@ public class KafkaConsumerProcessor
                 consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
                 boolean failed = true;
                 try {
-
-                    consumerState.pauseTopicPartitions(kafkaConsumer);
+                    consumerState.pauseTopicPartitions();
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                     failed = false;
-                    consumerState.resumeTopicPartitions(kafkaConsumer);
+                    consumerState.resumeTopicPartitions();
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
                         continue; // No consumer records to process
@@ -468,8 +465,6 @@ public class KafkaConsumerProcessor
             }
         } catch (WakeupException e) {
             // ignore for shutdown
-        } finally {
-            kafkaConsumer.close();
         }
     }
 
@@ -876,6 +871,8 @@ public class KafkaConsumerProcessor
         long currentRetryOffset;
         int currentRetryCount;
 
+        boolean autoPaused;
+
         private ConsumerState(String clientId, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions, AnnotationValue<KafkaListener> kafkaListener) {
             this.clientId = clientId;
             this.kafkaConsumer = consumer;
@@ -899,6 +896,8 @@ public class KafkaConsumerProcessor
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
             }
+
+            autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);
         }
 
         void pause() {
@@ -913,6 +912,7 @@ public class KafkaConsumerProcessor
         }
 
         synchronized void resume() {
+            autoPaused = false;
             _pauseRequests = null;
         }
 
@@ -929,8 +929,12 @@ public class KafkaConsumerProcessor
             return _pauseRequests.containsAll(topicPartitions) && _pausedTopicPartitions.containsAll(topicPartitions);
         }
 
-        synchronized void resumeTopicPartitions(Consumer<?, ?> kafkaConsumer) {
-            final List<TopicPartition> toResume = kafkaConsumer.paused().stream()
+        synchronized void resumeTopicPartitions() {
+            Set<TopicPartition> paused = kafkaConsumer.paused();
+            if (paused.isEmpty()) {
+                return;
+            }
+            final List<TopicPartition> toResume = paused.stream()
                     .filter(topicPartition -> _pauseRequests == null || !_pauseRequests.contains(topicPartition))
                     .collect(Collectors.toList());
             LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", clientId, toResume);
@@ -940,7 +944,10 @@ public class KafkaConsumerProcessor
             }
         }
 
-        synchronized void pauseTopicPartitions(Consumer<?, ?> kafkaConsumer) {
+        synchronized void pauseTopicPartitions() {
+            if (autoPaused) {
+                kafkaConsumer.pause(assignments);
+            }
             if (_pauseRequests == null || _pauseRequests.isEmpty()) {
                 return;
             }

@@ -155,4 +155,11 @@ public @interface KafkaListener {
      * @return The properties
      */
     Property[] properties() default {};
+
+    /**
+     * Setting to allow start the consumer in paused mode.
+     *
+     * @return the auto startup setting
+     */
+    boolean autoStartup() default true;
 }
