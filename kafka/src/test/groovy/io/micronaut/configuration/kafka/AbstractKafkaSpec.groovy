@@ -5,7 +5,11 @@ import spock.util.concurrent.PollingConditions
 
 abstract class AbstractKafkaSpec extends Specification {
 
-    protected final PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
+    protected final PollingConditions conditions = new PollingConditions(timeout: conditionsTimeout, delay: 1)
+
+    protected int getConditionsTimeout() {
+        30
+    }
 
     protected Map<String, Object> getConfiguration() {
         Map<String, Object> config = [:]
