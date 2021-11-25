@@ -102,7 +102,7 @@ public interface ConsumerRegistry {
      * Pause the consumer for the given ID to consume from the given topic partitions.
      * Note that this method will request that the consumer is paused, however
      * does not block until the consumer is actually paused.
-     * You can use the {@link #isPaused(String, Collection<TopicPartition>)} method to
+     * You can use the {@link #isPaused(String, Collection)} method to
      * establish when the consumer has actually been paused for the topic partitions.
      *
      * @param id The id of the consumer
@@ -125,7 +125,7 @@ public interface ConsumerRegistry {
      * Resume the consumer for the given ID to consume from the given topic partitions.
      * Note that this method will request that the consumer is resumed, however
      * does not block until the consumer is actually resumed.
-     * You can use the {@link #isPaused(String, Collection<TopicPartition>)} method to
+     * You can use the {@link #isPaused(String, Collection)} method to
      * establish when the consumer has actually been resumed to consume from the given topic partitions.
      *
      * @param id The id of the consumer

@@ -16,7 +16,7 @@ kafkaListener:
   kafkaOffsets: Commiting Kafka Offsets
   kafkaListenerBatch: Kafka Batch Processing
   kafkaSendTo: Forwarding Messages with @SendTo
-  kafkaExceptions: Handling Consumer Exceptions
+  kafkaErrors: Handling Consumer Exceptions
 kafkaApplications:
   title: Running Kafka Applications
   kafkaHealth: Kafka Health Checks
