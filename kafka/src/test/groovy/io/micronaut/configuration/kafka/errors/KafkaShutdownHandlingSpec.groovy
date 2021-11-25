@@ -49,8 +49,8 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
             TopicPartition topicPartition = new TopicPartition("wakeup", 0)
             Map<TopicPartition, OffsetAndMetadata> offsetAndMetadata = consumer.committed([topicPartition] as Set)
             offsetAndMetadata == null
-            offsetAndMetadata.get(topicPartition) == null
-            offsetAndMetadata.get(topicPartition).offset() == 0
+                    || offsetAndMetadata.get(topicPartition) == null
+                    || offsetAndMetadata.get(topicPartition).offset() == 0
 
         cleanup:
             consumer.close()
@@ -79,8 +79,8 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
             TopicPartition topicPartition = new TopicPartition("wakeup-batch", 0)
             Map<TopicPartition, OffsetAndMetadata> offsetAndMetadata = consumer.committed([topicPartition] as Set)
             offsetAndMetadata == null
-            offsetAndMetadata.get(topicPartition) == null
-            offsetAndMetadata.get(topicPartition).offset() == 0
+                    || offsetAndMetadata.get(topicPartition) == null
+                    || offsetAndMetadata.get(topicPartition).offset() == 0
 
         cleanup:
             consumer.close()
