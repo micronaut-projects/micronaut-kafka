@@ -424,17 +424,18 @@ public class KafkaConsumerProcessor
             //noinspection InfiniteLoopStatement
             while (true) {
                 consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                boolean failed = true;
                 try {
 
                     consumerState.pauseTopicPartitions(kafkaConsumer);
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    failed = false;
                     consumerState.resumeTopicPartitions(kafkaConsumer);
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
                         continue; // No consumer records to process
                     }
 
-                    final boolean failed;
                     if (isBatch) {
                         failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, consumerRecords);
                     } else {
@@ -453,6 +454,13 @@ public class KafkaConsumerProcessor
                     }
 
                 } catch (WakeupException e) {
+                    try {
+                        if (!failed && offsetStrategy != OffsetStrategy.DISABLED) {
+                            kafkaConsumer.commitSync();
+                        }
+                    } catch (Throwable ex) {
+                        LOG.warn("Error committing Kafka offsets on shutdown: {}", ex.getMessage(), ex);
+                    }
                     throw e;
                 } catch (Throwable e) {
                     handleException(consumerState, null, e);
@@ -461,15 +469,7 @@ public class KafkaConsumerProcessor
         } catch (WakeupException e) {
             // ignore for shutdown
         } finally {
-            try {
-                if (offsetStrategy != OffsetStrategy.DISABLED) {
-                    kafkaConsumer.commitSync();
-                }
-            } catch (Throwable e) {
-                LOG.warn("Error committing Kafka offsets on shutdown: {}", e.getMessage(), e);
-            } finally {
-                kafkaConsumer.close();
-            }
+            kafkaConsumer.close();
         }
     }
 

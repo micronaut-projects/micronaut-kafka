@@ -55,15 +55,13 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
                 listenerWithErrorStrategyRetryOnError.failed.size() == 2 // One retry
                 listenerWithErrorStrategyRetryOnError.events.size() == 29
-//                listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
+                listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
 
                 listenerWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
                 listenerWithErrorStrategyRetryOnError10Times.events.size() == 29
-//                listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
+                listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
 
                 listenerWithErrorStrategyNone.failed.size() == 1
-                listenerWithErrorStrategyNone.events.size() < 29 // some from the failed 10 records batch will be lost
-                listenerWithErrorStrategyNone.events.size() > 20
                 listenerWithErrorStrategyNone.events.stream().anyMatch(e -> e.count == 29)
                 listenerWithErrorStrategyNone.exceptions.size() == 1
             }
