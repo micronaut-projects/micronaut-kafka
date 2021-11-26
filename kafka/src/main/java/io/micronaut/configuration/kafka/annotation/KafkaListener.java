@@ -84,6 +84,19 @@ public @interface KafkaListener {
     OffsetReset offsetReset() default OffsetReset.LATEST;
 
     /**
+     * Setting the error strategy allows you to resume at the next offset
+     * or to seek the consumer (stop on error) to the failed offset so that
+     * it can retry if an error occurs
+     *
+     * The consumer bean is still able to implement a custom exception handler to replace
+     * {@link io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler}
+     * and set the error strategy.
+     *
+     * @return The strategy to use when an error occurs
+     */
+    ErrorStrategy errorStrategy() default @ErrorStrategy();
+
+    /**
      * Kafka consumers are by default single threaded. If you wish to increase the number of threads
      * for a consumer you can alter this setting. Note that this means that multiple partitions will
      * be allocated to a single application.
