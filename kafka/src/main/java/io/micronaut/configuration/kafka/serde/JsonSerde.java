@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.serde;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Parameter;
+import io.micronaut.context.annotation.Prototype;
 import io.micronaut.core.annotation.Creator;
 import io.micronaut.core.serialize.exceptions.SerializationException;
 import io.micronaut.jackson.serialize.JacksonObjectSerializer;
@@ -34,6 +35,7 @@ import java.util.Map;
  * @since 1.0
  */
 @Deprecated
+@Prototype
 public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
     private final JacksonObjectSerializer objectSerializer;
