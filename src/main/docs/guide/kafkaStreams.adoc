@@ -50,7 +50,7 @@ include::{testskafkastreams}/wordcount/WordCountStream.java[tags=wordCountStream
 <3> An instance of api:configuration.kafka.streams.ConfiguredStreamBuilder[] is injected that allows mutating the configuration
 <4> Materialize the count stream and save to a state store
 
-NOTE: With Kafka streams the key and value `Serdes` (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass api:configuration.kafka.serde.JsonSerde[] to define your `Serdes`
+NOTE: With Kafka streams the key and value `Serdes` (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass api:configuration.kafka.serde.JsonObjectSerde[] to define your `Serdes`
 
 You can use the ann:configuration.kafka.annotation.KafkaClient[] annotation to send a sentence to be processed by the above stream:
 

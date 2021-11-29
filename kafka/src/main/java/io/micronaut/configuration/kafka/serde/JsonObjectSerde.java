@@ -15,11 +15,11 @@
  */
 package io.micronaut.configuration.kafka.serde;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.context.annotation.Parameter;
+import io.micronaut.context.annotation.Prototype;
 import io.micronaut.core.annotation.Creator;
 import io.micronaut.core.serialize.exceptions.SerializationException;
-import io.micronaut.jackson.serialize.JacksonObjectSerializer;
+import io.micronaut.json.JsonObjectSerializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
@@ -30,45 +30,24 @@ import java.util.Map;
  * A {@link Serializer} and {@link Deserializer} for JSON.
  *
  * @param <T> The type to serialize/deserialize
- * @author Graeme Rocher
- * @since 1.0
+ * @author Denis Stepanov
+ * @since 4.1.0
  */
-@Deprecated
-public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
+@Prototype
+public class JsonObjectSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
-    private final JacksonObjectSerializer objectSerializer;
+    private final JsonObjectSerializer objectSerializer;
     private final Class<T> type;
 
     /**
      * Constructs a new instance for the given arguments.
      *
-     * @param objectSerializer The {@link JacksonObjectSerializer}
+     * @param objectSerializer The {@link JsonObjectSerializer}
      * @param type The target type
      */
     @Creator
-    public JsonSerde(JacksonObjectSerializer objectSerializer, @Parameter Class<T> type) {
+    public JsonObjectSerde(JsonObjectSerializer objectSerializer, @Parameter Class<T> type) {
         this.objectSerializer = objectSerializer;
-        this.type = type;
-    }
-
-    /**
-     * Constructs a new instance for the given arguments. Using a default {@link ObjectMapper}
-     *
-     * @param type The target type
-     */
-    public JsonSerde(Class<T> type) {
-        this.objectSerializer = new JacksonObjectSerializer(new ObjectMapper());
-        this.type = type;
-    }
-
-    /**
-     * Constructs a new instance for the given arguments. Using a default {@link ObjectMapper}
-     *
-     * @param objectMapper The object mapper to use
-     * @param type The target type
-     */
-    public JsonSerde(ObjectMapper objectMapper, Class<T> type) {
-        this.objectSerializer = new JacksonObjectSerializer(objectMapper);
         this.type = type;
     }
 
@@ -112,6 +91,6 @@ public class JsonSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
     @Override
     public String toString() {
-        return "JsonSerde: " + type.getName();
+        return "JsonObjectSerde: " + type.getName();
     }
 }
