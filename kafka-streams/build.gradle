@@ -25,7 +25,7 @@ dependencies {
     testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
     testRuntimeOnly "io.micronaut:micronaut-management"
     testRuntimeOnly "io.micronaut.cache:micronaut-cache-core"
-    testRuntimeOnly "io.micronaut.reactor:micronaut-reactor:2.0.0-SNAPSHOT"
+    testRuntimeOnly "io.micronaut.reactor:micronaut-reactor:2.1.2-SNAPSHOT"
 }
 
 test {
