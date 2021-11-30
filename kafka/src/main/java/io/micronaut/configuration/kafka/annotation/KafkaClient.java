@@ -56,6 +56,17 @@ public @interface KafkaClient {
     String id() default "";
 
     /**
+     * The TransactionalId to use for transactional delivery. This enables reliability semantics which span multiple producer
+     * sessions since it allows the client to guarantee that transactions using the same TransactionalId have been completed prior to starting any new transactions.
+     * If no TransactionalId is provided, then the producer is limited to idempotent delivery.
+     * If a TransactionalId is configured, <code>enable.idempotence</code> is implied.
+     * By default, the TransactionId is not configured, which means transactions cannot be used.
+     *
+     * @return true to enable transaction
+     */
+    String transactionalId() default "";
+
+    /**
      * The maximum duration to block synchronous send operations.
      *
      * @return The timeout
