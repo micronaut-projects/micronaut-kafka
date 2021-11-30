@@ -23,6 +23,23 @@ class JsonSerdeSpec extends Specification {
         context.close()
     }
 
+    void "test json object serde"() {
+        given:
+        ApplicationContext context = ApplicationContext.run()
+
+        when:
+        JsonObjectSerde<Book> serde = context.createBean(JsonObjectSerde, Book)
+        def book = new Book(title: "The Stand")
+        def json = '{"title":"The Stand"}'
+
+        then:
+        new String(serde.serialize("foo", book)) == json
+        serde.deserialize("foo", json.bytes) == book
+
+        cleanup:
+        context.close()
+    }
+
     @EqualsAndHashCode
     static class Book {
         String title

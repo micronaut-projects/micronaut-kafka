@@ -850,7 +850,7 @@ public class KafkaConsumerProcessor
      *
      * @author Denis Stepanov
      */
-    private final static class ConsumerState {
+    private static final class ConsumerState {
         final String clientId;
         final Consumer<?, ?> kafkaConsumer;
         final Object consumerBean;

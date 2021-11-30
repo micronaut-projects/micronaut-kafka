@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
+import io.micronaut.configuration.kafka.serde.JsonObjectSerde;
 import io.micronaut.configuration.kafka.serde.JsonSerde;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
@@ -53,6 +54,7 @@ import java.util.Properties;
         FloatSerializer.class,
         // serdes
         JsonSerde.class,
+        JsonObjectSerde.class,
         // deserializers
         ShortDeserializer.class,
         DoubleDeserializer.class,
