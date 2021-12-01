@@ -851,7 +851,7 @@ public class KafkaConsumerProcessor
         }));
     }
 
-    private ProducerRecord createFromMessage(String topic, KafkaMessage message) {
+    private ProducerRecord createFromMessage(String topic, KafkaMessage<?, ?> message) {
         return new ProducerRecord(
                 message.getTopic() == null ? topic : message.getTopic(),
                 message.getPartition(),
@@ -861,7 +861,7 @@ public class KafkaConsumerProcessor
                 convertHeaders(message));
     }
 
-    private List<RecordHeader> convertHeaders(KafkaMessage message) {
+    private List<RecordHeader> convertHeaders(KafkaMessage<?, ?> message) {
         return message.getHeaders() == null ? null : message.getHeaders().entrySet()
                 .stream()
                 .map(e -> new RecordHeader(e.getKey(), e.getValue().toString().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());

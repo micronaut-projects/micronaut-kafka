@@ -23,20 +23,22 @@ import java.util.Map;
 /**
  * Message payload representation.
  *
+ * @param <K> The key type
+ * @param <V> The value type
  * @author Denis Stepanov
  * @since 4.1.0
  */
-public final class KafkaMessage {
+public final class KafkaMessage<K, V> {
 
     private final String topic;
-    private final Object key;
-    private final Object body;
+    private final K key;
+    private final V body;
     private final Integer partition;
     private final Long timestamp;
     private final Map<String, Object> headers;
 
     /**
-     * The default contructor.
+     * The default constructor.
      *
      * @param topic     The topic
      * @param key       The key
@@ -45,7 +47,7 @@ public final class KafkaMessage {
      * @param timestamp The timestamp
      * @param headers   The headers
      */
-    public KafkaMessage(@Nullable String topic, @Nullable Object key, @Nullable Object body, @Nullable Integer partition,
+    public KafkaMessage(@Nullable String topic, @Nullable K key, @Nullable V body, @Nullable Integer partition,
                         @Nullable Long timestamp, @Nullable Map<String, Object> headers) {
         this.topic = topic;
         this.key = key;
@@ -61,12 +63,12 @@ public final class KafkaMessage {
     }
 
     @Nullable
-    public Object getKey() {
+    public K getKey() {
         return key;
     }
 
     @Nullable
-    public Object getBody() {
+    public V getBody() {
         return body;
     }
 
@@ -87,67 +89,69 @@ public final class KafkaMessage {
 
     /**
      * The message builder.
+     * @param <K> The key type
+     * @param <V> The value type
      */
-    public static final class Builder {
+    public static final class Builder<K, V> {
         private String topic;
-        private Object key;
-        private Object body;
+        private K key;
+        private V body;
         private Integer partition;
         private Long timestamp;
         private Map<String, Object> headers;
 
         @NonNull
-        public static Builder withBody(@Nullable Object body) {
-            Builder builder = new Builder();
+        public static <T, F> Builder<T, F> withBody(@Nullable F body) {
+            Builder<T, F> builder = new Builder<>();
             builder.body = body;
             return builder;
         }
 
         @NonNull
-        public static Builder withoutBody() {
-            Builder builder = new Builder();
+        public static <T, F> Builder<T, F> withoutBody() {
+            Builder<T, F> builder = new Builder<>();
             return builder;
         }
 
         @NonNull
-        public Builder topic(@Nullable String topic) {
+        public Builder<K, V> topic(@Nullable String topic) {
             this.topic = topic;
             return this;
         }
 
         @NonNull
-        public Builder key(@Nullable Object key) {
+        public Builder<K, V> key(@Nullable K key) {
             this.key = key;
             return this;
         }
 
         @NonNull
-        public Builder body(@Nullable Object body) {
+        public Builder<K, V> body(@Nullable V body) {
             this.body = body;
             return this;
         }
 
         @NonNull
-        public Builder header(@Nullable Map<String, Object> headers) {
+        public Builder<K, V> header(@Nullable Map<String, Object> headers) {
             this.headers = headers;
             return this;
         }
 
         @NonNull
-        public Builder partition(@Nullable Integer partition) {
+        public Builder<K, V> partition(@Nullable Integer partition) {
             this.partition = partition;
             return this;
         }
 
         @NonNull
-        public Builder timestamp(@Nullable Long timestamp) {
+        public Builder<K, V> timestamp(@Nullable Long timestamp) {
             this.timestamp = timestamp;
             return this;
         }
 
         @NonNull
-        public KafkaMessage build() {
-            return new KafkaMessage(topic, key, body, partition, timestamp, headers);
+        public KafkaMessage<K, V> build() {
+            return new KafkaMessage<K, V>(topic, key, body, partition, timestamp, headers);
         }
     }
 
