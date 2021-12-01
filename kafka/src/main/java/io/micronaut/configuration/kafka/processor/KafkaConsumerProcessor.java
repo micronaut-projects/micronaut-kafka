@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka.processor;
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
-import io.micronaut.configuration.kafka.Message;
+import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
@@ -724,8 +724,8 @@ public class KafkaConsumerProcessor
                                     }
                                     for (String destinationTopic : consumerState.sendToDestinationTopics) {
                                         if (consumerState.isMessagesIterableReturnType) {
-                                            Iterable<Message> messages = (Iterable<Message>) value;
-                                            for (Message message : messages) {
+                                            Iterable<KafkaMessage> messages = (Iterable<KafkaMessage>) value;
+                                            for (KafkaMessage message : messages) {
                                                 ProducerRecord record = createFromMessage(destinationTopic, message);
                                                 kafkaProducer.send(record, (metadata, exception) -> {
                                                     if (exception != null) {
@@ -738,7 +738,7 @@ public class KafkaConsumerProcessor
                                         } else {
                                             ProducerRecord record;
                                             if (consumerState.isMessageReturnType) {
-                                                record = createFromMessage(destinationTopic, (Message) value);
+                                                record = createFromMessage(destinationTopic, (KafkaMessage) value);
                                             } else {
                                                 record = new ProducerRecord(destinationTopic, null, key, value, consumerRecord.headers());
                                             }
@@ -851,7 +851,7 @@ public class KafkaConsumerProcessor
         }));
     }
 
-    private ProducerRecord createFromMessage(String topic, Message message) {
+    private ProducerRecord createFromMessage(String topic, KafkaMessage message) {
         return new ProducerRecord(
                 message.getTopic() == null ? topic : message.getTopic(),
                 message.getPartition(),
@@ -861,7 +861,7 @@ public class KafkaConsumerProcessor
                 convertHeaders(message));
     }
 
-    private List<RecordHeader> convertHeaders(Message message) {
+    private List<RecordHeader> convertHeaders(KafkaMessage message) {
         return message.getHeaders() == null ? null : message.getHeaders().entrySet()
                 .stream()
                 .map(e -> new RecordHeader(e.getKey(), e.getValue().toString().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
@@ -1035,9 +1035,9 @@ public class KafkaConsumerProcessor
                 throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
             }
             ReturnType<?> returnType = method.getReturnType();
-            isMessageReturnType = returnType.getType().isAssignableFrom(Message.class)
-                    || returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(Message.class)).orElse(false);
-            isMessagesIterableReturnType = Iterable.class.isAssignableFrom(returnType.getType()) && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(Message.class)).orElse(false);
+            isMessageReturnType = returnType.getType().isAssignableFrom(KafkaMessage.class)
+                    || returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+            isMessagesIterableReturnType = Iterable.class.isAssignableFrom(returnType.getType()) && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
         }
 
         void pause() {

@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Denis Stepanov
  * @since 4.1.0
  */
-public final class Message {
+public final class KafkaMessage {
 
     private final String topic;
     private final Object key;
@@ -45,8 +45,8 @@ public final class Message {
      * @param timestamp The timestamp
      * @param headers   The headers
      */
-    public Message(@Nullable String topic, @Nullable Object key, @Nullable Object body, @Nullable Integer partition,
-                   @Nullable Long timestamp, @Nullable Map<String, Object> headers) {
+    public KafkaMessage(@Nullable String topic, @Nullable Object key, @Nullable Object body, @Nullable Integer partition,
+                        @Nullable Long timestamp, @Nullable Map<String, Object> headers) {
         this.topic = topic;
         this.key = key;
         this.body = body;
@@ -146,8 +146,8 @@ public final class Message {
         }
 
         @NonNull
-        public Message build() {
-            return new Message(topic, key, body, partition, timestamp, headers);
+        public KafkaMessage build() {
+            return new KafkaMessage(topic, key, body, partition, timestamp, headers);
         }
     }
 

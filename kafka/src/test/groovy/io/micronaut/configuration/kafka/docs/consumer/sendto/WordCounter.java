@@ -1,6 +1,6 @@
 package io.micronaut.configuration.kafka.docs.consumer.sendto;
 
-import io.micronaut.configuration.kafka.Message;
+import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.annotation.Topic;
@@ -24,13 +24,13 @@ public class WordCounter {
 
     @Topic("tx-incoming-strings")
     @SendTo("my-words-count")
-    List<Message> wordsCounter(String string) {
+    List<KafkaMessage> wordsCounter(String string) {
         Map<String, Integer> wordsCount = Stream.of(string.split(" "))
                 .map(word -> new AbstractMap.SimpleEntry<>(word, 1))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
-        List<Message> messages = new ArrayList<>();
+        List<KafkaMessage> messages = new ArrayList<>();
         for (Map.Entry<String, Integer> e : wordsCount.entrySet()) {
-            messages.add(Message.Builder.withBody(e.getValue()).key(e.getKey()).build());
+            messages.add(KafkaMessage.Builder.withBody(e.getValue()).key(e.getKey()).build());
         }
         return messages;
     }

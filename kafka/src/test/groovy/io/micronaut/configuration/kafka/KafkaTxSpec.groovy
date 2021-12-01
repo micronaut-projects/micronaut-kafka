@@ -191,13 +191,13 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
         @Topic("tx-strings")
         @SendTo("tx-words-count")
-        List<Message> wordsCounter(String string) {
+        List<KafkaMessage> wordsCounter(String string) {
             Map<String, Integer> wordsCount = Stream.of(string.split(" "))
                     .map(word -> new AbstractMap.SimpleEntry<>(word, 1))
                     .collect(Collectors.toMap((Map.Entry<String, Integer> e) -> e.key, (Map.Entry<String, Integer> e) -> e.value, (v1, v2) -> v1 + v2))
-            List<Message> messages = new ArrayList<>()
+            List<KafkaMessage> messages = new ArrayList<>()
             for (Map.Entry<String, Integer> e : wordsCount) {
-                messages.add(Message.Builder.withBody(e.getValue()).key(e.getKey()).build())
+                messages.add(KafkaMessage.Builder.withBody(e.getValue()).key(e.getKey()).build())
             }
             return messages
         }

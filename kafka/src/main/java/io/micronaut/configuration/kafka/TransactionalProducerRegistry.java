@@ -51,6 +51,6 @@ public interface TransactionalProducerRegistry {
      *
      * @param producer The producer
      */
-    void close(Producer<?, ?> producer);
+    void close(@NonNull Producer<?, ?> producer);
 
 }
