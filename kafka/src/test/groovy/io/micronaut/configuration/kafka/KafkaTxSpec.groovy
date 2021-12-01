@@ -21,8 +21,8 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration + [
-                'kafka.producers.tx-word-counter.key.serializer'                                              : 'org.apache.kafka.common.serialization.StringSerializer',
-                'kafka.producers.tx-word-counter.value.serializer'                                            : 'org.apache.kafka.common.serialization.IntegerSerializer'
+                'kafka.producers.tx-word-counter.key.serializer'  : 'org.apache.kafka.common.serialization.StringSerializer',
+                'kafka.producers.tx-word-counter.value.serializer': 'org.apache.kafka.common.serialization.IntegerSerializer'
         ]
     }
 
@@ -98,8 +98,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(producerTransactionalId = "tx-idempotence-numbers-collector",
-            isolation = IsolationLevel.READ_COMMITTED,
+    @KafkaListener(isolation = IsolationLevel.READ_COMMITTED,
             offsetReset = OffsetReset.EARLIEST,
             offsetStrategy = OffsetStrategy.SYNC,
             errorStrategy = @ErrorStrategy(value = ErrorStrategyValue.RETRY_ON_ERROR))
@@ -120,8 +119,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(producerTransactionalId = "tx-idempotence-numbers-collector2",
-            isolation = IsolationLevel.READ_COMMITTED,
+    @KafkaListener(isolation = IsolationLevel.READ_COMMITTED,
             offsetReset = OffsetReset.EARLIEST,
             offsetStrategy = OffsetStrategy.SYNC,
             errorStrategy = @ErrorStrategy(value = ErrorStrategyValue.RETRY_ON_ERROR, retryDelay = ""))
@@ -150,7 +148,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(producerTransactionalId = "tx-numbers-committed", isolation = IsolationLevel.READ_COMMITTED)
+    @KafkaListener(isolation = IsolationLevel.READ_COMMITTED)
     static class CommittedNumbersCollector {
 
         List<Integer> numbers = new ArrayList<>()
@@ -162,7 +160,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(producerTransactionalId = "tx-numbers-uncommitted", isolation = IsolationLevel.READ_UNCOMMITTED)
+    @KafkaListener(isolation = IsolationLevel.READ_UNCOMMITTED)
     static class UncommittedNumbersCollector {
 
         List<Integer> numbers = new ArrayList<>()
@@ -174,7 +172,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(producerTransactionalId = "tx-wordcount", isolation = IsolationLevel.READ_COMMITTED)
+    @KafkaListener(isolation = IsolationLevel.READ_COMMITTED)
     static class WordCountCollector {
 
         Map<String, Integer> counter = new HashMap<>()

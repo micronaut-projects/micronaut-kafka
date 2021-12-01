@@ -1,0 +1,14 @@
+Transaction processing can be enabled by defining `transactionalId` on `@KafkaClient`, which will initialize the producer for transactional usage and wrap any send operation with a transaction demarcation.
+
+.Alternative Kafka producer transactional code
+[source,java]
+----
+producer.initTransactions();
+try {
+    producer.beginTransaction();
+    producer.send(...);
+    producer.commitTransaction();
+} catch (Exception e) {
+    producer.abortTransaction();
+}
+----
