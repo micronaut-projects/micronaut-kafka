@@ -17,6 +17,8 @@ package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.context.annotation.*;
 import io.micronaut.messaging.annotation.MessageListener;
+import org.apache.kafka.common.IsolationLevel;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -82,6 +84,35 @@ public @interface KafkaListener {
      * @return The strategy to use to start consuming records
      */
     OffsetReset offsetReset() default OffsetReset.LATEST;
+
+    /**
+     * The client id of the producer that is used for {@link io.micronaut.messaging.annotation.SendTo}.
+     *
+     * @return the producer client id
+     */
+    String producerClientId() default "";
+
+    /**
+     * This setting applies only for the producer that is used for {@link io.micronaut.messaging.annotation.SendTo}.
+     *
+     * The TransactionalId to use for transactional delivery. This enables reliability semantics which span multiple producer
+     * sessions since it allows the client to guarantee that transactions using the same TransactionalId have been completed prior to starting any new transactions.
+     * If no TransactionalId is provided, then the producer is limited to idempotent delivery.
+     * If a TransactionalId is configured, <code>enable.idempotence</code> is implied.
+     * By default, the TransactionId is not configured, which means transactions cannot be used.
+     *
+     * @return the producer transaction id
+     */
+    String producerTransactionalId() default "";
+
+    /**
+     * Kafka consumer isolation level to control how to read messages written transactionally.
+     *
+     * See {@link org.apache.kafka.clients.consumer.ConsumerConfig#ISOLATION_LEVEL_CONFIG}.
+     *
+     * @return The isolation level
+     */
+    IsolationLevel isolation() default IsolationLevel.READ_UNCOMMITTED;
 
     /**
      * Setting the error strategy allows you to resume at the next offset

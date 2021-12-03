@@ -8,6 +8,7 @@ kafkaClient:
   kafkaClientConfiguration: Configuring @KafkaClient beans
   kafkaClientBatch: Sending Records in Batch
   kafkaClientScope: Injecting Kafka Producer Beans
+  kafkaClientTx: Transactions
   kafkaEmbedded: Embedding Kafka
 kafkaListener:
   title: Kafka Consumers Using @KafkaListener
