@@ -4,15 +4,12 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath "io.micronaut.build.internal:micronaut-gradle-plugins:4.2.4"
+        classpath "io.micronaut.build.internal:micronaut-gradle-plugins:4.2.6"
     }
 }
 
 
 subprojects { Project subproject ->
-    repositories {
-        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-    }
     if (subproject.path.contains("tests")) {
         return
     }
