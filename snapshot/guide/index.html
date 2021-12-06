@@ -108,7 +108,9 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientScope"><a href="#kafkaClientScope"><strong>5.4</strong><span>Injecting Kafka Producer Beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaEmbedded"><a href="#kafkaEmbedded"><strong>5.5</strong><span>Embedding Kafka</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientTx"><a href="#kafkaClientTx"><strong>5.5</strong><span>Transactions</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaEmbedded"><a href="#kafkaEmbedded"><strong>5.6</strong><span>Embedding Kafka</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
         
@@ -122,7 +124,7 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>6.5</strong><span>Forwarding Messages with @SendTo</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaExceptions"><a href="#kafkaExceptions"><strong>6.6</strong><span>Handling Consumer Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>6.6</strong><span>Handling Consumer Exceptions</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
         
@@ -150,7 +152,7 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> <select style='max-width: 200px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option selected='selected' value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0/guide/index.html'>4.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0-RC2/guide/index.html'>4.0.0-RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0.RC1/guide/index.html'>4.0.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.3/guide/index.html'>3.3.3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.2/guide/index.html'>3.3.2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.1/guide/index.html'>3.3.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.0/guide/index.html'>3.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.2.0/guide/index.html'>3.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.1.0/guide/index.html'>3.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.0.0/guide/index.html'>3.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.1/guide/index.html'>2.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0/guide/index.html'>2.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0.RC1/guide/index.html'>2.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.0.0/guide/index.html'>2.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.4.0/guide/index.html'>1.4.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select></p>
+        <p><strong>Version:</strong> <select style='max-width: 200px' onChange='window.document.location.href=this.options[this.selectedIndex].value;'><option selected='selected' value='https://micronaut-projects.github.io/micronaut-kafka/snapshot/guide/index.html'>SNAPSHOT</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0/guide/index.html'>4.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0-RC2/guide/index.html'>4.0.0-RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/4.0.0.RC1/guide/index.html'>4.0.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.3/guide/index.html'>3.3.3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.2/guide/index.html'>3.3.2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.1/guide/index.html'>3.3.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.3.0/guide/index.html'>3.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.2.0/guide/index.html'>3.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.1.0/guide/index.html'>3.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/3.0.0/guide/index.html'>3.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.1/guide/index.html'>2.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0/guide/index.html'>2.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.1.0.RC1/guide/index.html'>2.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/2.0.0/guide/index.html'>2.0.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.4.0/guide/index.html'>1.4.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.3.0/guide/index.html'>1.3.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0/guide/index.html'>1.2.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.2.0.RC1/guide/index.html'>1.2.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.1/guide/index.html'>1.1.1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0/guide/index.html'>1.1.0</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC3/guide/index.html'>1.1.0.RC3</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC2/guide/index.html'>1.1.0.RC2</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.1.0.RC1/guide/index.html'>1.1.0.RC1</option><option value='https://micronaut-projects.github.io/micronaut-kafka/1.0.4/guide/index.html'>1.0.4</option></select> </p>
     </div>
     
 <h1 id="introduction"><a class="anchor" href="#introduction"></a>1 Introduction</h1>
@@ -474,12 +476,7 @@ public class ProductListener {
 </div>
 
 
-<div class="paragraph">
-<p>The example in the quick start presented a trivial definition of an interface that will be implemented automatically for you using the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation.</p>
-</div>
-<div class="paragraph">
-<p>The implementation that powers <code>@KafkaClient</code> (defined by the <a href="../api/io/micronaut/configuration/kafka/intercept/KafkaClientIntroductionAdvice.html">KafkaClientIntroductionAdvice</a> class) is, however, very flexible and offers a range of options for defining Kafka clients.</p>
-</div>
+
 
 <h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>5.1 Defining @KafkaClient Methods</h2>
 
@@ -928,7 +925,7 @@ public void testBookSender() {
     try (KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))) {
         container.start();
         Map&lt;String, Object&gt; config = Collections.singletonMap( <i class="conum" data-value="1"></i><b>(1)</b>
-           AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS,
+           ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
            container.getBootstrapServers()
         );
 
@@ -959,7 +956,33 @@ public void testBookSender() {
 <p>By using the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
-<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>5.5 Embedding Kafka</h2>
+<h2 id="kafkaClientTx"><a class="anchor" href="#kafkaClientTx"></a>5.5 Transactions</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaClientTx.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>Transaction processing can be enabled by defining <code>transactionalId</code> on <code>@KafkaClient</code>, which will initialize the producer for transactional usage and wrap any send operation with a transaction demarcation.</p>
+</div>
+<div class="listingblock">
+<div class="title">Alternative Kafka producer transactional code</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">producer.initTransactions();
+try {
+    producer.beginTransaction();
+    producer.send(...);
+    producer.commitTransaction();
+} catch (Exception e) {
+    producer.abortTransaction();
+}</code></pre>
+</div>
+</div>
+
+<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>5.6 Embedding Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
@@ -1498,6 +1521,24 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <p>You may want to do this if for example you choose an alternative deserialization format such as Avro or Protobuf.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_transactional_properties">Transactional properties</h3>
+<div class="paragraph">
+<p>There are a few options that can be enabled for only in the transactional processing:</p>
+</div>
+<div class="sect3">
+<h4 id="_isolation">Isolation</h4>
+<div class="paragraph">
+<p>Use <code>isolation</code> member to define if you want to receive messages that haven&#8217;t been committed yet.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_offset_strategy">Custom offset strategy</h4>
+<div class="paragraph">
+<p>There is a special offset strategy <code>OffsetStrategy.SEND_TO_TRANSACTION</code> that can only be used with an associated producer, only applicable when <code>SendTo</code> is used.</p>
+</div>
+</div>
+</div>
 
 <h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>6.3 Commiting Kafka Offsets</h2>
 
@@ -1552,6 +1593,10 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#ASYNC_PER_RECORD">ASYNC_PER_RECORD</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets asynchronously after each <code>ConsumerRecord</code> is processed. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SEND_TO_TRANSACTION">SEND_TO_TRANSACTION</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Only available when the transactional producer is enabled for <code>@SendTo</code>. Sends offsets to transaction using method <code>sendOffsetsToTransaction</code> of <code>org.apache.kafka.clients.producer.Producer</code>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1992,16 +2037,110 @@ public Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
 <div class="paragraph">
 <p>In the reactive case the <code>poll</code> loop will continue and will not wait for the record to be sent unless you specifically annotate the method with <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a>.</p>
 </div>
+<div class="paragraph">
+<p>To enable transactional sending of the messages you need to define <code>producerTransactionalId</code> in <code>@KafkaListener</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Transactional consumer-producer</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(producerClientId = "word-counter-producer", <i class="conum" data-value="1"></i><b>(1)</b>
+        producerTransactionalId = "tx-word-counter-id", <i class="conum" data-value="2"></i><b>(2)</b>
+        offsetStrategy = OffsetStrategy.SEND_TO_TRANSACTION, <i class="conum" data-value="3"></i><b>(3)</b>
+        isolation = IsolationLevel.READ_COMMITTED <i class="conum" data-value="4"></i><b>(4)</b>
+)
+public class WordCounter {
 
-<h2 id="kafkaExceptions"><a class="anchor" href="#kafkaExceptions"></a>6.6 Handling Consumer Exceptions</h2>
+    @Topic("tx-incoming-strings")
+    @SendTo("my-words-count")
+    List&lt;KafkaMessage&gt; wordsCounter(String string) {
+        Map&lt;String, Integer&gt; wordsCount = Stream.of(string.split(" "))
+                .map(word -&gt; new AbstractMap.SimpleEntry&lt;&gt;(word, 1))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
+        List&lt;KafkaMessage&gt; messages = new ArrayList&lt;&gt;();
+        for (Map.Entry&lt;String, Integer&gt; e : wordsCount.entrySet()) {
+            messages.add(KafkaMessage.Builder.withBody(e.getValue()).key(e.getKey()).build());
+        }
+        return messages;
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The id of the producer to load additional config properties</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The transactional id that is required to enable transactional processing</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Enable offset strategy to commit the offsets to the transaction</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Consumer read messages isolation</td>
+</tr>
+</table>
+</div>
+
+<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>6.6 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaExceptions.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
 
 
+<div class="sect2">
+<h3 id="_consumer_error_strategies">Consumer error strategies</h3>
+<div class="paragraph">
+<p>It&#8217;s possible to define a different error strategy for <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> using <code>errorStrategy</code> attribute:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying an error strategy</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms", retryCount=3))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Setting the error strategy allows you to resume at the next offset or to seek the consumer (stop on error) to the failed offset so that it can retry if an error occurs.</p>
+</div>
+<div class="paragraph">
+<p>You can choose one of the error strategies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>RETRY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and will attempt to re-consume the current record indefinitely. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code></p>
+</li>
+<li>
+<p><code>RESUME_AT_NEXT_RECORD</code> - This strategy will ignore the current error and will resume at the next offset, in this case it&#8217;s recommended to have a custom exception handler that moves the failed message into an error queue.</p>
+</li>
+<li>
+<p><code>NONE</code> - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The error strategies apply only for non-batch messages processing.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exception_handlers">Exception handlers</h3>
 <div class="paragraph">
 <p>When an exception occurs in a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> method by default the exception is simply logged. This is handled by <a href="../api/io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html">DefaultKafkaListenerExceptionHandler</a>.</p>
 </div>
@@ -2013,6 +2152,7 @@ public Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
 </div>
 <div class="paragraph">
 <p>The <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerExceptionHandler.html">KafkaListenerExceptionHandler</a> receives an exception of type <a href="../api/io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html">KafkaListenerException</a> which allows access to the original <code>ConsumerRecord</code>, if available.</p>
+</div>
 </div>
 
 <h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>7 Running Kafka Applications</h1>
@@ -2358,7 +2498,7 @@ public class WordCountStream {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-With Kafka streams the key and value <code>Serdes</code> (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass <a href="../api/io/micronaut/configuration/kafka/serde/JsonSerde.html">JsonSerde</a> to define your <code>Serdes</code>
+With Kafka streams the key and value <code>Serdes</code> (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass <a href="../api/io/micronaut/configuration/kafka/serde/JsonObjectSerde.html">JsonObjectSerde</a> to define your <code>Serdes</code>
 </td>
 </tr>
 </table>
