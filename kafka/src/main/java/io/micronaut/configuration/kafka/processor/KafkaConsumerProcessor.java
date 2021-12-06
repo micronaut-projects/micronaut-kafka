@@ -443,6 +443,10 @@ public class KafkaConsumerProcessor
             //noinspection InfiniteLoopStatement
             while (true) {
                 consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                if (consumerState.autoPaused) {
+                    consumerState.pause(consumerState.assignments);
+                    kafkaConsumer.pause(consumerState.assignments);
+                }
                 boolean failed = true;
                 try {
                     consumerState.pauseTopicPartitions();
@@ -1085,9 +1089,6 @@ public class KafkaConsumerProcessor
         }
 
         synchronized void pauseTopicPartitions() {
-            if (autoPaused) {
-                kafkaConsumer.pause(assignments);
-            }
             if (_pauseRequests == null || _pauseRequests.isEmpty()) {
                 return;
             }
@@ -1097,7 +1098,6 @@ public class KafkaConsumerProcessor
                 _pausedTopicPartitions = new HashSet<>();
             }
             _pausedTopicPartitions.addAll(_pauseRequests);
-
         }
 
     }
