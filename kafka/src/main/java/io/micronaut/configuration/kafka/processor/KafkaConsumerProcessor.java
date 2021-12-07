@@ -793,7 +793,7 @@ public class KafkaConsumerProcessor
                 });
 
         recordMetadataProducer = recordMetadataProducer.onErrorResume((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {
-            handleException(consumerState, new KafkaListenerException(
+            handleException(consumerState.consumerBean, new KafkaListenerException(
                     "Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
                     throwable,
                     consumerState.consumerBean,
@@ -823,7 +823,7 @@ public class KafkaConsumerProcessor
                     );
 
                     return producerSend(consumerState, kafkaProducer, record).doOnError(ex -> {
-                        handleException(consumerState, new KafkaListenerException(
+                        handleException(consumerState.consumerBean, new KafkaListenerException(
                                 "Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
                                 throwable,
                                 consumerState.consumerBean,
