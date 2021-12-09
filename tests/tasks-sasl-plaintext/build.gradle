@@ -25,6 +25,6 @@ dependencies {
     testImplementation platform("org.testcontainers:testcontainers-bom:$testContainersVersion")
     testImplementation "org.testcontainers:kafka"
     testImplementation "org.testcontainers:spock"
-    testImplementation "io.micronaut.test:micronaut-test-spock:3.0.4"
+    testImplementation "io.micronaut.test:micronaut-test-spock:3.0.5"
     testImplementation  "io.micronaut.test:micronaut-test-core:3.0.4"
 }
