@@ -9,7 +9,7 @@ dependencies {
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-streams:${kafkaVersion}"
     implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-    implementation 'io.projectreactor:reactor-core:3.4.8'
+    implementation 'io.projectreactor:reactor-core:3.4.13'
     compileOnly "io.micronaut:micronaut-management"
 
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"

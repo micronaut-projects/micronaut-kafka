@@ -11,7 +11,7 @@ dependencies {
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.13.3'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-clients:${kafkaVersion}"
-    implementation 'io.projectreactor:reactor-core:3.4.8'
+    implementation 'io.projectreactor:reactor-core:3.4.13'
     implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.micrometer:micronaut-micrometer-core"
