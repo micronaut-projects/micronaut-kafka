@@ -7,7 +7,8 @@ import io.micronaut.management.health.indicator.HealthResult
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
 import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.utility.DockerImageName
+import spock.lang.AutoCleanup
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -18,10 +19,14 @@ import static io.micronaut.health.HealthStatus.UP
 
 class KafkaHealthIndicatorSpec extends Specification {
 
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+
+    def setupSpec() {
+        kafkaContainer.start()
+    }
+
     void "test kafka health indicator - UP"() {
         given:
-        KafkaContainer kafkaContainer = new KafkaContainer()
-        kafkaContainer.start()
         ApplicationContext applicationContext = ApplicationContext.run(
                 "kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()
         )
@@ -37,7 +42,6 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
-        kafkaContainer.stop()
     }
 
     void "test kafka health indicator - DOWN"() {
@@ -61,10 +65,8 @@ class KafkaHealthIndicatorSpec extends Specification {
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
-        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
-        container.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.getBootstrapServers(),
+                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): kafkaContainer.getBootstrapServers(),
                 "kafka.health.enabled": configvalue
         )
 
@@ -76,7 +78,6 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
-        container.stop()
 
         where:
         configvalue << [false, "false", "no", ""]
