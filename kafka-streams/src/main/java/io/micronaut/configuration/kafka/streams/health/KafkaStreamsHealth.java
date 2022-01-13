@@ -131,14 +131,16 @@ public class KafkaStreamsHealth implements HealthIndicator {
 
         if (kafkaStreams.state().isRunningOrRebalancing()) {
             for (ThreadMetadata metadata : kafkaStreams.localThreadsMetadata()) {
-                streamDetails.put("threadName", metadata.threadName());
-                streamDetails.put("threadState", metadata.threadState());
-                streamDetails.put("adminClientId", metadata.adminClientId());
-                streamDetails.put("consumerClientId", metadata.consumerClientId());
-                streamDetails.put("restoreConsumerClientId", metadata.restoreConsumerClientId());
-                streamDetails.put("producerClientIds", metadata.producerClientIds());
-                streamDetails.put("activeTasks", taskDetails(metadata.activeTasks()));
-                streamDetails.put("standbyTasks", taskDetails(metadata.standbyTasks()));
+                final Map<String, Object> threadDetails = new HashMap<>();
+                threadDetails.put("threadName", metadata.threadName());
+                threadDetails.put("threadState", metadata.threadState());
+                threadDetails.put("adminClientId", metadata.adminClientId());
+                threadDetails.put("consumerClientId", metadata.consumerClientId());
+                threadDetails.put("restoreConsumerClientId", metadata.restoreConsumerClientId());
+                threadDetails.put("producerClientIds", metadata.producerClientIds());
+                threadDetails.put("activeTasks", taskDetails(metadata.activeTasks()));
+                threadDetails.put("standbyTasks", taskDetails(metadata.standbyTasks()));
+                streamDetails.put(metadata.threadName(), threadDetails);
             }
         } else {
             streamDetails.put("error", "The processor is down");
