@@ -11,7 +11,7 @@ dependencies {
     compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.13.6'
     api "io.micronaut:micronaut-messaging:$micronautVersion"
     api "org.apache.kafka:kafka-clients:${kafkaVersion}"
-    implementation 'io.projectreactor:reactor-core:3.4.13'
+    implementation 'io.projectreactor:reactor-core:3.4.14'
     implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
     compileOnly "io.micronaut:micronaut-management"
     compileOnly "io.micronaut.micrometer:micronaut-micrometer-core"
@@ -22,7 +22,7 @@ dependencies {
     testImplementation "io.micronaut.test:micronaut-test-spock"
     testImplementation "io.micronaut:micronaut-inject-java"
     testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.8"
+    testImplementation "io.projectreactor:reactor-core:3.4.14"
     testImplementation "io.micronaut:micronaut-management"
     testImplementation "io.micronaut:micronaut-http-client"
     testImplementation "io.micronaut:micronaut-inject-groovy"
