@@ -1,7 +1,10 @@
 package io.micronaut.configuration.kafka.errors
 
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
-import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.annotation.ErrorStrategy
+import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
@@ -78,7 +81,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         @Topic("errors-resume")
         void handleMessage(String message) {
-            received.add(message)
+            received << message
             if (count.getAndIncrement() == 0) {
                 throw new RuntimeException("Won't handle first")
             }
@@ -98,8 +101,8 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         @Topic("errors-retry")
         void handleMessage(String message) {
-            received.add(message)
-            times.add(System.currentTimeMillis())
+            received << message
+            times << System.currentTimeMillis()
             if (count.getAndIncrement() == 0) {
                 throw new RuntimeException("Won't handle first")
             }
@@ -117,7 +120,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
             if (count.getAndIncrement() == 1) {
                 throw new RuntimeException("Won't handle first")
             }
-            received.add(message)
+            received << message
         }
 
         @Override

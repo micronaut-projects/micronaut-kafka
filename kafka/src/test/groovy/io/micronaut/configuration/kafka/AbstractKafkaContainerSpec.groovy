@@ -19,7 +19,6 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
     }
 
     protected Map<String, String> getEnvVariables() {
-        return [:]
+        [:]
     }
-
 }

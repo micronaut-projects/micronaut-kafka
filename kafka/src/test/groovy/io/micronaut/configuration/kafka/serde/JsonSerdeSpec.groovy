@@ -12,8 +12,8 @@ class JsonSerdeSpec extends Specification {
 
         when:
         JsonSerde<Book> serde = context.createBean(JsonSerde, Book)
-        def book = new Book(title: "The Stand")
-        def json = '{"title":"The Stand"}'
+        Book book = new Book(title: "The Stand")
+        String json = '{"title":"The Stand"}'
 
         then:
         new String(serde.serialize("foo", book)) == json
@@ -29,8 +29,8 @@ class JsonSerdeSpec extends Specification {
 
         when:
         JsonObjectSerde<Book> serde = context.createBean(JsonObjectSerde, Book)
-        def book = new Book(title: "The Stand")
-        def json = '{"title":"The Stand"}'
+        Book book = new Book(title: "The Stand")
+        String json = '{"title":"The Stand"}'
 
         then:
         new String(serde.serialize("foo", book)) == json

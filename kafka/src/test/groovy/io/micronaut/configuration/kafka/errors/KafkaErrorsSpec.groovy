@@ -19,16 +19,24 @@ import spock.lang.Shared
 
 import java.util.stream.IntStream
 
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+
 class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
     @Shared
     TestListenerWithErrorStrategyResumeAtNextRecord listenerWithErrorStrategyResumeAtNextRecord
+
     @Shared
     TestListenerWithErrorStrategyRetryOnError listenerWithErrorStrategyRetryOnError
+
     @Shared
     TestListenerWithErrorStrategyRetryOnError10Times listenerWithErrorStrategyRetryOnError10Times
+
     @Shared
     TestListenerWithErrorStrategyNone listenerWithErrorStrategyNone
+
     @Shared
     TestProducer producer
 
@@ -44,27 +52,28 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         producer = context.getBean(TestProducer)
     }
 
-    def "should correctly handle error strategies"() {
+    void "should correctly handle error strategies"() {
         when:
-            IntStream.range(0, 30).forEach { i -> producer.send(UUID.randomUUID(), new TestEvent(i)) }
+        IntStream.range(0, 30).forEach { i -> producer.send(UUID.randomUUID(), new TestEvent(i)) }
+
         then:
-            conditions.eventually {
-                listenerWithErrorStrategyResumeAtNextRecord.failed.size() == 1
-                listenerWithErrorStrategyResumeAtNextRecord.events.size() == 29
-                listenerWithErrorStrategyResumeAtNextRecord.exceptions.size() == 1
+        conditions.eventually {
+            listenerWithErrorStrategyResumeAtNextRecord.failed.size() == 1
+            listenerWithErrorStrategyResumeAtNextRecord.events.size() == 29
+            listenerWithErrorStrategyResumeAtNextRecord.exceptions.size() == 1
 
-                listenerWithErrorStrategyRetryOnError.failed.size() == 2 // One retry
-                listenerWithErrorStrategyRetryOnError.events.size() == 29
-                listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
+            listenerWithErrorStrategyRetryOnError.failed.size() == 2 // One retry
+            listenerWithErrorStrategyRetryOnError.events.size() == 29
+            listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
 
-                listenerWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
-                listenerWithErrorStrategyRetryOnError10Times.events.size() == 29
-                listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
+            listenerWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
+            listenerWithErrorStrategyRetryOnError10Times.events.size() == 29
+            listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
 
-                listenerWithErrorStrategyNone.failed.size() == 1
-                listenerWithErrorStrategyNone.events.stream().anyMatch(e -> e.count == 29)
-                listenerWithErrorStrategyNone.exceptions.size() == 1
-            }
+            listenerWithErrorStrategyNone.failed.size() == 1
+            listenerWithErrorStrategyNone.events.stream().anyMatch(e -> e.count == 29)
+            listenerWithErrorStrategyNone.exceptions.size() == 1
+        }
     }
 
     @Introspected
@@ -82,19 +91,19 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = ErrorStrategyValue.RESUME_AT_NEXT_RECORD))
+    @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD))
     static class TestListenerWithErrorStrategyResumeAtNextRecord extends AbstractTestListener {
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = ErrorStrategyValue.RETRY_ON_ERROR))
+    @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR))
     static class TestListenerWithErrorStrategyRetryOnError extends AbstractTestListener {
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = ErrorStrategyValue.RETRY_ON_ERROR, retryCount = 10))
+    @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10))
     static class TestListenerWithErrorStrategyRetryOnError10Times extends AbstractTestListener {
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST)
     static class TestListenerWithErrorStrategyNone extends AbstractTestListener {
     }
 
@@ -102,22 +111,22 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     static abstract class AbstractTestListener implements KafkaListenerExceptionHandler {
 
-        List<TestEvent> failed = new ArrayList<>()
-        Set<TestEvent> events = new HashSet<>()
-        List<KafkaListenerException> exceptions = new ArrayList<>()
+        List<TestEvent> failed = []
+        Set<TestEvent> events = []
+        List<KafkaListenerException> exceptions = []
 
         @Topic("test-topic")
         void receive(@KafkaKey UUID key, TestEvent event) {
             if (event.count == 3) {
-                failed.add(event)
+                failed << event
                 throw new IllegalArgumentException("BOOM")
             }
-            events.add(event)
+            events << event
         }
 
         @Override
         void handle(KafkaListenerException exception) {
-            exceptions.add(exception)
+            exceptions << exception
         }
     }
 
@@ -128,5 +137,4 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         @Topic("test-topic")
         void send(@KafkaKey UUID key, TestEvent event);
     }
-
 }

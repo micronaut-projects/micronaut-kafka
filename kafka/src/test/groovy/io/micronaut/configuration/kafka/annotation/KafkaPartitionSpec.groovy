@@ -21,7 +21,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         super.configuration + [(EMBEDDED_TOPICS): [TOPIC_WORDS]]
     }
 
-    def "test client without partition"() {
+    void "test client without partition"() {
         given:
         ClientWithoutPartition client = context.getBean(ClientWithoutPartition)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -41,7 +41,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with integer partition"() {
+    void "test client with integer partition"() {
         given:
         ClientWithIntegerPartition client = context.getBean(ClientWithIntegerPartition)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -61,7 +61,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with integer partition null"() {
+    void "test client with integer partition null"() {
         given:
         ClientWithIntegerPartition client = context.getBean(ClientWithIntegerPartition)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -81,7 +81,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with int partition"() {
+    void "test client with int partition"() {
         given:
         ClientWithIntPartition client = context.getBean(ClientWithIntPartition)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -101,7 +101,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with partition key"() {
+    void "test client with partition key"() {
         given:
         ClientWithPartitionKey client = context.getBean(ClientWithPartitionKey)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -121,7 +121,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with partition key null"() {
+    void "test client with partition key null"() {
         given:
         ClientWithPartitionKey client = context.getBean(ClientWithPartitionKey)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -172,11 +172,11 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class SentenceListener {
-        ConcurrentHashMap<String, Integer> entries = new ConcurrentHashMap<>()
+        Map<String, Integer> entries = new ConcurrentHashMap<>()
 
         @Topic(KafkaPartitionSpec.TOPIC_WORDS)
         void receive(@KafkaPartition int partition, String sentence) {
-            entries.put(sentence, partition)
+            entries[sentence] = partition
         }
     }
 }

@@ -8,7 +8,7 @@ import static io.micronaut.configuration.kafka.metrics.builder.MeterType.TIME_GA
 
 class MeterTypeSpec extends Specification {
 
-    def "test all the enums"() {
+    void "test all the enums"() {
         expect:
         MeterType.values() == [GAUGE, FUNCTION_COUNTER, TIME_GAUGE]
     }

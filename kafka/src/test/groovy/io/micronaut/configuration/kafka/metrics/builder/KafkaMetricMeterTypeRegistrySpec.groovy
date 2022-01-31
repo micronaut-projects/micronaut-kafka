@@ -8,7 +8,7 @@ import static io.micronaut.configuration.kafka.metrics.builder.MeterType.TIME_GA
 
 class KafkaMetricMeterTypeRegistrySpec extends Specification {
 
-    def "test lookup method"() {
+    void "test lookup method"() {
         given:
         def registry = new KafkaMetricMeterTypeRegistry()
 

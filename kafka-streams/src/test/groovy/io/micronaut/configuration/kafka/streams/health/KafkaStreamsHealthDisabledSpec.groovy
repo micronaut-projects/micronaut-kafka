@@ -4,7 +4,7 @@ import io.micronaut.configuration.kafka.streams.AbstractTestContainersSpec
 
 class KafkaStreamsHealthDisabledSpec extends AbstractTestContainersSpec {
 
-    def "health check disabled"() {
+    void "health check disabled"() {
         when:
         def bean = context.findBean(KafkaStreamsHealth)
 
@@ -14,8 +14,8 @@ class KafkaStreamsHealthDisabledSpec extends AbstractTestContainersSpec {
 
     @Override
     protected List<Object> getConfiguration() {
-        List<Object> config = super.getConfiguration()
+        List<Object> config = super.configuration
         config << "kafka.health.streams.enabled" << 'false'
-        return config
+        config
     }
 }

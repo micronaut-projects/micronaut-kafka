@@ -8,6 +8,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.annotation.MessageHeader
@@ -30,10 +31,10 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
                  (EMBEDDED_TOPICS)            : ['words', 'books', 'words-records', 'books-records']]
     }
 
-    def setupSpec() {
+    void setupSpec() {
         httpClient = context.createBean(
                 HttpClient,
-                embeddedServer.getURL(),
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
     }
@@ -50,7 +51,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
         then:
         conditions.eventually {
-            def response = Mono.from(httpClient.exchange("/metrics", Map)).block()
+            HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
             !result.names.contains("kafka.consumer.record-error-rate")
             result.names.contains("kafka.producer.count")

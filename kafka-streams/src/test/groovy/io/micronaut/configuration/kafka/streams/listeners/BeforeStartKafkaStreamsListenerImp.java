@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.streams.listeners;
 
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
 import io.micronaut.runtime.event.annotation.EventListener;
-
 import jakarta.inject.Singleton;
 
 @Singleton

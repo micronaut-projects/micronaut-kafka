@@ -432,7 +432,7 @@ class KafkaReactiveListenerSpec extends AbstractKafkaContainerSpec {
         Queue<Book> books = new ConcurrentLinkedDeque<>()
 
         void receiveSingle(Single<Book> book) {
-            books.add(book.blockingGet())
+            books << book.blockingGet()
         }
 
         void receiveFlowable(Flowable<Book> book) {
@@ -440,11 +440,11 @@ class KafkaReactiveListenerSpec extends AbstractKafkaContainerSpec {
         }
 
         void receiveFlux(Flux<Book> book) {
-            books.add(book.blockFirst())
+            books << book.blockFirst()
         }
 
         void receiveMono(Mono<Book> book) {
-            books.add(book.block())
+            books << book.block()
         }
     }
 

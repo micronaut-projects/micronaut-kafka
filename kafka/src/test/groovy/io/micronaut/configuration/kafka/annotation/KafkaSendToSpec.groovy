@@ -204,7 +204,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         Queue<Integer> quantities = new ConcurrentLinkedDeque<>()
 
         void receiveQuantity(int q) {
-            quantities.add(q)
+            quantities << q
         }
     }
 

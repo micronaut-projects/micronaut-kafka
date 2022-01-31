@@ -53,7 +53,7 @@ class ManualAckSpec extends AbstractKafkaContainerSpec {
         @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
         @Topic(ManualAckSpec.TOPIC_SYNC)
         void receive(Product product, Acknowledgement acknowledgement) {
-            products.add(product)
+            products << product
 
             acknowledgement.ack()
         }

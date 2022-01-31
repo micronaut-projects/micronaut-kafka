@@ -62,7 +62,7 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
             if (count.getAndIncrement() == 1) {
                 throw new RuntimeException("Won't handle first")
             }
-            received.add(message)
+            received << message
         }
 
         @Override
@@ -88,7 +88,7 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
 
         @Override
         void handle(KafkaListenerException exception) {
-            this.exceptionHandled = true
+            exceptionHandled = true
         }
     }
 

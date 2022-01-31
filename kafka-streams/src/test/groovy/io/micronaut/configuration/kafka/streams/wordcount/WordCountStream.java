@@ -3,6 +3,8 @@ package io.micronaut.configuration.kafka.streams.wordcount;
 // tag::imports[]
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
@@ -12,8 +14,6 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
