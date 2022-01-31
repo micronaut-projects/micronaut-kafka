@@ -875,11 +875,11 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-import jakarta.inject.Singleton;
 import java.util.concurrent.Future;
 
 @Singleton
@@ -997,9 +997,9 @@ try {
 <div class="listingblock">
 <div class="title">Kafka Gradle Test Dependencies</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:2.8.0:test'
-testImplementation 'org.apache.kafka:kafka_2.12:2.8.0'
-testImplementation 'org.apache.kafka:kafka_2.12:2.8.0:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:N/A:test'
+testImplementation 'org.apache.kafka:kafka_2.12:N/A'
+testImplementation 'org.apache.kafka:kafka_2.12:N/A:test'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1011,18 +1011,18 @@ testImplementation 'org.apache.kafka:kafka_2.12:2.8.0:test'</code></pre>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;2.8.0&lt;/version&gt;
+  &lt;version&gt;N/A&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.8.0&lt;/version&gt;
+  &lt;version&gt;N/A&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
   &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;2.8.0&lt;/version&gt;
+  &lt;version&gt;N/A&lt;/version&gt;
   &lt;classifier&gt;test&lt;/classifier&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
@@ -1618,10 +1618,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="listingblock">
 <div class="title">Committing offsets with <code>ack()</code></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(
-    offsetReset = OffsetReset.EARLIEST,
-    offsetStrategy = OffsetStrategy.DISABLED <i class="conum" data-value="1"></i><b>(1)</b>
-)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) <i class="conum" data-value="1"></i><b>(1)</b>
 @Topic("awesome-products")
 void receive(Product product,
              Acknowledgement acknowledgement) { <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1655,8 +1652,6 @@ void receive(Product product,
 <div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.OffsetReset;
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -1665,10 +1660,10 @@ import org.apache.kafka.common.TopicPartition;
 
 import java.util.Collections;
 
-@KafkaListener(
-        offsetReset = OffsetReset.EARLIEST,
-        offsetStrategy = OffsetStrategy.DISABLED <i class="conum" data-value="1"></i><b>(1)</b>
-)
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST;
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED;
+
+@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) <i class="conum" data-value="1"></i><b>(1)</b>
 @Topic("awesome-products")
 void receive(Product product,
              long offset,
@@ -1682,7 +1677,6 @@ void receive(Product product,
             new TopicPartition(topic, partition),
             new OffsetAndMetadata(offset + 1, "my metadata")
     ));
-
 }</code></pre>
 </div>
 </div>
@@ -1721,11 +1715,11 @@ void receive(Product product,
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
+import io.micronaut.core.annotation.NonNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 
-import io.micronaut.core.annotation.NonNull;
 import java.util.Collection;
 
 @KafkaListener
@@ -2418,6 +2412,8 @@ public class MessageClientFallback implements MessageClient { <i class="conum" d
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
@@ -2427,8 +2423,6 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -2547,7 +2541,6 @@ public class WordCountListener {
 
     @Topic(WordCountStream.OUTPUT)
     void count(@KafkaKey String word, long count) {
-        System.out.println("word = " + word);
         wordCounts.put(word, count);
     }
 
@@ -2700,10 +2693,10 @@ public &lt;T&gt; Optional&lt;T&gt; getQueryableStore(String storeName, Queryable
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.configuration.kafka.streams.wordcount;
 
 import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
+import jakarta.inject.Singleton;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
-import jakarta.inject.Singleton;
 import java.util.Optional;
 
 /**
