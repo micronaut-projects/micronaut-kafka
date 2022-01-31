@@ -12,8 +12,6 @@ abstract class AbstractKafkaSpec extends Specification {
     }
 
     protected Map<String, Object> getConfiguration() {
-        Map<String, Object> config = [:]
-        config['spec.name'] = getClass().getSimpleName()
-        config
+        ['spec.name': getClass().simpleName]
     }
 }

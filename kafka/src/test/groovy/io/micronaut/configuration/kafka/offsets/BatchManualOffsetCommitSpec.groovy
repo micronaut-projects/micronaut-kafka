@@ -5,11 +5,10 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
-
-import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
@@ -61,13 +60,13 @@ class BatchManualOffsetCommitSpec extends AbstractKafkaContainerSpec {
                      List<String> topics,
                      Consumer kafkaConsumer) {
             int i = 0
-            for(p in products) {
+            for (p in products) {
 
-                this.products.add(p)
+                this.products << p
 
-                String topic = topics.get(i)
-                int partition = partitions.get(i)
-                long offset = offsets.get(i)
+                String topic = topics[i]
+                int partition = partitions[i]
+                long offset = offsets[i]
 
                 kafkaConsumer.commitSync(Collections.singletonMap(
                         new TopicPartition(topic, partition),

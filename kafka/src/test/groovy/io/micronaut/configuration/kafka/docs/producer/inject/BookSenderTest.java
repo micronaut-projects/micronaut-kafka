@@ -1,8 +1,8 @@
 package io.micronaut.configuration.kafka.docs.producer.inject;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
 import io.micronaut.context.ApplicationContext;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.junit.Test;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;

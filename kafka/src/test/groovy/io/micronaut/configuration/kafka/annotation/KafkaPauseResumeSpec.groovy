@@ -30,8 +30,8 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
         Consumer consumer = registry.getConsumer("fruit-client")
 
         then:
-        consumer != null
-        registry.getConsumerIds()
+        consumer
+        registry.consumerIds
         !registry.isPaused("fruit-client")
 
         when:
@@ -83,8 +83,7 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
 
         @Topic("fruits")
         void receive(@MessageBody String name) {
-            println "RECEIVED FRUIT $name"
-            fruits.add(name)
+            fruits << name
         }
     }
 }

@@ -1,4 +1,33 @@
 plugins {
-    id "io.micronaut.build.internal.kafka-base"
-    id "io.micronaut.build.internal.module"
+    id 'io.micronaut.build.internal.module'
+}
+
+dependencies {
+    annotationProcessor mn.micronaut.inject.java
+
+    api mn.micronaut.messaging
+
+    compileOnly mn.micronaut.management
+
+    implementation mn.reactor
+    implementation libs.jakarta.inject.api
+
+    testAnnotationProcessor mn.micronaut.inject.java
+
+    testImplementation libs.micronaut.micrometer
+    testImplementation mn.micronaut.test.spock
+    testImplementation mn.micronaut.inject.java
+    testImplementation mn.micronaut.management
+    testImplementation mn.reactor
+    testImplementation libs.testcontainers.kafka
+
+    testRuntimeOnly libs.micronaut.cache
+    testRuntimeOnly mn.micronaut.reactor
+    testRuntimeOnly mn.micronaut.http.server.netty
+    testRuntimeOnly mn.micronaut.management
+    testRuntimeOnly mn.micronaut.runtime
+}
+
+test {
+    maxHeapSize = '2048m'
 }

@@ -19,30 +19,30 @@ abstract class AbstractTestContainersSpec extends Specification {
     @Shared @AutoCleanup ApplicationContext context
     @Shared static KafkaContainer kafkaContainer = KafkaSetup.init()
 
-    def setupSpec() {
+    void setupSpec() {
         List<Object> config = ["kafka.bootstrap.servers", kafkaContainer.bootstrapServers]
         config.addAll(getConfiguration())
 
         embeddedServer = ApplicationContext.run(EmbeddedServer, CollectionUtils.mapOf(config as Object[]))
 
-        context = embeddedServer.getApplicationContext()
+        context = embeddedServer.applicationContext
     }
 
     protected List<Object> getConfiguration() {
-        return ['kafka.generic.config', "hello",
-                'kafka.streams.my-stream.application.id', 'my-stream',
-                'kafka.streams.my-stream.num.stream.threads', 10,
-                'kafka.streams.optimization-on.application.id', 'optimization-on',
-                'kafka.streams.optimization-on.topology.optimization', 'all',
-                'kafka.streams.optimization-off.application.id', 'optimization-off',
-                'kafka.streams.optimization-off.topology.optimization', 'none']
+        ['kafka.generic.config', "hello",
+         'kafka.streams.my-stream.application.id', 'my-stream',
+         'kafka.streams.my-stream.num.stream.threads', 10,
+         'kafka.streams.optimization-on.application.id', 'optimization-on',
+         'kafka.streams.optimization-on.topology.optimization', 'all',
+         'kafka.streams.optimization-off.application.id', 'optimization-off',
+         'kafka.streams.optimization-off.topology.optimization', 'none']
     }
 
-    def cleanupSpec() {
+    void cleanupSpec() {
         try {
             embeddedServer.stop()
             log.warn("Stopped containers!")
-        } catch (Exception ignore) {
+        } catch (Exception ignored) {
             log.error("Could not stop containers")
         }
         embeddedServer?.close()

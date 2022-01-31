@@ -23,10 +23,10 @@ class KafkaUniqueGroupIdSpec extends AbstractEmbeddedServerSpec {
                 [(EMBEDDED_TOPICS): [KafkaUniqueGroupIdSpec.TOPIC]]
     }
 
-    def setupSpec() {
+    void setupSpec() {
         httpClient = context.createBean(
                 HttpClient,
-                embeddedServer.getURL(),
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false))
     }
 

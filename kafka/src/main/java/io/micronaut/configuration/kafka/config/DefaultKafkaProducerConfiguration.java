@@ -25,8 +25,8 @@ import java.util.Properties;
 /**
  * The default {@link org.apache.kafka.clients.producer.KafkaProducer} configuration when no default is specified.
  *
- * @param <K>
- * @param <V>
+ * @param <K> The key deserializer type
+ * @param <V> The value deserializer type
  */
 @Requires(missingProperty = KafkaProducerConfiguration.PREFIX + ".default")
 @Primary

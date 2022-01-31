@@ -1,17 +1,16 @@
 plugins {
-    id "java"
-    id "groovy"
-    id "io.micronaut.application"
+    id 'groovy'
+    id 'io.micronaut.application'
 }
 
 application {
-    mainClass = "example.Application"
+    mainClass = 'example.Application'
 }
 
 micronaut {
     version project.ext.micronautVersion
-    runtime "netty"
-    testRuntime "spock"
+    runtime 'netty'
+    testRuntime 'spock'
 }
 
 repositories {
@@ -19,12 +18,12 @@ repositories {
 }
 
 dependencies {
-    implementation project(":kafka")
-    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-    testImplementation "io.micronaut:micronaut-http-client"
-    testImplementation platform("org.testcontainers:testcontainers-bom:$testContainersVersion")
-    testImplementation "org.testcontainers:kafka"
-    testImplementation "org.testcontainers:spock"
-    testImplementation "io.micronaut.test:micronaut-test-spock:3.0.5"
-    testImplementation  "io.micronaut.test:micronaut-test-core:3.0.4"
+    implementation projects.kafka
+    implementation mn.jakarta.annotation.api
+
+    testImplementation mn.micronaut.http.client
+    testImplementation libs.testcontainers.kafka
+    testImplementation libs.testcontainers.spock
+    testImplementation "io.micronaut.test:micronaut-test-spock:$micronautTestVersion"
+    testImplementation "io.micronaut.test:micronaut-test-core:$micronautTestVersion"
 }

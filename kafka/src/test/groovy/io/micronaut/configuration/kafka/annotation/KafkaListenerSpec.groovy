@@ -10,6 +10,8 @@ import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
+import io.micronaut.core.annotation.Nullable
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.MessageHeaders
@@ -26,8 +28,6 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
 
-import io.micronaut.core.annotation.Nullable
-
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
@@ -43,10 +43,10 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
                  (EMBEDDED_TOPICS): ['words', 'books', 'words-records', 'books-records']]
     }
 
-    def setupSpec() {
+    void setupSpec() {
         httpClient = context.createBean(
                 HttpClient,
-                embeddedServer.getURL(),
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
     }
@@ -74,7 +74,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
         and:
         conditions.eventually {
-            def response = Mono.from(httpClient.exchange("/metrics", Map)).block()
+            HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")

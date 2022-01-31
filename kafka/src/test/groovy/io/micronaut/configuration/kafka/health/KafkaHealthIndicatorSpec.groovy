@@ -23,7 +23,7 @@ class KafkaHealthIndicatorSpec extends Specification {
         KafkaContainer kafkaContainer = new KafkaContainer()
         kafkaContainer.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                "kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()
+                "kafka.bootstrap.servers": kafkaContainer.bootstrapServers
         )
 
         when:
@@ -64,12 +64,12 @@ class KafkaHealthIndicatorSpec extends Specification {
         KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
         container.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.getBootstrapServers(),
+                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.bootstrapServers,
                 "kafka.health.enabled": configvalue
         )
 
         when:
-        def optional = applicationContext.findBean(KafkaHealthIndicator)
+        Optional<KafkaHealthIndicator> optional = applicationContext.findBean(KafkaHealthIndicator)
 
         then:
         !optional.isPresent()
@@ -86,8 +86,12 @@ class KafkaHealthIndicatorSpec extends Specification {
     void "kafka health indicator handle missing replication factor config"() {
         given:
         Collection<ConfigEntry> configEntries = []
-        if (offsetFactor) { configEntries.add(new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)) }
-        if (defaultFactor) { configEntries.add(new ConfigEntry(DEFAULT_REPLICATION_PROPERTY, defaultFactor)) }
+        if (offsetFactor) {
+            configEntries << new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)
+        }
+        if (defaultFactor) {
+            configEntries << new ConfigEntry(DEFAULT_REPLICATION_PROPERTY, defaultFactor)
+        }
         Config config = new Config(configEntries)
 
         when:

@@ -11,7 +11,7 @@ import static java.util.concurrent.TimeUnit.SECONDS
 
 class KafkaMetricMeterTypeSpec extends Specification {
 
-    def "should be able to construct with no args"() {
+    void "should be able to construct with no args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType()
 
@@ -22,7 +22,7 @@ class KafkaMetricMeterTypeSpec extends Specification {
         kafkaMetricMeterType.description == null
     }
 
-    def "should be able to construct with some args"() {
+    void "should be able to construct with some args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test")
 
@@ -33,7 +33,7 @@ class KafkaMetricMeterTypeSpec extends Specification {
         kafkaMetricMeterType.description == "test"
     }
 
-    def "should be able to construct with more args"() {
+    void "should be able to construct with more args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test", "test2")
 
@@ -44,7 +44,7 @@ class KafkaMetricMeterTypeSpec extends Specification {
         kafkaMetricMeterType.description == "test"
     }
 
-    def "should be able to construct with even more args"() {
+    void "should be able to construct with even more args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(FUNCTION_COUNTER, "test", SECONDS)
 
@@ -55,7 +55,7 @@ class KafkaMetricMeterTypeSpec extends Specification {
         kafkaMetricMeterType.description == "test"
     }
 
-    def "should be able to construct with args"() {
+    void "should be able to construct with args"() {
         when:
         KafkaMetricMeterType kafkaMetricMeterType = new KafkaMetricMeterType(TIME_GAUGE, "a", DAYS, "c")
 

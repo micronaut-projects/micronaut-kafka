@@ -1,37 +1,13 @@
 plugins {
-    id "io.micronaut.build.internal.kafka-module"
+    id 'io.micronaut.build.internal.kafka-module'
 }
 
 dependencies {
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-    annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
-    api project(":kafka")
-    api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-streams:${kafkaVersion}"
-    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-    implementation 'io.projectreactor:reactor-core:3.4.13'
-    compileOnly "io.micronaut:micronaut-management"
+    api projects.kafka
+    api libs.kafka.streams
 
-    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testCompileOnly mn.micronaut.inject.groovy
 
-    testImplementation "io.micronaut:micronaut-management"
-    testCompileOnly "io.micronaut:micronaut-inject-groovy"
-    testImplementation "io.micronaut.test:micronaut-test-spock"
-    testImplementation "io.micronaut:micronaut-inject-java"
-    testImplementation "io.micronaut:micronaut-inject"
-    testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.8"
-    testImplementation "io.micronaut:micronaut-management"
-    testImplementation "org.testcontainers:kafka:$testContainersVersion"
-    testImplementation "org.testcontainers:spock:$testContainersVersion"
-
-    testRuntimeOnly "io.micronaut:micronaut-runtime"
-    testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
-    testRuntimeOnly "io.micronaut:micronaut-management"
-    testRuntimeOnly "io.micronaut.cache:micronaut-cache-core"
-    testRuntimeOnly "io.micronaut.reactor:micronaut-reactor:2.1.1"
-}
-
-test {
-    maxHeapSize = "2048m"
+    testImplementation mn.micronaut.inject
+    testImplementation libs.testcontainers.spock
 }

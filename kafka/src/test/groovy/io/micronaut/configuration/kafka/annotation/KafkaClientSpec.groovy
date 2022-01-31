@@ -23,7 +23,8 @@ import static java.util.concurrent.TimeUnit.SECONDS
 
 class KafkaClientSpec extends AbstractKafkaSpec {
 
-    private @AutoCleanup ApplicationContext ctx
+    @AutoCleanup
+    private ApplicationContext ctx
 
     void setup() {
         ctx = ApplicationContext.run(
@@ -61,7 +62,7 @@ class KafkaClientSpec extends AbstractKafkaSpec {
         client.sendSentence("test", "hello-world").get(1, SECONDS)
 
         then:
-        def e = thrown(ExecutionException)
+        ExecutionException e = thrown()
         e.cause instanceof MessagingClientException
     }
 

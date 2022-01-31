@@ -5,11 +5,11 @@ import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.docs.consumer.config.Product;
+import io.micronaut.core.annotation.NonNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 
-import io.micronaut.core.annotation.NonNull;
 import java.util.Collection;
 // end::imports[]
 

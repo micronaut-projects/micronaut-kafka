@@ -4,9 +4,6 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
-import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration
-import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration
-import io.micronaut.configuration.kafka.processor.KafkaConsumerProcessor
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource

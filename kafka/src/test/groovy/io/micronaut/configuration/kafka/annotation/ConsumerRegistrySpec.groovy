@@ -1,10 +1,7 @@
-
 package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.configuration.kafka.ConsumerRegistry
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
@@ -17,9 +14,14 @@ import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentSkipListSet
 
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
+
 class ConsumerRegistrySpec extends Specification {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared
+    @AutoCleanup
+    KafkaContainer kafkaContainer = new KafkaContainer()
 
     @Shared
     @AutoCleanup
@@ -29,20 +31,17 @@ class ConsumerRegistrySpec extends Specification {
     @AutoCleanup
     ApplicationContext context
 
-    def setupSpec() {
+    void setupSpec() {
         kafkaContainer.start()
         embeddedServer = ApplicationContext.run(EmbeddedServer,
-                CollectionUtils.mapOf(
-                        "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-                        "micrometer.metrics.enabled", true,
-                        'endpoints.metrics.sensitive', false,
-                        AbstractKafkaConfiguration.EMBEDDED_TOPICS, ["fruits"]
-                )
-        )
+                ['kafka.bootstrap.servers'    : kafkaContainer.bootstrapServers,
+                 'micrometer.metrics.enabled' : true,
+                 'endpoints.metrics.sensitive': false,
+                 (EMBEDDED_TOPICS)            : ['fruits']])
         context = embeddedServer.applicationContext
     }
 
-    void "test consumer registry"() {
+    void 'test consumer registry'() {
         given:
         PollingConditions conditions = new PollingConditions(timeout: 30, delay: 1)
         ConsumerRegistry registry = context.getBean(ConsumerRegistry)
@@ -50,68 +49,58 @@ class ConsumerRegistrySpec extends Specification {
         BicycleListener listener = context.getBean(BicycleListener)
 
         when:
-        Consumer consumer = registry.getConsumer("bicycle-client")
+        Consumer consumer = registry.getConsumer('bicycle-client')
 
         then:
         consumer
 
         when:
-        Set<String> consumerIds = registry.getConsumerIds()
+        Set<String> consumerIds = registry.consumerIds
 
         then:
-        consumerIds.contains("bicycle-client")
+        consumerIds.contains 'bicycle-client'
 
         when:
-        Set<String> subscription = registry.getConsumerSubscription("bicycle-client")
+        Set<String> subscription = registry.getConsumerSubscription('bicycle-client')
 
         then:
         subscription
         subscription.size() == 1
-        subscription[0] == "bicycles"
+        subscription[0] == 'bicycles'
 
         when:
-        registry.getConsumerAssignment("bicycle-client")
-
-        then:
-        IllegalArgumentException e = thrown(IllegalArgumentException)
-        e.message == "No consumer assignment found for ID: bicycle-client"
-
-        when:
-        client.send("Raleigh", "Professional")
+        client.send 'Raleigh', 'Professional'
 
         then:
         conditions.eventually {
             listener.bicycles.size() == 1
-            listener.bicycles[0] == "Professional"
+            listener.bicycles[0] == 'Professional'
         }
 
         when:
-        Set<TopicPartition> topicPartitions = registry.getConsumerAssignment("bicycle-client")
+        Set<TopicPartition> topicPartitions = registry.getConsumerAssignment('bicycle-client')
 
         then:
         topicPartitions
         topicPartitions.size() == 1
-        topicPartitions[0].topic() == "bicycles"
+        topicPartitions[0].topic() == 'bicycles'
         topicPartitions[0].partition() == 0
     }
 
     @KafkaClient
     static interface BicycleClient {
-
-        @Topic("bicycles")
+        @Topic('bicycles')
         void send(@KafkaKey String make, @MessageBody String model)
     }
 
-    @KafkaListener(clientId = "bicycle-client", offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(clientId = 'bicycle-client', offsetReset = EARLIEST)
     static class BicycleListener {
 
         Set<String> bicycles = new ConcurrentSkipListSet<>()
 
-        @Topic("bicycles")
+        @Topic('bicycles')
         void receive(@MessageBody String model) {
-            println "RECEIVED BICYCLE $model"
-            bicycles.add(model)
+            bicycles << model
         }
-
     }
 }

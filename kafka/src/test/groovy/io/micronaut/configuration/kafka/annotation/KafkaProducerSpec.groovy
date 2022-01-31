@@ -9,6 +9,7 @@ import io.micronaut.context.event.BeanCreatedEventListener
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.SendTo
 import io.opentracing.mock.MockTracer
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.common.header.Header
@@ -21,7 +22,6 @@ import org.testcontainers.containers.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
-import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -38,10 +38,10 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
     @Shared @AutoCleanup ApplicationContext context
 
-    def setupSpec() {
+    void setupSpec() {
         kafkaContainer.start()
         context =  ApplicationContext.builder(
-                getConfiguration() +
+                configuration +
                 ['micronaut.application.name'                : 'test-app',
                  "kafka.schema.registry.url"                 : "http://localhot:8081",
                  "kafka.producers.named.key.serializer"      : StringSerializer.name,
@@ -58,12 +58,12 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
                  "kafka.consumers.default.value.deserializer": StringDeserializer.name,
                  "kafka.consumers.default.value-deserializer": StringDeserializer.name,
                  "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
-                 "kafka.bootstrap.servers"                   : kafkaContainer.getBootstrapServers(),
+                 "kafka.bootstrap.servers"                   : kafkaContainer.bootstrapServers,
                  (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
         ).singletons(mockTracer).start()
     }
 
-    def "test customize defaults"() {
+    void "test customize defaults"() {
         given:
         UserClient client = context.getBean(UserClient)
         UserListener userListener = context.getBean(UserListener)
@@ -83,7 +83,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         }
     }
 
-    def "test multiple consumer methods"() {
+    void "test multiple consumer methods"() {
         given:
         ProductClient client = context.getBean(ProductClient)
         ProductListener userListener = context.getBean(ProductListener)
@@ -106,7 +106,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         context.getBean(KafkaProducerInstrumentation).counter.get() > 0
     }
 
-    def "test collection of headers"() {
+    void "test collection of headers"() {
         given:
         BicycleClient client = context.getBean(BicycleClient)
         BicycleListener listener = context.getBean(BicycleListener)
@@ -128,7 +128,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         }
     }
 
-    def "test kafka record headers"() {
+    void "test kafka record headers"() {
         given:
         BicycleClient client = context.getBean(BicycleClient)
         BicycleListener listener = context.getBean(BicycleListener)
@@ -259,7 +259,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         @Override
         Consumer<?, ?> onCreated(BeanCreatedEvent<Consumer<?, ?>> event) {
             counter.incrementAndGet()
-            return event.getBean()
+            event.bean
         }
     }
 
@@ -272,7 +272,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
         @Override
         Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
             counter.incrementAndGet()
-            return event.getBean()
+            event.bean
         }
     }
 }
