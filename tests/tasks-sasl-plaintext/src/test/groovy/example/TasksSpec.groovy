@@ -1,18 +1,16 @@
 package example
 
-
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import io.micronaut.test.support.TestPropertyProvider
+import jakarta.inject.Inject
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.MountableFile
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
-
-import jakarta.inject.Inject
 
 @MicronautTest
 class TasksSpec extends Specification implements TestPropertyProvider {
@@ -32,18 +30,16 @@ class TasksSpec extends Specification implements TestPropertyProvider {
 
     PollingConditions pollingConditions = new PollingConditions(initialDelay: 2, timeout: 100)
 
-    def 'should process tasks'() {
+    void 'should process tasks'() {
         expect:
-            pollingConditions.eventually {
-                client.toBlocking().retrieve("/tasks/processed-count", Integer) > 3
-            }
+        pollingConditions.eventually {
+            client.toBlocking().retrieve("/tasks/processed-count", Integer) > 3
+        }
     }
 
     @Override
     Map<String, String> getProperties() {
         kafkaContainer.start()
-        return [
-                'kafka.bootstrap.servers': kafkaContainer.bootstrapServers
-        ]
+        ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
     }
 }

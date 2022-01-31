@@ -40,7 +40,6 @@ public interface TransactionalProducerRegistry {
      * @param <K> The key generic type
      * @param <V> The value generic type
      * @return The producer
-     * @since
      */
     @NonNull
     <K, V> Producer<K, V> getTransactionalProducer(@Nullable String clientId, String transactionalId, Argument<K> keyType, Argument<V> valueType);

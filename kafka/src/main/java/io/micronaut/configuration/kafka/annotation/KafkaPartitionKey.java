@@ -17,14 +17,19 @@ package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.core.bind.annotation.Bindable;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Parameter level annotation for Kafka producers to indicate which parameter to compute the Kafka Partition from.
  *
  * <p>The partition is computed by first serializing the object, using an appropriate serializer from
  * {@link io.micronaut.configuration.kafka.serde.SerdeRegistry} as determined by, and then computing the partition
- * number using the same algorithm as Kafka's own {@code DefaultStrategy} ({@code murmur2})<p/>
+ * number using the same algorithm as Kafka's own {@code DefaultStrategy} ({@code murmur2})</p>
  *
  * <p>If the provided value is {@code null} then the configured/default partitioning strategy takes place.</p>
  *

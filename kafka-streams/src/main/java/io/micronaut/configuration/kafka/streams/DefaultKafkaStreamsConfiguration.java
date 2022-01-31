@@ -30,8 +30,8 @@ import java.util.Properties;
  *
  * @author graemerocher
  * @since 1.0
- * @param <K>
- * @param <V>
+ * @param <K> The key deserializer type
+ * @param <V> The value deserializer type
  */
 @Requires(missingProperty = KafkaStreamsConfiguration.PREFIX + ".default")
 @Singleton
