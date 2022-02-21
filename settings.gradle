@@ -16,7 +16,6 @@ include 'kafka-streams'
 include 'tests:tasks-sasl-plaintext'
 
 enableFeaturePreview 'TYPESAFE_PROJECT_ACCESSORS'
-enableFeaturePreview 'VERSION_CATALOGS'
 
 dependencyResolutionManagement {
     repositories {
