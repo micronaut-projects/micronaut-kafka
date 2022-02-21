@@ -169,7 +169,7 @@ If you are publishing a milestone or release candidate, check the pre-release ch
 Note that the release tags must be preceded with `v`, e.g.: `v1.2.3`.
 
 Once you publish the GitHub release, the
-[Release GitHub Action workflow](https://github.com/micronaut-projects/micronaut-kafka/blob/master/.github/workflows/release.yml)
+[Release GitHub Action workflow](https://github.com/micronaut-projects/micronaut-project-template/blob/master/.github/workflows/release.yml)
 will kick off, performing the following steps:
 
 * Pre-release: sets the `projectVersion` property in `gradle.properties` to the release version, and commit and pushes

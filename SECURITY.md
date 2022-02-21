@@ -10,7 +10,7 @@ receiving such patches depend on the CVSS v3.0 Rating:
 
 ## Reporting a Vulnerability
 
-Please report (suspected) security vulnerabilities to
-**[Github Security Advisories](https://github.com/micronaut-projects/micronaut-kafka/security/advisories/new)**. You will receive a response from
+Please responsibly disclose (suspected) security vulnerabilities to
+**[The Micronaut Foundation](foundation@micronaut.io)**. You will receive a response from
 us within 48 hours. If the issue is confirmed, we will release a patch as soon
 as possible depending on complexity but historically within a few days.
