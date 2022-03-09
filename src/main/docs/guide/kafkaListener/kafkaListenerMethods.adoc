@@ -129,7 +129,7 @@ Note that in this case the method returns an `rx:Single[]` this indicates to Mic
 
 The idea here is that you are able to write consumers that don't block, however care must be taken in the case where an error occurs in the `doOnSuccess` method otherwise the message could be lost. You could for example re-deliver the message in case of an error.
 
-Alternatively, you can use the ann:core.annotation.Blocking[] annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the `poll` loop, preventing offsets from being committed automatically:
+Alternatively, you can use the https://micronaut-projects.github.io/micronaut-core/latest/api/io/micronaut/core/annotation/Blocking.html[@Blocking] annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the `poll` loop, preventing offsets from being committed automatically:
 
 .Blocking with Reactive Consumers
 [source,java]
