@@ -8,7 +8,7 @@ This will create a project with the minimum necessary configuration for Kafka.
 
 == Kafka Messaging Application
 
-The Micronaut CLI includes the ability to create Kafka-based messaging applications designed to implement message-driven microservices. 
+The Micronaut CLI includes the ability to create Kafka-based messaging applications designed to implement message-driven microservices.
 
 To create a Message-Driven Microservice with Micronaut + Kafka use the `create-messaging-app` command:
 
@@ -21,9 +21,9 @@ As you'd expect, you can start the application with `./gradlew run` (for Gradle)
 Within the new project, you can now run the Kafka-specific code generation commands:
 
 ----
-$ mn create-kafka-producer Message
+$ mn create-kafka-producer MessageProducer
 | Rendered template Producer.java to destination src/main/java/my/kafka/app/MessageProducer.java
 
-$ mn create-kafka-listener Message
+$ mn create-kafka-listener MessageListener
 | Rendered template Listener.java to destination src/main/java/my/kafka/app/MessageListener.java
 ----
