@@ -1350,7 +1350,7 @@ public Mono&lt;Product&gt; receive(@KafkaKey String brand,  <i class="conum" dat
 <p>The idea here is that you are able to write consumers that don&#8217;t block, however care must be taken in the case where an error occurs in the <code>doOnSuccess</code> method otherwise the message could be lost. You could for example re-deliver the message in case of an error.</p>
 </div>
 <div class="paragraph">
-<p>Alternatively, you can use the <a href="../api/io/micronaut/core/annotation/Blocking.html">@Blocking</a> annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the <code>poll</code> loop, preventing offsets from being committed automatically:</p>
+<p>Alternatively, you can use the <a href="https://micronaut-projects.github.io/micronaut-core/latest/api/io/micronaut/core/annotation/Blocking.html">@Blocking</a> annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the <code>poll</code> loop, preventing offsets from being committed automatically:</p>
 </div>
 <div class="listingblock">
 <div class="title">Blocking with Reactive Consumers</div>
