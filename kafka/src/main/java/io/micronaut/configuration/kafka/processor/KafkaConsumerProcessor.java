@@ -363,15 +363,15 @@ public class KafkaConsumerProcessor
         }
         final Optional keyDeserializer = consumerConfiguration.getKeyDeserializer();
         if (consumerConfiguration.getKeyDeserializer().isPresent()) {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), method);
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), logMethod(method));
         } else {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), method);
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), logMethod(method));
         }
         final Optional valueDeserializer = consumerConfiguration.getValueDeserializer();
         if (valueDeserializer.isPresent()) {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), method);
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), logMethod(method));
         } else {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), method);
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), logMethod(method));
         }
     }
 
@@ -504,7 +504,9 @@ public class KafkaConsumerProcessor
 
         for (final ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
 
-            LOG.trace("Kafka consumer [{}] received record: {}", method, consumerRecord);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Kafka consumer [{}] received record: {}", logMethod(method), consumerRecord);
+            }
 
             if (trackPartitions) {
                 final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
@@ -658,7 +660,10 @@ public class KafkaConsumerProcessor
                 } else {
                     kafkaConsumer.subscribe(topics);
                 }
-                LOG.info("Kafka listener [{}] subscribed to topics: {}", method, topics);
+
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod(method), topics);
+                }
             }
 
             if (hasPatterns) {
@@ -674,7 +679,9 @@ public class KafkaConsumerProcessor
                     } else {
                         kafkaConsumer.subscribe(compiledPattern);
                     }
-                    LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", method, pattern);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", logMethod(method), pattern);
+                    }
                 }
             }
         }
@@ -846,7 +853,7 @@ public class KafkaConsumerProcessor
             List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
             LOG.trace("Method [{}] produced record metadata: {}", method, listRecords);
         } else {
-            recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata));
+            recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", logMethod(method), recordMetadata));
         }
     }
 
@@ -955,6 +962,10 @@ public class KafkaConsumerProcessor
                 LOG.error("Error asynchronously committing Kafka offsets [{}]: {}", offsets, exception.getMessage(), exception);
             }
         };
+    }
+
+    private static String logMethod(ExecutableMethod<?, ?> method) {
+        return method.getDeclaringType().getSimpleName() + "#" + method.getName();
     }
 
     /**
@@ -1087,8 +1098,10 @@ public class KafkaConsumerProcessor
             final List<TopicPartition> toResume = paused.stream()
                     .filter(topicPartition -> _pauseRequests == null || !_pauseRequests.contains(topicPartition))
                     .collect(Collectors.toList());
-            LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", clientId, toResume);
-            kafkaConsumer.resume(toResume);
+            if (!toResume.isEmpty()) {
+                LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", clientId, toResume);
+                kafkaConsumer.resume(toResume);
+            }
             if (_pausedTopicPartitions != null) {
                 toResume.forEach(_pausedTopicPartitions::remove);
             }

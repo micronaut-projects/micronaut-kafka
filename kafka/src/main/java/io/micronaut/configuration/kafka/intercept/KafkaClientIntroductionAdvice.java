@@ -192,7 +192,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                     for (Object o : batchValue) {
                         ProducerRecord record = buildProducerRecord(context, producerState, o);
                         if (LOG.isTraceEnabled()) {
-                            LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
+                            LOG.trace("@KafkaClient method [" + logMethod(context) + "] Sending producer record: " + record);
                         }
 
                         Object result;
@@ -213,7 +213,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
                 } else {
                     ProducerRecord record = buildProducerRecord(context, producerState, value);
 
-                    LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("@KafkaClient method [{}] Sending producer record: {}", logMethod(context), record);
+                    }
 
                     Object result;
                     if (producerState.maxBlock != null) {
@@ -318,7 +320,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
 
             ProducerRecord record = buildProducerRecord(context, producerState, value);
             if (LOG.isTraceEnabled()) {
-                LOG.trace("@KafkaClient method [" + context + "] Sending producer record: " + record);
+                LOG.trace("@KafkaClient method [" + logMethod(context) + "] Sending producer record: " + record);
             }
 
             boolean transactional = producerState.transactional;
@@ -422,8 +424,9 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
         Argument<?> finalReturnType = returnType;
         Flux<Object> sendFlowable = valueFlowable.flatMap(o -> {
             ProducerRecord record = buildProducerRecord(context, producerState, o);
-
-            LOG.trace("@KafkaClient method [{}] Sending producer record: {}", context, record);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("@KafkaClient method [{}] Sending producer record: {}", logMethod(context), record);
+            }
 
             return producerSend(kafkaProducer, record)
                     .map(metadata -> convertResult(metadata, finalReturnType, o, producerState.bodyArgument))
@@ -725,6 +728,10 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
                     transactional, transactionalId, maxBlock, isBatchSend, bodyArgument);
         });
+    }
+
+    private static String logMethod(ExecutableMethod<?, ?> method) {
+        return method.getDeclaringType().getSimpleName() + "#" + method.getName();
     }
 
     private static final class ProducerState {
