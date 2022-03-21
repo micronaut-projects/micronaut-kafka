@@ -1109,7 +1109,7 @@ public class KafkaConsumerProcessor
     }
 
     /**
-     * Topic retry status
+     * Topic retry status.
      */
     private static final class PartitionRetryState {
         long currentRetryOffset;
