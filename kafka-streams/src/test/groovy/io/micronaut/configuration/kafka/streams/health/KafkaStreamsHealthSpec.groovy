@@ -42,15 +42,20 @@ class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
         HealthResult healthLevelTwo = ((Map<String, HealthResult>) healthLevelOne.details).find { it.key == "micronaut-kafka-streams" }?.value
         healthLevelTwo.name == "micronaut-kafka-streams"
         healthLevelTwo.status == UP
-        (healthLevelTwo.details as Map).size() == 8
-        (healthLevelTwo.details as Map).containsKey("adminClientId")
-        (healthLevelTwo.details as Map).containsKey("restoreConsumerClientId")
-        (healthLevelTwo.details as Map).containsKey("threadState")
-        (healthLevelTwo.details as Map).containsKey("producerClientIds")
-        (healthLevelTwo.details as Map).containsKey("standbyTasks")
-        (healthLevelTwo.details as Map).containsKey("activeTasks")
-        (healthLevelTwo.details as Map).containsKey("consumerClientId")
-        (healthLevelTwo.details as Map).containsKey("threadName")
+
+        Map<String, Map<String, String>> threadsDetails = healthLevelTwo.details as Map<String, Map<String, String>>
+        threadsDetails.size() == 1
+
+        Map<String, String> threadDetails = threadsDetails.values().first()
+        threadDetails.size() == 8
+        threadDetails.containsKey("adminClientId")
+        threadDetails.containsKey("restoreConsumerClientId")
+        threadDetails.containsKey("threadState")
+        threadDetails.containsKey("producerClientIds")
+        threadDetails.containsKey("standbyTasks")
+        threadDetails.containsKey("activeTasks")
+        threadDetails.containsKey("consumerClientId")
+        threadDetails.containsKey("threadName")
     }
 
     void "test default if empty kafkaStream name"() {
