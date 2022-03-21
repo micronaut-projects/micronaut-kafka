@@ -5,7 +5,7 @@ class KafkaPartitionedErrorsSpec extends KafkaErrorsSpec {
     @Override
     void startKafka() {
         super.startKafka()
-        createTopic("test-topic", 5, 1)
+        createTopic("test-topic", 3, 1)
     }
 
     @Override

@@ -10,6 +10,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
@@ -38,6 +39,9 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     TestListenerWithErrorStrategyNone listenerWithErrorStrategyNone
 
     @Shared
+    TestListenerSyncPerRecordWithErrorStrategyRetryOnError10Times listenerSyncPerRecordWithErrorStrategyRetryOnError10Times
+
+    @Shared
     TestProducer producer
 
     @Override
@@ -54,6 +58,7 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         listenerWithErrorStrategyRetryOnError = context.getBean(TestListenerWithErrorStrategyRetryOnError)
         listenerWithErrorStrategyRetryOnError10Times = context.getBean(TestListenerWithErrorStrategyRetryOnError10Times)
         listenerWithErrorStrategyNone = context.getBean(TestListenerWithErrorStrategyNone)
+        listenerSyncPerRecordWithErrorStrategyRetryOnError10Times = context.getBean(TestListenerSyncPerRecordWithErrorStrategyRetryOnError10Times)
         producer = context.getBean(TestProducer)
     }
 
@@ -74,6 +79,10 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
             listenerWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
             listenerWithErrorStrategyRetryOnError10Times.events.size() == 29
             listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
+
+            listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
+            listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.events.size() == 29
+            listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
 
             listenerWithErrorStrategyNone.failed.size() == 1
             listenerWithErrorStrategyNone.events.stream().anyMatch(e -> e.count == 29)
@@ -110,6 +119,10 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
     @KafkaListener(offsetReset = EARLIEST)
     static class TestListenerWithErrorStrategyNone extends AbstractTestListener {
+    }
+
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = OffsetStrategy.SYNC_PER_RECORD, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10))
+    static class TestListenerSyncPerRecordWithErrorStrategyRetryOnError10Times extends AbstractTestListener {
     }
 
     @Slf4j
