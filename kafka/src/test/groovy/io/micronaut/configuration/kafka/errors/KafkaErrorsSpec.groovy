@@ -113,28 +113,32 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD))
     static class TestListenerWithErrorStrategyResumeAtNextRecord extends AbstractTestListener {
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR))
     static class TestListenerWithErrorStrategyRetryOnError extends AbstractTestListener {
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10))
     static class TestListenerWithErrorStrategyRetryOnError10Times extends AbstractTestListener {
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     @KafkaListener(offsetReset = EARLIEST)
     static class TestListenerWithErrorStrategyNone extends AbstractTestListener {
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = OffsetStrategy.SYNC_PER_RECORD, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10))
     static class TestListenerSyncPerRecordWithErrorStrategyRetryOnError10Times extends AbstractTestListener {
     }
 
     @Slf4j
-    @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     static abstract class AbstractTestListener implements KafkaListenerExceptionHandler {
 
         TreeSet<Integer> partitions = []

@@ -1,44 +1,22 @@
 package io.micronaut.configuration.kafka.annotation
 
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.ConsumerRegistry
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.MessageBody
-import io.micronaut.runtime.server.EmbeddedServer
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ConcurrentSkipListSet
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
-import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class ConsumerRegistrySpec extends Specification {
+class ConsumerRegistrySpec extends AbstractKafkaContainerSpec {
 
-    @Shared
-    @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer()
-
-    @Shared
-    @AutoCleanup
-    EmbeddedServer embeddedServer
-
-    @Shared
-    @AutoCleanup
-    ApplicationContext context
-
-    void setupSpec() {
-        kafkaContainer.start()
-        embeddedServer = ApplicationContext.run(EmbeddedServer,
-                ['kafka.bootstrap.servers'    : kafkaContainer.bootstrapServers,
-                 'micrometer.metrics.enabled' : true,
-                 'endpoints.metrics.sensitive': false,
-                 (EMBEDDED_TOPICS)            : ['fruits']])
-        context = embeddedServer.applicationContext
+    @Override
+    protected Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ['micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
     }
 
     void 'test consumer registry'() {
@@ -87,12 +65,14 @@ class ConsumerRegistrySpec extends Specification {
         topicPartitions[0].partition() == 0
     }
 
+    @Requires(property = 'spec.name', value = 'ConsumerRegistrySpec')
     @KafkaClient
     static interface BicycleClient {
         @Topic('bicycles')
         void send(@KafkaKey String make, @MessageBody String model)
     }
 
+    @Requires(property = 'spec.name', value = 'ConsumerRegistrySpec')
     @KafkaListener(clientId = 'bicycle-client', offsetReset = EARLIEST)
     static class BicycleListener {
 

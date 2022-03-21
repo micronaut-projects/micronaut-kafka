@@ -14,7 +14,7 @@ class DisabledSpec extends Specification {
 
     void "Starting app with kafka disabled works correctly"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run("kafka.enabled": "false")
+        ApplicationContext ctx = ApplicationContext.run("kafka.enabled": "false", "spec.name": getClass().getSimpleName())
 
         when: "test that the service has been created correctly"
         DisabledTestService service = ctx.getBean(DisabledTestService)
