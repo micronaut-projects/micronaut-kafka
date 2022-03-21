@@ -11,6 +11,7 @@ plugins {
 
 rootProject.name = 'kafka-parent'
 
+include 'kafka-bom'
 include 'kafka'
 include 'kafka-streams'
 include 'tests:tasks-sasl-plaintext'
