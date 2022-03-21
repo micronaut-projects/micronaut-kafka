@@ -24,6 +24,6 @@ dependencies {
     testImplementation mn.micronaut.http.client
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
-    testImplementation "io.micronaut.test:micronaut-test-spock:$micronautTestVersion"
-    testImplementation "io.micronaut.test:micronaut-test-core:$micronautTestVersion"
+    testImplementation "io.micronaut.test:micronaut-test-spock"
+    testImplementation "io.micronaut.test:micronaut-test-core"
 }
