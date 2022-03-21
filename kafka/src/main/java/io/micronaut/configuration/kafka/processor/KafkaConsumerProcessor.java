@@ -556,27 +556,33 @@ public class KafkaConsumerProcessor
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
         if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
-
-            if (consumerState.currentRetryOffset != consumerRecord.offset()) {
-                consumerState.currentRetryOffset = consumerRecord.offset();
-                consumerState.currentRetryCount = 1;
+            if (consumerState.partitionRetries == null) {
+                consumerState.partitionRetries = new HashMap<>();
+            }
+            int partition = consumerRecord.partition();
+            PartitionRetryState retryState = consumerState.partitionRetries.computeIfAbsent(partition, t -> new PartitionRetryState());
+            if (retryState.currentRetryOffset != consumerRecord.offset()) {
+                retryState.currentRetryOffset = consumerRecord.offset();
+                retryState.currentRetryCount = 1;
             } else {
-                consumerState.currentRetryCount++;
+                retryState.currentRetryCount++;
             }
 
-            if (consumerState.errorStrategyRetryCount >= consumerState.currentRetryCount) {
-                TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            if (consumerState.errorStrategyRetryCount >= retryState.currentRetryCount) {
+                TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
                 Duration retryDelay = consumerState.errorStrategyRetryDelay;
                 if (retryDelay != null) {
                     // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
-                    consumerState.pause();
-                    taskScheduler.schedule(retryDelay, (Runnable) consumerState::resume);
+                    Set<TopicPartition> paused = Collections.singleton(topicPartition);
+                    consumerState.pause(paused);
+                    taskScheduler.schedule(retryDelay, () -> consumerState.resume(paused));
                 }
                 // skip handle exception
                 return true;
             } else {
+                consumerState.partitionRetries.remove(partition);
                 // Skip the failing record
                 currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
             }
@@ -977,8 +983,8 @@ public class KafkaConsumerProcessor
         final Duration errorStrategyRetryDelay;
         final int errorStrategyRetryCount;
 
-        long currentRetryOffset;
-        int currentRetryCount;
+        @Nullable
+        Map<Integer, PartitionRetryState> partitionRetries;
 
         boolean autoPaused;
         final String producerClientId;
@@ -1100,6 +1106,14 @@ public class KafkaConsumerProcessor
             _pausedTopicPartitions.addAll(_pauseRequests);
         }
 
+    }
+
+    /**
+     * Topic retry status
+     */
+    private static final class PartitionRetryState {
+        long currentRetryOffset;
+        int currentRetryCount;
     }
 
 }
