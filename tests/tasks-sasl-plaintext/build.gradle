@@ -19,9 +19,8 @@ repositories {
 
 dependencies {
     implementation projects.kafka
-    implementation mn.jakarta.annotation.api
 
-    testImplementation mn.micronaut.http.client
+    testImplementation libs.micronaut.http.client
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
     testImplementation "io.micronaut.test:micronaut-test-spock"
