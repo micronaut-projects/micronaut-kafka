@@ -40,6 +40,11 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     @Shared
     TestProducer producer
 
+    @Override
+    protected int getConditionsTimeout() {
+        return 60
+    }
+
     protected Map<String, Object> getConfiguration() {
         super.configuration + ['kafka.consumers.default.max.poll.records': 10]
     }
