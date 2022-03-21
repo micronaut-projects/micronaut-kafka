@@ -30,6 +30,11 @@ abstract class AbstractEmbeddedServerSpec extends AbstractKafkaSpec {
         kafkaContainer.start()
     }
 
+    void cleanupSpec() {
+        context.stop()
+        kafkaContainer.stop()
+    }
+
     void createTopic(String name, int numPartitions, int replicationFactor) {
         try (def admin = AdminClient.create([(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG): kafkaContainer.bootstrapServers])) {
             admin.createTopics([new NewTopic(name, numPartitions, (short) replicationFactor)]).all().get()

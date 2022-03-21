@@ -9,6 +9,7 @@ import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.KafkaPartition
 import io.micronaut.configuration.kafka.annotation.OffsetReset
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -16,6 +17,7 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Introspected
+import org.jetbrains.annotations.NotNull
 import spock.lang.Shared
 
 import java.util.stream.IntStream
@@ -46,7 +48,7 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
     @Override
     protected int getConditionsTimeout() {
-        return 60
+        return 120
     }
 
     protected Map<String, Object> getConfiguration() {
@@ -68,40 +70,46 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
         then:
         conditions.eventually {
+            listenerWithErrorStrategyResumeAtNextRecord.exceptions.size() == 1
             listenerWithErrorStrategyResumeAtNextRecord.failed.size() == 1
             listenerWithErrorStrategyResumeAtNextRecord.events.size() == 29
-            listenerWithErrorStrategyResumeAtNextRecord.exceptions.size() == 1
 
+            listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
             listenerWithErrorStrategyRetryOnError.failed.size() == 2 // One retry
             listenerWithErrorStrategyRetryOnError.events.size() == 29
-            listenerWithErrorStrategyRetryOnError.exceptions.size() == 1
 
+            listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
             listenerWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
             listenerWithErrorStrategyRetryOnError10Times.events.size() == 29
-            listenerWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
 
+            listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
             listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.failed.size() == 11 // 10 times retry
             listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.events.size() == 29
-            listenerSyncPerRecordWithErrorStrategyRetryOnError10Times.exceptions.size() == 1
 
+            listenerWithErrorStrategyNone.exceptions.size() == 1
             listenerWithErrorStrategyNone.failed.size() == 1
             listenerWithErrorStrategyNone.events.stream().anyMatch(e -> e.count == 29)
-            listenerWithErrorStrategyNone.exceptions.size() == 1
         }
     }
 
     @Introspected
     @EqualsAndHashCode
-    @ToString
-    static class TestEvent {
+    static class TestEvent implements Comparable<TestEvent> {
 
-        int count
-
-        TestEvent() {
-        }
+        final int count
 
         TestEvent(int count) {
             this.count = count
+        }
+
+        @Override
+        String toString() {
+            count
+        }
+
+        @Override
+        int compareTo(@NotNull TestEvent o) {
+            return count <=> o.count
         }
     }
 
@@ -129,16 +137,19 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaErrorsSpec')
     static abstract class AbstractTestListener implements KafkaListenerExceptionHandler {
 
+        TreeSet<Integer> partitions = []
         List<TestEvent> failed = []
-        Set<TestEvent> events = []
+        TreeSet<TestEvent> events = []
         List<KafkaListenerException> exceptions = []
 
         @Topic("test-topic")
-        void receive(@KafkaKey UUID key, TestEvent event) {
+        void receive(@KafkaKey UUID key, @KafkaPartition int partition, TestEvent event) {
+            partitions << partition
             if (event.count == 3) {
                 failed << event
                 throw new IllegalArgumentException("BOOM")
             }
+//            System.out.println(partition + " " + event + " " + this)
             events << event
         }
 

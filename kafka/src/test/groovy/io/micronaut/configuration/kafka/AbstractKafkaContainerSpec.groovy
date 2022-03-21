@@ -18,6 +18,11 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
         )
     }
 
+    void cleanupSpec() {
+        context.stop()
+        kafkaContainer.stop()
+    }
+
     protected Map<String, String> getEnvVariables() {
         [:]
     }
