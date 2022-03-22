@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.HttpResponse
@@ -61,12 +62,12 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
             def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.preferred-read-replica", Map)).block()
             Map metricBody = preferredReadReplica.body()
             metricBody.availableTags.size() == 3
-            metricBody.availableTags*.tag == ["partition", "topic", "client-id"]
+            metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.PARTITION_TAG, ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
 
             def requestRate = Mono.from(httpClient.exchange("/metrics/kafka.consumer.request-rate", Map)).block()
             Map requestRateBody = requestRate.body()
             requestRateBody.availableTags.size() == 2
-            requestRateBody.availableTags*.tag == ["node-id", "client-id"]
+            requestRateBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.NODE_ID_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
         }
     }
 

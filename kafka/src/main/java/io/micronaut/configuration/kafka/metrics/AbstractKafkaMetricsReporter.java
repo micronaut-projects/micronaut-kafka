@@ -42,6 +42,10 @@ import java.util.stream.Collectors;
 @Internal
 public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
 
+    public static final String CLIENT_ID_TAG = "client-id";
+    public static final String TOPIC_TAG = "topic";
+    public static final String NODE_ID_TAG = "node-id";
+
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
 
     private List<KafkaMetric> metrics;
@@ -119,9 +123,9 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
      */
     protected Set<String> getIncludedTags() {
         HashSet<String> tags = new HashSet<>();
-        tags.add("client-id");
-        tags.add("topic");
-        tags.add("node-id");
+        tags.add(CLIENT_ID_TAG);
+        tags.add(TOPIC_TAG);
+        tags.add(NODE_ID_TAG);
         return tags;
     }
 

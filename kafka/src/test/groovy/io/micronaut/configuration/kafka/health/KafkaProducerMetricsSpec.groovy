@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.HttpResponse
@@ -62,7 +63,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
             def recordSendTotal = Mono.from(httpClient.exchange("/metrics/kafka.producer.record-send-total", Map)).block()
             Map metricBody = recordSendTotal.body()
             metricBody.availableTags.size() == 2
-            metricBody.availableTags*.tag == ["topic", "client-id"]
+            metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
         }
     }
 

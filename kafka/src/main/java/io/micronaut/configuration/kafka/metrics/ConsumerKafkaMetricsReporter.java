@@ -30,6 +30,8 @@ import java.util.Set;
 @TypeHint(ConsumerKafkaMetricsReporter.class)
 public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
+    public static final String PARTITION_TAG = "partition";
+
     private static final String CONSUMER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".consumer";
 
     /**
@@ -43,7 +45,7 @@ public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
     @Override
     protected Set<String> getIncludedTags() {
         HashSet<String> tags = new HashSet<>(super.getIncludedTags());
-        tags.add("partition");
+        tags.add(PARTITION_TAG);
         return tags;
     }
 
