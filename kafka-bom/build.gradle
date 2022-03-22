@@ -1,0 +1,8 @@
+plugins {
+    id "io.micronaut.build.internal.bom"
+}
+
+micronautBom {
+    // exclude example projects
+    extraExcludedProjects.add("tasks-sasl-plaintext")
+}

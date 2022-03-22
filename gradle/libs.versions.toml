@@ -1,21 +1,36 @@
 [versions]
-jakarta-inject-api = '2.0.1'
-kafka = '2.8.0'
+managed-kafka = '2.8.0'
+
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
-testcontainers = '1.16.3'
+
 zipkin-brave-kafka-clients = '5.13.7'
 
 [libraries]
-jakarta-inject-api = { module = 'jakarta.inject:jakarta.inject-api', version.ref = 'jakarta-inject-api' }
-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'kafka' }
-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'kafka' }
-micronaut-cache = { module = 'io.micronaut.cache:micronaut-cache-core', version = '' }
-micronaut-micrometer = { module = 'io.micronaut.micrometer:micronaut-micrometer-core', version = '' }
-micronaut-micrometer-statsd = { module = 'io.micronaut.micrometer:micronaut-micrometer-registry-statsd', version = '' }
-micronaut-tracing = { module = 'io.micronaut:micronaut-tracing', version = '' }
+managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
+managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
+
+micronaut-cache = { module = 'io.micronaut.cache:micronaut-cache-core' }
+micronaut-graal = { module = 'io.micronaut:micronaut-graal' }
+micronaut-http-client = { module = 'io.micronaut:micronaut-http-client' }
+micronaut-http-server-netty = { module = 'io.micronaut:micronaut-http-server-netty' }
+micronaut-inject-java = { module = 'io.micronaut:micronaut-inject-java' }
+micronaut-management = { module = 'io.micronaut:micronaut-management' }
+micronaut-messaging = { module = 'io.micronaut:micronaut-messaging' }
+micronaut-micrometer = { module = 'io.micronaut.micrometer:micronaut-micrometer-core' }
+micronaut-micrometer-statsd = { module = 'io.micronaut.micrometer:micronaut-micrometer-registry-statsd' }
+micronaut-reactor = { module = 'io.micronaut.reactor:micronaut-reactor' }
+micronaut-rxjava2 = { module = 'io.micronaut.rxjava2:micronaut-rxjava2' }
+micronaut-tracing = { module = 'io.micronaut:micronaut-tracing' }
+
+graal = { module = "org.graalvm.nativeimage:svm" }
+projectreactor = { module = 'io.projectreactor:reactor-core' }
+
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
-testcontainers-kafka = { module = 'org.testcontainers:kafka', version.ref = 'testcontainers' }
-testcontainers-spock = { module = 'org.testcontainers:spock', version.ref = 'testcontainers' }
+
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
+
+testcontainers-bom = { module = "org.testcontainers:testcontainers-bom" }
+testcontainers-kafka = { module = 'org.testcontainers:kafka' }
+testcontainers-spock = { module = 'org.testcontainers:spock' }

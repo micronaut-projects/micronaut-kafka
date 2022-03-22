@@ -3,29 +3,22 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor mn.micronaut.inject.java
+    api libs.micronaut.messaging
 
-    api mn.micronaut.messaging
+    compileOnly libs.micronaut.management
 
-    compileOnly mn.micronaut.management
+    implementation libs.projectreactor
 
-    implementation mn.reactor
-    implementation libs.jakarta.inject.api
-
-    testAnnotationProcessor mn.micronaut.inject.java
+    testAnnotationProcessor libs.micronaut.inject.java
 
     testImplementation libs.micronaut.micrometer
-    testImplementation mn.micronaut.test.spock
-    testImplementation mn.micronaut.inject.java
-    testImplementation mn.micronaut.management
-    testImplementation mn.reactor
+    testImplementation libs.micronaut.management
     testImplementation libs.testcontainers.kafka
 
     testRuntimeOnly libs.micronaut.cache
-    testRuntimeOnly mn.micronaut.reactor
-    testRuntimeOnly mn.micronaut.http.server.netty
-    testRuntimeOnly mn.micronaut.management
-    testRuntimeOnly mn.micronaut.runtime
+    testRuntimeOnly libs.micronaut.reactor
+    testRuntimeOnly libs.micronaut.http.server.netty
+    testRuntimeOnly libs.micronaut.management
 }
 
 test {

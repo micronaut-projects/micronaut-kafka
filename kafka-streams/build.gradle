@@ -4,10 +4,5 @@ plugins {
 
 dependencies {
     api projects.kafka
-    api libs.kafka.streams
-
-    testCompileOnly mn.micronaut.inject.groovy
-
-    testImplementation mn.micronaut.inject
-    testImplementation libs.testcontainers.spock
+    api libs.managed.kafka.streams
 }

@@ -11,19 +11,9 @@ plugins {
 
 rootProject.name = 'kafka-parent'
 
+include 'kafka-bom'
 include 'kafka'
 include 'kafka-streams'
 include 'tests:tasks-sasl-plaintext'
 
 enableFeaturePreview 'TYPESAFE_PROJECT_ACCESSORS'
-
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-    versionCatalogs {
-        mn {
-            from "io.micronaut:micronaut-bom:${providers.gradleProperty('micronautVersion').get()}"
-        }
-    }
-}
