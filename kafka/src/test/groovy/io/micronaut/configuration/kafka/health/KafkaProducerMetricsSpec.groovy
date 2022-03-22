@@ -8,11 +8,13 @@ import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.annotation.MessageHeader
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -20,7 +22,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 
 class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -29,10 +31,10 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
                  (EMBEDDED_TOPICS)            : ['words', 'books', 'words-records', 'books-records']]
     }
 
-    def setupSpec() {
+    void setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
-                embeddedServer.getURL(),
+                HttpClient,
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
     }
@@ -49,7 +51,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
 
         then:
         conditions.eventually {
-            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
             !result.names.contains("kafka.consumer.record-error-rate")
             result.names.contains("kafka.producer.count")

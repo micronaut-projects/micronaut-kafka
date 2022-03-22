@@ -1,47 +1,26 @@
-dependencies {
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-    annotationProcessor "io.micronaut:micronaut-graal"
-    annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
-    compileOnly "org.graalvm.nativeimage:svm"
-    compileOnly 'io.opentracing.contrib:opentracing-kafka-client:0.1.15'
-    compileOnly 'io.zipkin.brave:brave-instrumentation-kafka-clients:5.13.3'
-    api "io.micronaut:micronaut-messaging:$micronautVersion"
-    api "org.apache.kafka:kafka-clients:${kafkaVersion}"
-
-    compileOnly "io.micronaut:micronaut-management"
-    compileOnly "io.micronaut.micrometer:micronaut-micrometer-core"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    compileOnly "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    compileOnly "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
-
-    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
-    testImplementation "io.micronaut.test:micronaut-test-spock"
-    testImplementation "io.micronaut:micronaut-inject-java"
-    testImplementation "io.micronaut.micrometer:micronaut-micrometer-core"
-    testImplementation "io.projectreactor:reactor-core:3.4.6"
-    testImplementation "io.micronaut:micronaut-management"
-    testImplementation "io.micronaut:micronaut-http-client"
-    testImplementation "io.micronaut:micronaut-inject-groovy"
-    testImplementation "io.micronaut:micronaut-management"
-    testImplementation "org.apache.kafka:kafka-clients:${kafkaVersion}:test"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}"
-    testImplementation "org.apache.kafka:kafka_2.12:${kafkaVersion}:test"
-
-    testImplementation "org.testcontainers:kafka:$testContainersVersion"
-    testImplementation 'io.opentracing.contrib:opentracing-kafka-client:0.1.15'
-    testImplementation 'io.opentracing:opentracing-mock:0.33.0'
-
-    testRuntimeOnly 'io.micronaut:micronaut-tracing'
-    testRuntimeOnly "io.micronaut:micronaut-runtime"
-    testRuntimeOnly "io.micronaut:micronaut-http-server-netty"
-    testRuntimeOnly "io.micronaut:micronaut-management"
-    testRuntimeOnly "io.micronaut.micrometer:micronaut-micrometer-registry-statsd"
-    testRuntimeOnly "io.micronaut.cache:micronaut-cache-core"
-    testRuntimeOnly "io.micronaut.reactor:micronaut-reactor"
+plugins {
+    id 'io.micronaut.build.internal.kafka-module'
 }
 
-test {
-    maxHeapSize = "2048m"
+dependencies {
+    annotationProcessor libs.micronaut.graal
+
+    api libs.managed.kafka.clients
+
+    compileOnly libs.micronaut.micrometer
+    compileOnly libs.opentracing.kafka.client
+    compileOnly libs.zipkin.brave.kafka.clients
+    compileOnly libs.micronaut.graal
+    compileOnly libs.graal
+
+    testImplementation libs.micronaut.rxjava2
+    testImplementation libs.micronaut.http.client
+    testImplementation libs.opentracing.mock
+    testImplementation libs.opentracing.kafka.client
+    testImplementation libs.micronaut.rxjava2
+
+    testRuntimeOnly libs.micronaut.micrometer.statsd
+    testRuntimeOnly libs.micronaut.tracing
 }
 
 //testlogger {

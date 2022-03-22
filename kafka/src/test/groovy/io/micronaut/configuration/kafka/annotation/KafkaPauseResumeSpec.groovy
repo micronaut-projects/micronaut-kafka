@@ -3,7 +3,7 @@ package io.micronaut.configuration.kafka.annotation
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.context.annotation.Requires
-import io.micronaut.messaging.annotation.Body
+import io.micronaut.messaging.annotation.MessageBody
 import org.apache.kafka.clients.consumer.Consumer
 
 import java.util.concurrent.ConcurrentSkipListSet
@@ -30,8 +30,8 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
         Consumer consumer = registry.getConsumer("fruit-client")
 
         then:
-        consumer != null
-        registry.getConsumerIds()
+        consumer
+        registry.consumerIds
         !registry.isPaused("fruit-client")
 
         when:
@@ -72,7 +72,7 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface FruitClient {
         @Topic("fruits")
-        void send(@KafkaKey String company, @Body String fruit)
+        void send(@KafkaKey String company, @MessageBody String fruit)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPauseResumeSpec')
@@ -82,9 +82,8 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
         Set<String> fruits = new ConcurrentSkipListSet<>()
 
         @Topic("fruits")
-        void receive(@Body String name) {
-            println "RECEIVED FRUIT $name"
-            fruits.add(name)
+        void receive(@MessageBody String name) {
+            fruits << name
         }
     }
 }

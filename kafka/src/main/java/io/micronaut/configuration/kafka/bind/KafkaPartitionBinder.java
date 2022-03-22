@@ -15,33 +15,33 @@
  */
 package io.micronaut.configuration.kafka.bind;
 
+import io.micronaut.configuration.kafka.annotation.KafkaPartition;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
-import io.micronaut.http.annotation.Body;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import javax.inject.Singleton;
 import java.util.Optional;
 
 /**
- * The default binder that binds the body of a ConsumerRecord.
+ * Binder for binding the parameters that is designated the {@link KafkaPartition}.
  *
- * @param <T> The target generic type
- * @author Graeme Rocher
- * @since 1.0
+ * @param <T> The target type
+ * @author André Prata
+ * @since 3.3.4
  */
 @Singleton
-public class KafkaBodyBinder<T> implements AnnotatedConsumerRecordBinder<Body, T> {
+public class KafkaPartitionBinder<T> implements AnnotatedConsumerRecordBinder<KafkaPartition, T> {
 
     @Override
-    public Class<Body> annotationType() {
-        return Body.class;
+    public Class<KafkaPartition> annotationType() {
+        return KafkaPartition.class;
     }
 
     @Override
     public BindingResult<T> bind(ArgumentConversionContext<T> context, ConsumerRecord<?, ?> source) {
-        Object value = source.value();
-        Optional<T> converted = ConversionService.SHARED.convert(value, context);
+        Object partition = source.partition();
+        Optional<T> converted = ConversionService.SHARED.convert(partition, context);
         return () -> converted;
     }
 }

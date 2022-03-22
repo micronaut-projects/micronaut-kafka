@@ -1,10 +1,10 @@
 package io.micronaut.configuration.kafka.streams.optimization;
 
 import io.micronaut.configuration.kafka.streams.InteractiveQueryService;
+import jakarta.inject.Singleton;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
-import javax.inject.Singleton;
 import java.util.Optional;
 
 @Singleton

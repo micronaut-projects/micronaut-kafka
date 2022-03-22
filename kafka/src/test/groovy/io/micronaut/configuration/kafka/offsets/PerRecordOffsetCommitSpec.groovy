@@ -5,8 +5,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC_PER_RECORD
@@ -53,7 +52,7 @@ class PerRecordOffsetCommitSpec extends AbstractKafkaContainerSpec {
         @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC_PER_RECORD)
         @Topic(PerRecordOffsetCommitSpec.TOPIC_SYNC)
         void receive(Product product) {
-            products.add(product)
+            products << product
         }
     }
 

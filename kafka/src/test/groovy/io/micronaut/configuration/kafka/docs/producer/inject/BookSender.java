@@ -3,11 +3,11 @@ package io.micronaut.configuration.kafka.docs.producer.inject;
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-import javax.inject.Singleton;
 import java.util.concurrent.Future;
 // end::imports[]
 

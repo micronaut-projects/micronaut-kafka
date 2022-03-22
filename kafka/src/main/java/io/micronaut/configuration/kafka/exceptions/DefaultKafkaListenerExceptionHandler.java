@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.context.annotation.Primary;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -24,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.NonNull;
-import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

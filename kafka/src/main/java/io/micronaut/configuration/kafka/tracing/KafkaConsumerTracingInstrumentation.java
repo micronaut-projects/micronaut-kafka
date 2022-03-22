@@ -16,15 +16,15 @@
 package io.micronaut.configuration.kafka.tracing;
 
 import io.micronaut.configuration.kafka.tracing.brave.BraveKafkaConsumerTracingInstrumentation;
+import io.micronaut.context.BeanProvider;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaConsumer;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /**
  * Instruments Kafka consumers with Open Tracing support.
@@ -38,13 +38,13 @@ import javax.inject.Singleton;
 @Requires(classes = TracingKafkaConsumer.class)
 public class KafkaConsumerTracingInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
 
-    private final Provider<Tracer> tracerProvider;
+    private final BeanProvider<Tracer> tracerProvider;
 
     /**
      * Default constructor.
      * @param tracerProvider The tracer provider
      */
-    protected KafkaConsumerTracingInstrumentation(Provider<Tracer> tracerProvider) {
+    protected KafkaConsumerTracingInstrumentation(BeanProvider<Tracer> tracerProvider) {
         this.tracerProvider = tracerProvider;
     }
 

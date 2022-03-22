@@ -10,8 +10,8 @@ include::{testskafka}/producer/inject/BookSender.java[tags=imports, indent=0]
 include::{testskafka}/producer/inject/BookSender.java[tags=clazz, indent=0]
 ----
 
-<1> The `KafkaProducer` is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.
-<2> The `KafkaProducer` is used to send records
+<1> The `Producer` is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.
+<2> The `Producer` is used to send records
 
 Note that there is no need to call the `close()` method to shut down the `KafkaProducer`, it is fully managed by Micronaut and will be shutdown when the application shuts down.
 

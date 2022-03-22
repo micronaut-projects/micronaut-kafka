@@ -24,14 +24,15 @@ import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.aggregator.HealthAggregator;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
-import io.reactivex.Flowable;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.processor.TaskMetadata;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
+import reactor.core.publisher.Flux;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -81,16 +82,16 @@ public class KafkaStreamsHealth implements HealthIndicator {
 
     @Override
     public Publisher<HealthResult> getResult() {
-        Flowable<HealthResult> kafkaStreamHealth = Flowable.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
+        Flux<HealthResult> kafkaStreamHealth = Flux.fromIterable(this.kafkaStreamsFactory.getStreams().keySet())
                 .map(kafkaStreams -> Pair.of(getApplicationId(kafkaStreams), kafkaStreams))
-                .flatMap(pair -> Flowable.just(pair)
+                .flatMap(pair -> Flux.just(pair)
                         .filter(p -> p.getValue().state().isRunningOrRebalancing())
                         .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
                                 .details(buildDetails(p.getValue())))
                         .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
                                 .details(buildDownDetails(pair.getValue().state())))
-                        .onErrorReturn(e -> HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(e.getMessage(), pair.getValue().state()))))
+                        .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
+                                .details(buildDownDetails(e.getMessage(), pair.getValue().state())))))
                 .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
     }
@@ -130,14 +131,16 @@ public class KafkaStreamsHealth implements HealthIndicator {
 
         if (kafkaStreams.state().isRunningOrRebalancing()) {
             for (ThreadMetadata metadata : kafkaStreams.localThreadsMetadata()) {
-                streamDetails.put("threadName", metadata.threadName());
-                streamDetails.put("threadState", metadata.threadState());
-                streamDetails.put("adminClientId", metadata.adminClientId());
-                streamDetails.put("consumerClientId", metadata.consumerClientId());
-                streamDetails.put("restoreConsumerClientId", metadata.restoreConsumerClientId());
-                streamDetails.put("producerClientIds", metadata.producerClientIds());
-                streamDetails.put("activeTasks", taskDetails(metadata.activeTasks()));
-                streamDetails.put("standbyTasks", taskDetails(metadata.standbyTasks()));
+                final Map<String, Object> threadDetails = new HashMap<>();
+                threadDetails.put("threadName", metadata.threadName());
+                threadDetails.put("threadState", metadata.threadState());
+                threadDetails.put("adminClientId", metadata.adminClientId());
+                threadDetails.put("consumerClientId", metadata.consumerClientId());
+                threadDetails.put("restoreConsumerClientId", metadata.restoreConsumerClientId());
+                threadDetails.put("producerClientIds", metadata.producerClientIds());
+                threadDetails.put("activeTasks", taskDetails(metadata.activeTasks()));
+                threadDetails.put("standbyTasks", taskDetails(metadata.standbyTasks()));
+                streamDetails.put(metadata.threadName(), threadDetails);
             }
         } else {
             streamDetails.put("error", "The processor is down");

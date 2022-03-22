@@ -17,10 +17,10 @@ package io.micronaut.configuration.kafka.serde;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.core.reflect.ClassUtils;
+import jakarta.inject.Singleton;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
-import javax.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JsonSerdeRegistry implements SerdeRegistry {
 
     private final BeanContext beanContext;
-    private final Map<Class, JsonSerde> serdes = new ConcurrentHashMap<>();
+    private final Map<Class, JsonObjectSerde> serdes = new ConcurrentHashMap<>();
 
     /**
      * Constructs a new instance.
@@ -51,14 +51,12 @@ public class JsonSerdeRegistry implements SerdeRegistry {
         if (ClassUtils.isJavaBasicType(type)) {
             return (Serde<T>) Serdes.serdeFrom(String.class);
         } else {
-            JsonSerde jsonSerde = serdes.get(type);
-            if (jsonSerde != null) {
-                return jsonSerde;
-            } else {
-                jsonSerde = beanContext.createBean(JsonSerde.class, type);
+            JsonObjectSerde jsonSerde = serdes.get(type);
+            if (jsonSerde == null) {
+                jsonSerde = beanContext.createBean(JsonObjectSerde.class, type);
                 serdes.put(type, jsonSerde);
-                return jsonSerde;
             }
+            return jsonSerde;
         }
     }
 }

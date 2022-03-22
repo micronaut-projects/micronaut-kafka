@@ -15,11 +15,14 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
-import io.micronaut.configuration.kafka.Acknowledgement;
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
+import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.ProducerRegistry;
+import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
+import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
+import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
@@ -38,6 +41,8 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Blocking;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.BoundExecutable;
 import io.micronaut.core.bind.DefaultExecutableBinder;
@@ -45,6 +50,7 @@ import io.micronaut.core.bind.ExecutableBinder;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.ArgumentUtils;
 import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.CollectionUtils;
@@ -52,16 +58,16 @@ import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import io.micronaut.messaging.annotation.Body;
+import io.micronaut.messaging.Acknowledgement;
+import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.annotation.SendTo;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
 import io.micronaut.runtime.ApplicationConfiguration;
+import io.micronaut.scheduling.ScheduledExecutorTaskScheduler;
 import io.micronaut.scheduling.TaskExecutors;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Scheduler;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
+import io.micronaut.scheduling.TaskScheduler;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -73,34 +79,43 @@ import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.WakeupException;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
-import io.micronaut.core.annotation.NonNull;
 import javax.annotation.PreDestroy;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>A {@link ExecutableMethodProcessor} that will process all beans annotated with {@link KafkaListener}
@@ -112,7 +127,7 @@ import java.util.regex.Pattern;
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
 public class KafkaConsumerProcessor
-        implements ExecutableMethodProcessor<KafkaListener>, AutoCloseable, ConsumerRegistry {
+        implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
 
@@ -120,31 +135,32 @@ public class KafkaConsumerProcessor
     private final ApplicationConfiguration applicationConfiguration;
     private final BeanContext beanContext;
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
-    private final Map<String, Consumer> consumers = new ConcurrentHashMap<>();
-    private final Map<String, Set<String>> consumerSubscriptions = new ConcurrentHashMap<>();
-    private final Map<String, Set<TopicPartition>> consumerAssignments = new ConcurrentHashMap<>();
-    private final Map<String, Consumer> pausedConsumers = new ConcurrentHashMap<>();
-    private final Set<String> paused = new ConcurrentSkipListSet<>();
+    private final Map<String, ConsumerState> consumers = new ConcurrentHashMap<>();
+
     private final ConsumerRecordBinderRegistry binderRegistry;
     private final SerdeRegistry serdeRegistry;
     private final Scheduler executorScheduler;
     private final KafkaListenerExceptionHandler exceptionHandler;
+    private final TaskScheduler taskScheduler;
     private final ProducerRegistry producerRegistry;
+    private final TransactionalProducerRegistry transactionalProducerRegistry;
     private final BatchConsumerRecordsBinderRegistry batchBinderRegistry;
     private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
 
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
      *
-     * @param executorService              The executor service
-     * @param applicationConfiguration     The application configuration
-     * @param beanContext                  The bean context
-     * @param defaultConsumerConfiguration The default consumer config
-     * @param binderRegistry               The {@link ConsumerRecordBinderRegistry}
-     * @param batchBinderRegistry          The {@link BatchConsumerRecordsBinderRegistry}
-     * @param serdeRegistry                The {@link org.apache.kafka.common.serialization.Serde} registry
-     * @param producerRegistry             The {@link ProducerRegistry}
-     * @param exceptionHandler             The exception handler to use
+     * @param executorService               The executor service
+     * @param applicationConfiguration      The application configuration
+     * @param beanContext                   The bean context
+     * @param defaultConsumerConfiguration  The default consumer config
+     * @param binderRegistry                The {@link ConsumerRecordBinderRegistry}
+     * @param batchBinderRegistry           The {@link BatchConsumerRecordsBinderRegistry}
+     * @param serdeRegistry                 The {@link org.apache.kafka.common.serialization.Serde} registry
+     * @param producerRegistry              The {@link ProducerRegistry}
+     * @param exceptionHandler              The exception handler to use
+     * @param schedulerService              The scheduler service
+     * @param transactionalProducerRegistry The transactional producer registry
      */
     public KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
@@ -155,7 +171,9 @@ public class KafkaConsumerProcessor
             BatchConsumerRecordsBinderRegistry batchBinderRegistry,
             SerdeRegistry serdeRegistry,
             ProducerRegistry producerRegistry,
-            KafkaListenerExceptionHandler exceptionHandler) {
+            KafkaListenerExceptionHandler exceptionHandler,
+            @Named(TaskExecutors.SCHEDULED) ExecutorService schedulerService,
+            TransactionalProducerRegistry transactionalProducerRegistry) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
         this.beanContext = beanContext;
@@ -163,30 +181,41 @@ public class KafkaConsumerProcessor
         this.binderRegistry = binderRegistry;
         this.batchBinderRegistry = batchBinderRegistry;
         this.serdeRegistry = serdeRegistry;
-        this.executorScheduler = Schedulers.from(executorService);
+        this.executorScheduler = Schedulers.fromExecutor(executorService);
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
+        this.taskScheduler = new ScheduledExecutorTaskScheduler(schedulerService);
+        this.transactionalProducerRegistry = transactionalProducerRegistry;
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
-                        .forEach(definition -> {
-                            // pre-initialize singletons before processing
-                            if (definition.isSingleton()) {
-                                try {
-                                    beanContext.getBean(definition.getBeanType());
-                                } catch (Exception e) {
-                                    throw new MessagingSystemException(
-                                            "Error creating bean for @KafkaListener of type [" + definition.getBeanType() + "]: " + e.getMessage(),
-                                            e
-                                    );
-                                }
-                            }
-                        });
+                .forEach(definition -> {
+                    // pre-initialize singletons before processing
+                    if (definition.isSingleton()) {
+                        try {
+                            beanContext.getBean(definition.getBeanType());
+                        } catch (Exception e) {
+                            throw new MessagingSystemException(
+                                    "Error creating bean for @KafkaListener of type [" + definition.getBeanType() + "]: " + e.getMessage(),
+                                    e
+                            );
+                        }
+                    }
+                });
+    }
+
+    @NonNull
+    private ConsumerState getConsumerState(@NonNull String id) {
+        ConsumerState consumerState = consumers.get(id);
+        if (consumerState == null) {
+            throw new IllegalArgumentException("No consumer found for ID: " + id);
+        }
+        return consumerState;
     }
 
     @NonNull
     @Override
     public <K, V> Consumer<K, V> getConsumer(@NonNull String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Consumer consumer = consumers.get(id);
+        final Consumer consumer = getConsumerState(id).kafkaConsumer;
         if (consumer == null) {
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
@@ -197,7 +226,7 @@ public class KafkaConsumerProcessor
     @Override
     public Set<String> getConsumerSubscription(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Set<String> subscriptions = consumerSubscriptions.get(id);
+        final Set<String> subscriptions = getConsumerState(id).subscriptions;
         if (subscriptions == null || subscriptions.isEmpty()) {
             throw new IllegalArgumentException("No consumer subscription found for ID: " + id);
         }
@@ -208,7 +237,7 @@ public class KafkaConsumerProcessor
     @Override
     public Set<TopicPartition> getConsumerAssignment(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Set<TopicPartition> assignment = consumerAssignments.get(id);
+        final Set<TopicPartition> assignment = getConsumerState(id).assignments;
         if (assignment == null || assignment.isEmpty()) {
             throw new IllegalArgumentException("No consumer assignment found for ID: " + id);
         }
@@ -223,28 +252,32 @@ public class KafkaConsumerProcessor
 
     @Override
     public boolean isPaused(@NonNull String id) {
-        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            return paused.contains(id) && pausedConsumers.containsKey(id);
-        }
-        return false;
+        return isPaused(id, getConsumerState(id).assignments);
+    }
+
+    @Override
+    public boolean isPaused(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
+        return getConsumerState(id).isPaused(topicPartitions);
     }
 
     @Override
     public void pause(@NonNull String id) {
-        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            paused.add(id);
-        } else {
-            throw new IllegalArgumentException("No consumer found for ID: " + id);
-        }
+        getConsumerState(id).pause();
+    }
+
+    @Override
+    public void pause(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
+        getConsumerState(id).pause(topicPartitions);
     }
 
     @Override
     public void resume(@NonNull String id) {
-        if (StringUtils.isNotEmpty(id) && consumers.containsKey(id)) {
-            paused.remove(id);
-        } else {
-            throw new IllegalArgumentException("No consumer found for ID: " + id);
-        }
+        getConsumerState(id).resume();
+    }
+
+    @Override
+    public void resume(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions) {
+        getConsumerState(id).resume(topicPartitions);
     }
 
     @Override
@@ -258,34 +291,39 @@ public class KafkaConsumerProcessor
             return; // No topics to consume
         }
         final Class<?> beanType = beanDefinition.getBeanType();
-        final String groupId = consumerAnnotation.stringValue("groupId")
-            .filter(StringUtils::isNotEmpty)
-            .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
+        String groupId = consumerAnnotation.stringValue("groupId")
+                .filter(StringUtils::isNotEmpty)
+                .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
+        if (consumerAnnotation.isTrue("uniqueGroupId")) {
+            groupId = groupId + "_" + UUID.randomUUID();
+        }
         final String clientId = consumerAnnotation.stringValue("clientId")
-            .filter(StringUtils::isNotEmpty)
-            .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
+                .filter(StringUtils::isNotEmpty)
+                .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
-            .orElse(OffsetStrategy.AUTO);
+                .orElse(OffsetStrategy.AUTO);
         final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
                 .orElse(defaultConsumerConfiguration);
         final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
-        final Properties properties = createConsumerProperties(method, consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
+        final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
-        submitConsumerThreads(method, clientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, properties, beanType);
+        submitConsumerThreads(method, clientId, groupId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, properties, beanType);
     }
 
     @Override
     @PreDestroy
     public void close() {
-        for (Consumer consumer : consumers.values()) {
-            consumer.wakeup();
+        for (ConsumerState consumerState : consumers.values()) {
+            consumerState.kafkaConsumer.wakeup();
         }
         consumers.clear();
     }
 
-    private Properties createConsumerProperties(final ExecutableMethod<?, ?> method, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                                final DefaultKafkaConsumerConfiguration consumerConfiguration, final String clientId,
-                                                final String groupId, final OffsetStrategy offsetStrategy) {
+    private Properties createConsumerProperties(final AnnotationValue<KafkaListener> consumerAnnotation,
+                                                final DefaultKafkaConsumerConfiguration consumerConfiguration,
+                                                final String clientId,
+                                                final String groupId,
+                                                final OffsetStrategy offsetStrategy) {
         final Properties properties = consumerConfiguration.getConfig();
 
         if (consumerAnnotation.getRequiredValue("offsetReset", OffsetReset.class) == OffsetReset.EARLIEST) {
@@ -295,22 +333,20 @@ public class KafkaConsumerProcessor
         // enable auto commit offsets if necessary
         properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, String.valueOf(offsetStrategy == OffsetStrategy.AUTO));
 
-        method.getValue(KafkaListener.class, "heartbeatInterval", Duration.class)
-            .map(Duration::toMillis)
-            .map(String::valueOf)
-            .ifPresent(heartbeatInterval -> properties.putIfAbsent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval));
+        consumerAnnotation.get("heartbeatInterval", Duration.class)
+                .map(Duration::toMillis)
+                .map(String::valueOf)
+                .ifPresent(heartbeatInterval -> properties.putIfAbsent(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval));
 
-        method.getValue(KafkaListener.class, "sessionTimeout", Duration.class)
-            .map(Duration::toMillis)
-            .map(String::valueOf)
-            .ifPresent(sessionTimeout -> properties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout));
+        consumerAnnotation.get("sessionTimeout", Duration.class)
+                .map(Duration::toMillis)
+                .map(String::valueOf)
+                .ifPresent(sessionTimeout -> properties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout));
 
-        if (consumerAnnotation.isTrue("uniqueGroupId")) {
-            final String uniqueGroupId = groupId + "_" + UUID.randomUUID().toString();
-            properties.put(ConsumerConfig.GROUP_ID_CONFIG, uniqueGroupId);
-        } else {
-            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        }
+        consumerAnnotation.enumValue("isolation", IsolationLevel.class)
+                .ifPresent(isolation -> properties.putIfAbsent(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolation.toString().toLowerCase(Locale.ROOT)));
+
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         if (clientId != null) {
             properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
@@ -327,21 +363,27 @@ public class KafkaConsumerProcessor
         }
         final Optional keyDeserializer = consumerConfiguration.getKeyDeserializer();
         if (consumerConfiguration.getKeyDeserializer().isPresent()) {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), method);
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), logMethod(method));
         } else {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), method);
+            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), logMethod(method));
         }
         final Optional valueDeserializer = consumerConfiguration.getValueDeserializer();
         if (valueDeserializer.isPresent()) {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), method);
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), logMethod(method));
         } else {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), method);
+            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), logMethod(method));
         }
     }
 
-    private void submitConsumerThreads(final ExecutableMethod<?, ?> method, final String clientId, final OffsetStrategy offsetStrategy,
-                                       final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                       final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration, final Properties properties, final Class<?> beanType) {
+    private void submitConsumerThreads(final ExecutableMethod<?, ?> method,
+                                       final String clientId,
+                                       final String groupId,
+                                       final OffsetStrategy offsetStrategy,
+                                       final List<AnnotationValue<Topic>> topicAnnotations,
+                                       final AnnotationValue<KafkaListener> consumerAnnotation,
+                                       final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
+                                       final Properties properties,
+                                       final Class<?> beanType) {
         final int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
         for (int i = 0; i < consumerThreads; i++) {
             final String finalClientId;
@@ -355,118 +397,116 @@ public class KafkaConsumerProcessor
             } else {
                 finalClientId = "kafka-consumer-" + clientIdGenerator.incrementAndGet();
             }
-            submitConsumerThread(method, finalClientId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, beanType);
+            submitConsumerThread(method, finalClientId, groupId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, beanType);
         }
     }
 
-    private void submitConsumerThread(final ExecutableMethod<?, ?> method, final String finalClientId, final OffsetStrategy offsetStrategy,
-                                      final List<AnnotationValue<Topic>> topicAnnotations, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                      final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration, final Class<?> beanType) {
+    private void submitConsumerThread(final ExecutableMethod<?, ?> method,
+                                      final String clientId,
+                                      final String groupId,
+                                      final OffsetStrategy offsetStrategy,
+                                      final List<AnnotationValue<Topic>> topicAnnotations,
+                                      final AnnotationValue<KafkaListener> consumerAnnotation,
+                                      final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
+                                      final Class<?> beanType) {
         final Consumer<?, ?> kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
-        consumers.put(finalClientId, kafkaConsumer);
         final Object consumerBean = beanContext.getBean(beanType);
         if (consumerBean instanceof ConsumerAware) {
             //noinspection unchecked
             ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
         }
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
-        consumerSubscriptions.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.subscription()));
-        executorService.submit(() -> createConsumerThreadPollLoop(method, finalClientId, offsetStrategy, consumerAnnotation, consumerBean, kafkaConsumer));
+        ConsumerState consumerState = new ConsumerState(clientId, groupId, offsetStrategy, kafkaConsumer, consumerBean, Collections.unmodifiableSet(kafkaConsumer.subscription()), consumerAnnotation, method);
+        consumers.put(clientId, consumerState);
+        executorService.submit(() -> createConsumerThreadPollLoop(method, consumerState));
     }
 
-    @SuppressWarnings("squid:S2189")
-    private void createConsumerThreadPollLoop(final ExecutableMethod<?, ?> method, final String finalClientId, final OffsetStrategy offsetStrategy,
-                                              final AnnotationValue<KafkaListener> consumerAnnotation, final Object consumerBean, final Consumer<?, ?> kafkaConsumer) {
+    private void createConsumerThreadPollLoop(final ExecutableMethod<?, ?> method,
+                                              final ConsumerState consumerState) {
 
         final boolean isBatch = method.isTrue(KafkaListener.class, "batch");
         final Duration pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class)
-            .orElseGet(() -> Duration.ofMillis(100));
-        final Optional<Argument> consumerArg = Arrays.stream(method.getArguments())
-            .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
-            .findFirst();
-        final Optional<Argument> ackArg = Arrays.stream(method.getArguments())
-            .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()) || io.micronaut.messaging.Acknowledgement.class.isAssignableFrom(arg.getType()))
-            .findFirst();
+                .orElseGet(() -> Duration.ofMillis(100));
+        final Optional<Argument<?>> consumerArg = Arrays.stream(method.getArguments())
+                .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
+                .findFirst();
+        final Optional<Argument<?>> ackArg = Arrays.stream(method.getArguments())
+                .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
+                .findFirst();
 
-        try {
+        try (Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer) {
 
-            final boolean trackPartitions = ackArg.isPresent() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
+            final boolean trackPartitions = ackArg.isPresent() || consumerState.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || consumerState.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
             final Map<Argument<?>, Object> boundArguments = new HashMap<>(2);
             consumerArg.ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
-            boolean consumerPaused = false;
-
             //noinspection InfiniteLoopStatement
             while (true) {
-                consumerAssignments.put(finalClientId, Collections.unmodifiableSet(kafkaConsumer.assignment()));
+                consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                if (consumerState.autoPaused) {
+                    consumerState.pause(consumerState.assignments);
+                    kafkaConsumer.pause(consumerState.assignments);
+                }
+                boolean failed = true;
                 try {
-                    if (!consumerPaused && paused.contains(finalClientId)) {
-                        consumerPaused = true;
-                        LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                        kafkaConsumer.pause(kafkaConsumer.assignment());
-                        pausedConsumers.put(finalClientId, kafkaConsumer);
-                    }
+                    consumerState.pauseTopicPartitions();
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
-                    if (consumerPaused && !paused.contains(finalClientId)) {
-                        LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", finalClientId, kafkaConsumer.paused());
-                        kafkaConsumer.resume(kafkaConsumer.paused());
-                        pausedConsumers.remove(finalClientId);
-                        consumerPaused = false;
-                    }
+                    failed = false;
+                    consumerState.resumeTopicPartitions();
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
                         continue; // No consumer records to process
                     }
 
-                    final boolean failed;
                     if (isBatch) {
-                        failed = !processConsumerRecordsAsBatch(method, consumerBean, kafkaConsumer, consumerAnnotation, boundArguments, consumerRecords);
+                        failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, consumerRecords);
                     } else {
-                        failed = !processConsumerRecords(method, offsetStrategy, consumerBean, kafkaConsumer, consumerAnnotation,
-                            boundArguments, trackPartitions, ackArg, consumerRecords);
+                        failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, ackArg, consumerRecords);
                     }
                     if (!failed) {
-                        if (offsetStrategy == OffsetStrategy.SYNC) {
+                        if (consumerState.offsetStrategy == OffsetStrategy.SYNC) {
                             try {
                                 kafkaConsumer.commitSync();
                             } catch (CommitFailedException e) {
-                                handleException(kafkaConsumer, consumerBean, null, e);
+                                handleException(consumerState, null, e);
                             }
-                        } else if (offsetStrategy == OffsetStrategy.ASYNC) {
-                            kafkaConsumer.commitAsync(resolveCommitCallback(consumerBean));
+                        } else if (consumerState.offsetStrategy == OffsetStrategy.ASYNC) {
+                            kafkaConsumer.commitAsync(resolveCommitCallback(consumerState.consumerBean));
                         }
                     }
 
                 } catch (WakeupException e) {
+                    try {
+                        if (!failed && consumerState.offsetStrategy != OffsetStrategy.DISABLED) {
+                            kafkaConsumer.commitSync();
+                        }
+                    } catch (Throwable ex) {
+                        LOG.warn("Error committing Kafka offsets on shutdown: {}", ex.getMessage(), ex);
+                    }
                     throw e;
                 } catch (Throwable e) {
-                    handleException(kafkaConsumer, consumerBean, null, e);
+                    handleException(consumerState, null, e);
                 }
             }
         } catch (WakeupException e) {
             // ignore for shutdown
-        } finally {
-            try {
-                if (offsetStrategy != OffsetStrategy.DISABLED) {
-                    kafkaConsumer.commitSync();
-                }
-            } catch (Throwable e) {
-                LOG.warn("Error committing Kafka offsets on shutdown: {}", e.getMessage(), e);
-            } finally {
-                kafkaConsumer.close();
-            }
         }
     }
 
-    private boolean processConsumerRecords(final ExecutableMethod<?, ?> method, final OffsetStrategy offsetStrategy, final Object consumerBean,
-                                           final Consumer<?, ?> kafkaConsumer, final AnnotationValue<KafkaListener> consumerAnnotation,
-                                           final Map<Argument<?>, Object> boundArguments, final boolean trackPartitions,
-                                           final Optional<Argument> ackArg, final ConsumerRecords<?, ?> consumerRecords) {
+    private boolean processConsumerRecords(final ConsumerState consumerState,
+                                           final ExecutableMethod<?, ?> method,
+                                           final Map<Argument<?>, Object> boundArguments,
+                                           final boolean trackPartitions,
+                                           final Optional<Argument<?>> ackArg,
+                                           final ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = trackPartitions ? new HashMap<>() : null;
+
         for (final ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
 
-            LOG.trace("Kafka consumer [{}] received record: {}", method, consumerRecord);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Kafka consumer [{}] received record: {}", logMethod(method), consumerRecord);
+            }
 
             if (trackPartitions) {
                 final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
@@ -474,47 +514,94 @@ public class KafkaConsumerProcessor
                 currentOffsets.put(topicPartition, offsetAndMetadata);
             }
 
+            Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer;
             ackArg.ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
 
             try {
                 final BoundExecutable boundExecutable = executableBinder.bind(method, binderRegistry, consumerRecord);
-                final Object result = boundExecutable.invoke(consumerBean);
+                final Object result = boundExecutable.invoke(consumerState.consumerBean);
                 if (result != null) {
-                    final Flowable<?> resultFlowable;
+                    final Flux<?> resultFlowable;
                     final boolean isBlocking;
                     if (Publishers.isConvertibleToPublisher(result)) {
-                        resultFlowable = Publishers.convertPublisher(result, Flowable.class);
+                        resultFlowable = Flux.from(Publishers.convertPublisher(result, Publisher.class));
                         isBlocking = method.hasAnnotation(Blocking.class);
                     } else {
-                        resultFlowable = Flowable.just(result);
+                        resultFlowable = Flux.just(result);
                         isBlocking = true;
                     }
-                    handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, resultFlowable, isBlocking);
+                    handleResultFlux(consumerState, method, consumerRecord, resultFlowable, isBlocking, consumerRecords);
                 }
             } catch (Throwable e) {
-                handleException(kafkaConsumer, consumerBean, consumerRecord, e);
-                return false;
+                if (resolveWithErrorStrategy(consumerState, consumerRecord, e)) {
+                    return false;
+                }
             }
 
-            if (offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
+            if (consumerState.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
                 try {
                     kafkaConsumer.commitSync(currentOffsets);
                 } catch (CommitFailedException e) {
-                    handleException(kafkaConsumer, consumerBean, consumerRecord, e);
+                    handleException(consumerState, consumerRecord, e);
                 }
-            } else if (offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-                kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerBean));
+            } else if (consumerState.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
+                kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerState.consumerBean));
             }
         }
         return true;
     }
 
-    private boolean processConsumerRecordsAsBatch(final ExecutableMethod<?, ?> method, final Object consumerBean, final Consumer<?, ?> kafkaConsumer,
-                                               final AnnotationValue<KafkaListener> consumerAnnotation, final Map<Argument<?>, Object> boundArguments,
-                                               final ConsumerRecords<?, ?> consumerRecords) {
+    private boolean resolveWithErrorStrategy(ConsumerState consumerState,
+                                             ConsumerRecord<?, ?> consumerRecord,
+                                             Throwable e) {
+
+        ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
+
+        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
+            if (consumerState.partitionRetries == null) {
+                consumerState.partitionRetries = new HashMap<>();
+            }
+            int partition = consumerRecord.partition();
+            PartitionRetryState retryState = consumerState.partitionRetries.computeIfAbsent(partition, t -> new PartitionRetryState());
+            if (retryState.currentRetryOffset != consumerRecord.offset()) {
+                retryState.currentRetryOffset = consumerRecord.offset();
+                retryState.currentRetryCount = 1;
+            } else {
+                retryState.currentRetryCount++;
+            }
+
+            if (consumerState.errorStrategyRetryCount >= retryState.currentRetryCount) {
+                TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
+                consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+
+                Duration retryDelay = consumerState.errorStrategyRetryDelay;
+                if (retryDelay != null) {
+                    // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
+                    Set<TopicPartition> paused = Collections.singleton(topicPartition);
+                    consumerState.pause(paused);
+                    taskScheduler.schedule(retryDelay, () -> consumerState.resume(paused));
+                }
+                // skip handle exception
+                return true;
+            } else {
+                consumerState.partitionRetries.remove(partition);
+                // Skip the failing record
+                currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+            }
+        }
+
+        handleException(consumerState, consumerRecord, e);
+
+        return currentErrorStrategy != ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+    }
+
+    private boolean processConsumerRecordsAsBatch(final ConsumerState consumerState,
+                                                  final ExecutableMethod<?, ?> method,
+                                                  final Map<Argument<?>, Object> boundArguments,
+                                                  final ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
         final BoundExecutable boundExecutable = batchBinder.bind(method, batchBinderRegistry, consumerRecords);
-        Object result = boundExecutable.invoke(consumerBean);
+        Object result = boundExecutable.invoke(consumerState.consumerBean);
 
         if (result != null) {
             if (result.getClass().isArray()) {
@@ -522,29 +609,30 @@ public class KafkaConsumerProcessor
             }
 
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
-            final Flowable<?> resultFlowable;
+            final Flux<?> resultFlux;
             if (result instanceof Iterable) {
-                resultFlowable = Flowable.fromIterable((Iterable) result);
+                resultFlux = Flux.fromIterable((Iterable) result);
             } else if (isPublisher) {
-                resultFlowable = Publishers.convertPublisher(result, Flowable.class);
+                resultFlux = Flux.from(Publishers.convertPublisher(result, Publisher.class));
             } else {
-                resultFlowable = Flowable.just(result);
+                resultFlux = Flux.just(result);
             }
 
             final Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
             final boolean isBlocking = !isPublisher || method.hasAnnotation(Blocking.class);
             if (isBlocking) {
-                resultFlowable.blockingSubscribe(o -> {
+                List<?> objects = resultFlux.collectList().block();
+                for (Object object : objects) {
                     if (iterator.hasNext()) {
                         final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-                        handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flowable.just(o), isBlocking);
+                        handleResultFlux(consumerState, method, consumerRecord, Flux.just(object), isBlocking, consumerRecords);
                     }
-                });
+                }
             } else {
-                resultFlowable.forEach(o -> {
+                resultFlux.subscribe(o -> {
                     if (iterator.hasNext()) {
                         final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-                        handleResultFlowable(consumerAnnotation, consumerBean, method, kafkaConsumer, consumerRecord, Flowable.just(o), isBlocking);
+                        handleResultFlux(consumerState, method, consumerRecord, Flux.just(o), isBlocking, consumerRecords);
                     }
                 });
             }
@@ -572,7 +660,10 @@ public class KafkaConsumerProcessor
                 } else {
                     kafkaConsumer.subscribe(topics);
                 }
-                LOG.info("Kafka listener [{}] subscribed to topics: {}", method, topics);
+
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod(method), topics);
+                }
             }
 
             if (hasPatterns) {
@@ -588,15 +679,18 @@ public class KafkaConsumerProcessor
                     } else {
                         kafkaConsumer.subscribe(compiledPattern);
                     }
-                    LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", method, pattern);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", logMethod(method), pattern);
+                    }
                 }
             }
         }
     }
 
-    private void handleException(final Consumer<?, ?> kafkaConsumer, final Object consumerBean, final ConsumerRecord<?, ?> consumerRecord, final Throwable e) {
-        final KafkaListenerException kafkaListenerException = new KafkaListenerException(e, consumerBean, kafkaConsumer, consumerRecord);
-        handleException(consumerBean, kafkaListenerException);
+    private void handleException(final ConsumerState consumerState,
+                                 final ConsumerRecord<?, ?> consumerRecord,
+                                 final Throwable e) {
+        handleException(consumerState.consumerBean, new KafkaListenerException(e, consumerState.consumerBean, consumerState.kafkaConsumer, consumerRecord));
     }
 
     private void handleException(final Object consumerBean, final KafkaListenerException kafkaListenerException) {
@@ -608,121 +702,196 @@ public class KafkaConsumerProcessor
     }
 
     @SuppressWarnings({"SubscriberImplementation", "unchecked"})
-    private void handleResultFlowable(
-            AnnotationValue<KafkaListener> kafkaListener,
-            Object consumerBean,
-            ExecutableMethod<?, ?> method,
-            Consumer kafkaConsumer,
-            ConsumerRecord<?, ?> consumerRecord,
-            Flowable<?> resultFlowable,
-            boolean isBlocking) {
-        Flowable<RecordMetadata> recordMetadataProducer = resultFlowable.subscribeOn(executorScheduler)
-                .flatMap((Function<Object, Publisher<RecordMetadata>>) o -> {
-                    String[] destinationTopics = method.stringValues(SendTo.class);
-                    if (ArrayUtils.isNotEmpty(destinationTopics)) {
-                        Object key = consumerRecord.key();
-                        Object value = o;
+    private void handleResultFlux(ConsumerState consumerState,
+                                  ExecutableMethod<?, ?> method,
+                                  ConsumerRecord<?, ?> consumerRecord,
+                                  Flux<?> resultFlowable,
+                                  boolean isBlocking,
+                                  ConsumerRecords<?, ?> consumerRecords) {
 
+        Flux<RecordMetadata> recordMetadataProducer = resultFlowable
+                .flatMap((Function<Object, Publisher<RecordMetadata>>) value -> {
+                    if (consumerState.sendToDestinationTopics != null) {
+                        Object key = consumerRecord.key();
                         if (value != null) {
-                            String groupId = kafkaListener.stringValue("groupId").orElse(null);
-                            Producer kafkaProducer = producerRegistry.getProducer(
-                                    StringUtils.isNotEmpty(groupId) ? groupId : null,
-                                    Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
-                                    Argument.of(value.getClass())
-                            );
-
-                            return Flowable.create(emitter -> {
-                                for (String destinationTopic : destinationTopics) {
-                                    ProducerRecord record = new ProducerRecord(
-                                            destinationTopic,
-                                            null,
-                                            key,
-                                            value,
-                                            consumerRecord.headers()
-                                    );
-
-                                    kafkaProducer.send(record, (metadata, exception) -> {
-                                        if (exception != null) {
-                                            emitter.onError(exception);
-                                        } else {
-                                            emitter.onNext(metadata);
+                            Producer kafkaProducer;
+                            if (consumerState.useSendOffsetsToTransaction) {
+                                kafkaProducer = transactionalProducerRegistry.getTransactionalProducer(
+                                        consumerState.producerClientId,
+                                        consumerState.producerTransactionalId,
+                                        Argument.of(byte[].class),
+                                        Argument.of(Object.class)
+                                );
+                            } else {
+                                kafkaProducer = producerRegistry.getProducer(
+                                        consumerState.producerClientId == null ? consumerState.groupId : consumerState.producerClientId,
+                                        Argument.of((Class) (key != null ? key.getClass() : byte[].class)),
+                                        Argument.of(value.getClass())
+                                );
+                            }
+                            return Flux.create(emitter -> {
+                                try {
+                                    if (consumerState.useSendOffsetsToTransaction) {
+                                        try {
+                                            LOG.trace("Beginning transaction for producer: {}", consumerState.producerTransactionalId);
+                                            kafkaProducer.beginTransaction();
+                                        } catch (ProducerFencedException e) {
+                                            handleProducerFencedException(kafkaProducer, e);
                                         }
-                                    });
-
+                                    }
+                                    for (String destinationTopic : consumerState.sendToDestinationTopics) {
+                                        if (consumerState.isMessagesIterableReturnType) {
+                                            Iterable<KafkaMessage> messages = (Iterable<KafkaMessage>) value;
+                                            for (KafkaMessage message : messages) {
+                                                ProducerRecord record = createFromMessage(destinationTopic, message);
+                                                kafkaProducer.send(record, (metadata, exception) -> {
+                                                    if (exception != null) {
+                                                        emitter.error(exception);
+                                                    } else {
+                                                        emitter.next(metadata);
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            ProducerRecord record;
+                                            if (consumerState.isMessageReturnType) {
+                                                record = createFromMessage(destinationTopic, (KafkaMessage) value);
+                                            } else {
+                                                record = new ProducerRecord(destinationTopic, null, key, value, consumerRecord.headers());
+                                            }
+                                            LOG.trace("Sending record: {} for producer: {} {}", record, kafkaProducer, consumerState.producerTransactionalId);
+                                            kafkaProducer.send(record, (metadata, exception) -> {
+                                                if (exception != null) {
+                                                    emitter.error(exception);
+                                                } else {
+                                                    emitter.next(metadata);
+                                                }
+                                            });
+                                        }
+                                    }
+                                    if (consumerState.useSendOffsetsToTransaction) {
+                                        Map<TopicPartition, OffsetAndMetadata> offsetsToCommit = new HashMap<>();
+                                        for (TopicPartition partition : consumerRecords.partitions()) {
+                                            List<? extends ConsumerRecord<?, ?>> partitionedRecords = consumerRecords.records(partition);
+                                            long offset = partitionedRecords.get(partitionedRecords.size() - 1).offset();
+                                            offsetsToCommit.put(partition, new OffsetAndMetadata(offset + 1));
+                                        }
+                                        try {
+                                            LOG.trace("Sending offsets: {} to transaction for producer: {} and customer group id: {}", offsetsToCommit, consumerState.producerTransactionalId, consumerState.groupId);
+                                            kafkaProducer.sendOffsetsToTransaction(offsetsToCommit, consumerState.groupId);
+                                            LOG.trace("Committing transaction for producer: {}", consumerState.producerTransactionalId);
+                                            kafkaProducer.commitTransaction();
+                                            LOG.trace("Committed transaction for producer: {}", consumerState.producerTransactionalId);
+                                        } catch (ProducerFencedException e) {
+                                            handleProducerFencedException(kafkaProducer, e);
+                                        }
+                                    }
+                                    emitter.complete();
+                                } catch (Exception e) {
+                                    if (consumerState.useSendOffsetsToTransaction) {
+                                        try {
+                                            LOG.trace("Aborting transaction for producer: {} because of error: {}", consumerState.producerTransactionalId, e.getMessage());
+                                            kafkaProducer.abortTransaction();
+                                        } catch (ProducerFencedException ex) {
+                                            handleProducerFencedException(kafkaProducer, ex);
+                                        }
+                                    }
+                                    emitter.error(e);
                                 }
-                                emitter.onComplete();
-                            }, BackpressureStrategy.ERROR);
+                            });
                         }
-                        return Flowable.empty();
+                        return Flux.empty();
                     }
-                    return Flowable.empty();
-                }).onErrorResumeNext((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {
-                    handleException(consumerBean, new KafkaListenerException(
-                            "Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
-                            throwable,
-                            consumerBean,
-                            kafkaConsumer,
-                            consumerRecord
-                    ));
-
-                    if (kafkaListener.isTrue("redelivery")) {
-                        LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
-
-                        Object key = consumerRecord.key();
-                        Object value = consumerRecord.value();
-
-                        if (key != null && value != null) {
-                            String groupId = kafkaListener.stringValue("groupId").orElse(null);
-                            Producer kafkaProducer = producerRegistry.getProducer(
-                                    StringUtils.isNotEmpty(groupId) ? groupId : null,
-                                    Argument.of(key.getClass()),
-                                    Argument.of(value.getClass())
-                            );
-
-                            ProducerRecord record = new ProducerRecord(
-                                    consumerRecord.topic(),
-                                    consumerRecord.partition(),
-                                    key,
-                                    value,
-                                    consumerRecord.headers()
-                            );
-
-                            return Flowable.create(emitter -> kafkaProducer.send(record, (metadata, exception) -> {
-                                if (exception != null) {
-                                    handleException(consumerBean, new KafkaListenerException(
-                                            "Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
-                                            throwable,
-                                            consumerBean,
-                                            kafkaConsumer,
-                                            consumerRecord
-                                    ));
-
-                                    emitter.onComplete();
-                                } else {
-                                    emitter.onNext(metadata);
-                                    emitter.onComplete();
-                                }
-                            }), BackpressureStrategy.ERROR);
-                        }
-                    }
-                    return Flowable.empty();
+                    return Flux.empty();
                 });
 
+        recordMetadataProducer = recordMetadataProducer.onErrorResume((Function<Throwable, Publisher<RecordMetadata>>) throwable -> {
+            handleException(consumerState.consumerBean, new KafkaListenerException(
+                    "Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
+                    throwable,
+                    consumerState.consumerBean,
+                    consumerState.kafkaConsumer,
+                    consumerRecord
+            ));
+
+            if (consumerState.redelivery) {
+                LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
+
+                Object key = consumerRecord.key();
+                Object value = consumerRecord.value();
+
+                if (key != null && value != null) {
+                    Producer kafkaProducer = producerRegistry.getProducer(
+                            consumerState.producerClientId == null ? consumerState.groupId : consumerState.producerClientId,
+                            Argument.of(key.getClass()),
+                            Argument.of(value.getClass())
+                    );
+
+                    ProducerRecord record = new ProducerRecord(
+                            consumerRecord.topic(),
+                            consumerRecord.partition(),
+                            key,
+                            value,
+                            consumerRecord.headers()
+                    );
+
+                    return producerSend(consumerState, kafkaProducer, record).doOnError(ex -> {
+                        handleException(consumerState.consumerBean, new KafkaListenerException(
+                                "Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + method + "]: " + throwable.getMessage(),
+                                throwable,
+                                consumerState.consumerBean,
+                                consumerState.kafkaConsumer,
+                                consumerRecord
+                        ));
+                    });
+                }
+            }
+            return Flux.empty();
+        });
+
         if (isBlocking) {
-            recordMetadataProducer.blockingSubscribe(recordMetadata -> {
-                LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
-            });
+            List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
+            LOG.trace("Method [{}] produced record metadata: {}", method, listRecords);
         } else {
-            //noinspection ResultOfMethodCallIgnored
-            recordMetadataProducer.subscribe(recordMetadata -> {
-                LOG.trace("Method [{}] produced record metadata: {}", method, recordMetadata);
-            });
+            recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", logMethod(method), recordMetadata));
         }
+    }
+
+    private Mono<RecordMetadata> producerSend(ConsumerState consumerState, Producer<?, ?> producer, ProducerRecord record) {
+        LOG.trace("Sending record: {} for producer: {} {}", record, producer, consumerState.producerTransactionalId);
+        return Mono.create(emitter -> producer.send(record, (metadata, exception) -> {
+            if (exception != null) {
+                emitter.error(exception);
+            } else {
+                emitter.success(metadata);
+            }
+        }));
+    }
+
+    private ProducerRecord createFromMessage(String topic, KafkaMessage<?, ?> message) {
+        return new ProducerRecord(
+                message.getTopic() == null ? topic : message.getTopic(),
+                message.getPartition(),
+                message.getTimestamp(),
+                message.getKey(),
+                message.getBody(),
+                convertHeaders(message));
+    }
+
+    private List<RecordHeader> convertHeaders(KafkaMessage<?, ?> message) {
+        return message.getHeaders() == null ? null : message.getHeaders().entrySet()
+                .stream()
+                .map(e -> new RecordHeader(e.getKey(), e.getValue().toString().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
+    }
+
+    private void handleProducerFencedException(Producer<?, ?> producer, ProducerFencedException e) {
+        LOG.error("Failed accessing the producer: " + producer, e);
+        transactionalProducerRegistry.close(producer);
     }
 
     private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(Body.class))
+                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
                 .findFirst()
                 .orElseGet(() -> Arrays.stream(method.getArguments())
                         .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
@@ -736,7 +905,7 @@ public class KafkaConsumerProcessor
         final Argument<?> bodyArgument = findBodyArgument(method);
 
         if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getKeyDeserializer().isPresent()) {
-            final Optional<Argument> keyArgument = Arrays.stream(method.getArguments())
+            final Optional<Argument<?>> keyArgument = Arrays.stream(method.getArguments())
                     .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
                     .findFirst();
             if (keyArgument.isPresent()) {
@@ -793,6 +962,171 @@ public class KafkaConsumerProcessor
                 LOG.error("Error asynchronously committing Kafka offsets [{}]: {}", offsets, exception.getMessage(), exception);
             }
         };
+    }
+
+    private static String logMethod(ExecutableMethod<?, ?> method) {
+        return method.getDeclaringType().getSimpleName() + "#" + method.getName();
+    }
+
+    /**
+     * The internal state of the consumer.
+     *
+     * @author Denis Stepanov
+     */
+    private static final class ConsumerState {
+        final String clientId;
+        final Consumer<?, ?> kafkaConsumer;
+        final Object consumerBean;
+        final Set<String> subscriptions;
+
+        Set<TopicPartition> assignments;
+        Set<TopicPartition> _pausedTopicPartitions;
+        Set<TopicPartition> _pauseRequests;
+
+        @Nullable
+        final String groupId;
+        final boolean redelivery;
+
+        final OffsetStrategy offsetStrategy;
+
+        final ErrorStrategyValue errorStrategy;
+        @Nullable
+        final Duration errorStrategyRetryDelay;
+        final int errorStrategyRetryCount;
+
+        @Nullable
+        Map<Integer, PartitionRetryState> partitionRetries;
+
+        boolean autoPaused;
+        final String producerClientId;
+        final String producerTransactionalId;
+        final boolean transactional;
+
+        @Nullable
+        final String[] sendToDestinationTopics;
+        final boolean useSendOffsetsToTransaction;
+        final boolean isMessageReturnType;
+        final boolean isMessagesIterableReturnType;
+
+        private ConsumerState(String clientId, String groupId, OffsetStrategy offsetStrategy, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions,
+                              AnnotationValue<KafkaListener> kafkaListener, ExecutableMethod<?, ?> method) {
+            this.clientId = clientId;
+            this.groupId = groupId;
+            this.kafkaConsumer = consumer;
+            this.consumerBean = consumerBean;
+            this.subscriptions = subscriptions;
+            this.offsetStrategy = offsetStrategy;
+
+            redelivery = kafkaListener.isTrue("redelivery");
+
+            AnnotationValue<ErrorStrategy> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class).orElse(null);
+            errorStrategy = errorStrategyAnnotation == null ? ErrorStrategyValue.NONE : kafkaListener.get("errorStrategy", ErrorStrategy.class)
+                    .map(ErrorStrategy::value)
+                    .orElse(ErrorStrategyValue.NONE);
+
+            if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
+                Duration retryDelay = errorStrategyAnnotation.get("retryDelay", Duration.class)
+                        .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
+                this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
+                this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
+            } else {
+                this.errorStrategyRetryDelay = null;
+                this.errorStrategyRetryCount = 0;
+            }
+
+            autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);
+            producerClientId = kafkaListener.stringValue("producerClientId").orElse(null);
+            producerTransactionalId = kafkaListener.stringValue("producerTransactionalId").orElse(null);
+            transactional = StringUtils.isNotEmpty(producerTransactionalId);
+
+            String[] destinationTopics = method.stringValues(SendTo.class);
+            sendToDestinationTopics = ArrayUtils.isNotEmpty(destinationTopics) ? destinationTopics : null;
+
+            if (offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION) {
+                if (transactional && method.hasAnnotation(SendTo.class)) {
+                    useSendOffsetsToTransaction = true;
+                } else {
+                    throw new MessagingSystemException("Offset strategy 'SEND_TO_TRANSACTION' can only be used when transaction is enabled and @SendTo is used");
+                }
+            } else {
+                useSendOffsetsToTransaction = false;
+            }
+
+            if (useSendOffsetsToTransaction && redelivery) {
+                throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
+            }
+            ReturnType<?> returnType = method.getReturnType();
+            isMessageReturnType = returnType.getType().isAssignableFrom(KafkaMessage.class)
+                    || returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+            isMessagesIterableReturnType = Iterable.class.isAssignableFrom(returnType.getType()) && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+        }
+
+        void pause() {
+            pause(assignments);
+        }
+
+        synchronized void pause(@NonNull Collection<TopicPartition> topicPartitions) {
+            if (_pauseRequests == null) {
+                _pauseRequests = new HashSet<>();
+            }
+            _pauseRequests.addAll(topicPartitions);
+        }
+
+        synchronized void resume() {
+            autoPaused = false;
+            _pauseRequests = null;
+        }
+
+        synchronized void resume(@NonNull Collection<TopicPartition> topicPartitions) {
+            if (_pauseRequests != null) {
+                _pauseRequests.removeAll(topicPartitions);
+            }
+        }
+
+        synchronized boolean isPaused(@NonNull Collection<TopicPartition> topicPartitions) {
+            if (_pauseRequests == null || _pausedTopicPartitions == null) {
+                return false;
+            }
+            return _pauseRequests.containsAll(topicPartitions) && _pausedTopicPartitions.containsAll(topicPartitions);
+        }
+
+        synchronized void resumeTopicPartitions() {
+            Set<TopicPartition> paused = kafkaConsumer.paused();
+            if (paused.isEmpty()) {
+                return;
+            }
+            final List<TopicPartition> toResume = paused.stream()
+                    .filter(topicPartition -> _pauseRequests == null || !_pauseRequests.contains(topicPartition))
+                    .collect(Collectors.toList());
+            if (!toResume.isEmpty()) {
+                LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", clientId, toResume);
+                kafkaConsumer.resume(toResume);
+            }
+            if (_pausedTopicPartitions != null) {
+                toResume.forEach(_pausedTopicPartitions::remove);
+            }
+        }
+
+        synchronized void pauseTopicPartitions() {
+            if (_pauseRequests == null || _pauseRequests.isEmpty()) {
+                return;
+            }
+            kafkaConsumer.pause(_pauseRequests);
+            LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", clientId, kafkaConsumer.paused());
+            if (_pausedTopicPartitions == null) {
+                _pausedTopicPartitions = new HashSet<>();
+            }
+            _pausedTopicPartitions.addAll(_pauseRequests);
+        }
+
+    }
+
+    /**
+     * Topic retry status.
+     */
+    private static final class PartitionRetryState {
+        long currentRetryOffset;
+        int currentRetryCount;
     }
 
 }

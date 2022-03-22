@@ -1,15 +1,16 @@
 package io.micronaut.configuration.kafka.health
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.management.health.indicator.HealthResult
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
@@ -22,12 +23,12 @@ class KafkaHealthIndicatorSpec extends Specification {
         KafkaContainer kafkaContainer = new KafkaContainer()
         kafkaContainer.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                "kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()
+                "kafka.bootstrap.servers": kafkaContainer.bootstrapServers
         )
 
         when:
         KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
-        HealthResult result = healthIndicator.result.firstElement().blockingGet()
+        HealthResult result = healthIndicator.result.next().block()
 
         then:
         // report down because the not enough nodes to meet replication factor
@@ -47,7 +48,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         when:
         KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
-        HealthResult result = healthIndicator.result.firstElement().blockingGet()
+        HealthResult result = healthIndicator.result.next().block()
 
         then:
         // report down because the not enough nodes to meet replication factor
@@ -60,19 +61,22 @@ class KafkaHealthIndicatorSpec extends Specification {
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
+        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
+        container.start()
         ApplicationContext applicationContext = ApplicationContext.run(
-                (EMBEDDED)            : true,
+                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.bootstrapServers,
                 "kafka.health.enabled": configvalue
         )
 
         when:
-        def optional = applicationContext.findBean(KafkaHealthIndicator)
+        Optional<KafkaHealthIndicator> optional = applicationContext.findBean(KafkaHealthIndicator)
 
         then:
         !optional.isPresent()
 
         cleanup:
         applicationContext.close()
+        container.stop()
 
         where:
         configvalue << [false, "false", "no", ""]
@@ -82,8 +86,12 @@ class KafkaHealthIndicatorSpec extends Specification {
     void "kafka health indicator handle missing replication factor config"() {
         given:
         Collection<ConfigEntry> configEntries = []
-        if (offsetFactor) { configEntries.add(new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)) }
-        if (defaultFactor) { configEntries.add(new ConfigEntry(DEFAULT_REPLICATION_PROPERTY, defaultFactor)) }
+        if (offsetFactor) {
+            configEntries << new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)
+        }
+        if (defaultFactor) {
+            configEntries << new ConfigEntry(DEFAULT_REPLICATION_PROPERTY, defaultFactor)
+        }
         Config config = new Config(configEntries)
 
         when:

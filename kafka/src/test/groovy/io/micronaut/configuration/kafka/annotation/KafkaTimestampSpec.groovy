@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.producer.ProducerRecord
 
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -17,18 +16,13 @@ class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
         super.configuration + [(EMBEDDED_TOPICS): [TOPIC_WORDS]]
     }
 
-    def "test client without timestamp"() {
+    void "test client without timestamp"() {
         given:
         ClientWithoutClientTimestamp client = context.getBean(ClientWithoutClientTimestamp)
         SentenceListener listener = context.getBean(SentenceListener)
         listener.keys.clear()
         listener.sentences.clear()
         listener.timestamps.clear()
-
-        ProducerRecord pr = Spy(
-                ProducerRecord,
-                constructorArgs: [TOPIC_WORDS, null, null, "key", "sentence", new ArrayList()]
-        ) as ProducerRecord
 
         when:
         client.sendSentence("key", "sentence")
@@ -44,7 +38,7 @@ class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with timestamp"() {
+    void "test client with timestamp"() {
         given:
         ClientWithClientTimestamp client = context.getBean(ClientWithClientTimestamp)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -66,7 +60,7 @@ class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with custom timestamp"() {
+    void "test client with custom timestamp"() {
         given:
         ClientWithTimestampAsParameter client = context.getBean(ClientWithTimestampAsParameter)
         SentenceListener listener = context.getBean(SentenceListener)
@@ -88,7 +82,7 @@ class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    def "test client with timestamp and custom timestamp as parameter"() {
+    void "test client with timestamp and custom timestamp as parameter"() {
         given:
         ClientWithClientTimestampAndTimestampAsParameter client = context.getBean(ClientWithClientTimestampAndTimestampAsParameter)
         SentenceListener listener = context.getBean(SentenceListener)

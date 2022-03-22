@@ -1,0 +1,26 @@
+plugins {
+    id 'io.micronaut.build.internal.module'
+}
+
+dependencies {
+    api libs.micronaut.messaging
+
+    compileOnly libs.micronaut.management
+
+    implementation libs.projectreactor
+
+    testAnnotationProcessor libs.micronaut.inject.java
+
+    testImplementation libs.micronaut.micrometer
+    testImplementation libs.micronaut.management
+    testImplementation libs.testcontainers.kafka
+
+    testRuntimeOnly libs.micronaut.cache
+    testRuntimeOnly libs.micronaut.reactor
+    testRuntimeOnly libs.micronaut.http.server.netty
+    testRuntimeOnly libs.micronaut.management
+}
+
+test {
+    maxHeapSize = '2048m'
+}

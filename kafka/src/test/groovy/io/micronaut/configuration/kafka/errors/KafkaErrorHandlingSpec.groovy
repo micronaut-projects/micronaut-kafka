@@ -8,6 +8,7 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.TopicPartition
+import reactor.core.publisher.Mono
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -37,6 +38,19 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    void "test custom exception handler in reactive consumer"() {
+        when:"A reactive consumer with custom exception handler throws a Mono error"
+        ErrorClient myClient = context.getBean(ErrorClient)
+        myClient.sendMessage("One")
+
+        ErrorCausingReactiveConsumer myConsumer = context.getBean(ErrorCausingReactiveConsumer)
+
+        then:"The bean's exception handler is used"
+        conditions.eventually {
+            myConsumer.exceptionHandled
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
     static class ErrorCausingConsumer implements KafkaListenerExceptionHandler {
@@ -48,7 +62,7 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
             if (count.getAndIncrement() == 1) {
                 throw new RuntimeException("Won't handle first")
             }
-            received.add(message)
+            received << message
         }
 
         @Override
@@ -59,6 +73,22 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
                     new TopicPartition("errors", record.partition()),
                     record.offset()
             )
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
+    static class ErrorCausingReactiveConsumer implements KafkaListenerExceptionHandler {
+        boolean exceptionHandled = false
+
+        @Topic("errors")
+        Mono<Void> handleMessage(String message) {
+            return Mono.error(new RuntimeException())
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionHandled = true
         }
     }
 

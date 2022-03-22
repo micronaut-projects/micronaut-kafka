@@ -27,3 +27,16 @@ include::{testskafka}/consumer/sendto/ProductListener.java[tags=reactive, indent
 <3> The return is mapped from the single to the value of the quantity
 
 In the reactive case the `poll` loop will continue and will not wait for the record to be sent unless you specifically annotate the method with ann:core.annotation.Blocking[].
+
+To enable transactional sending of the messages you need to define `producerTransactionalId` in `@KafkaListener`.
+
+.Transactional consumer-producer
+[source,java]
+----
+include::{testskafka}/consumer/sendto/WordCounter.java[tags=transactional, indent=0]
+----
+
+<1> The id of the producer to load additional config properties
+<2> The transactional id that is required to enable transactional processing
+<3> Enable offset strategy to commit the offsets to the transaction
+<4> Consumer read messages isolation

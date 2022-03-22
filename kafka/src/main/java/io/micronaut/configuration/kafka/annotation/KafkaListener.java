@@ -17,6 +17,8 @@ package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.context.annotation.*;
 import io.micronaut.messaging.annotation.MessageListener;
+import org.apache.kafka.common.IsolationLevel;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -84,11 +86,53 @@ public @interface KafkaListener {
     OffsetReset offsetReset() default OffsetReset.LATEST;
 
     /**
+     * The client id of the producer that is used for {@link io.micronaut.messaging.annotation.SendTo}.
+     *
+     * @return the producer client id
+     */
+    String producerClientId() default "";
+
+    /**
+     * This setting applies only for the producer that is used for {@link io.micronaut.messaging.annotation.SendTo}.
+     *
+     * The TransactionalId to use for transactional delivery. This enables reliability semantics which span multiple producer
+     * sessions since it allows the client to guarantee that transactions using the same TransactionalId have been completed prior to starting any new transactions.
+     * If no TransactionalId is provided, then the producer is limited to idempotent delivery.
+     * If a TransactionalId is configured, <code>enable.idempotence</code> is implied.
+     * By default, the TransactionId is not configured, which means transactions cannot be used.
+     *
+     * @return the producer transaction id
+     */
+    String producerTransactionalId() default "";
+
+    /**
+     * Kafka consumer isolation level to control how to read messages written transactionally.
+     *
+     * See {@link org.apache.kafka.clients.consumer.ConsumerConfig#ISOLATION_LEVEL_CONFIG}.
+     *
+     * @return The isolation level
+     */
+    IsolationLevel isolation() default IsolationLevel.READ_UNCOMMITTED;
+
+    /**
+     * Setting the error strategy allows you to resume at the next offset
+     * or to seek the consumer (stop on error) to the failed offset so that
+     * it can retry if an error occurs
+     *
+     * The consumer bean is still able to implement a custom exception handler to replace
+     * {@link io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler}
+     * and set the error strategy.
+     *
+     * @return The strategy to use when an error occurs
+     */
+    ErrorStrategy errorStrategy() default @ErrorStrategy();
+
+    /**
      * Kafka consumers are by default single threaded. If you wish to increase the number of threads
      * for a consumer you can alter this setting. Note that this means that multiple partitions will
      * be allocated to a single application.
      *
-     * <p>NOTE: When using this setting if your bean is {@link javax.inject.Singleton} then local state will be s
+     * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be s
      * shared between invocations from different consumer threads</p>
      *
      * @return The number of threads
@@ -96,7 +140,7 @@ public @interface KafkaListener {
     int threads() default 1;
 
     /**
-     * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(long)}.
+     * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)}.
      *
      * @return The timeout. Defaults to 100ms
      */
@@ -142,4 +186,11 @@ public @interface KafkaListener {
      * @return The properties
      */
     Property[] properties() default {};
+
+    /**
+     * Setting to allow start the consumer in paused mode.
+     *
+     * @return the auto startup setting
+     */
+    boolean autoStartup() default true;
 }

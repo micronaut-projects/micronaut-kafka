@@ -6,11 +6,10 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.common.TopicPartition
-
-import javax.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
@@ -59,7 +58,7 @@ class AssignToPartitionSpec extends AbstractKafkaContainerSpec {
         @KafkaListener(offsetReset = EARLIEST)
         @Topic(AssignToPartitionSpec.TOPIC_SYNC)
         void receive(Product product) {
-            products.add(product)
+            products << product
         }
 
         @Override

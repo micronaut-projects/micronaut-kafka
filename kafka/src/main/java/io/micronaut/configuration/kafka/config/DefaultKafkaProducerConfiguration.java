@@ -18,15 +18,15 @@ package io.micronaut.configuration.kafka.config;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.annotation.Requires;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.Properties;
 
 /**
  * The default {@link org.apache.kafka.clients.producer.KafkaProducer} configuration when no default is specified.
  *
- * @param <K>
- * @param <V>
+ * @param <K> The key deserializer type
+ * @param <V> The value deserializer type
  */
 @Requires(missingProperty = KafkaProducerConfiguration.PREFIX + ".default")
 @Primary

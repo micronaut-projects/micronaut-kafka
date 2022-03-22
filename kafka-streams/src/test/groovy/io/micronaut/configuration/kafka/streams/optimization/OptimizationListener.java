@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.streams.optimization;
 
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Context;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -10,7 +9,9 @@ import org.apache.kafka.common.TopicPartition;
 
 import java.util.Collection;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "OptimizationListener")
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST;
+
+@KafkaListener(offsetReset = EARLIEST, groupId = "OptimizationListener")
 @Context
 public class OptimizationListener implements ConsumerRebalanceListener {
 

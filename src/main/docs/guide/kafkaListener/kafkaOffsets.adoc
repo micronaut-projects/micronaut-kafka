@@ -26,6 +26,9 @@ The following table summarizes the enum values and behaviour:
 |api:configuration.kafka.annotation.OffsetStrategy#ASYNC_PER_RECORD[]
 |Commits offsets asynchronously after each `ConsumerRecord` is processed. Sets `enable.auto.commit` to `false`
 
+|api:configuration.kafka.annotation.OffsetStrategy#SEND_TO_TRANSACTION[]
+|Only available when the transactional producer is enabled for `@SendTo`. Sends offsets to transaction using method `sendOffsetsToTransaction` of `org.apache.kafka.clients.producer.Producer`.
+
 |===
 
 Depending on the your level of paranoia or durability requirements you can choose to tune how and when offsets are committed.

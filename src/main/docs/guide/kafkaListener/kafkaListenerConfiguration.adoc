@@ -96,3 +96,15 @@ kafka:
 ----
 
 You may want to do this if for example you choose an alternative deserialization format such as Avro or Protobuf.
+
+=== Transactional properties
+
+There are a few options that can be enabled for only in the transactional processing:
+
+==== Isolation
+
+Use `isolation` member to define if you want to receive messages that haven't been committed yet.
+
+==== Custom offset strategy
+
+There is a special offset strategy `OffsetStrategy.SEND_TO_TRANSACTION` that can only be used with an associated producer, only applicable when `SendTo` is used.

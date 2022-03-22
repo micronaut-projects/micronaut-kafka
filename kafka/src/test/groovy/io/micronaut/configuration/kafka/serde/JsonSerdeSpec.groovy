@@ -12,8 +12,25 @@ class JsonSerdeSpec extends Specification {
 
         when:
         JsonSerde<Book> serde = context.createBean(JsonSerde, Book)
-        def book = new Book(title: "The Stand")
-        def json = '{"title":"The Stand"}'
+        Book book = new Book(title: "The Stand")
+        String json = '{"title":"The Stand"}'
+
+        then:
+        new String(serde.serialize("foo", book)) == json
+        serde.deserialize("foo", json.bytes) == book
+
+        cleanup:
+        context.close()
+    }
+
+    void "test json object serde"() {
+        given:
+        ApplicationContext context = ApplicationContext.run()
+
+        when:
+        JsonObjectSerde<Book> serde = context.createBean(JsonObjectSerde, Book)
+        Book book = new Book(title: "The Stand")
+        String json = '{"title":"The Stand"}'
 
         then:
         new String(serde.serialize("foo", book)) == json

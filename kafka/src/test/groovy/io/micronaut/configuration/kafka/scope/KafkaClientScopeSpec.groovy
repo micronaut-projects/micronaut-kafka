@@ -4,10 +4,9 @@ import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.Producer
-
-import javax.inject.Inject
-import javax.inject.Singleton
 
 class KafkaClientScopeSpec extends AbstractKafkaSpec {
 

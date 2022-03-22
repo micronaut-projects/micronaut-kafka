@@ -19,9 +19,9 @@ import brave.kafka.clients.KafkaTracing;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 
-import javax.inject.Singleton;
 
 /**
  * Kafka producer tracing instrumentation using Brave.
@@ -44,6 +44,7 @@ public class BraveKafkaProducerTracingInstrumentation implements BeanCreatedEven
 
     @Override
     public Producer<?, ?> onCreated(BeanCreatedEvent<Producer<?, ?>> event) {
-        return kafkaTracing.producer(event.getBean());
+        final Producer<?, ?> producer = event.getBean();
+        return kafkaTracing.producer(producer);
     }
 }

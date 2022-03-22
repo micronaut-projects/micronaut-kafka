@@ -5,11 +5,10 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
-
-import javax.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
@@ -60,7 +59,7 @@ class ManualOffsetCommitSpec extends AbstractKafkaContainerSpec {
                      int partition,
                      String topic,
                      Consumer kafkaConsumer) {
-            products.add(product)
+            products << product
 
             kafkaConsumer.commitSync(Collections.singletonMap(
                     new TopicPartition(topic, partition),

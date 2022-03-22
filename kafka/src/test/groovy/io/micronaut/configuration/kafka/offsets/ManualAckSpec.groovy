@@ -1,13 +1,12 @@
 package io.micronaut.configuration.kafka.offsets
 
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
-import io.micronaut.configuration.kafka.Acknowledgement
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-
-import javax.inject.Singleton
+import io.micronaut.messaging.Acknowledgement
+import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
@@ -54,7 +53,7 @@ class ManualAckSpec extends AbstractKafkaContainerSpec {
         @KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED)
         @Topic(ManualAckSpec.TOPIC_SYNC)
         void receive(Product product, Acknowledgement acknowledgement) {
-            products.add(product)
+            products << product
 
             acknowledgement.ack()
         }

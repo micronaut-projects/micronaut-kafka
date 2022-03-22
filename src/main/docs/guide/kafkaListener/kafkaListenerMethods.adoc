@@ -35,21 +35,25 @@ The following table summarizes the annotations and their purpose, with an exampl
 |===
 |Annotation |Description |Example
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html[@Body]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html[@MessageBody]
 | Allows explicitly indicating the body of the message
-|`@Body Product product`
+|`@MessageBody Product product`
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader]
 | Allows binding a parameter to a message header
-|`@Header("X-My-Header") String myHeader`
+|`@MessageHeader("X-My-Header") String myHeader`
 
 |ann:configuration.kafka.annotation.KafkaKey[]
-| Allows specifying the parameter that is the key
-|`@KafkaKey String key`
+| Allows binding a parameter to the message key
+|`@KafkaKey String messageKey`
+
+|ann:configuration.kafka.annotation.KafkaPartition[]
+| Allows binding a parameter to the partition the message was received from
+|`@KafkaPartition Integer partition`
 
 |===
 
-For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation to bind a parameter value from a header contained within a `ConsumerRecord`.
+For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader] annotation to bind a parameter value from a header contained within a `ConsumerRecord`.
 
 
 == Topics, Partitions and Offsets
@@ -125,7 +129,7 @@ Note that in this case the method returns an `rx:Single[]` this indicates to Mic
 
 The idea here is that you are able to write consumers that don't block, however care must be taken in the case where an error occurs in the `doOnSuccess` method otherwise the message could be lost. You could for example re-deliver the message in case of an error.
 
-Alternatively, you can use the ann:core.annotation.Blocking[] annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the `poll` loop, preventing offsets from being committed automatically:
+Alternatively, you can use the https://micronaut-projects.github.io/micronaut-core/latest/api/io/micronaut/core/annotation/Blocking.html[@Blocking] annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the `poll` loop, preventing offsets from being committed automatically:
 
 .Blocking with Reactive Consumers
 [source,java]

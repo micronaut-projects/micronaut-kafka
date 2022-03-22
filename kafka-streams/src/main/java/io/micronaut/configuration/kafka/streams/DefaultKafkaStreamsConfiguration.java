@@ -21,8 +21,8 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.runtime.ApplicationConfiguration;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.Properties;
 
 /**
@@ -30,8 +30,8 @@ import java.util.Properties;
  *
  * @author graemerocher
  * @since 1.0
- * @param <K>
- * @param <V>
+ * @param <K> The key deserializer type
+ * @param <V> The value deserializer type
  */
 @Requires(missingProperty = KafkaStreamsConfiguration.PREFIX + ".default")
 @Singleton

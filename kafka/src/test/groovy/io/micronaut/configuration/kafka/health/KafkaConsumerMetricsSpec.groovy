@@ -6,9 +6,11 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.annotation.MessageHeader
+import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -17,7 +19,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 
 class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
     @Shared MeterRegistry meterRegistry
 
     protected Map<String, Object> getConfiguration() {
@@ -29,8 +31,8 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
 
     void setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
-                embeddedServer.getURL(),
+                HttpClient,
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
         meterRegistry = context.getBean(MeterRegistry)
@@ -45,7 +47,7 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
 
         expect:
         conditions.eventually {
-            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
             result.names.contains("kafka.consumer.bytes-consumed-total")
             !result.names.contains("kafka.consumer.record-error-rate")

@@ -1,26 +1,5 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath "io.micronaut.build.internal:micronaut-gradle-plugins:4.0.0"
-    }
+plugins {
+    id 'io.micronaut.build.internal.docs'
+    id 'io.micronaut.build.internal.dependency-updates'
+    id 'io.micronaut.build.internal.quality-reporting'
 }
-
-
-subprojects { Project subproject ->
-
-    if (subproject.path.contains("tests")) {
-        return
-    }
-
-    group "io.micronaut.kafka"
-
-    apply plugin: "io.micronaut.build.internal.common"
-    apply plugin: "io.micronaut.build.internal.dependency-updates"
-    apply plugin: "io.micronaut.build.internal.publishing"
-}
-
-apply plugin: "io.micronaut.build.internal.docs"
-apply plugin: "io.micronaut.build.internal.dependency-updates"

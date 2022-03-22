@@ -33,8 +33,8 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         def stream = context.getBean(KafkaStreams, Qualifiers.byName('my-stream'))
 
         then:
-        stream.config.originals().get('application.id') == "my-stream"
-        stream.config.originals().get('generic.config') == "hello"
+        stream.config.originals()['application.id'] == "my-stream"
+        stream.config.originals()['generic.config'] == "hello"
     }
 
     void "test kafka stream application"() {
@@ -54,11 +54,6 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
             interactiveQueryService.getWordCount(WORD_COUNT_STORE, "fox") > 0
             interactiveQueryService.getWordCount(WORD_COUNT_STORE, "jumps") > 0
             interactiveQueryService.<String, Long> getGenericKeyValue(WORD_COUNT_STORE, "the") > 0
-
-            println countListener.wordCounts
-            println interactiveQueryService.getWordCount(WORD_COUNT_STORE, "fox")
-            println interactiveQueryService.getWordCount(WORD_COUNT_STORE, "jumps")
-            println interactiveQueryService.<String, Long> getGenericKeyValue(WORD_COUNT_STORE, "the")
         }
     }
 
@@ -88,15 +83,14 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         }
 
         OptimizationClient optimizationClient = context.getBean(OptimizationClient)
-
         optimizationClient.publishOptimizationOffMessage("key", "off")
         optimizationClient.publishOptimizationOnMessage("key", "on")
 
         then:
         conditions.eventually {
-            optimizationListener.getOptimizationOnChangelogMessageCount() == 0
+            optimizationListener.optimizationOnChangelogMessageCount == 0
             //no changelog should be created/used when topology optimization is enabled
-            optimizationListener.getOptimizationOffChangelogMessageCount() == 1
+            optimizationListener.optimizationOffChangelogMessageCount == 1
             interactiveQueryService.getValue(OPTIMIZATION_OFF_STORE, "key") == "off"
             interactiveQueryService.getValue(OPTIMIZATION_ON_STORE, "key") == "on"
         }

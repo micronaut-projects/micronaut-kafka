@@ -10,8 +10,10 @@ import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
 import io.micronaut.configuration.kafka.serde.JsonSerde
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
+import io.micronaut.core.annotation.Nullable
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
-import io.micronaut.http.client.RxHttpClient
+import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
@@ -21,11 +23,10 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
+import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Stepwise
-
-import javax.annotation.Nullable
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
@@ -33,7 +34,7 @@ import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 @Stepwise
 class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
-    @Shared @AutoCleanup RxHttpClient httpClient
+    @Shared @AutoCleanup HttpClient httpClient
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -42,10 +43,10 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
                  (EMBEDDED_TOPICS): ['words', 'books', 'words-records', 'books-records']]
     }
 
-    def setupSpec() {
+    void setupSpec() {
         httpClient = context.createBean(
-                RxHttpClient,
-                embeddedServer.getURL(),
+                HttpClient,
+                embeddedServer.URL,
                 new DefaultHttpClientConfiguration(followRedirects: false)
         )
     }
@@ -73,7 +74,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
         and:
         conditions.eventually {
-            def response = httpClient.exchange("/metrics", Map).blockingFirst()
+            HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
 
             result.names.contains("kafka.producer.count")
@@ -125,7 +126,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
-    void "test @Body annotation"() {
+    void "test @MessageBody annotation"() {
         when:
         MyClient myClient = context.getBean(MyClient)
         RecordMetadata metadata = myClient.sendGetRecordMetadata("key", "hello world")
@@ -181,7 +182,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         producer?.close()
     }
 
-    void "test @Header annotation with optional"() {
+    void "test @MessageHeader annotation with optional"() {
         when:
         MyClient myClient = context.getBean(MyClient)
         myClient.sendSentence("key", "Hello, world!", "words")

@@ -16,12 +16,14 @@
 package io.micronaut.configuration.kafka;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
+import io.micronaut.configuration.kafka.serde.JsonObjectSerde;
 import io.micronaut.configuration.kafka.serde.JsonSerde;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.TypeHint;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
@@ -52,6 +54,7 @@ import java.util.Properties;
         FloatSerializer.class,
         // serdes
         JsonSerde.class,
+        JsonObjectSerde.class,
         // deserializers
         ShortDeserializer.class,
         DoubleDeserializer.class,
@@ -81,7 +84,7 @@ public class KafkaConsumerFactory {
      * @return The consumer
      */
     @Prototype
-    public <K, V> KafkaConsumer<K, V> createConsumer(
+    public <K, V> Consumer<K, V> createConsumer(
             @Parameter AbstractKafkaConsumerConfiguration<K, V> consumerConfiguration) {
 
         Optional<Deserializer<K>> keyDeserializer = consumerConfiguration.getKeyDeserializer();

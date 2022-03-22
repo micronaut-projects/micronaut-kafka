@@ -27,7 +27,7 @@ package io.micronaut.configuration.kafka.annotation;
  */
 public enum OffsetStrategy {
     /**
-     * Automatically commit offsets with the {@link org.apache.kafka.clients.consumer.Consumer#poll(long)} loop.
+     * Automatically commit offsets with the {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)} loop.
      */
     AUTO,
     /**
@@ -49,6 +49,11 @@ public enum OffsetStrategy {
     /**
      * Asynchronously commit offsets using {@link org.apache.kafka.clients.consumer.Consumer#commitSync()} after each {@link org.apache.kafka.clients.consumer.ConsumerRecord} is consumed.
      */
-    ASYNC_PER_RECORD
+    ASYNC_PER_RECORD,
+    /**
+     * Only applicable for transactional processing in combination with {@link io.micronaut.messaging.annotation.SendTo}.
+     * Sends offsets to transaction using {@link org.apache.kafka.clients.producer.Producer#sendOffsetsToTransaction(java.util.Map, String)}
+     */
+    SEND_TO_TRANSACTION
 
 }

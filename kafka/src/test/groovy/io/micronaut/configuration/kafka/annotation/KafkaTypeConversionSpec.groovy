@@ -4,10 +4,10 @@ import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
+import jakarta.inject.Inject
 import org.apache.kafka.common.errors.SerializationException
 import spock.lang.Stepwise
 
-import javax.inject.Inject
 import java.util.concurrent.ConcurrentHashMap
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -24,7 +24,7 @@ class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
     void "test send valid UUID key"() {
         when:
         MyClient myClient = context.getBean(MyClient)
-        def uuid = UUID.randomUUID()
+        UUID uuid = UUID.randomUUID()
         myClient.send(uuid.toString(), "test")
 
         MyListener myConsumer = context.getBean(MyListener)
@@ -38,7 +38,7 @@ class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
     void "test send invalid UUID key"() {
         when:
         MyClient myClient = context.getBean(MyClient)
-        def uuid = "bunch 'o junk"
+        String uuid = "bunch 'o junk"
         myClient.send(uuid, "test")
 
         MyListener myConsumer = context.getBean(MyListener)
@@ -64,7 +64,7 @@ class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
 
         @Topic("uuids")
         void receive(@KafkaKey UUID key, String message) {
-            messages.put(key, message)
+            messages[key] = message
         }
 
         @Override

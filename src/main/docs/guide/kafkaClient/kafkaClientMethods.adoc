@@ -2,7 +2,7 @@
 
 The Kafka key can be specified by providing a parameter annotated with `@KafkaKey`. If no such parameter is specified the record is sent with a `null` key.
 
-The value to send is resolved by selecting the argument annotated with https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html[@Body], otherwise the first argument with no specific binding annotation is used. For example:
+The value to send is resolved by selecting the argument annotated with https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html[@MessageBody], otherwise the first argument with no specific binding annotation is used. For example:
 
 [source,java]
 ----
@@ -14,7 +14,7 @@ The method above will use the parameter `brand` as the key and the parameter `na
 
 === Including Message Headers
 
-There are a number of ways you can include message headers. One way is to annotate an argument with the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation and include a value when calling the method:
+There are a number of ways you can include message headers. One way is to annotate an argument with the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader] annotation and include a value when calling the method:
 
 [source,java]
 ----
@@ -22,7 +22,7 @@ There are a number of ways you can include message headers. One way is to annota
 void sendProduct(
     @KafkaKey String brand,
     String name,
-    @Header("My-Header") String myHeader);
+    @MessageHeader("My-Header") String myHeader);
 ----
 
 The example above will include the value of the `myHeader` argument as a header called `My-Header`.
@@ -124,18 +124,26 @@ The following table summarizes the annotations and their purpose, with an exampl
 |===
 |Annotation |Description |Example
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Body.html[@Body]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html[@MessageBody]
 | Allows explicitly indicating the body of the message to sent
-|`@Body Product product`
+|`@MessageBody Product product`
 
-|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header]
+|https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader]
 | Allows specifying a parameter that should be sent as a header
-|`@Header("X-My-Header") String myHeader`
+|`@MessageHeader("X-My-Header") String myHeader`
 
 |ann:configuration.kafka.annotation.KafkaKey[]
 | Allows specifying the parameter that is the Kafka key
 |`@KafkaKey String key`
 
+|ann:configuration.kafka.annotation.KafkaPartition[]
+| Allows specifying the parameter that is the partition number
+|`@KafkaPartition Integer partition`
+
+|ann:configuration.kafka.annotation.KafkaPartitionKey[]
+| Allows specifying the parameter that is used to compute a partition number independently from the Message Key.
+|`@KafkaPartition String partitionKey`
+
 |===
 
-For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/Header.html[@Header] annotation to bind a parameter value to a header in the `ProducerRecord`.
+For example, you can use the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader] annotation to bind a parameter value to a header in the `ProducerRecord`.

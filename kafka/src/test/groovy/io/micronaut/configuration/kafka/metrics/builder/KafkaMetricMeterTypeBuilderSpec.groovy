@@ -1,25 +1,26 @@
 package io.micronaut.configuration.kafka.metrics.builder
 
+import io.micrometer.core.instrument.Meter
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry
 import org.apache.kafka.common.MetricName
 import org.apache.kafka.common.metrics.KafkaMetric
 import org.apache.kafka.common.metrics.MetricConfig
 import org.apache.kafka.common.metrics.stats.Avg
-import org.apache.kafka.common.utils.MockTime
+import org.apache.kafka.common.utils.Time
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class KafkaMetricMeterTypeBuilderSpec extends Specification {
 
-    def "building with no values is empty"() {
+    void "building with no values is empty"() {
         expect:
         !KafkaMetricMeterTypeBuilder.newBuilder().build().isPresent()
     }
 
     @Unroll
-    def "can build Meter with varying conditions #name #prefix #isValid"() {
+    void "can build Meter with varying conditions #name #prefix #isValid"() {
         when:
-        def optional = KafkaMetricMeterTypeBuilder.newBuilder()
+        Optional<Meter> optional = KafkaMetricMeterTypeBuilder.newBuilder()
                 .name(name)
                 .prefix(prefix)
                 .tagFunction(tagFunction)
@@ -43,15 +44,15 @@ class KafkaMetricMeterTypeBuilderSpec extends Specification {
         "name" | "prefix" | createTagFunction() | createMetric() | new LoggingMeterRegistry() | true
     }
 
-    def createMetric() {
-        return new KafkaMetric(new Object(),
+    private KafkaMetric createMetric() {
+        new KafkaMetric(new Object(),
                 new MetricName("name", "group", "description", [:]),
                 new Avg(),
                 new MetricConfig(),
-                new MockTime())
+                Mock(Time))
     }
 
-    def createTagFunction() {
+    private createTagFunction() {
         return {}
     }
 }
