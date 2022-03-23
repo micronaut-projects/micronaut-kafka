@@ -59,7 +59,7 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
             !result.names.contains("kafka.producer.bytes-consumed-total")
             !result.names.contains("kafka.count")
 
-            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.preferred-read-replica", Map)).block()
+            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.records-lead-avg", Map)).block()
             Map metricBody = preferredReadReplica.body()
             metricBody.availableTags.size() == 3
             metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.PARTITION_TAG, ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
