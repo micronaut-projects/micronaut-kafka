@@ -4,7 +4,9 @@
   ],
   "addLabels": ["dependency-upgrade"],
   "schedule": [
-    "after 10am"
+    "every weekend"
   ],
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 20,
   "timezone": "Europe/Prague"
 }
