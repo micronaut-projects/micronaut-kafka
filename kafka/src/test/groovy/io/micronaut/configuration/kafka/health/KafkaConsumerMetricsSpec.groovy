@@ -13,10 +13,12 @@ import io.micronaut.messaging.annotation.MessageHeader
 import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
 import spock.lang.Shared
+import spock.lang.Retry
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
+@Retry
 class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
 
     @Shared @AutoCleanup HttpClient httpClient
