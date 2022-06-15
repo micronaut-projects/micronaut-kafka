@@ -5,6 +5,7 @@ import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.NewTopic
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 
 class KafkaSetup {
 
@@ -12,7 +13,7 @@ class KafkaSetup {
 
     static KafkaContainer init() {
         if (kafkaContainer == null) {
-            kafkaContainer = new KafkaContainer("5.4.2")
+            kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.9"))
             kafkaContainer.start()
             createTopics()
         }

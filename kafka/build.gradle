@@ -3,26 +3,22 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor libs.micronaut.graal
+    annotationProcessor mn.micronaut.graal
 
     api libs.managed.kafka.clients
 
-    compileOnly libs.micronaut.micrometer
+    compileOnly mn.micronaut.micrometer.core
     compileOnly libs.opentracing.kafka.client
     compileOnly libs.zipkin.brave.kafka.clients
-    compileOnly libs.micronaut.graal
-    compileOnly libs.graal
+    compileOnly mn.micronaut.graal
+    compileOnly mn.graal
 
-    testImplementation libs.micronaut.rxjava2
-    testImplementation libs.micronaut.http.client
+    testImplementation mn.micronaut.rxjava2
+    testImplementation mn.micronaut.http.client
     testImplementation libs.opentracing.mock
     testImplementation libs.opentracing.kafka.client
-    testImplementation libs.micronaut.rxjava2
+    testImplementation mn.micronaut.rxjava2
 
-    testRuntimeOnly libs.micronaut.micrometer.statsd
-    testRuntimeOnly libs.micronaut.tracing
+    testRuntimeOnly mn.micronaut.micrometer.registry.statsd
+    testRuntimeOnly mn.micronaut.tracing.core
 }
-
-//testlogger {
-//    showStandardStreams true
-//}

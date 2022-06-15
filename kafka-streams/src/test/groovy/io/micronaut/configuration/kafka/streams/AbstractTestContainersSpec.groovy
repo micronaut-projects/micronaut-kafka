@@ -20,6 +20,7 @@ abstract class AbstractTestContainersSpec extends Specification {
     @Shared static KafkaContainer kafkaContainer = KafkaSetup.init()
 
     void setupSpec() {
+        kafkaContainer.start()
         List<Object> config = ["kafka.bootstrap.servers", kafkaContainer.bootstrapServers]
         config.addAll(getConfiguration())
 
