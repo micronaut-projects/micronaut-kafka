@@ -23,6 +23,7 @@ import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.TypeHint;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
@@ -41,6 +42,7 @@ import java.util.Properties;
  */
 @Factory
 @TypeHint({
+        CooperativeStickyAssignor.class,
         // serializers
         ShortSerializer.class,
         DoubleSerializer.class,
