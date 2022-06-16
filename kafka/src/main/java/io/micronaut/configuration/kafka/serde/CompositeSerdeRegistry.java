@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.serde;
 
 import io.micronaut.context.annotation.Primary;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.OrderUtil;
 import io.micronaut.core.reflect.ReflectionUtils;
 import io.micronaut.core.serialize.exceptions.SerializationException;
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Singleton
 @Primary
+@Internal
 public class CompositeSerdeRegistry implements SerdeRegistry {
 
     private final List<SerdeRegistry> registries;

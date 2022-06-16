@@ -23,18 +23,17 @@ micronaut:
 kafka:
   security.protocol: PLAINTEXT
   client.id: ${random.uuid}
-  group.id: ${random.uuid}
   consumers.group.id: ${random.uuid}
   streams:
     my-stream:
       client.id: ${random.uuid}
-      application-id: micronaut-kafka-streams-1
+      application-id: micronaut-kafka-streams-${random.uuid}
       group.id: ${random.uuid}
     optimization-on:
       client.id: ${random.uuid}
-      application-id: micronaut-kafka-streams-2
+      application-id: micronaut-kafka-streams-${random.uuid}
       group.id: ${random.uuid}
     optimization-off:
       client.id: ${random.uuid}
-      application-id: micronaut-kafka-streams-3
+      application-id: micronaut-kafka-streams-${random.uuid}
       group.id: ${random.uuid}

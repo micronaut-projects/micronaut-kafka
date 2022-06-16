@@ -20,9 +20,8 @@ repositories {
 dependencies {
     implementation projects.kafka
 
-    testImplementation libs.micronaut.http.client
+    testImplementation mn.micronaut.http.client
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
-    testImplementation "io.micronaut.test:micronaut-test-spock"
-    testImplementation "io.micronaut.test:micronaut-test-core"
+    testImplementation mn.micronaut.test.spock
 }

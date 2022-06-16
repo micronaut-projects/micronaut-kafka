@@ -8,8 +8,7 @@ import spock.lang.Retry
 class KafkaPartitionedErrorsSpec extends KafkaErrorsSpec {
 
     @Override
-    void startKafka() {
-        super.startKafka()
+    void afterKafkaStarted() {
         createTopic("test-topic", 3, 1)
     }
 

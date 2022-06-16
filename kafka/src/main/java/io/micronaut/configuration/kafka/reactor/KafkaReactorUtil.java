@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.reactor;
 
+import io.micronaut.core.annotation.Internal;
 import org.apache.kafka.common.KafkaFuture;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +27,7 @@ import java.util.function.Supplier;
  * @author graemerocher
  * @since 4.0.0
  */
+@Internal
 public class KafkaReactorUtil {
 
     /**

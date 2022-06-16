@@ -41,6 +41,7 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Blocking;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
@@ -91,8 +92,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
@@ -126,7 +125,8 @@ import java.util.stream.Collectors;
  */
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
-public class KafkaConsumerProcessor
+@Internal
+class KafkaConsumerProcessor
         implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
@@ -139,7 +139,6 @@ public class KafkaConsumerProcessor
 
     private final ConsumerRecordBinderRegistry binderRegistry;
     private final SerdeRegistry serdeRegistry;
-    private final Scheduler executorScheduler;
     private final KafkaListenerExceptionHandler exceptionHandler;
     private final TaskScheduler taskScheduler;
     private final ProducerRegistry producerRegistry;
@@ -162,7 +161,7 @@ public class KafkaConsumerProcessor
      * @param schedulerService              The scheduler service
      * @param transactionalProducerRegistry The transactional producer registry
      */
-    public KafkaConsumerProcessor(
+    KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
             ApplicationConfiguration applicationConfiguration,
             BeanContext beanContext,
@@ -181,7 +180,6 @@ public class KafkaConsumerProcessor
         this.binderRegistry = binderRegistry;
         this.batchBinderRegistry = batchBinderRegistry;
         this.serdeRegistry = serdeRegistry;
-        this.executorScheduler = Schedulers.fromExecutor(executorService);
         this.producerRegistry = producerRegistry;
         this.exceptionHandler = exceptionHandler;
         this.taskScheduler = new ScheduledExecutorTaskScheduler(schedulerService);

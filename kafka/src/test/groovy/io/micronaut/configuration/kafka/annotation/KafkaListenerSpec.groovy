@@ -7,13 +7,14 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguratio
 import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
 import io.micronaut.configuration.kafka.metrics.KafkaProducerMetrics
-import io.micronaut.configuration.kafka.serde.JsonSerde
+import io.micronaut.configuration.kafka.serde.JsonObjectSerde
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Nullable
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.HttpClient
+import io.micronaut.json.JsonObjectSerializer
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
@@ -165,7 +166,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         when:
         def config = context.getBean(AbstractKafkaProducerConfiguration)
         config.setKeySerializer(new StringSerializer())
-        config.setValueSerializer(new JsonSerde(Book).serializer())
+        config.setValueSerializer(new JsonObjectSerde(context.getBean(JsonObjectSerializer), Book).serializer())
         Producer producer = context.createBean(Producer, config)
         producer.send(new ProducerRecord("books-records", "Stephen King", new Book(title: "The Stand"))).get()
 

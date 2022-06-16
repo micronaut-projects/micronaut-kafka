@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka
+package io.micronaut.configuration.kafka.streams
 
 import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.admin.AdminClient
@@ -8,10 +8,12 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
+import spock.lang.Specification
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.9")).withEnv(getEnvVariables())
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.9"))
+            .withEnv(getEnvVariables())
     @Shared @AutoCleanup ApplicationContext context
 
     void setupSpec() {
@@ -25,16 +27,16 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     void startContext() {
         context = ApplicationContext.run(
-                getConfiguration() +
-                        ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
+                getConfiguration() + ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
         )
     }
 
     void stopContext() {
-        context.stop()
+        context?.stop()
     }
 
     void cleanupSpec() {
+        stopContext()
         kafkaContainer.stop()
     }
 
