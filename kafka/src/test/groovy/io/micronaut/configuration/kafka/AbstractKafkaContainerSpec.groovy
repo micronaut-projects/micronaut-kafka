@@ -16,7 +16,11 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     void setupSpec() {
         kafkaContainer.start()
+        afterKafkaStarted()
         startContext()
+    }
+
+    void afterKafkaStarted() {
     }
 
     void startContext() {
