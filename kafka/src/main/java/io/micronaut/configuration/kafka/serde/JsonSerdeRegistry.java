@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.serde;
 
 import io.micronaut.context.BeanContext;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.reflect.ClassUtils;
 import jakarta.inject.Singleton;
 import org.apache.kafka.common.serialization.Serde;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Graeme Rocher
  * @since 1.0
  */
+@Internal
 @Singleton
 public class JsonSerdeRegistry implements SerdeRegistry {
 

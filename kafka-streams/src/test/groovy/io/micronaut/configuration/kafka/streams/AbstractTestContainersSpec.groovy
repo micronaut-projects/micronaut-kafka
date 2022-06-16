@@ -1,51 +1,43 @@
 package io.micronaut.configuration.kafka.streams
 
-import groovy.util.logging.Slf4j
-import io.micronaut.context.ApplicationContext
-import io.micronaut.core.util.CollectionUtils
-import io.micronaut.runtime.server.EmbeddedServer
-import org.testcontainers.containers.KafkaContainer
-import spock.lang.AutoCleanup
+
+import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
+import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import spock.lang.Shared
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
 
-@Slf4j
-abstract class AbstractTestContainersSpec extends Specification {
+abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
 
-    PollingConditions conditions = new PollingConditions(timeout: 60, delay: 1)
+    @Shared
+    String myStreamApplicationId = 'my-stream-' + UUID.randomUUID().toString()
 
-    @Shared @AutoCleanup EmbeddedServer embeddedServer
-    @Shared @AutoCleanup ApplicationContext context
-    @Shared static KafkaContainer kafkaContainer = KafkaSetup.init()
+    @Shared
+    String optimizationOnApplicationId = 'optimization-on-' + UUID.randomUUID().toString()
 
-    void setupSpec() {
-        kafkaContainer.start()
-        List<Object> config = ["kafka.bootstrap.servers", kafkaContainer.bootstrapServers]
-        config.addAll(getConfiguration())
+    @Shared
+    String optimizationOffApplicationId = 'optimization-off-' + UUID.randomUUID().toString()
 
-        embeddedServer = ApplicationContext.run(EmbeddedServer, CollectionUtils.mapOf(config as Object[]))
-
-        context = embeddedServer.applicationContext
+    protected Map<String, Object> getConfiguration() {
+        super.getConfiguration() + ['kafka.generic.config': "hello",
+                                    'kafka.streams.my-stream.application.id': myStreamApplicationId,
+                                    'kafka.streams.my-stream.num.stream.threads': 10,
+                                    'kafka.streams.optimization-on.application.id': optimizationOnApplicationId,
+                                    'kafka.streams.optimization-on.topology.optimization': 'all',
+                                    'kafka.streams.optimization-off.application.id': optimizationOffApplicationId,
+                                    'kafka.streams.optimization-off.topology.optimization': 'none']
     }
 
-    protected List<Object> getConfiguration() {
-        ['kafka.generic.config', "hello",
-         'kafka.streams.my-stream.application.id', 'my-stream',
-         'kafka.streams.my-stream.num.stream.threads', 10,
-         'kafka.streams.optimization-on.application.id', 'optimization-on',
-         'kafka.streams.optimization-on.topology.optimization', 'all',
-         'kafka.streams.optimization-off.application.id', 'optimization-off',
-         'kafka.streams.optimization-off.topology.optimization', 'none']
+    @Override
+    void afterKafkaStarted() {
+        [
+                WordCountStream.INPUT,
+                WordCountStream.OUTPUT,
+                WordCountStream.NAMED_WORD_COUNT_INPUT,
+                WordCountStream.NAMED_WORD_COUNT_OUTPUT,
+                OptimizationStream.OPTIMIZATION_ON_INPUT,
+                OptimizationStream.OPTIMIZATION_OFF_INPUT
+        ].forEach(topic -> {
+            createTopic(topic.toString(), 1, 1)
+        })
     }
 
-    void cleanupSpec() {
-        try {
-            embeddedServer.stop()
-            log.warn("Stopped containers!")
-        } catch (Exception ignored) {
-            log.error("Could not stop containers")
-        }
-        embeddedServer?.close()
-    }
 }

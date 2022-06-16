@@ -32,6 +32,7 @@ import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.annotation.Bindable;
@@ -91,7 +92,8 @@ import java.util.function.Function;
  * @since 1.0
  */
 @InterceptorBean(KafkaClient.class)
-public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>, AutoCloseable {
+@Internal
+class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaClientIntroductionAdvice.class);
     private static final ContextSupplier NULL_SUPPLIER = __ -> null;
 
@@ -107,7 +109,7 @@ public class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, 
      * @param serdeRegistry     The serde registry
      * @param conversionService The conversion service
      */
-    public KafkaClientIntroductionAdvice(
+    KafkaClientIntroductionAdvice(
             BeanContext beanContext,
             SerdeRegistry serdeRegistry,
             ConversionService<?> conversionService) {

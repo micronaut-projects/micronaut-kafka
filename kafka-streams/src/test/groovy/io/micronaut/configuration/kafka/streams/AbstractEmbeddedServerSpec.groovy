@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka
+package io.micronaut.configuration.kafka.streams
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.runtime.server.EmbeddedServer

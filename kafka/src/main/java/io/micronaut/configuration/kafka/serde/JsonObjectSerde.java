@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.serde;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.core.annotation.Creator;
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.serialize.exceptions.SerializationException;
 import io.micronaut.json.JsonObjectSerializer;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -33,6 +34,7 @@ import java.util.Map;
  * @author Denis Stepanov
  * @since 4.1.0
  */
+@Internal
 @Prototype
 public class JsonObjectSerde<T> implements Serializer<T>, Deserializer<T>, Serde<T> {
 
