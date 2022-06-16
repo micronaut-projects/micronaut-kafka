@@ -6,6 +6,7 @@ import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import io.micronaut.test.support.TestPropertyProvider
 import jakarta.inject.Inject
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import org.testcontainers.utility.MountableFile
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -17,7 +18,7 @@ class TasksSpec extends Specification implements TestPropertyProvider {
 
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer()
+    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.9"))
             .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:SASL_PLAINTEXT")
             .withEnv("KAFKA_SASL_ENABLED_MECHANISMS", "PLAIN")
             .withEnv("KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL", "PLAIN")
