@@ -85,4 +85,14 @@ public class WordCountStream {
         counts.toStream().to(NAMED_WORD_COUNT_OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
         return source;
     }
+
+    public static final String START_KAFKA_STREAMS_OFF = "start-kafka-streams-off";
+
+    @Singleton
+    @Named(START_KAFKA_STREAMS_OFF)
+    KStream<String, String> startKafkaStreamsOff(
+        @Named(START_KAFKA_STREAMS_OFF) ConfiguredStreamBuilder builder) {
+
+        return builder.stream(INPUT);
+    }
 }

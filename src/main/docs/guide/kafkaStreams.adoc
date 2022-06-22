@@ -123,3 +123,17 @@ NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have
 include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream,indent=0]
 }
 ----
+
+.Configuring Kafka Streams for testing
+When writing a test without starting the actual Kafka server, you can instruct Micronaut not to start Kafka Streams. To do this create a config file suffixed with an environment name, such as `application-test.yml` and set the `kafka.streams.[STREAM-NAME].start-kafka-streams` to `false`.
+
+
+For example in `application-test.yml`:
+
+[source,yaml]
+----
+kafka:
+    streams:
+        default:
+            start-kafka-streams: false
+----
