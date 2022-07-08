@@ -15,6 +15,14 @@
  */
 package io.micronaut.configuration.kafka;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+import javax.annotation.PreDestroy;
+
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -25,7 +33,6 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.exceptions.ConfigurationException;
-import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
@@ -41,35 +48,34 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
-
 /**
- * A factory class for creating Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
+ * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
  *
  * @author Graeme Rocher
  * @since 1.0
  */
 @Factory
-public class KafkaProducerFactory implements ProducerRegistry, TransactionalProducerRegistry {
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerFactory.class);
+public class KafkaProducerRegistry implements ProducerRegistry, TransactionalProducerRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerRegistry.class);
     private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
+    private final ProducerFactory producerFactory;
 
     /**
      * Default constructor.
      * @param beanContext The bean context
      * @param serdeRegistry The serde registry
+     * @param producerFactory
      */
-    public KafkaProducerFactory(BeanContext beanContext, SerdeRegistry serdeRegistry) {
+    public KafkaProducerRegistry(
+        BeanContext beanContext,
+        SerdeRegistry serdeRegistry,
+        ProducerFactory producerFactory
+    ) {
         this.beanContext = beanContext;
         this.serdeRegistry = serdeRegistry;
+        this.producerFactory = producerFactory;
     }
 
     /**
@@ -95,11 +101,11 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 if (keySerializer.isPresent() && valueSerializer.isPresent()) {
                     Serializer<K> ks = keySerializer.get();
                     Serializer<V> vs = valueSerializer.get();
-                    return createProducer(config, ks, vs);
+                    return producerFactory.createProducer(config, ks, vs);
                 } else if (keySerializer.isPresent() || valueSerializer.isPresent()) {
                     throw new ConfigurationException("Both the [keySerializer] and [valueSerializer] must be set when setting either");
                 } else {
-                    return createProducer(config, null, null);
+                    return producerFactory.createProducer(config, null, null);
                 }
             } else {
                 throw new ConfigurationException("No Kafka configuration specified when using direct instantiation");
@@ -123,23 +129,6 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         }
         final String id = injectionPoint.getAnnotationMetadata().stringValue(KafkaClient.class).orElse(null);
         return getKafkaProducer(id, null, k, v, false);
-    }
-
-    /**
-     *
-     * Creates kafka producer, could be overridden for further control.
-     *
-     * @param config properties for producer
-     * @param ks key serializer
-     * @param vs value serializer
-     * @param <K> key type
-     * @param <V> value type
-     * @since 5.0.0
-     * @return new instance of producer
-     */
-    @NonNull
-    protected <K, V> Producer<K, V> createProducer(Properties config, Serializer<K> ks, Serializer<V> vs) {
-        return new KafkaProducer<>(config, ks, vs);
     }
 
     @SuppressWarnings("unchecked")
