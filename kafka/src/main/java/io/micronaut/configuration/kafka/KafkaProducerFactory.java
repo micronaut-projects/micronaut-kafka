@@ -61,8 +61,8 @@ import io.micronaut.inject.qualifiers.Qualifiers;
  * @since 1.0
  */
 @Factory
-public class KafkaProducerRegistry implements ProducerRegistry, TransactionalProducerRegistry {
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerRegistry.class);
+public class KafkaProducerFactory implements ProducerRegistry, TransactionalProducerRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerFactory.class);
     private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
@@ -72,9 +72,9 @@ public class KafkaProducerRegistry implements ProducerRegistry, TransactionalPro
      * Default constructor.
      * @param beanContext The bean context
      * @param serdeRegistry The serde registry
-     * @param producerFactory
+     * @param producerFactory The producer factory
      */
-    public KafkaProducerRegistry(
+    public KafkaProducerFactory(
         BeanContext beanContext,
         SerdeRegistry serdeRegistry,
         ProducerFactory producerFactory
