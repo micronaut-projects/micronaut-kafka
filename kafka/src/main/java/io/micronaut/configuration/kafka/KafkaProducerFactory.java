@@ -25,6 +25,7 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.exceptions.ConfigurationException;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
@@ -133,8 +134,10 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
      * @param vs value serializer
      * @param <K> key type
      * @param <V> value type
+     * @since 5.0.0
      * @return new instance of producer
      */
+    @NonNull
     protected <K, V> Producer<K, V> createProducer(Properties config, Serializer<K> ks, Serializer<V> vs) {
         return new KafkaProducer<>(config, ks, vs);
     }
