@@ -98,17 +98,11 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 if (keySerializer.isPresent() && valueSerializer.isPresent()) {
                     Serializer<K> ks = keySerializer.get();
                     Serializer<V> vs = valueSerializer.get();
-                    return new KafkaProducer<>(
-                            config,
-                            ks,
-                            vs
-                    );
+                    return createProducer(config, ks, vs);
                 } else if (keySerializer.isPresent() || valueSerializer.isPresent()) {
                     throw new ConfigurationException("Both the [keySerializer] and [valueSerializer] must be set when setting either");
                 } else {
-                    return new KafkaProducer<>(
-                            config
-                    );
+                    return createProducer(config, null, null);
                 }
             } else {
                 throw new ConfigurationException("No Kafka configuration specified when using direct instantiation");
@@ -150,6 +144,21 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         }
 
         return getKafkaProducer(id, null, k, v, false, properties);
+    }
+
+    /**
+     *
+     * Creates kafka producer, could be overridden for further control.
+     *
+     * @param config properties for producer
+     * @param ks key serializer
+     * @param vs value serializer
+     * @param <K> key type
+     * @param <V> value type
+     * @return new instance of producer
+     */
+    protected <K, V> Producer<K, V> createProducer(Properties config, Serializer<K> ks, Serializer<V> vs) {
+        return new KafkaProducer<>(config, ks, vs);
     }
 
     @SuppressWarnings("unchecked")
