@@ -4,7 +4,7 @@ managed-kafka = '2.8.1'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
-zipkin-brave-kafka-clients = '5.13.9'
+zipkin-brave-kafka-clients = '5.13.10'
 
 [libraries]
 managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
