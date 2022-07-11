@@ -24,3 +24,10 @@ dependencies {
 test {
     maxHeapSize = '2048m'
 }
+
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.graalvm.sdk:graal-sdk:22.0.0.2'
+    }
+}
