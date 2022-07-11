@@ -2,6 +2,8 @@
 micronaut = "3.5.1"
 micronaut-docs = "2.0.0"
 
+# Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
+managed-kafka-compat = "3.2.0"
 managed-kafka = '3.2.0'
 
 groovy = "3.0.11"
@@ -12,6 +14,9 @@ opentracing-mock = '0.33.0'
 zipkin-brave-kafka-clients = '5.13.10'
 
 [libraries]
+# Duplicated to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
+managed-kafka = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka-compat' }
+
 managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
 managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
 
