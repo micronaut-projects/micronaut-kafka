@@ -86,13 +86,4 @@ public class WordCountStream {
         return source;
     }
 
-    public static final String START_KAFKA_STREAMS_OFF = "start-kafka-streams-off";
-
-    @Singleton
-    @Named(START_KAFKA_STREAMS_OFF)
-    KStream<String, String> startKafkaStreamsOff(
-        @Named(START_KAFKA_STREAMS_OFF) ConfiguredStreamBuilder builder) {
-
-        return builder.stream(INPUT);
-    }
 }

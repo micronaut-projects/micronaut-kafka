@@ -1,22 +1,17 @@
 package io.micronaut.configuration.kafka.streams
 
-import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
+import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams.State
 import spock.lang.Retry
 
 @Retry
-class KafkaStreamsFactorySpec extends AbstractTestContainersSpec {
+class StartKafkaStreamSpec extends AbstractTestContainersSpec {
 
     void "should not start kafkaStreams"() {
-        given:
-        def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName(WordCountStream.START_KAFKA_STREAMS_OFF))
-
-        def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-
-
         when:
-        builder.build()
+        def builder = context.getBean(ConfiguredStreamBuilder, Qualifiers.byName(StartKafkaStreamsOff.START_KAFKA_STREAMS_OFF))
+        def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
 
         then:
         for (entry in kafkaStreamsFactory.streams) {
