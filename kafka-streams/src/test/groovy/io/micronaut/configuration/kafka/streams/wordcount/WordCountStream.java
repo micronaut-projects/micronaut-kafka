@@ -85,4 +85,5 @@ public class WordCountStream {
         counts.toStream().to(NAMED_WORD_COUNT_OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
         return source;
     }
+
 }

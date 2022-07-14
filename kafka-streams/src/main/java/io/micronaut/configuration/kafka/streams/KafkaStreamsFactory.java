@@ -47,6 +47,8 @@ public class KafkaStreamsFactory implements Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsFactory.class);
 
+    private static final String START_KAFKA_STREAMS_PROPERTY = "start-kafka-streams";
+
     private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();
 
     private final ApplicationEventPublisher eventPublisher;
@@ -100,13 +102,21 @@ public class KafkaStreamsFactory implements Closeable {
                 topology,
                 builder.getConfiguration()
         );
-        eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
+        final String startKafkaStreamsValue = builder.getConfiguration().getProperty(
+            START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
+        final boolean startKafkaStreams = Boolean.parseBoolean(startKafkaStreamsValue);
+        if (startKafkaStreams) {
+            eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
+        }
         streams.put(kafkaStreams, builder);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Initializing Application {} with topology:\n{}", name, topology.describe().toString());
         }
-        kafkaStreams.start();
-        eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
+
+        if (startKafkaStreams) {
+            kafkaStreams.start();
+            eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
+        }
         return kafkaStreams;
     }
 

@@ -2,6 +2,7 @@ package io.micronaut.configuration.kafka.streams
 
 
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
+import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
 import spock.lang.Shared
 
@@ -16,6 +17,9 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
     @Shared
     String optimizationOffApplicationId = 'optimization-off-' + UUID.randomUUID().toString()
 
+    @Shared
+    String startKafkaStreamsOffApplicationId = 'start-kafka-streams-off-' + UUID.randomUUID().toString()
+
     protected Map<String, Object> getConfiguration() {
         super.getConfiguration() + ['kafka.generic.config': "hello",
                                     'kafka.streams.my-stream.application.id': myStreamApplicationId,
@@ -23,7 +27,8 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
                                     'kafka.streams.optimization-on.application.id': optimizationOnApplicationId,
                                     'kafka.streams.optimization-on.topology.optimization': 'all',
                                     'kafka.streams.optimization-off.application.id': optimizationOffApplicationId,
-                                    'kafka.streams.optimization-off.topology.optimization': 'none']
+                                    'kafka.streams.optimization-off.topology.optimization': 'none',
+                                    'kafka.streams.start-kafka-streams-off.application.id': startKafkaStreamsOffApplicationId]
     }
 
     @Override
@@ -33,6 +38,8 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
                 WordCountStream.OUTPUT,
                 WordCountStream.NAMED_WORD_COUNT_INPUT,
                 WordCountStream.NAMED_WORD_COUNT_OUTPUT,
+                StartKafkaStreamsOff.STREAMS_OFF_INPUT,
+                StartKafkaStreamsOff.STREAMS_OFF_OUTPUT,
                 OptimizationStream.OPTIMIZATION_ON_INPUT,
                 OptimizationStream.OPTIMIZATION_OFF_INPUT
         ].forEach(topic -> {
