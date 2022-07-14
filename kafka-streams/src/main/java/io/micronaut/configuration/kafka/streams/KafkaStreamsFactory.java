@@ -102,15 +102,18 @@ public class KafkaStreamsFactory implements Closeable {
                 topology,
                 builder.getConfiguration()
         );
-        eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
+        final String startKafkaStreamsValue = builder.getConfiguration().getProperty(
+            START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
+        final boolean startKafkaStreams = Boolean.parseBoolean(startKafkaStreamsValue);
+        if (startKafkaStreams) {
+            eventPublisher.publishEvent(new BeforeKafkaStreamStart(kafkaStreams, kStreams));
+        }
         streams.put(kafkaStreams, builder);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Initializing Application {} with topology:\n{}", name, topology.describe().toString());
         }
 
-        final String startKafkaStreams = builder.getConfiguration().getProperty(
-            START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
-        if (Boolean.parseBoolean(startKafkaStreams)) {
+        if (startKafkaStreams) {
             kafkaStreams.start();
             eventPublisher.publishEvent(new AfterKafkaStreamsStart(kafkaStreams, kStreams));
         }
