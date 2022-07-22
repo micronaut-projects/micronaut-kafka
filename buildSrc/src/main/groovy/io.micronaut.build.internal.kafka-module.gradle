@@ -21,6 +21,12 @@ dependencies {
     testRuntimeOnly mn.micronaut.management
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'org.graalvm.sdk:graal-sdk:22.0.0.2'
+    }
+}
+
 test {
     maxHeapSize = '2048m'
 }
