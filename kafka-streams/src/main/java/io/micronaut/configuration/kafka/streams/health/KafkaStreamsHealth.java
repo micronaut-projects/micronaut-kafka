@@ -26,8 +26,8 @@ import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.TaskMetadata;
-import org.apache.kafka.streams.ThreadMetadata;
+import org.apache.kafka.streams.processor.TaskMetadata;
+import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
 import jakarta.inject.Singleton;
@@ -130,7 +130,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
         final Map<String, Object> streamDetails = new HashMap<>();
 
         if (kafkaStreams.state().isRunningOrRebalancing()) {
-            for (ThreadMetadata metadata : kafkaStreams.metadataForLocalThreads()) {
+            for (ThreadMetadata metadata : kafkaStreams.localThreadsMetadata()) {
                 final Map<String, Object> threadDetails = new HashMap<>();
                 threadDetails.put("threadName", metadata.threadName());
                 threadDetails.put("threadState", metadata.threadState());
@@ -179,10 +179,10 @@ public class KafkaStreamsHealth implements HealthIndicator {
     private static String getDefaultStreamName(final KafkaStreams kafkaStreams) {
         return Optional.ofNullable(kafkaStreams)
                 .filter(kafkaStreams1 -> kafkaStreams1.state().isRunningOrRebalancing())
-                .map(KafkaStreams::metadataForLocalThreads)
+                .map(KafkaStreams::localThreadsMetadata)
                 .map(Collection::stream)
                 .flatMap(Stream::findFirst)
-                .map(org.apache.kafka.streams.ThreadMetadata::threadName)
+                .map(ThreadMetadata::threadName)
                 .orElse("unidentified");
     }
 
@@ -192,9 +192,9 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param taskMetadataSet the task metadata
      * @return map of details
      */
-    private static Map<String, Object> taskDetails(Set<org.apache.kafka.streams.TaskMetadata> taskMetadataSet) {
+    private static Map<String, Object> taskDetails(Set<TaskMetadata> taskMetadataSet) {
         final Map<String, Object> details = new HashMap<>();
-        for (org.apache.kafka.streams.TaskMetadata taskMetadata : taskMetadataSet) {
+        for (TaskMetadata taskMetadata : taskMetadataSet) {
             details.put("taskId", taskMetadata.taskId());
             if (details.containsKey("partitions")) {
                 @SuppressWarnings("unchecked")
