@@ -25,5 +25,3 @@ dependencies {
     testImplementation libs.testcontainers.spock
     testImplementation mn.micronaut.test.spock
 }
-
-graalvmNative.toolchainDetection = false
