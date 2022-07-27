@@ -2,12 +2,6 @@ plugins {
     id 'io.micronaut.build.internal.kafka-module'
 }
 
-micronautBuild {
-    binaryCompatibility {
-        enabled.set(false)
-    }
-}
-
 configurations.all {
     resolutionStrategy {
         force 'org.graalvm.sdk:graal-sdk:22.0.0.2'
