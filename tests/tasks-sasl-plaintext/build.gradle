@@ -25,3 +25,11 @@ dependencies {
     testImplementation libs.testcontainers.spock
     testImplementation mn.micronaut.test.spock
 }
+
+graalvmNative {
+    binaries {
+        main {
+            buildArgs.add('--trace-object-instantiation=com.sun.org.slf4j.internal.Logger')
+        }
+    }
+}
