@@ -33,8 +33,8 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         def stream = context.getBean(KafkaStreams, Qualifiers.byName('my-stream'))
 
         then:
-        stream.config.originals()['application.id'] == myStreamApplicationId
-        stream.config.originals()['generic.config'] == "hello"
+        stream.applicationConfigs.originals()['application.id'] == myStreamApplicationId
+        stream.applicationConfigs.originals()['generic.config'] == "hello"
     }
 
     void "test kafka stream application"() {
