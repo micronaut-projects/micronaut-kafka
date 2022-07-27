@@ -30,6 +30,7 @@ graalvmNative {
     binaries {
         main {
             buildArgs.add('--trace-object-instantiation=com.sun.org.slf4j.internal.Logger')
+            buildArgs.add('--initialize-at-run-time=om.sun.org.apache.xml.internal.security.Init')
         }
     }
 }
