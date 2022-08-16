@@ -14,6 +14,7 @@ dependencies {
     api libs.managed.kafka.clients
 
     compileOnly mn.micronaut.micrometer.core
+    compileOnly mn.micronaut.micrometer.registry.prometheus
     compileOnly libs.opentracing.kafka.client
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
@@ -27,4 +28,5 @@ dependencies {
 
     testRuntimeOnly mn.micronaut.micrometer.registry.statsd
     testRuntimeOnly mn.micronaut.tracing.core
+    testRuntimeOnly mn.micronaut.micrometer.registry.prometheus
 }

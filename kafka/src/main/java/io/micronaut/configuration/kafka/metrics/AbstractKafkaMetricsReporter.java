@@ -19,6 +19,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.lang.NonNull;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micronaut.configuration.kafka.metrics.builder.KafkaMetricMeterTypeBuilder;
 import io.micronaut.core.annotation.Internal;
 import org.apache.kafka.common.MetricName;
@@ -99,7 +100,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
         KafkaMetricMeterTypeBuilder.newBuilder()
-                .prefix(getMetricPrefix())
+                .prefix(getMetricPrefix(meterRegistry, metric))
                 .metric(metric)
                 .tagFunction(getTagFunction())
                 .registry(meterRegistry)
@@ -127,6 +128,22 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         tags.add(TOPIC_TAG);
         tags.add(NODE_ID_TAG);
         return tags;
+    }
+
+    /**
+     * Customize metric prefix with tag names
+     * @param meterRegistry
+     * @param metric
+     * @return
+     */
+    private String getMetricPrefix(MeterRegistry meterRegistry, KafkaMetric metric) {
+        String prefix = getMetricPrefix();
+        if (meterRegistry instanceof PrometheusMeterRegistry) {
+            StringBuilder sb = new StringBuilder(prefix);
+            metric.metricName().tags().keySet().forEach(v -> sb.append(".").append(v));
+            return sb.toString();
+        }
+        return prefix;
     }
 
     /**
