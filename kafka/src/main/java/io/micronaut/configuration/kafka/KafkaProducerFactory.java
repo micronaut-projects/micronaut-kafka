@@ -28,6 +28,7 @@ import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.ArgumentInjectionPoint;
 import io.micronaut.inject.FieldInjectionPoint;
@@ -194,7 +195,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
             }
 
-            if (props != null && !props.isEmpty()) {
+            if (CollectionUtils.isNotEmpty(props)) {
                 properties.putAll(props);
             }
 
