@@ -566,6 +566,10 @@ class KafkaConsumerProcessor
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
         if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+            if (consumerState.partitionRetries != null) {
+                consumerState.partitionRetries.remove(consumerRecord.partition());
+            }
+            // Skip the failing record
             currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
         }
 
