@@ -565,6 +565,10 @@ class KafkaConsumerProcessor
 
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
+        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+            currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+        }
+
         if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
             if (consumerState.partitionRetries == null) {
                 consumerState.partitionRetries = new HashMap<>();
@@ -1001,6 +1005,7 @@ class KafkaConsumerProcessor
         @Nullable
         final Duration errorStrategyRetryDelay;
         final int errorStrategyRetryCount;
+        final Class<? extends Throwable>[] errorStrategyExceptions;
 
         @Nullable
         Map<Integer, PartitionRetryState> partitionRetries;
@@ -1038,9 +1043,11 @@ class KafkaConsumerProcessor
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
                 this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
+                this.errorStrategyExceptions = errorStrategyAnnotation.get("exceptionTypes", Class[].class).orElse(new Class[0]);
             } else {
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
+                this.errorStrategyExceptions = new Class[0];
             }
 
             autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);
