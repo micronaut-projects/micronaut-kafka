@@ -25,8 +25,10 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.exceptions.ConfigurationException;
+import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.type.Argument;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.ArgumentInjectionPoint;
 import io.micronaut.inject.FieldInjectionPoint;
@@ -41,6 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -126,12 +130,30 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         if (k == null || v == null) {
             throw new ConfigurationException("@KafkaClient used on type missing generic argument values for Key and Value: " + injectionPoint);
         }
-        final String id = injectionPoint.getAnnotationMetadata().stringValue(KafkaClient.class).orElse(null);
-        return getKafkaProducer(id, null, k, v, false);
+
+        AnnotationMetadata annotationMetadata = injectionPoint.getAnnotationMetadata();
+        final String id = annotationMetadata.stringValue(KafkaClient.class).orElse(null);
+
+        Map<String, String> properties = new HashMap<>();
+
+        annotationMetadata.findAnnotation(KafkaClient.class)
+            .map(ann -> ann.getProperties("properties", "name"))
+            .ifPresent(properties::putAll);
+
+        annotationMetadata.getValue(KafkaClient.class, "maxBlock", Duration.class)
+            .ifPresent(duration -> properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, String.valueOf(duration.toMillis())));
+
+        int acks = annotationMetadata.intValue(KafkaClient.class, "acks").orElse(KafkaClient.Acknowledge.DEFAULT);
+        if (acks != KafkaClient.Acknowledge.DEFAULT) {
+            String acksValue = acks == -1 ? "all" : String.valueOf(acks);
+            properties.put(ProducerConfig.ACKS_CONFIG, acksValue);
+        }
+
+        return getKafkaProducer(id, null, k, v, false, properties);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getKafkaProducer(@Nullable String id, @Nullable String transactionalId, Argument<?> keyType, Argument<?> valueType, boolean transactional) {
+    private <T> T getKafkaProducer(@Nullable String id, @Nullable String transactionalId, Argument<?> keyType, Argument<?> valueType, boolean transactional, @Nullable Map<String, String> props) {
         ClientKey key = new ClientKey(
                 id,
                 keyType.getType(),
@@ -173,6 +195,10 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
             }
 
+            if (CollectionUtils.isNotEmpty(props)) {
+                properties.putAll(props);
+            }
+
             Producer producer = beanContext.createBean(Producer.class, newConfig);
             if (transactional) {
                 producer.initTransactions();
@@ -199,12 +225,12 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
 
     @Override
     public <K, V> Producer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType) {
-        return getKafkaProducer(id, null, keyType, valueType, false);
+        return getKafkaProducer(id, null, keyType, valueType, false, null);
     }
 
     @Override
     public <K, V> Producer<K, V> getTransactionalProducer(String id, String transactionalId, Argument<K> keyType, Argument<V> valueType) {
-        return getKafkaProducer(id, transactionalId, keyType, valueType, true);
+        return getKafkaProducer(id, transactionalId, keyType, valueType, true, null);
     }
 
     @Override
