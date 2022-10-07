@@ -4,10 +4,12 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
+import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.messaging.annotation.SendTo
 import io.micronaut.serde.annotation.Serdeable
 import io.reactivex.Flowable
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import reactor.core.publisher.Flux
 import spock.lang.Retry
 
@@ -19,6 +21,7 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
 
     public static final String BOOKS_TOPIC = 'KafkaBatchListenerSpec-books'
     public static final String BOOKS_LIST_TOPIC = 'KafkaBatchListenerSpec-books-list'
+    public static final String BOOK_CONSUMER_RECORD_LIST_TOPIC = 'KafkaBatchListenerSpec-consumer-records'
     public static final String BOOKS_HEADERS_TOPIC = 'KafkaBatchListenerSpec-books-headers'
     public static final String BOOKS_FLUX_TOPIC = 'KafkaBatchListenerSpec-books-flux'
     public static final String BOOKS_FLOWABLE_TOPIC = 'KafkaBatchListenerSpec-books-flowable'
@@ -204,6 +207,24 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         }
     }
 
+    void "test keys and values deserialized to the correct type when receiving a batch of ConsumerRecord"() {
+        given:
+        MyBatchClient myBatchClient = context.getBean(MyBatchClient)
+        BookListener bookListener = context.getBean(BookListener)
+        bookListener.books?.clear()
+        bookListener.keys?.clear()
+
+        when:
+        myBatchClient.sendToReceiveAsConsumerRecord("book-1", new Book(title: "The Flowable"))
+        myBatchClient.sendToReceiveAsConsumerRecord("book-2", new Book(title: "The Shining"))
+
+        then:
+        conditions.eventually {
+            bookListener.books == [new Book(title: "The Flowable"), new Book(title: "The Shining")]
+            bookListener.keys == ["book-1", "book-2"]
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaBatchListenerSpec')
     @KafkaClient(batch = true)
     @Topic(KafkaBatchListenerSpec.BOOKS_TOPIC)
@@ -236,6 +257,10 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
 
         @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
         void sendBooksFlowable(Flowable<Book> books)
+
+        @Topic(KafkaBatchListenerSpec.BOOK_CONSUMER_RECORD_LIST_TOPIC)
+        void sendToReceiveAsConsumerRecord(@KafkaKey String key, @MessageBody Book book)
+
     }
 
     @Requires(property = 'spec.name', value = 'KafkaBatchListenerSpec')
@@ -243,6 +268,7 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
     @Topic(KafkaBatchListenerSpec.BOOKS_TOPIC)
     static class BookListener {
         List<Book> books = []
+        List<String> keys = []
         List<String> headers = []
 
         @Topic(KafkaBatchListenerSpec.BOOKS_LIST_TOPIC)
@@ -297,6 +323,12 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
         void receiveFlowable(Flowable<Book> books) {
             this.books.addAll books.toList().blockingGet()
+        }
+
+        @Topic(KafkaBatchListenerSpec.BOOK_CONSUMER_RECORD_LIST_TOPIC)
+        void receiveConsumerRecords(List<ConsumerRecord<String, Book>> books) {
+          this.keys.addAll(books.collect { it.key() })
+          this.books.addAll(books.collect { it.value() })
         }
     }
 
