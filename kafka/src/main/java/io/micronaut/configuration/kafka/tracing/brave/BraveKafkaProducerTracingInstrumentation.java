@@ -15,12 +15,14 @@
  */
 package io.micronaut.configuration.kafka.tracing.brave;
 
-import brave.kafka.clients.KafkaTracing;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-import jakarta.inject.Singleton;
+
 import org.apache.kafka.clients.producer.Producer;
+
+import brave.kafka.clients.KafkaTracing;
+import jakarta.inject.Singleton;
 
 
 /**
@@ -36,6 +38,7 @@ public class BraveKafkaProducerTracingInstrumentation implements BeanCreatedEven
 
     /**
      * Default constructor.
+     *
      * @param kafkaTracing The kafka tracing
      */
     public BraveKafkaProducerTracingInstrumentation(KafkaTracing kafkaTracing) {

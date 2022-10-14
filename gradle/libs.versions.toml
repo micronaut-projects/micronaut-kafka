@@ -12,6 +12,8 @@ opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
 zipkin-brave-kafka-clients = '5.14.1'
+# remove this version after micronaut-tracing v.4.5.0 or higher is released
+opentelemetry-kafka-clients = '1.19.0-alpha'
 
 [libraries]
 # Duplicated to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
@@ -23,7 +25,8 @@ managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
 
-zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
+opentelemetry-kafka-clients = { module = "io.opentelemetry.instrumentation:opentelemetry-kafka-clients-2.6", version.ref = 'opentelemetry-kafka-clients' }
+
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 
 testcontainers-bom = { module = "org.testcontainers:testcontainers-bom" }

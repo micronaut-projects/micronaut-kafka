@@ -16,14 +16,17 @@
 package io.micronaut.configuration.kafka.tracing;
 
 import io.micronaut.configuration.kafka.tracing.brave.BraveKafkaProducerTracingInstrumentation;
+import io.micronaut.configuration.kafka.tracing.opentelemetry.OpentelemetryKafkaProducerTracingInstrumentation;
 import io.micronaut.context.BeanProvider;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
-import jakarta.inject.Singleton;
+
 import org.apache.kafka.clients.producer.Producer;
+
+import jakarta.inject.Singleton;
 
 /**
  * Instruments Kafka producers with Open Tracing support.
@@ -33,7 +36,7 @@ import org.apache.kafka.clients.producer.Producer;
  */
 @Singleton
 @Requires(beans = Tracer.class)
-@Requires(missingBeans = BraveKafkaProducerTracingInstrumentation.class)
+@Requires(missingBeans = {BraveKafkaProducerTracingInstrumentation.class, OpentelemetryKafkaProducerTracingInstrumentation.class})
 @Requires(classes = TracingKafkaProducer.class)
 public class KafkaProducerTracingInstrumentation implements BeanCreatedEventListener<Producer<?, ?>> {
 
@@ -41,6 +44,7 @@ public class KafkaProducerTracingInstrumentation implements BeanCreatedEventList
 
     /**
      * Default constructor.
+     *
      * @param tracerProvider The tracer provider
      */
     protected KafkaProducerTracingInstrumentation(BeanProvider<Tracer> tracerProvider) {

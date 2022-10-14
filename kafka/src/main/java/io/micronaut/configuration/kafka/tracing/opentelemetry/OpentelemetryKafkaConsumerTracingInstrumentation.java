@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2022 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.tracing.brave;
+package io.micronaut.configuration.kafka.tracing.opentelemetry;
 
-import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import io.opentelemetry.instrumentation.kafkaclients.KafkaTelemetry;
 
 import org.apache.kafka.clients.consumer.Consumer;
 
-import brave.kafka.clients.KafkaTracing;
 import jakarta.inject.Singleton;
 
 /**
- * Kafka consumer tracing instrumentation using Brave.
- *
- * @author dstepanov
+ * Kafka consumer tracing instrumentation using Opentelemetry.
  */
 @Singleton
-@Requires(beans = KafkaTracing.class)
-public class BraveKafkaConsumerTracingInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
+public class OpentelemetryKafkaConsumerTracingInstrumentation implements BeanCreatedEventListener<Consumer<?, ?>> {
 
-    private final KafkaTracing kafkaTracing;
+    private final KafkaTelemetry kafkaTelemetry;
 
     /**
      * Default constructor.
      *
-     * @param kafkaTracing The kafka tracing
+     * @param kafkaTelemetry The kafka telemetry
      */
-    public BraveKafkaConsumerTracingInstrumentation(KafkaTracing kafkaTracing) {
-        this.kafkaTracing = kafkaTracing;
+    public OpentelemetryKafkaConsumerTracingInstrumentation(KafkaTelemetry kafkaTelemetry) {
+        this.kafkaTelemetry = kafkaTelemetry;
     }
 
     @Override
     public Consumer<?, ?> onCreated(BeanCreatedEvent<Consumer<?, ?>> event) {
-        return kafkaTracing.consumer(event.getBean());
+        return kafkaTelemetry.wrap(event.getBean());
     }
 }

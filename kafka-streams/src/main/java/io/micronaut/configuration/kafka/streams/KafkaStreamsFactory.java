@@ -123,7 +123,7 @@ public class KafkaStreamsFactory implements Closeable {
     /**
      * Create the interactive query service bean.
      *
-     * @return Rhe {@link InteractiveQueryService} bean
+     * @return The {@link InteractiveQueryService} bean
      */
     @Singleton
     InteractiveQueryService interactiveQueryService() {

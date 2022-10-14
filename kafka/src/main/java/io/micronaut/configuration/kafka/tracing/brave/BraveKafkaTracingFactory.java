@@ -15,13 +15,13 @@
  */
 package io.micronaut.configuration.kafka.tracing.brave;
 
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.core.annotation.Nullable;
+
 import brave.Tracing;
 import brave.kafka.clients.KafkaTracing;
 import brave.messaging.MessagingTracing;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
-
-import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Singleton;
 
 /**
@@ -39,12 +39,13 @@ public class BraveKafkaTracingFactory {
      *
      * @param tracing The {@link Tracing}
      * @param messagingTracing The {@link MessagingTracing} if exists
+     *
      * @return a new instance of {@link KafkaTracing}
      */
     @Requires(missingBeans = KafkaTracing.class)
     @Singleton
     KafkaTracing kafkaTracing(Tracing tracing, @Nullable MessagingTracing messagingTracing) {
-      return messagingTracing == null ? KafkaTracing.create(tracing) : KafkaTracing.create(messagingTracing);
+        return messagingTracing == null ? KafkaTracing.create(tracing) : KafkaTracing.create(messagingTracing);
     }
 
 }
