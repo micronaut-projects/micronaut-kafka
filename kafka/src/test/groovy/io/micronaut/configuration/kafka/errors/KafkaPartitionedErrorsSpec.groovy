@@ -1,10 +1,12 @@
 package io.micronaut.configuration.kafka.errors
 
+import spock.lang.Ignore
 import spock.lang.Stepwise
 import spock.lang.Retry
 
 @Stepwise
 @Retry
+@Ignore("https://github.com/micronaut-projects/micronaut-kafka/issues/514")
 class KafkaPartitionedErrorsSpec extends KafkaErrorsSpec {
 
     @Override

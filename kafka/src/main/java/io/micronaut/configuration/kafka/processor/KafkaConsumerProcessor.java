@@ -314,6 +314,11 @@ class KafkaConsumerProcessor
         for (ConsumerState consumerState : consumers.values()) {
             consumerState.kafkaConsumer.wakeup();
         }
+        for (ConsumerState consumerState : consumers.values()) {
+            while (consumerState.closedState == ConsumerCloseState.POLLING) {
+                LOG.debug("consumer not closed yet");
+            }
+        }
         consumers.clear();
     }
 
@@ -449,6 +454,7 @@ class KafkaConsumerProcessor
                 try {
                     consumerState.pauseTopicPartitions();
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    consumerState.closedState = ConsumerCloseState.POLLING;
                     failed = false;
                     consumerState.resumeTopicPartitions();
 
@@ -487,7 +493,7 @@ class KafkaConsumerProcessor
                 }
             }
         } catch (WakeupException e) {
-            // ignore for shutdown
+            consumerState.closedState = ConsumerCloseState.CLOSED;
         }
     }
 
@@ -1005,6 +1011,7 @@ class KafkaConsumerProcessor
         final boolean useSendOffsetsToTransaction;
         final boolean isMessageReturnType;
         final boolean isMessagesIterableReturnType;
+        ConsumerCloseState closedState;
 
         private ConsumerState(String clientId, String groupId, OffsetStrategy offsetStrategy, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions,
                               AnnotationValue<KafkaListener> kafkaListener, ExecutableMethod<?, ?> method) {
@@ -1057,6 +1064,7 @@ class KafkaConsumerProcessor
             isMessageReturnType = returnType.getType().isAssignableFrom(KafkaMessage.class)
                     || returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
             isMessagesIterableReturnType = Iterable.class.isAssignableFrom(returnType.getType()) && returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+            closedState = ConsumerCloseState.NOT_STARTED;
         }
 
         void pause() {
@@ -1125,6 +1133,10 @@ class KafkaConsumerProcessor
     private static final class PartitionRetryState {
         long currentRetryOffset;
         int currentRetryCount;
+    }
+
+    private enum ConsumerCloseState {
+        NOT_STARTED, POLLING, CLOSED
     }
 
 }
