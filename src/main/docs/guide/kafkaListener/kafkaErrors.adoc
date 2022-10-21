@@ -12,7 +12,7 @@ Setting the error strategy allows you to resume at the next offset or to seek th
 
 You can choose one of the error strategies:
 
-- `RETRY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and will attempt to re-consume the current record indefinitely. Possible retry delay can be defined by `retryDelay` and retry count by `retryCount`
+- `RETRY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by `retryDelay` and retry count by `retryCount`
 
 - `RESUME_AT_NEXT_RECORD` - This strategy will ignore the current error and will resume at the next offset, in this case it's recommended to have a custom exception handler that moves the failed message into an error queue.
 
