@@ -2109,7 +2109,7 @@ public class WordCounter {
 <div class="ulist">
 <ul>
 <li>
-<p><code>RETRY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and will attempt to re-consume the current record indefinitely. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code></p>
+<p><code>RETRY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code></p>
 </li>
 <li>
 <p><code>RESUME_AT_NEXT_RECORD</code> - This strategy will ignore the current error and will resume at the next offset, in this case it&#8217;s recommended to have a custom exception handler that moves the failed message into an error queue.</p>
