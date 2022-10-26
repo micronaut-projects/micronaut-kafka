@@ -43,7 +43,7 @@ public @interface ErrorStrategy {
     int DEFAULT_DELAY_IN_SECONDS = 1;
 
     /**
-     * Default retry delay in seconds.
+     * Default retry attempts.
      */
     int DEFAULT_RETRY_COUNT = 1;
 
