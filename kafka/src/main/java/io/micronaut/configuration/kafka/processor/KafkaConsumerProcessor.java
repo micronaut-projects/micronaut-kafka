@@ -114,7 +114,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * <p>A {@link ExecutableMethodProcessor} that will process all beans annotated with {@link KafkaListener}
@@ -414,9 +413,9 @@ class KafkaConsumerProcessor
                                       final Class<?> beanType) {
         final Consumer<?, ?> kafkaConsumer = beanContext.createBean(Consumer.class, consumerConfiguration);
         final Object consumerBean = beanContext.getBean(beanType);
-        if (consumerBean instanceof ConsumerAware) {
+        if (consumerBean instanceof ConsumerAware ca) {
             //noinspection unchecked
-            ((ConsumerAware) consumerBean).setKafkaConsumer(kafkaConsumer);
+            ca.setKafkaConsumer(kafkaConsumer);
         }
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
         ConsumerState consumerState = new ConsumerState(clientId, groupId, offsetStrategy, kafkaConsumer, consumerBean, Collections.unmodifiableSet(kafkaConsumer.subscription()), consumerAnnotation, method);
@@ -614,8 +613,8 @@ class KafkaConsumerProcessor
 
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
             final Flux<?> resultFlux;
-            if (result instanceof Iterable) {
-                resultFlux = Flux.fromIterable((Iterable) result);
+            if (result instanceof Iterable iterable) {
+                resultFlux = Flux.fromIterable(iterable);
             } else if (isPublisher) {
                 resultFlux = Flux.from(Publishers.convertPublisher(result, Publisher.class));
             } else {
@@ -659,8 +658,8 @@ class KafkaConsumerProcessor
 
             if (hasTopics) {
                 final List<String> topics = Arrays.asList(topicNames);
-                if (consumerBean instanceof ConsumerRebalanceListener) {
-                    kafkaConsumer.subscribe(topics, (ConsumerRebalanceListener) consumerBean);
+                if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                    kafkaConsumer.subscribe(topics, crl);
                 } else {
                     kafkaConsumer.subscribe(topics);
                 }
@@ -678,8 +677,8 @@ class KafkaConsumerProcessor
                     } catch (Exception e) {
                         throw new MessagingSystemException("Invalid topic pattern [" + pattern + "] for method [" + method + "]: " + e.getMessage(), e);
                     }
-                    if (consumerBean instanceof ConsumerRebalanceListener) {
-                        kafkaConsumer.subscribe(compiledPattern, (ConsumerRebalanceListener) consumerBean);
+                    if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                        kafkaConsumer.subscribe(compiledPattern, crl);
                     } else {
                         kafkaConsumer.subscribe(compiledPattern);
                     }
@@ -698,8 +697,8 @@ class KafkaConsumerProcessor
     }
 
     private void handleException(final Object consumerBean, final KafkaListenerException kafkaListenerException) {
-        if (consumerBean instanceof KafkaListenerExceptionHandler) {
-            ((KafkaListenerExceptionHandler) consumerBean).handle(kafkaListenerException);
+        if (consumerBean instanceof KafkaListenerExceptionHandler kle) {
+            kle.handle(kafkaListenerException);
         } else {
             exceptionHandler.handle(kafkaListenerException);
         }
@@ -885,7 +884,7 @@ class KafkaConsumerProcessor
     private List<RecordHeader> convertHeaders(KafkaMessage<?, ?> message) {
         return message.getHeaders() == null ? null : message.getHeaders().entrySet()
                 .stream()
-                .map(e -> new RecordHeader(e.getKey(), e.getValue().toString().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
+                .map(e -> new RecordHeader(e.getKey(), e.getValue().toString().getBytes(StandardCharsets.UTF_8))).toList();
     }
 
     private void handleProducerFencedException(Producer<?, ?> producer, ProducerFencedException e) {
@@ -960,8 +959,8 @@ class KafkaConsumerProcessor
 
     private static OffsetCommitCallback resolveCommitCallback(final Object consumerBean) {
         return (offsets, exception) -> {
-            if (consumerBean instanceof OffsetCommitCallback) {
-                ((OffsetCommitCallback) consumerBean).onComplete(offsets, exception);
+            if (consumerBean instanceof OffsetCommitCallback occ) {
+                occ.onComplete(offsets, exception);
             } else if (exception != null) {
                 LOG.error("Error asynchronously committing Kafka offsets [{}]: {}", offsets, exception.getMessage(), exception);
             }
@@ -1103,7 +1102,7 @@ class KafkaConsumerProcessor
             }
             final List<TopicPartition> toResume = paused.stream()
                     .filter(topicPartition -> _pauseRequests == null || !_pauseRequests.contains(topicPartition))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!toResume.isEmpty()) {
                 LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", clientId, toResume);
                 kafkaConsumer.resume(toResume);

@@ -183,10 +183,10 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     Iterable<Object> batchValue;
                     if (value != null && value.getClass().isArray()) {
                         batchValue = Arrays.asList((Object[]) value);
-                    } else if (!(value instanceof Iterable)) {
+                    } else if (!(value instanceof Iterable iterable)) {
                         batchValue = Collections.singletonList(value);
                     } else {
-                        batchValue = (Iterable) value;
+                        batchValue = iterable;
                     }
 
                     List<Object> results = new ArrayList<>();
@@ -264,8 +264,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 }
 
                 Flux<Object> bodyEmitter;
-                if (batchValue instanceof Iterable) {
-                    bodyEmitter = Flux.fromIterable((Iterable) batchValue);
+                if (batchValue instanceof Iterable iterable) {
+                    bodyEmitter = Flux.fromIterable(iterable);
                 } else {
                     bodyEmitter = Flux.just(batchValue);
                 }
@@ -541,8 +541,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 } else if (argument.isAnnotationPresent(KafkaTimestamp.class)) {
                     timestampSupplier = ctx -> {
                         Object o = ctx.getParameterValues()[finalI];
-                        if (o instanceof Long) {
-                            return (Long) o;
+                        if (o instanceof Long l) {
+                            return l;
                         }
                         return null;
                     };
