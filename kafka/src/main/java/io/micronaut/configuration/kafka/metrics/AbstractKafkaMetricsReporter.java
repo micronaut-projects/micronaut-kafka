@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A {@link MetricsReporter} that binds metrics to micrometer.
@@ -113,7 +112,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
                 .stream()
                 .filter(entry -> getIncludedTags().contains(entry.getKey()))
                 .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
