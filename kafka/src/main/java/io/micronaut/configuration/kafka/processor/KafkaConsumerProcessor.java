@@ -445,7 +445,7 @@ class KafkaConsumerProcessor
 
             //noinspection InfiniteLoopStatement
             while (true) {
-                consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                consumerState.updateAssignments();
                 if (consumerState.autoPaused) {
                     consumerState.pause(consumerState.assignments);
                     kafkaConsumer.pause(consumerState.assignments);
@@ -1125,6 +1125,12 @@ class KafkaConsumerProcessor
             _pausedTopicPartitions.addAll(_pauseRequests);
         }
 
+        synchronized void updateAssignments() {
+            assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+            if (_pauseRequests != null && _pauseRequests.retainAll(assignments)) {
+                LOG.error("Pending pause requests for Consumer [{}] were invalidated because the consumer assignments changed", clientId);
+            }
+        }
     }
 
     /**
