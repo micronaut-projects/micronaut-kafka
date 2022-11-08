@@ -1117,14 +1117,19 @@ class KafkaConsumerProcessor
             if (_pauseRequests == null || _pauseRequests.isEmpty()) {
                 return;
             }
-            kafkaConsumer.pause(_pauseRequests);
+            // Only attempt to pause actual assignments
+            Set<TopicPartition> validPauseRequests = new HashSet<>(_pauseRequests);
+            validPauseRequests.retainAll(assignments);
+            if (validPauseRequests.isEmpty()) {
+                return;
+            }
+            kafkaConsumer.pause(validPauseRequests);
             LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", clientId, kafkaConsumer.paused());
             if (_pausedTopicPartitions == null) {
                 _pausedTopicPartitions = new HashSet<>();
             }
-            _pausedTopicPartitions.addAll(_pauseRequests);
+            _pausedTopicPartitions.addAll(validPauseRequests);
         }
-
     }
 
     /**
