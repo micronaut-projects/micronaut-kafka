@@ -445,8 +445,8 @@ class KafkaConsumerProcessor
 
             //noinspection InfiniteLoopStatement
             while (true) {
-                final var newAssignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
-                if (!newAssignments.equals(consumerState.assignments)) {
+                final Set<TopicPartition> newAssignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                if (LOG.isInfoEnabled() && !newAssignments.equals(consumerState.assignments)) {
                     LOG.info("Consumer [{}] assignments changed: {} -> {}", consumerState.clientId, consumerState.assignments, newAssignments);
                 }
                 consumerState.assignments = newAssignments;
@@ -1127,7 +1127,7 @@ class KafkaConsumerProcessor
             if (validPauseRequests.isEmpty()) {
                 return;
             }
-            LOG.debug("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", clientId, validPauseRequests);
+            LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", clientId, validPauseRequests);
             kafkaConsumer.pause(validPauseRequests);
             LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", clientId, kafkaConsumer.paused());
             if (_pausedTopicPartitions == null) {

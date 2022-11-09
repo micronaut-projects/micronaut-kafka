@@ -12,6 +12,8 @@ import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.TopicPartition
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -22,6 +24,8 @@ import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
 
 class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
 
     void "test when the error strategy is 'resume at next offset' the next message is consumed"() {
         when:"A consumer throws an exception"
@@ -66,7 +70,8 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         then: "The message that threw the exception is re-consumed"
         conditions.eventually {
             myConsumer.received == ["One", "One", "Two"]
-            myConsumer.count.get() == 3
+            myConsumer.finished == ["One", "Two", "One"]
+            sleep(1000)  // wait for the sleeping consumer to wake up and misbehave
             myConsumer.exceptionCount.get() == 0
         }
         and:"the retry of the first message is delivered at least 5000ms afterwards"
@@ -158,6 +163,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
         offsetReset = EARLIEST,
+        threads = 2,
         errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR),
         properties = @Property(name = ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, value = "5000")
     )
@@ -165,15 +171,22 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         AtomicInteger count = new AtomicInteger(0)
         AtomicInteger exceptionCount = new AtomicInteger(0)
         List<String> received = []
+        List<String> finished = []
         List<Long> times = []
 
         @Topic("errors-timeout-and-retry")
         void handleMessage(String message) {
+            LOG.info("Got {}", message)
             received << message
             times << System.currentTimeMillis()
-            if (count.getAndIncrement() == 0) {
-                Thread.sleep(10_000)
-                throw new RuntimeException("Won't handle first")
+            try {
+                if (count.getAndIncrement() == 0) {
+                    Thread.sleep(10_000)
+                    throw new RuntimeException("Won't handle first")
+                }
+            } finally {
+                // This lets us block the test conditions until the first thread (that sleeps) has a chance to wake back up
+                finished << message
             }
         }
 
