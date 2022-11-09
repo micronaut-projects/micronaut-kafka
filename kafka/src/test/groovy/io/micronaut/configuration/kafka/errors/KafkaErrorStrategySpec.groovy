@@ -111,9 +111,9 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
-            offsetReset = EARLIEST,
-            offsetStrategy = SYNC,
-            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms")
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms")
     )
     static class RetryOnErrorErrorCausingConsumer {
         AtomicInteger count = new AtomicInteger(0)
@@ -156,7 +156,11 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
-    @KafkaListener(offsetReset = EARLIEST, errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR), properties = @Property(name = ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, value = "5000"))
+    @KafkaListener(
+        offsetReset = EARLIEST,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR),
+        properties = @Property(name = ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, value = "5000")
+    )
     static class RetryAndRebalanceOnErrorErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
         AtomicInteger exceptionCount = new AtomicInteger(0)
