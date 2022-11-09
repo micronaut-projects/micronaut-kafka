@@ -67,7 +67,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         conditions.eventually {
             myConsumer.received == ["One", "One", "Two"]
             myConsumer.count.get() == 3
-            myConsumer.exceptionCount.get() == 1
+            myConsumer.exceptionCount.get() == 0
         }
         and:"the retry of the first message is delivered at least 5000ms afterwards"
         myConsumer.times[1] - myConsumer.times[0] >= 5_000
@@ -165,17 +165,17 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         @Topic("errors-timeout-and-retry")
         void handleMessage(String message) {
-            received << message;
+            received << message
             times << System.currentTimeMillis()
             if (count.getAndIncrement() == 0) {
-                Thread.sleep(10_000);
+                Thread.sleep(10_000)
                 throw new RuntimeException("Won't handle first")
             }
         }
 
         @Override
         void handle(KafkaListenerException exception) {
-            exceptionCount.getAndIncrement();
+            exceptionCount.getAndIncrement()
         }
     }
 
