@@ -17,14 +17,13 @@ package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
-import io.micronaut.context.annotation.Context;
-import io.micronaut.context.annotation.EachBean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Parameter;
+import io.micronaut.context.annotation.*;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.processor.internals.DefaultKafkaClientSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,12 +94,14 @@ public class KafkaStreamsFactory implements Closeable {
     KafkaStreams kafkaStreams(
             @Parameter String name,
             ConfiguredStreamBuilder builder,
+            KafkaClientSupplier kafkaClientSupplier,
             KStream<?, ?>... kStreams
     ) {
         Topology topology = builder.build(builder.getConfiguration());
         KafkaStreams kafkaStreams = new KafkaStreams(
                 topology,
-                builder.getConfiguration()
+                builder.getConfiguration(),
+                kafkaClientSupplier
         );
         final String startKafkaStreamsValue = builder.getConfiguration().getProperty(
             START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
@@ -128,6 +129,16 @@ public class KafkaStreamsFactory implements Closeable {
     @Singleton
     InteractiveQueryService interactiveQueryService() {
         return new InteractiveQueryService(streams.keySet());
+    }
+
+    /**
+     * Provide a default kafka client supplier which is overridable
+     * @return DefaultKafkaClientSupplier
+     */
+    @Singleton
+    @Secondary
+    KafkaClientSupplier kafkaClientSupplier() {
+        return new DefaultKafkaClientSupplier();
     }
 
     @Override

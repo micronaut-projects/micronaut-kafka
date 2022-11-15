@@ -39,6 +39,7 @@ public class WordCountStream {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
         KStream<String, String> source = builder.stream(INPUT);
 
@@ -74,6 +75,7 @@ public class WordCountStream {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
         KStream<String, String> source = builder.stream(NAMED_WORD_COUNT_INPUT);
         KTable<String, Long> counts = source

@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micronaut.configuration.kafka.metrics;
+package io.micronaut.configuration.kafka.streams.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
+import io.micronaut.configuration.kafka.metrics.AbstractKafkaMetrics;
+import io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter;
+import io.micronaut.configuration.kafka.streams.AbstractKafkaStreamsConfiguration;
 import io.micronaut.configuration.metrics.annotation.RequiresMetrics;
 import io.micronaut.context.BeanLocator;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+
+import javax.annotation.PreDestroy;
 
 import java.util.Optional;
 
@@ -36,8 +41,8 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
  */
 @RequiresMetrics
 @Context
-@Requires(property = MICRONAUT_METRICS_BINDERS + ".kafka.enabled", value = "true", defaultValue = "true")
-public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaConsumerConfiguration> implements BeanCreatedEventListener<AbstractKafkaConsumerConfiguration> {
+@Requires(property = MICRONAUT_METRICS_BINDERS + ".kafka.streams.enabled", value = "true", defaultValue = "true")
+public class KafkaStreamsMetrics extends AbstractKafkaMetrics<AbstractKafkaStreamsConfiguration> implements BeanCreatedEventListener<AbstractKafkaStreamsConfiguration> {
 
     private final BeanLocator beanLocator;
 
@@ -45,17 +50,17 @@ public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaCons
      * Default constructor.
      * @param beanLocator The bean locator
      */
-    public KafkaConsumerMetrics(BeanLocator beanLocator) {
+    public KafkaStreamsMetrics(BeanLocator beanLocator) {
         this.beanLocator = beanLocator;
     }
 
     @Override
-    public AbstractKafkaConsumerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaConsumerConfiguration> event) {
+    public AbstractKafkaStreamsConfiguration onCreated(BeanCreatedEvent<AbstractKafkaStreamsConfiguration> event) {
         Optional<MeterRegistry> optionalMeterRegistry = beanLocator.findBean(MeterRegistry.class);
         if (optionalMeterRegistry.isPresent()) {
-            return addKafkaMetrics(event, ConsumerKafkaMetricsReporter.class.getName(), optionalMeterRegistry.get());
+            return addKafkaMetrics(event, KafkaStreamsMetricsReporter.class.getName(), optionalMeterRegistry.get());
         } else {
-            return addKafkaMetrics(event, ConsumerKafkaMetricsReporter.class.getName());
+            return addKafkaMetrics(event, KafkaStreamsMetricsReporter.class.getName());
         }
     }
 

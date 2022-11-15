@@ -27,7 +27,8 @@ import io.micronaut.context.event.BeanCreatedEventListener;
 
 import javax.annotation.PreDestroy;
 
-import static io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter.METER_REGISTRIES;
+import java.util.Optional;
+
 import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory.MICRONAUT_METRICS_BINDERS;
 
 /**
@@ -39,7 +40,7 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
 @Context
 // Producer metrics are primary since Grails/Boot only support a single metric provider
 @Primary
-public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration>, AutoCloseable {
+public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration> {
 
     private final BeanLocator beanLocator;
 
@@ -53,13 +54,12 @@ public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProd
 
     @Override
     public AbstractKafkaProducerConfiguration onCreated(BeanCreatedEvent<AbstractKafkaProducerConfiguration> event) {
-        beanLocator.findBean(MeterRegistry.class).ifPresent(METER_REGISTRIES::add);
-        return addKafkaMetrics(event, ProducerKafkaMetricsReporter.class.getName());
+        Optional<MeterRegistry> optionalMeterRegistry = beanLocator.findBean(MeterRegistry.class);
+        if (optionalMeterRegistry.isPresent()) {
+            return addKafkaMetrics(event, ProducerKafkaMetricsReporter.class.getName(), optionalMeterRegistry.get());
+        } else {
+            return addKafkaMetrics(event, ProducerKafkaMetricsReporter.class.getName());
+        }
     }
 
-    @PreDestroy
-    @Override
-    public void close() {
-        METER_REGISTRIES.clear();
-    }
 }
