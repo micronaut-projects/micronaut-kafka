@@ -6,4 +6,5 @@ dependencies {
     api projects.kafka
     api libs.managed.kafka.streams
     compileOnly mn.micronaut.micrometer.core
+    testImplementation mn.micronaut.http.client
 }

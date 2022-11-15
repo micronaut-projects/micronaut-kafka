@@ -18,10 +18,10 @@ class KafkaStreamsMetricsSpec extends AbstractTestContainersSpec {
 
     @Shared @AutoCleanup HttpClient httpClient
 
-    protected List<Object> getConfiguration() {
+    protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micrometer.metrics.enabled', true,
-                 'endpoints.metrics.sensitive', false]
+                ['micrometer.metrics.enabled': true,
+                 'endpoints.metrics.sensitive': false]
     }
 
     def setupSpec() {
@@ -75,7 +75,8 @@ class KafkaStreamsMetricsSpec extends AbstractTestContainersSpec {
 
             def response = Mono.from(httpClient.exchange("/metrics/kafka-streams.records-consumed-total", Map)).block()
             Map result = response.body()
-            result.measurements[0] == [statistic: "COUNT", value: 42.0]
+            result.measurements[0].statistic == 'COUNT'
+            result.measurements[0].value > 0
         }
         conditions.eventually {
             def response = Mono.from(httpClient.exchange("/metrics/kafka-streams.alive-stream-threads", Map)).block()

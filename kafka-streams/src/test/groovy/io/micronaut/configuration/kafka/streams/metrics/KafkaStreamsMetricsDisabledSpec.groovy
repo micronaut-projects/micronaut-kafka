@@ -51,10 +51,10 @@ class KafkaStreamsMetricsDisabledSpec extends AbstractTestContainersSpec {
         }
     }
 
-    protected List<Object> getConfiguration() {
+    protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micrometer.metrics.enabled', true,
-                 'endpoints.metrics.sensitive', false,
-                 'micronaut.metrics.binders.kafka.streams.enabled', false]
+                ['micrometer.metrics.enabled': true,
+                 'endpoints.metrics.sensitive': false,
+                 'micronaut.metrics.binders.kafka.streams.enabled': false]
     }
 }
