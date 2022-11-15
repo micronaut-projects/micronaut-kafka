@@ -445,7 +445,11 @@ class KafkaConsumerProcessor
 
             //noinspection InfiniteLoopStatement
             while (true) {
-                consumerState.assignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                final Set<TopicPartition> newAssignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
+                if (LOG.isInfoEnabled() && !newAssignments.equals(consumerState.assignments)) {
+                    LOG.info("Consumer [{}] assignments changed: {} -> {}", consumerState.clientId, consumerState.assignments, newAssignments);
+                }
+                consumerState.assignments = newAssignments;
                 if (consumerState.autoPaused) {
                     consumerState.pause(consumerState.assignments);
                     kafkaConsumer.pause(consumerState.assignments);
@@ -1117,14 +1121,20 @@ class KafkaConsumerProcessor
             if (_pauseRequests == null || _pauseRequests.isEmpty()) {
                 return;
             }
-            kafkaConsumer.pause(_pauseRequests);
+            // Only attempt to pause active assignments
+            Set<TopicPartition> validPauseRequests = new HashSet<>(_pauseRequests);
+            validPauseRequests.retainAll(assignments);
+            if (validPauseRequests.isEmpty()) {
+                return;
+            }
+            LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", clientId, validPauseRequests);
+            kafkaConsumer.pause(validPauseRequests);
             LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", clientId, kafkaConsumer.paused());
             if (_pausedTopicPartitions == null) {
                 _pausedTopicPartitions = new HashSet<>();
             }
-            _pausedTopicPartitions.addAll(_pauseRequests);
+            _pausedTopicPartitions.addAll(validPauseRequests);
         }
-
     }
 
     /**
