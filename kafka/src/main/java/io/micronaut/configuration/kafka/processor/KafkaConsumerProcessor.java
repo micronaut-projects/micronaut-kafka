@@ -455,7 +455,7 @@ class KafkaConsumerProcessor
                     consumerState.pauseTopicPartitions();
                     final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
                     consumerState.closedState = ConsumerCloseState.POLLING;
-                    failed = false;
+                    failed = true;
                     consumerState.resumeTopicPartitions();
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
