@@ -27,11 +27,7 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,23 +36,23 @@ import java.util.stream.Collectors;
  * A {@link MetricsReporter} that binds metrics to micrometer.
  */
 @Internal
-abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
+public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
 
-    static final Collection<MeterRegistry> METER_REGISTRIES = new ConcurrentLinkedQueue<>();
+    private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
 
     private List<KafkaMetric> metrics;
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
-        if (!METER_REGISTRIES.contains(registry)) {
-            METER_REGISTRIES.add(registry);
+        if (!meterRegistries.contains(registry)) {
+            meterRegistries.add(registry);
         }
     }
 
     @Override
     public void init(List<KafkaMetric> metrics) {
         this.metrics = metrics;
-        for (MeterRegistry meterRegistry : METER_REGISTRIES) {
+        for (MeterRegistry meterRegistry : meterRegistries) {
             for (KafkaMetric metric : metrics) {
                 registerMetric(meterRegistry, metric);
             }
@@ -65,7 +61,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
 
     @Override
     public void metricChange(KafkaMetric metric) {
-        for (MeterRegistry meterRegistry : METER_REGISTRIES) {
+        for (MeterRegistry meterRegistry : meterRegistries) {
             registerMetric(meterRegistry, metric);
         }
     }
@@ -77,7 +73,10 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
 
     @Override
     public void configure(Map<String, ?> configs) {
-
+        Object meterRegistry = configs.get("meter.registry");
+        if (meterRegistry != null) {
+            meterRegistries.add((MeterRegistry) meterRegistry);
+        }
     }
 
     @PreDestroy
@@ -87,7 +86,7 @@ abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBin
             metrics.clear();
             metrics = null;
         }
-        METER_REGISTRIES.clear();
+        meterRegistries.clear();
     }
 
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {

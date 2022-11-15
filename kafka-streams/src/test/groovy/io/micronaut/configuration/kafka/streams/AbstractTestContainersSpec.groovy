@@ -1,11 +1,16 @@
 package io.micronaut.configuration.kafka.streams
 
-
+import groovy.util.logging.Slf4j
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
 import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
+import org.apache.kafka.common.utils.Utils
+import org.apache.kafka.streams.StreamsConfig
 import spock.lang.Shared
 
+import java.nio.file.Paths
+
+@Slf4j
 abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
 
     @Shared
@@ -47,4 +52,32 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
         })
     }
 
+    def cleanupSpec() {
+        def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
+        kafkaStreamsFactory.getStreams().forEach((kafkaStream, configuredStreamBuilder) -> {
+            kafkaStream.close()
+            kafkaStream.cleanUp()
+            purgeLocalStreamsState(configuredStreamBuilder.configuration)
+        })
+        try {
+            embeddedServer.stop()
+            log.warn("Stopped containers!")
+        } catch (Exception ignore) {
+            log.error("Could not stop containers")
+        }
+        embeddedServer?.close()
+    }
+
+    static def purgeLocalStreamsState(final streamsConfiguration) throws IOException {
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
+        if (path != null) {
+            final File node = Paths.get(path).normalize().toFile();
+            // Only purge state when it's under java.io.tmpdir.  This is a safety net to prevent accidentally
+            // deleting important local directory trees.
+            if (node.getAbsolutePath().startsWith(tmpDir)) {
+                Utils.delete(new File(node.getAbsolutePath()));
+            }
+        }
+    }
 }
