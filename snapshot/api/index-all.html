@@ -88,6 +88,18 @@
 <dd>
 <div class="block">Constructs a new instance.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">AbstractKafkaMetrics</span></a>&lt;<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="type parameter in AbstractKafkaMetrics">T</a> extends <a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
+<dd>
+<div class="block">A class to simplify the producer and consumer metric.reporters default property.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html#AbstractKafkaMetrics--">AbstractKafkaMetrics()</a></span> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetrics</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">AbstractKafkaMetricsReporter</span></a> - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
+<dd>
+<div class="block">A <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics"><code>MetricsReporter</code></a> that binds metrics to micrometer.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#AbstractKafkaMetricsReporter--">AbstractKafkaMetricsReporter()</a></span> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config"><span class="typeNameLink">AbstractKafkaProducerConfiguration</span></a>&lt;<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="type parameter in AbstractKafkaProducerConfiguration">K</a>,<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="type parameter in AbstractKafkaProducerConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
 <div class="block">Abstract Configuration for Apache Kafka Producer.</div>
@@ -116,6 +128,14 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#add-java.lang.CharSequence-java.lang.CharSequence-">add(CharSequence, CharSequence)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html#addKafkaMetrics-io.micronaut.context.event.BeanCreatedEvent-java.lang.String-">addKafkaMetrics(BeanCreatedEvent&lt;T&gt;, String)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetrics</a></dt>
+<dd>
+<div class="block">Method to add a default metric reporter if not otherwise defined.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html#addKafkaMetrics-io.micronaut.context.event.BeanCreatedEvent-java.lang.String-io.micrometer.core.instrument.MeterRegistry-">addKafkaMetrics(BeanCreatedEvent&lt;T&gt;, String, MeterRegistry)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetrics</a></dt>
+<dd>
+<div class="block">Method to add a default metric reporter if not otherwise defined.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/admin/AdminClientFactory.html" title="class in io.micronaut.configuration.kafka.admin"><span class="typeNameLink">AdminClientFactory</span></a> - Class in <a href="io/micronaut/configuration/kafka/admin/package-summary.html">io.micronaut.configuration.kafka.admin</a></dt>
 <dd>
 <div class="block">Creates the Kakfa <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/AdminClient.html?is-external=true" title="class or interface in org.apache.kafka.clients.admin"><code>AdminClient</code></a>.</div>
@@ -184,6 +204,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html#bind-io.micronaut.core.convert.ArgumentConversionContext-org.apache.kafka.clients.consumer.ConsumerRecord-">bind(ArgumentConversionContext&lt;T&gt;, ConsumerRecord&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaPartitionBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaPartitionBinder</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo(MeterRegistry)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#body-V-">body(V)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave"><span class="typeNameLink">BraveKafkaConsumerTracingInstrumentation</span></a> - Class in <a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a></dt>
@@ -230,14 +252,12 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#close-org.apache.kafka.clients.producer.Producer-">close(Producer&lt;?, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
 <dd>
 <div class="block">Method to close bean.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ProducerKafkaMetricsReporter</a></dt>
 <dd>
 <div class="block">Method to close bean.</div>
@@ -246,6 +266,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html#close--">close()</a></span> - Method in class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></dt>
+<dd>
+<div class="block">Method to close bean.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/TransactionalProducerRegistry.html#close-org.apache.kafka.clients.producer.Producer-">close(Producer&lt;?, ?&gt;)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/TransactionalProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">TransactionalProducerRegistry</a></dt>
 <dd>
 <div class="block">Closed the producer.</div>
@@ -259,6 +283,8 @@
 <div class="block">The default constructor.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/graal/SaslClientCallbackHandlerSubstitute.html#configure-java.util.Map-java.lang.String-java.util.List-">configure(Map&lt;String, ?&gt;, String, List&lt;AppConfigurationEntry&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.graal.<a href="io/micronaut/configuration/kafka/graal/SaslClientCallbackHandlerSubstitute.html" title="class in io.micronaut.configuration.kafka.graal">SaslClientCallbackHandlerSubstitute</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#configure-java.util.Map-">configure(Map&lt;String, ?&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#configure-java.util.Map-boolean-">configure(Map&lt;String, ?&gt;, boolean)</a></span> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
@@ -472,6 +498,10 @@
 <dd>
 <div class="block">The health check timeout.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>
+<div class="block">The tags to include in the gauge.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#getKafkaConsumer--">getKafkaConsumer()</a></span> - Method in exception io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#getKafkaListener--">getKafkaListener()</a></span> - Method in exception io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
@@ -484,6 +514,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html#getKeySerializer--">getKeySerializer()</a></span> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>
+<div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix()</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
 <dd>
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
@@ -492,6 +526,8 @@
 <dd>
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html#getMetricPrefix--">getMetricPrefix()</a></span> - Method in class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaMessage.html#getPartition--">getPartition()</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.html" title="class in io.micronaut.configuration.kafka">KafkaMessage</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#getProducer-io.micronaut.inject.InjectionPoint-io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration-">getProducer(InjectionPoint&lt;KafkaProducer&lt;K, V&gt;&gt;, AbstractKafkaProducerConfiguration&lt;K, V&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
@@ -568,6 +604,8 @@
 </a>
 <h2 class="title">I</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#init-java.util.List-">init(List&lt;KafkaMetric&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#init-io.micronaut.runtime.ApplicationConfiguration-io.micronaut.context.env.Environment-java.util.Properties-">init(ApplicationConfiguration, Environment, Properties)</a></span> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
 <dd>
 <div class="block">Shared initialization.</div>
@@ -639,6 +677,8 @@
 <dt><a href="io/micronaut/configuration/kafka/streams/event/package-summary.html">io.micronaut.configuration.kafka.streams.event</a> - package io.micronaut.configuration.kafka.streams.event</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/health/package-summary.html">io.micronaut.configuration.kafka.streams.health</a> - package io.micronaut.configuration.kafka.streams.health</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/metrics/package-summary.html">io.micronaut.configuration.kafka.streams.metrics</a> - package io.micronaut.configuration.kafka.streams.metrics</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/package-summary.html">io.micronaut.configuration.kafka.tracing</a> - package io.micronaut.configuration.kafka.tracing</dt>
 <dd>&nbsp;</dd>
@@ -904,6 +944,20 @@
 <dd>
 <div class="block">Constructor for the health check.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html" title="class in io.micronaut.configuration.kafka.streams.metrics"><span class="typeNameLink">KafkaStreamsMetrics</span></a> - Class in <a href="io/micronaut/configuration/kafka/streams/metrics/package-summary.html">io.micronaut.configuration.kafka.streams.metrics</a></dt>
+<dd>
+<div class="block">Binds Kafka Metrics to Micrometer.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html#KafkaStreamsMetrics-io.micronaut.context.BeanLocator-">KafkaStreamsMetrics(BeanLocator)</a></span> - Constructor for class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetrics</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics"><span class="typeNameLink">KafkaStreamsMetricsReporter</span></a> - Class in <a href="io/micronaut/configuration/kafka/streams/metrics/package-summary.html">io.micronaut.configuration.kafka.streams.metrics</a></dt>
+<dd>
+<div class="block">Kafka streams specific metrics reporter which prefixes all metrics with kafka-streams.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html#KafkaStreamsMetricsReporter--">KafkaStreamsMetricsReporter()</a></span> - Constructor for class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaTimestamp.html" title="annotation in io.micronaut.configuration.kafka.annotation"><span class="typeNameLink">KafkaTimestamp</span></a> - Annotation Type in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
 <dd>
 <div class="block">Parameter level annotation to indicate which parameter is bound to the Kafka Producer timestamp.</div>
@@ -924,6 +978,10 @@
 <dd>
 <div class="block">Builder method for setting kafka metric.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange(KafkaMetric)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval(KafkaMetric)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:N">
 <!--   -->
@@ -965,6 +1023,8 @@
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaConsumerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaProducerConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;AbstractKafkaStreamsConfiguration&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html#onCreated-io.micronaut.context.event.BeanCreatedEvent-">onCreated(BeanCreatedEvent&lt;Consumer&lt;?, ?&gt;&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.tracing.brave.<a href="io/micronaut/configuration/kafka/tracing/brave/BraveKafkaConsumerTracingInstrumentation.html" title="class in io.micronaut.configuration.kafka.tracing.brave">BraveKafkaConsumerTracingInstrumentation</a></dt>
 <dd>&nbsp;</dd>

@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
+var methods = {"i0":10,"i1":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -98,7 +98,12 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
+<li><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter</a></li>
+<li>
+<ul class="inheritance">
 <li>io.micronaut.configuration.kafka.metrics.ProducerKafkaMetricsReporter</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -113,7 +118,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>@Internal
 public class <span class="typeNameLabel">ProducerKafkaMetricsReporter</span>
-extends java.lang.Object</pre>
+extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></pre>
 <div class="block">A <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics"><code>MetricsReporter</code></a> class for producer metrics.</div>
 </li>
 </ul>
@@ -152,43 +157,24 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo</a></span>(io.micrometer.core.instrument.MeterRegistry&nbsp;registry)</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#close--">close</a></span>()</code>
 <div class="block">Method to close bean.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#configure-java.util.Map-">configure</a></span>(java.util.Map&lt;java.lang.String,?&gt;&nbsp;configs)</code>&nbsp;</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>protected java.util.Set&lt;java.lang.String&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a></span>()</code>
-<div class="block">The tags to include in the gauge.</div>
-</td>
-</tr>
-<tr id="i4" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>protected java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix</a></span>()</code>
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#init-java.util.List-">init</a></span>(java.util.List&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&gt;&nbsp;metrics)</code>&nbsp;</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange</a></span>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&nbsp;metric)</code>&nbsp;</td>
-</tr>
-<tr id="i7" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval</a></span>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&nbsp;metric)</code>&nbsp;</td>
-</tr>
 </table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;io.micronaut.configuration.kafka.metrics.<a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></h3>
+<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#configure-java.util.Map-">configure</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#init-java.util.List-">init</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval</a></code></li>
+</ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
@@ -243,6 +229,8 @@ extends java.lang.Object</pre>
 <pre>protected&nbsp;java.lang.String&nbsp;getMetricPrefix()</pre>
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 <dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>prefix name</dd>
 </dl>
@@ -251,7 +239,7 @@ extends java.lang.Object</pre>
 <a name="close--">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>close</h4>
 <pre>@PreDestroy
@@ -264,86 +252,8 @@ public&nbsp;void&nbsp;close()</pre>
 <dd><code>close</code>&nbsp;in interface&nbsp;<code>java.lang.AutoCloseable</code></dd>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true#close--" title="class or interface in org.apache.kafka.common.metrics">close</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">MetricsReporter</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="bindTo-io.micrometer.core.instrument.MeterRegistry-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>bindTo</h4>
-<pre>public&nbsp;void&nbsp;bindTo(@NonNull
-                   io.micrometer.core.instrument.MeterRegistry&nbsp;registry)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>bindTo</code>&nbsp;in interface&nbsp;<code>io.micrometer.core.instrument.binder.MeterBinder</code></dd>
-</dl>
-</li>
-</ul>
-<a name="init-java.util.List-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>init</h4>
-<pre>public&nbsp;void&nbsp;init(java.util.List&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&gt;&nbsp;metrics)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true#init-java.util.List-" title="class or interface in org.apache.kafka.common.metrics">init</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">MetricsReporter</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="metricChange-org.apache.kafka.common.metrics.KafkaMetric-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>metricChange</h4>
-<pre>public&nbsp;void&nbsp;metricChange(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&nbsp;metric)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true#metricChange-org.apache.kafka.common.metrics.KafkaMetric-" title="class or interface in org.apache.kafka.common.metrics">metricChange</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">MetricsReporter</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>metricRemoval</h4>
-<pre>public&nbsp;void&nbsp;metricRemoval(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">KafkaMetric</a>&nbsp;metric)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-" title="class or interface in org.apache.kafka.common.metrics">metricRemoval</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html?is-external=true" title="class or interface in org.apache.kafka.common.metrics">MetricsReporter</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="configure-java.util.Map-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>configure</h4>
-<pre>public&nbsp;void&nbsp;configure(java.util.Map&lt;java.lang.String,?&gt;&nbsp;configs)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/Configurable.html?is-external=true#configure-java.util.Map-" title="class or interface in org.apache.kafka.common">configure</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/Configurable.html?is-external=true" title="class or interface in org.apache.kafka.common">Configurable</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="getIncludedTags--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>getIncludedTags</h4>
-<pre>protected&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getIncludedTags()</pre>
-<div class="block">The tags to include in the gauge. Defaults to just the client-id.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>The tags to include</dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#close--">close</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
 </dl>
 </li>
 </ul>
