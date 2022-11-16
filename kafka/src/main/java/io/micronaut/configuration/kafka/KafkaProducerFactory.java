@@ -24,16 +24,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import javax.annotation.PreDestroy;
-
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.Serializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -53,6 +43,14 @@ import io.micronaut.inject.ArgumentInjectionPoint;
 import io.micronaut.inject.FieldInjectionPoint;
 import io.micronaut.inject.InjectionPoint;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import jakarta.annotation.PreDestroy;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.

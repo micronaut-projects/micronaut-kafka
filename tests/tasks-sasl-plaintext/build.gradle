@@ -1,6 +1,7 @@
 plugins {
     id 'groovy'
     id 'io.micronaut.application'
+    id 'io.micronaut.build.internal.kafka-tests'
 }
 
 application {
@@ -13,10 +14,6 @@ micronaut {
     testRuntime 'spock'
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation projects.kafka
 
@@ -24,6 +21,8 @@ dependencies {
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
     testImplementation mn.micronaut.test.spock
+
+    testRuntimeOnly(mn.snakeyaml)
 }
 
 graalvmNative {
