@@ -337,6 +337,14 @@
 <dd>
 <div class="block">Creates a new <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html?is-external=true" title="class or interface in org.apache.kafka.clients.consumer"><code>KafkaConsumer</code></a> for the given configuration.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html#createProducer-java.util.Properties-org.apache.kafka.common.serialization.Serializer-org.apache.kafka.common.serialization.Serializer-">createProducer(Properties, Serializer&lt;K&gt;, Serializer&lt;V&gt;)</a></span> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html" title="class in io.micronaut.configuration.kafka">DefaultProducerFactory</a></dt>
+<dd>
+<div class="block">Creates kafka producer, could be overridden for further control.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/ProducerFactory.html#createProducer-java.util.Properties-org.apache.kafka.common.serialization.Serializer-org.apache.kafka.common.serialization.Serializer-">createProducer(Properties, Serializer&lt;K&gt;, Serializer&lt;V&gt;)</a></span> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka">ProducerFactory</a></dt>
+<dd>
+<div class="block">Creates kafka producer, could be overridden for further control.</div>
+</dd>
 </dl>
 <a name="I:D">
 <!--   -->
@@ -406,6 +414,12 @@
 <dd>
 <div class="block">Construct a new <a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams"><code>KafkaStreamsConfiguration</code></a> for the given defaults.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html" title="class in io.micronaut.configuration.kafka"><span class="typeNameLink">DefaultProducerFactory</span></a> - Class in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">A default implementation of <a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka"><code>ProducerFactory</code></a> used for creating producer.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html#DefaultProducerFactory--">DefaultProducerFactory()</a></span> - Constructor for class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html" title="class in io.micronaut.configuration.kafka">DefaultProducerFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserialize-java.lang.String-byte:A-">deserialize(String, byte[])</a></span> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserializer--">deserializer()</a></span> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
@@ -898,9 +912,9 @@
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka"><span class="typeNameLink">KafkaProducerFactory</span></a> - Class in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
 <dd>
-<div class="block">A factory class for creating Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html?is-external=true" title="class or interface in org.apache.kafka.clients.producer"><code>Producer</code></a> instances.</div>
+<div class="block">A registry class for Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html?is-external=true" title="class or interface in org.apache.kafka.clients.producer"><code>Producer</code></a> instances.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-">KafkaProducerFactory(BeanContext, SerdeRegistry)</a></span> - Constructor for class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
+<dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.ProducerFactory-">KafkaProducerFactory(BeanContext, SerdeRegistry, ProducerFactory)</a></span> - Constructor for class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
@@ -1089,6 +1103,10 @@
 <dt><span class="memberNameLink"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html#PREFIX">PREFIX</a></span> - Static variable in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsConfiguration</a></dt>
 <dd>
 <div class="block">The default streams configuration.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">ProducerFactory</span></a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">A factory class for creating Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html?is-external=true" title="class or interface in org.apache.kafka.clients.producer"><code>Producer</code></a> instances.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics"><span class="typeNameLink">ProducerKafkaMetricsReporter</span></a> - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
 <dd>

@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?io/micronaut/configuration/kafka/KafkaProducerFactory.html" target="_top">Frames</a></li>
@@ -115,7 +115,7 @@ var activeTableTab = "activeTableTab";
 public class <span class="typeNameLabel">KafkaProducerFactory</span>
 extends java.lang.Object
 implements <a href="../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a>, <a href="../../../../io/micronaut/configuration/kafka/TransactionalProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">TransactionalProducerRegistry</a></pre>
-<div class="block">A factory class for creating Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html?is-external=true" title="class or interface in org.apache.kafka.clients.producer"><code>Producer</code></a> instances.</div>
+<div class="block">A registry class for Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html?is-external=true" title="class or interface in org.apache.kafka.clients.producer"><code>Producer</code></a> instances.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.0</dd>
@@ -140,8 +140,9 @@ implements <a href="../../../../io/micronaut/configuration/kafka/ProducerRegistr
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/KafkaProducerFactory.html#KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-">KafkaProducerFactory</a></span>(io.micronaut.context.BeanContext&nbsp;beanContext,
-                    <a href="../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry)</code>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../io/micronaut/configuration/kafka/KafkaProducerFactory.html#KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.ProducerFactory-">KafkaProducerFactory</a></span>(io.micronaut.context.BeanContext&nbsp;beanContext,
+                    <a href="../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry,
+                    <a href="../../../../io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka">ProducerFactory</a>&nbsp;producerFactory)</code>
 <div class="block">Default constructor.</div>
 </td>
 </tr>
@@ -218,19 +219,21 @@ implements <a href="../../../../io/micronaut/configuration/kafka/ProducerRegistr
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-">
+<a name="KafkaProducerFactory-io.micronaut.context.BeanContext-io.micronaut.configuration.kafka.serde.SerdeRegistry-io.micronaut.configuration.kafka.ProducerFactory-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>KafkaProducerFactory</h4>
 <pre>public&nbsp;KafkaProducerFactory(io.micronaut.context.BeanContext&nbsp;beanContext,
-                            <a href="../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry)</pre>
+                            <a href="../../../../io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a>&nbsp;serdeRegistry,
+                            <a href="../../../../io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka">ProducerFactory</a>&nbsp;producerFactory)</pre>
 <div class="block">Default constructor.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>beanContext</code> - The bean context</dd>
 <dd><code>serdeRegistry</code> - The serde registry</dd>
+<dd><code>producerFactory</code> - The producer factory</dd>
 </dl>
 </li>
 </ul>
@@ -378,7 +381,7 @@ protected&nbsp;void&nbsp;stop()</pre>
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?io/micronaut/configuration/kafka/KafkaProducerFactory.html" target="_top">Frames</a></li>
