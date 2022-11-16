@@ -153,18 +153,24 @@ public @interface <span class="memberNameLabel">ErrorStrategy</span></pre>
 <th class="colLast" scope="col">Optional Element and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>java.lang.Class&lt;? extends java.lang.Throwable&gt;[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#exceptionTypes--">exceptionTypes</a></span></code>
+<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryCount--">retryCount</a></span></code>
 <div class="block">The retry count used with RETRY_ON_ERROR <a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryDelay--">retryDelay</a></span></code>
 <div class="block">The delay used with RETRY_ON_ERROR <a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#value--">value</a></span></code>
 <div class="block">The strategy to use when an error occurs, see <a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
@@ -261,7 +267,7 @@ public @interface <span class="memberNameLabel">ErrorStrategy</span></pre>
 <li class="blockList"><a name="value--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>value</h4>
 <pre>public abstract&nbsp;<a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a>&nbsp;value</pre>
@@ -273,6 +279,29 @@ public @interface <span class="memberNameLabel">ErrorStrategy</span></pre>
 <dl>
 <dt>Default:</dt>
 <dd>io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="exceptionTypes--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>exceptionTypes</h4>
+<pre>public abstract&nbsp;java.lang.Class&lt;? extends java.lang.Throwable&gt;[]&nbsp;exceptionTypes</pre>
+<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="../../../../../io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the list of exceptions types</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>4.5.0</dd>
+</dl>
+<dl>
+<dt>Default:</dt>
+<dd>{}</dd>
 </dl>
 </li>
 </ul>

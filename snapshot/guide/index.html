@@ -2131,6 +2131,30 @@ The error strategies apply only for non-batch messages processing.
 </tr>
 </table>
 </div>
+<div class="sect3">
+<h4 id="_specify_exceptions_to_retry">Specify exceptions to retry</h4>
+<div class="paragraph">
+<p>It&#8217;s possible to define only exceptions from which the retry will occur.</p>
+</div>
+<div class="listingblock">
+<div class="title">Specifying exceptions to retry</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms", retryCount=3, exceptionTypes = { MyException.class, MySecondException.class }))</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_exception_handlers">Exception handlers</h3>
