@@ -50,6 +50,7 @@ import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.reflect.ReflectionUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.ArgumentUtils;
@@ -1047,11 +1048,13 @@ class KafkaConsumerProcessor
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
                 this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
-                this.errorStrategyExceptions = errorStrategyAnnotation.get("exceptionTypes", Class[].class).orElse(new Class[0]);
+                //noinspection unchecked
+                this.errorStrategyExceptions = (Class<? extends Throwable>[]) errorStrategyAnnotation.classValues("exceptionTypes");
             } else {
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
-                this.errorStrategyExceptions = new Class[0];
+                //noinspection unchecked
+                this.errorStrategyExceptions = ReflectionUtils.EMPTY_CLASS_ARRAY;
             }
 
             autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);

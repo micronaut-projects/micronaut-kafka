@@ -72,6 +72,7 @@ public @interface ErrorStrategy {
      * The types of exceptions to retry, used with RETRY_ON_ERROR, see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
      * @return the list of exceptions types
+     * @since 4.5.0
      */
     Class<? extends Throwable>[] exceptionTypes() default {};
 }
