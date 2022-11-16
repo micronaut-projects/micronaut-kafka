@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
+var methods = {"i0":10,"i1":10,"i2":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -73,13 +73,13 @@ var activeTableTab = "activeTableTab";
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -126,6 +126,32 @@ extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/Abstrac
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field.summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Field and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#PARTITION_TAG">PARTITION_TAG</a></span></code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="fields.inherited.from.class.io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;io.micronaut.configuration.kafka.metrics.<a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></h3>
+<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#CLIENT_ID_TAG">CLIENT_ID_TAG</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#NODE_ID_TAG">NODE_ID_TAG</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#TOPIC_TAG">TOPIC_TAG</a></code></li>
+</ul>
+</li>
+</ul>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.summary">
@@ -162,6 +188,12 @@ extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/Abstrac
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>protected java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a></span>()</code>
+<div class="block">The tags to include in the gauge.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>protected java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix</a></span>()</code>
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
@@ -173,7 +205,7 @@ extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/Abstrac
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;io.micronaut.configuration.kafka.metrics.<a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></h3>
-<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#configure-java.util.Map-">configure</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#init-java.util.List-">init</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval</a></code></li>
+<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#bindTo-io.micrometer.core.instrument.MeterRegistry-">bindTo</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#configure-java.util.Map-">configure</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#init-java.util.List-">init</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricChange-org.apache.kafka.common.metrics.KafkaMetric-">metricChange</a>, <a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricRemoval-org.apache.kafka.common.metrics.KafkaMetric-">metricRemoval</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -197,6 +229,27 @@ extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/Abstrac
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field.detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a name="PARTITION_TAG">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>PARTITION_TAG</h4>
+<pre>public static final&nbsp;java.lang.String PARTITION_TAG</pre>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../constant-values.html#io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter.PARTITION_TAG">Constant Field Values</a></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.detail">
@@ -233,6 +286,23 @@ extends <a href="../../../../../io/micronaut/configuration/kafka/metrics/Abstrac
 <dd><code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMetricPrefix--">getMetricPrefix</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>prefix name</dd>
+</dl>
+</li>
+</ul>
+<a name="getIncludedTags--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getIncludedTags</h4>
+<pre>protected&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getIncludedTags()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getIncludedTags--">AbstractKafkaMetricsReporter</a></code></span></div>
+<div class="block">The tags to include in the gauge. Defaults to just the client-id.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getIncludedTags--">getIncludedTags</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The tags to include</dd>
 </dl>
 </li>
 </ul>
@@ -310,13 +380,13 @@ public&nbsp;void&nbsp;close()</pre>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
