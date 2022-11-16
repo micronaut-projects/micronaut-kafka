@@ -1053,7 +1053,7 @@ class KafkaConsumerProcessor
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
                 //noinspection unchecked
-                this.errorStrategyExceptions = ReflectionUtils.EMPTY_CLASS_ARRAY;
+                this.errorStrategyExceptions = (Class<? extends Throwable>[]) ReflectionUtils.EMPTY_CLASS_ARRAY;
             }
 
             autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);

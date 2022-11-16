@@ -5,7 +5,6 @@ plugins {
 
 dependencies {
     api mn.micronaut.messaging
-    api mn.micronaut.retry
     api mn.micronaut.json.core
 
     compileOnly mn.micronaut.management

@@ -18,7 +18,6 @@ package io.micronaut.configuration.kafka.annotation;
 import io.micronaut.aop.Introduction;
 import io.micronaut.context.annotation.AliasFor;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.retry.annotation.Recoverable;
 import jakarta.inject.Singleton;
 
 import java.lang.annotation.Documented;
@@ -37,7 +36,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Introduction
-@Recoverable
 @Singleton
 public @interface KafkaClient {
 

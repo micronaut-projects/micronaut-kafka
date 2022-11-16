@@ -63,7 +63,7 @@ public class CompositeSerdeRegistry implements SerdeRegistry {
         if (serde != null) {
            return serde;
         } else {
-            type = ReflectionUtils.getWrapperType(type);
+            type = (Class<T>) ReflectionUtils.getWrapperType(type);
             try {
                 return Serdes.serdeFrom(type);
             } catch (IllegalArgumentException e) {
