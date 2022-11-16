@@ -27,7 +27,11 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,6 +41,10 @@ import java.util.stream.Collectors;
  */
 @Internal
 public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
+
+    public static final String CLIENT_ID_TAG = "client-id";
+    public static final String TOPIC_TAG = "topic";
+    public static final String NODE_ID_TAG = "node-id";
 
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
 
@@ -114,7 +122,11 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
      * @return The tags to include
      */
     protected Set<String> getIncludedTags() {
-        return Collections.singleton("client-id");
+        HashSet<String> tags = new HashSet<>();
+        tags.add(CLIENT_ID_TAG);
+        tags.add(TOPIC_TAG);
+        tags.add(NODE_ID_TAG);
+        return tags;
     }
 
     /**

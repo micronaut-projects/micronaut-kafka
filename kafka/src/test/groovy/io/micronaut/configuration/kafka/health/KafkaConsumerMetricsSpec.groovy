@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.metrics.ConsumerKafkaMetricsReporter
 import io.micronaut.configuration.metrics.management.endpoint.MetricsEndpoint
 import io.micronaut.context.annotation.Requires
 import io.micronaut.http.HttpResponse
@@ -57,6 +58,16 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
             !result.names.contains("kafka.producer.record-error-rate")
             !result.names.contains("kafka.producer.bytes-consumed-total")
             !result.names.contains("kafka.count")
+
+            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.records-lead-avg", Map)).block()
+            Map metricBody = preferredReadReplica.body()
+            metricBody.availableTags.size() == 3
+            metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.PARTITION_TAG, ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
+
+            def requestRate = Mono.from(httpClient.exchange("/metrics/kafka.consumer.request-rate", Map)).block()
+            Map requestRateBody = requestRate.body()
+            requestRateBody.availableTags.size() == 2
+            requestRateBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.NODE_ID_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
         }
     }
 

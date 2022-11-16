@@ -20,6 +20,8 @@ import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.TypeHint;
 
 import javax.annotation.PreDestroy;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A {@link org.apache.kafka.common.metrics.MetricsReporter} class for consumer metrics.
@@ -27,6 +29,8 @@ import javax.annotation.PreDestroy;
 @Internal
 @TypeHint(ConsumerKafkaMetricsReporter.class)
 public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
+
+    public static final String PARTITION_TAG = "partition";
 
     private static final String CONSUMER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".consumer";
 
@@ -36,6 +40,13 @@ public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
     @Override
     protected String getMetricPrefix() {
         return CONSUMER_PREFIX;
+    }
+
+    @Override
+    protected Set<String> getIncludedTags() {
+        HashSet<String> tags = new HashSet<>(super.getIncludedTags());
+        tags.add(PARTITION_TAG);
+        return tags;
     }
 
     /**
