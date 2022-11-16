@@ -15,6 +15,25 @@
  */
 package io.micronaut.configuration.kafka;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
+import javax.annotation.PreDestroy;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -34,26 +53,9 @@ import io.micronaut.inject.ArgumentInjectionPoint;
 import io.micronaut.inject.FieldInjectionPoint;
 import io.micronaut.inject.InjectionPoint;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.Serializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PreDestroy;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 /**
- * A factory class for creating Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
+ * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
  *
  * @author Graeme Rocher
  * @since 1.0
@@ -64,15 +66,22 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
+    private final ProducerFactory producerFactory;
 
     /**
      * Default constructor.
      * @param beanContext The bean context
      * @param serdeRegistry The serde registry
+     * @param producerFactory The producer factory
      */
-    public KafkaProducerFactory(BeanContext beanContext, SerdeRegistry serdeRegistry) {
+    public KafkaProducerFactory(
+        BeanContext beanContext,
+        SerdeRegistry serdeRegistry,
+        ProducerFactory producerFactory
+    ) {
         this.beanContext = beanContext;
         this.serdeRegistry = serdeRegistry;
+        this.producerFactory = producerFactory;
     }
 
     /**
@@ -98,17 +107,11 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 if (keySerializer.isPresent() && valueSerializer.isPresent()) {
                     Serializer<K> ks = keySerializer.get();
                     Serializer<V> vs = valueSerializer.get();
-                    return new KafkaProducer<>(
-                            config,
-                            ks,
-                            vs
-                    );
+                    return producerFactory.createProducer(config, ks, vs);
                 } else if (keySerializer.isPresent() || valueSerializer.isPresent()) {
                     throw new ConfigurationException("Both the [keySerializer] and [valueSerializer] must be set when setting either");
                 } else {
-                    return new KafkaProducer<>(
-                            config
-                    );
+                    return producerFactory.createProducer(config, null, null);
                 }
             } else {
                 throw new ConfigurationException("No Kafka configuration specified when using direct instantiation");
