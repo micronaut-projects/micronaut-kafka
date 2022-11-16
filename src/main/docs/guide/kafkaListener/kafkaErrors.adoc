@@ -20,6 +20,17 @@ You can choose one of the error strategies:
 
 NOTE: The error strategies apply only for non-batch messages processing.
 
+==== Specify exceptions to retry
+
+It's possible to define only exceptions from which the retry will occur.
+
+.Specifying exceptions to retry
+[source,java]
+----
+@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms", retryCount=3, exceptionTypes = { MyException.class, MySecondException.class }))
+----
+
+NOTE: Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
 
 === Exception handlers
 

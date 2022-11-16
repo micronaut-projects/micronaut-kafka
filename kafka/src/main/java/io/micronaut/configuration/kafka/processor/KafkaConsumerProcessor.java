@@ -50,6 +50,7 @@ import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.reflect.ReflectionUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.ArgumentUtils;
@@ -565,6 +566,14 @@ class KafkaConsumerProcessor
 
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
+        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+            if (consumerState.partitionRetries != null) {
+                consumerState.partitionRetries.remove(consumerRecord.partition());
+            }
+            // Skip the failing record
+            currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+        }
+
         if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
             if (consumerState.partitionRetries == null) {
                 consumerState.partitionRetries = new HashMap<>();
@@ -1001,6 +1010,7 @@ class KafkaConsumerProcessor
         @Nullable
         final Duration errorStrategyRetryDelay;
         final int errorStrategyRetryCount;
+        final Class<? extends Throwable>[] errorStrategyExceptions;
 
         @Nullable
         Map<Integer, PartitionRetryState> partitionRetries;
@@ -1038,9 +1048,13 @@ class KafkaConsumerProcessor
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
                 this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
+                //noinspection unchecked
+                this.errorStrategyExceptions = (Class<? extends Throwable>[]) errorStrategyAnnotation.classValues("exceptionTypes");
             } else {
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
+                //noinspection unchecked
+                this.errorStrategyExceptions = ReflectionUtils.EMPTY_CLASS_ARRAY;
             }
 
             autoPaused = !kafkaListener.booleanValue("autoStartup").orElse(true);
