@@ -1,5 +1,8 @@
 package io.micronaut.configuration.kafka.docs.consumer.config;
 
+import io.micronaut.serde.annotation.Serdeable;
+
+@Serdeable
 public class Product {
 
     private String name;

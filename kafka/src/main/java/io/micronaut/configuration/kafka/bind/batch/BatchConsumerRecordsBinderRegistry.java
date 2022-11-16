@@ -43,14 +43,17 @@ import java.util.Optional;
 public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistry<ConsumerRecords<?, ?>> {
 
     private final ConsumerRecordBinderRegistry consumerRecordBinderRegistry;
+    private final ConversionService conversionService;
 
     /**
      * Constructs a new instance.
      *
      * @param consumerRecordBinderRegistry The wrapped {@link ConsumerRecordBinderRegistry}
+     * @param conversionService The conversion service
      */
-    public BatchConsumerRecordsBinderRegistry(ConsumerRecordBinderRegistry consumerRecordBinderRegistry) {
+    public BatchConsumerRecordsBinderRegistry(ConsumerRecordBinderRegistry consumerRecordBinderRegistry, ConversionService conversionService) {
         this.consumerRecordBinderRegistry = consumerRecordBinderRegistry;
+        this.conversionService = conversionService;
     }
 
     @SuppressWarnings("unchecked")
@@ -78,9 +81,9 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
                 }
                 return () -> {
                     if (Publisher.class.isAssignableFrom(argument.getType())) {
-                        return ConversionService.SHARED.convert(Flux.fromIterable(bound), argument);
+                        return conversionService.convert(Flux.fromIterable(bound), argument);
                     } else {
-                        return ConversionService.SHARED.convert(bound, argument);
+                        return conversionService.convert(bound, argument);
                     }
                 };
             });

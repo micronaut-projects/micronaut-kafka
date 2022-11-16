@@ -33,6 +33,16 @@ import java.util.Optional;
 @Singleton
 public class KafkaKeyBinder<T> implements AnnotatedConsumerRecordBinder<KafkaKey, T> {
 
+    private final ConversionService conversionService;
+
+    /**
+     * Default constructor.
+     * @param conversionService The conversion service
+     */
+    public KafkaKeyBinder(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
     @Override
     public Class<KafkaKey> annotationType() {
         return KafkaKey.class;
@@ -41,7 +51,7 @@ public class KafkaKeyBinder<T> implements AnnotatedConsumerRecordBinder<KafkaKey
     @Override
     public BindingResult<T> bind(ArgumentConversionContext<T> context, ConsumerRecord<?, ?> source) {
         Object key = source.key();
-        Optional<T> converted = ConversionService.SHARED.convert(key, context);
+        Optional<T> converted = conversionService.convert(key, context);
         return () -> converted;
     }
 }

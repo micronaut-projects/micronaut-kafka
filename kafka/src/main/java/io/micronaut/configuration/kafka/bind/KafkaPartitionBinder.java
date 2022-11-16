@@ -32,6 +32,15 @@ import java.util.Optional;
  */
 @Singleton
 public class KafkaPartitionBinder<T> implements AnnotatedConsumerRecordBinder<KafkaPartition, T> {
+    private final ConversionService conversionService;
+
+    /**
+     * Default constructor.
+     * @param conversionService The conversion service
+     */
+    public KafkaPartitionBinder(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     @Override
     public Class<KafkaPartition> annotationType() {
@@ -41,7 +50,7 @@ public class KafkaPartitionBinder<T> implements AnnotatedConsumerRecordBinder<Ka
     @Override
     public BindingResult<T> bind(ArgumentConversionContext<T> context, ConsumerRecord<?, ?> source) {
         Object partition = source.partition();
-        Optional<T> converted = ConversionService.SHARED.convert(partition, context);
+        Optional<T> converted = conversionService.convert(partition, context);
         return () -> converted;
     }
 }

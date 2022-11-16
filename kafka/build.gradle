@@ -19,6 +19,7 @@ dependencies {
     compileOnly mn.micronaut.graal
     compileOnly mn.graal
 
+    testImplementation mn.micronaut.serde.jackson
     testImplementation mn.micronaut.rxjava2
     testImplementation mn.micronaut.http.client
     testImplementation libs.opentracing.mock

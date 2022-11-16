@@ -18,14 +18,17 @@ package io.micronaut.configuration.kafka.bind;
 import io.micronaut.core.bind.ArgumentBinder;
 import io.micronaut.core.bind.ArgumentBinderRegistry;
 import io.micronaut.core.bind.annotation.Bindable;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArrayUtils;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -45,8 +48,21 @@ public class ConsumerRecordBinderRegistry implements ArgumentBinderRegistry<Cons
      * Creates the registry for the given binders.
      *
      * @param binders The binders
+     * @deprecated Use conversion service constructor instead.
      */
+    @Deprecated
     public ConsumerRecordBinderRegistry(ConsumerRecordBinder<?>... binders) {
+        this(ConversionService.SHARED, binders);
+    }
+
+    /**
+     * Creates the registry for the given binders.
+     *
+     * @param conversionService The conversion service
+     * @param binders The binders
+     */
+    @Inject
+    public ConsumerRecordBinderRegistry(ConversionService conversionService, ConsumerRecordBinder<?>... binders) {
         if (ArrayUtils.isNotEmpty(binders)) {
             for (ConsumerRecordBinder<?> binder : binders) {
                 if (binder instanceof AnnotatedConsumerRecordBinder) {
@@ -77,11 +93,7 @@ public class ConsumerRecordBinderRegistry implements ArgumentBinderRegistry<Cons
         } else {
             @SuppressWarnings("unchecked")
             ConsumerRecordBinder<T> binder = (ConsumerRecordBinder<T>) byType.get(argument.typeHashCode());
-            if (binder != null) {
-                return Optional.of(binder);
-            } else {
-                return Optional.of(new KafkaDefaultBinder<>());
-            }
+            return Optional.of(Objects.requireNonNullElseGet(binder, KafkaDefaultBinder::new));
         }
     }
 }

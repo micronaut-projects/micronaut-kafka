@@ -2,6 +2,7 @@ package io.micronaut.configuration.kafka.serde
 
 import groovy.transform.EqualsAndHashCode
 import io.micronaut.context.ApplicationContext
+import io.micronaut.serde.annotation.Serdeable
 import spock.lang.Specification
 
 class JsonSerdeSpec extends Specification {
@@ -24,6 +25,7 @@ class JsonSerdeSpec extends Specification {
     }
 
     @EqualsAndHashCode
+    @Serdeable
     static class Book {
         String title
     }

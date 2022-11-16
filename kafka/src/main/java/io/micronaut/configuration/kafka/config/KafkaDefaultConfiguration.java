@@ -89,8 +89,8 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
             return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
         }).forEach(entry -> {
             Object value = entry.getValue();
-            if (ConversionService.SHARED.canConvert(entry.getValue().getClass(), String.class)) {
-                Optional<?> converted = ConversionService.SHARED.convert(entry.getValue(), String.class);
+            if (environment.canConvert(entry.getValue().getClass(), String.class)) {
+                Optional<?> converted = environment.convert(entry.getValue(), String.class);
                 if (converted.isPresent()) {
                     value = converted.get();
                 }
