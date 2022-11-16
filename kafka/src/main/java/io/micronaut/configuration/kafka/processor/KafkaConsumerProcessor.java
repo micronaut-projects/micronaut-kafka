@@ -292,9 +292,6 @@ class KafkaConsumerProcessor
         String groupId = consumerAnnotation.stringValue("groupId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
-        if (consumerAnnotation.isTrue("uniqueGroupId")) {
-            groupId = groupId + "_" + UUID.randomUUID();
-        }
         final String clientId = consumerAnnotation.stringValue("clientId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
@@ -302,6 +299,9 @@ class KafkaConsumerProcessor
                 .orElse(OffsetStrategy.AUTO);
         final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
                 .orElse(defaultConsumerConfiguration);
+        if (consumerAnnotation.isTrue("uniqueGroupId")) {
+            groupId = groupId + "_" + UUID.randomUUID();
+        }
         final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
         final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
