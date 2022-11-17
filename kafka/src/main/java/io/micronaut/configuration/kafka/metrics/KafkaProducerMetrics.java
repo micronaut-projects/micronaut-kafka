@@ -24,7 +24,6 @@ import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
-import jakarta.annotation.PreDestroy;
 
 import java.util.Optional;
 

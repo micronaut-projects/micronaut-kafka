@@ -16,7 +16,6 @@
 package io.micronaut.configuration.kafka.bind;
 
 import io.micronaut.core.annotation.AnnotationMetadata;
-import io.micronaut.core.bind.ArgumentBinder;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;

@@ -15,19 +15,18 @@
  */
 package io.micronaut.configuration.kafka.config;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.env.Environment;
-import io.micronaut.core.convert.ConversionService;
-import io.micronaut.core.util.StringUtils;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
+
+import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.env.Environment;
+import io.micronaut.core.util.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 /**
  * The default Kafka configuration to apply to both the consumer and the producer, but can be overridden by either.
