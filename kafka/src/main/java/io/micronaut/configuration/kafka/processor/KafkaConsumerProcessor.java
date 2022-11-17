@@ -316,7 +316,7 @@ class KafkaConsumerProcessor
         }
         for (ConsumerState consumerState : consumers.values()) {
             while (consumerState.closedState == ConsumerCloseState.POLLING) {
-                LOG.debug("consumer not closed yet");
+                LOG.trace("consumer not closed yet");
             }
         }
         consumers.clear();

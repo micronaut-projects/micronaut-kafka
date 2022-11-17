@@ -17,12 +17,11 @@ micronaut {
 dependencies {
     implementation projects.kafka
     implementation mn.micronaut.serde.jackson
-
+    implementation mn.snakeyaml
     testImplementation mn.micronaut.http.client
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
     testImplementation mn.micronaut.test.spock
-    testRuntimeOnly(mn.snakeyaml)
 }
 
 graalvmNative {

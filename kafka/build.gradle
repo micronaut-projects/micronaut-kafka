@@ -17,7 +17,6 @@ dependencies {
     compileOnly libs.opentracing.kafka.client
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
-    compileOnly mn.graal
 
     testImplementation mn.micronaut.serde.jackson
     testImplementation mn.micronaut.rxjava2
