@@ -17,8 +17,14 @@ package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
-import io.micronaut.context.annotation.*;
+import io.micronaut.context.annotation.Context;
+import io.micronaut.context.annotation.EachBean;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Parameter;
+import io.micronaut.context.annotation.Secondary;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import jakarta.annotation.PreDestroy;
+import jakarta.inject.Singleton;
 import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -27,8 +33,6 @@ import org.apache.kafka.streams.processor.internals.DefaultKafkaClientSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
-import jakarta.inject.Singleton;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Map;

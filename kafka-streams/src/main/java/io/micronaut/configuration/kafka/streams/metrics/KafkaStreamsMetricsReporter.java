@@ -16,8 +16,8 @@
 package io.micronaut.configuration.kafka.streams.metrics;
 
 import io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter;
+import jakarta.annotation.PreDestroy;
 
-import javax.annotation.PreDestroy;
 
 /**
  * Kafka streams specific metrics reporter which prefixes all metrics with kafka-streams.

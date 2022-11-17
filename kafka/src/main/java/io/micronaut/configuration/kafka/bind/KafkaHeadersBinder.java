@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.bind;
 
 import io.micronaut.configuration.kafka.KafkaHeaders;
 import io.micronaut.core.convert.ArgumentConversionContext;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.messaging.MessageHeaders;
 import jakarta.inject.Singleton;
@@ -35,6 +36,12 @@ public class KafkaHeadersBinder implements TypedConsumerRecordBinder<MessageHead
 
     public static final Argument<MessageHeaders> TYPE = Argument.of(MessageHeaders.class);
 
+    private final ConversionService conversionService;
+
+    public KafkaHeadersBinder(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
     @Override
     public Argument<MessageHeaders> argumentType() {
         return TYPE;
@@ -42,8 +49,7 @@ public class KafkaHeadersBinder implements TypedConsumerRecordBinder<MessageHead
 
     @Override
     public BindingResult<MessageHeaders> bind(ArgumentConversionContext<MessageHeaders> context, ConsumerRecord<?, ?> source) {
-
-        KafkaHeaders kafkaHeaders = new KafkaHeaders(source.headers());
+        KafkaHeaders kafkaHeaders = new KafkaHeaders(source.headers(), conversionService);
         return () -> Optional.of(kafkaHeaders);
     }
 }

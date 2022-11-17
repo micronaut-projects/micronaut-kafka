@@ -5,6 +5,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
+import io.micronaut.serde.annotation.Serdeable
 import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -56,6 +57,7 @@ class PerRecordOffsetCommitSpec extends AbstractKafkaContainerSpec {
         }
     }
 
+    @Serdeable
     static class Product {
         String name
     }

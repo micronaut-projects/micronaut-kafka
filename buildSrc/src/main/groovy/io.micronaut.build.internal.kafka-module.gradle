@@ -1,9 +1,11 @@
 plugins {
     id 'io.micronaut.build.internal.module'
+    id 'io.micronaut.build.internal.kafka-base'
 }
 
 dependencies {
     api mn.micronaut.messaging
+    api mn.micronaut.json.core
 
     compileOnly mn.micronaut.management
 
@@ -19,6 +21,7 @@ dependencies {
     testRuntimeOnly mn.micronaut.reactor
     testRuntimeOnly mn.micronaut.http.server.netty
     testRuntimeOnly mn.micronaut.management
+    testRuntimeOnly mn.snakeyaml
 }
 
 configurations.all {

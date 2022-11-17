@@ -5,6 +5,11 @@
     "allDeclaredConstructors":true
   },
   {
+    "name":"java.util.zip.CRC32C",
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
     "name":"org.apache.kafka.clients.consumer.RangeAssignor",
     "allDeclaredMethods":true,
     "allDeclaredConstructors":true

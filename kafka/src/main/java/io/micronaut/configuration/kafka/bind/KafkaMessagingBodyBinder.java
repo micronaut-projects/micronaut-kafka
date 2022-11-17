@@ -32,6 +32,15 @@ import java.util.Optional;
  */
 @Singleton
 public class KafkaMessagingBodyBinder<T> implements AnnotatedConsumerRecordBinder<MessageBody, T> {
+    private final ConversionService conversionService;
+
+    /**
+     * Default constructor.
+     * @param conversionService The conversion service
+     */
+    public KafkaMessagingBodyBinder(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     @Override
     public Class<MessageBody> annotationType() {
@@ -41,7 +50,7 @@ public class KafkaMessagingBodyBinder<T> implements AnnotatedConsumerRecordBinde
     @Override
     public BindingResult<T> bind(ArgumentConversionContext<T> context, ConsumerRecord<?, ?> source) {
         Object value = source.value();
-        Optional<T> converted = ConversionService.SHARED.convert(value, context);
+        Optional<T> converted = conversionService.convert(value, context);
         return () -> converted;
     }
 

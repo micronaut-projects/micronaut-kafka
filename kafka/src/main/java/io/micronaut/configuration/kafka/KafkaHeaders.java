@@ -36,15 +36,29 @@ import org.apache.kafka.common.header.Headers;
 public class KafkaHeaders implements MessageHeaders {
 
     private final Headers headers;
+    private final ConversionService conversionService;
 
     /**
      * Constructs a new instance for the given headers.
      *
      * @param headers The kafka headers
      */
+    @Deprecated
     public KafkaHeaders(Headers headers) {
+        this(headers, ConversionService.SHARED);
+    }
+
+    /**
+     * Constructs a new instance for the given headers.
+     *
+     * @param headers The kafka headers
+     * @param conversionService The conversion service
+     */
+    public KafkaHeaders(Headers headers, ConversionService conversionService) {
         Objects.requireNonNull(headers, "Argument [headers] cannot be null");
+        Objects.requireNonNull(conversionService, "Argument [conversionService] cannot be null");
         this.headers = headers;
+        this.conversionService = conversionService;
     }
 
     @Override
@@ -87,7 +101,7 @@ public class KafkaHeaders implements MessageHeaders {
     public <T> Optional<T> get(CharSequence name, ArgumentConversionContext<T> conversionContext) {
         String v = get(name);
         if (v != null) {
-            return ConversionService.SHARED.convert(v, conversionContext);
+            return conversionService.convert(v, conversionContext);
         }
         return Optional.empty();
     }

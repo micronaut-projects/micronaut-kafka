@@ -10,6 +10,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Introspected
+import io.micronaut.serde.annotation.Serdeable
 import spock.lang.Shared
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -46,9 +47,9 @@ class KafkaConsumerAutoStartupSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
-    @Introspected
     @EqualsAndHashCode
     @ToString
+    @Serdeable
     static class TestEvent {
 
         int count

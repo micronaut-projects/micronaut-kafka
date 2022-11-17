@@ -21,6 +21,8 @@ import io.micronaut.core.convert.TypeConverter;
 import org.apache.kafka.common.header.Header;
 
 import jakarta.inject.Singleton;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -31,9 +33,19 @@ import java.util.Optional;
  */
 @Singleton
 public class KafkaHeaderConverter implements TypeConverter<org.apache.kafka.common.header.Header, Object> {
+    private final ConversionService conversionService;
+
+    /**
+     * Default constructor.
+     * @param conversionService The conversion service
+     */
+    public KafkaHeaderConverter(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
     @Override
     public Optional<Object> convert(Header object, Class<Object> targetType, ConversionContext context) {
         byte[] v = object.value();
-        return ConversionService.SHARED.convert(new String(v), targetType, context);
+        return conversionService.convert(new String(v, StandardCharsets.UTF_8), targetType, context);
     }
 }

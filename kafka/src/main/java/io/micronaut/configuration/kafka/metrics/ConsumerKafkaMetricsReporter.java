@@ -18,8 +18,7 @@ package io.micronaut.configuration.kafka.metrics;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.TypeHint;
-
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -1,6 +1,7 @@
 plugins {
     id 'groovy'
     id 'io.micronaut.application'
+    id 'io.micronaut.build.internal.kafka-tests'
 }
 
 application {
@@ -13,13 +14,10 @@ micronaut {
     testRuntime 'spock'
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation projects.kafka
-
+    implementation mn.micronaut.serde.jackson
+    implementation mn.snakeyaml
     testImplementation mn.micronaut.http.client
     testImplementation libs.testcontainers.kafka
     testImplementation libs.testcontainers.spock
@@ -29,8 +27,7 @@ dependencies {
 graalvmNative {
     binaries {
         main {
-            buildArgs.add('--trace-object-instantiation=com.sun.org.slf4j.internal.Logger')
-            buildArgs.add('--initialize-at-run-time=om.sun.org.apache.xml.internal.security.Init')
+            buildArgs.add('--trace-object-instantiation=ch.qos.logback.classic.Logger')
         }
     }
 }

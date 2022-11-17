@@ -45,6 +45,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.messaging.exceptions.MessagingClientException;
+import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -61,11 +62,9 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -99,7 +98,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
-    private final ConversionService<?> conversionService;
+    private final ConversionService conversionService;
     private final Map<ProducerKey, ProducerState> producerMap = new ConcurrentHashMap<>();
 
     /**
@@ -112,7 +111,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     KafkaClientIntroductionAdvice(
             BeanContext beanContext,
             SerdeRegistry serdeRegistry,
-            ConversionService<?> conversionService) {
+            ConversionService conversionService) {
         this.beanContext = beanContext;
         this.serdeRegistry = serdeRegistry;
         this.conversionService = conversionService;
@@ -184,10 +183,10 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     Iterable<Object> batchValue;
                     if (value != null && value.getClass().isArray()) {
                         batchValue = Arrays.asList((Object[]) value);
-                    } else if (!(value instanceof Iterable)) {
+                    } else if (!(value instanceof Iterable iterable)) {
                         batchValue = Collections.singletonList(value);
                     } else {
-                        batchValue = (Iterable) value;
+                        batchValue = iterable;
                     }
 
                     List<Object> results = new ArrayList<>();
@@ -265,8 +264,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 }
 
                 Flux<Object> bodyEmitter;
-                if (batchValue instanceof Iterable) {
-                    bodyEmitter = Flux.fromIterable((Iterable) batchValue);
+                if (batchValue instanceof Iterable iterable) {
+                    bodyEmitter = Flux.fromIterable(iterable);
                 } else {
                     bodyEmitter = Flux.just(batchValue);
                 }
@@ -542,8 +541,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 } else if (argument.isAnnotationPresent(KafkaTimestamp.class)) {
                     timestampSupplier = ctx -> {
                         Object o = ctx.getParameterValues()[finalI];
-                        if (o instanceof Long) {
-                            return (Long) o;
+                        if (o instanceof Long l) {
+                            return l;
                         }
                         return null;
                     };

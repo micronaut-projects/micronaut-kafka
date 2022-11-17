@@ -13,5 +13,7 @@
         <appender-ref ref="STDOUT" />
     </root>
 
+    <logger name="io.micronaut.context.env" level="trace" />
+    <logger name="io.micronaut.configuration.kafka" level="trace" />
 
 </configuration>

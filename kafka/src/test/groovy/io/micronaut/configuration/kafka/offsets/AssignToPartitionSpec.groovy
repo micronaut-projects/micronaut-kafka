@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
+import io.micronaut.serde.annotation.Serdeable
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
@@ -74,6 +75,7 @@ class AssignToPartitionSpec extends AbstractKafkaContainerSpec {
         }
     }
 
+    @Serdeable
     static class Product {
         String name
     }

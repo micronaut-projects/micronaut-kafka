@@ -18,11 +18,14 @@ package io.micronaut.configuration.kafka.bind;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
+import io.micronaut.core.type.Argument;
 import io.micronaut.messaging.annotation.MessageHeader;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -31,6 +34,12 @@ import java.util.Optional;
  */
 @Singleton
 public class KafkaMessageHeaderBinder<T> implements AnnotatedConsumerRecordBinder<MessageHeader, T> {
+    public static final BindingResult<?> EMPTY_OPTIONAL = () -> Optional.of(Optional.empty());
+    private final ConversionService conversionService;
+
+    public KafkaMessageHeaderBinder(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     @Override
     public Class<MessageHeader> annotationType() {
@@ -43,20 +52,35 @@ public class KafkaMessageHeaderBinder<T> implements AnnotatedConsumerRecordBinde
         AnnotationMetadata annotationMetadata = context.getAnnotationMetadata();
 
         // use deprecated versions as that is what is stored in metadata
+        Argument<T> argument = context.getArgument();
         String name = annotationMetadata.stringValue(MessageHeader.class, "name")
                 .orElseGet(() -> annotationMetadata.stringValue(MessageHeader.class)
-                        .orElse(context.getArgument().getName()));
-        Iterable<org.apache.kafka.common.header.Header> value = headers.headers(name);
+                        .orElse(argument.getName()));
+        Iterator<Header> i = headers.headers(name).iterator();
+        if (i.hasNext()) {
+            Header value = i.next();
+            if (argument.isOptional()) {
+                Argument<?> typeVar = argument.getFirstTypeVariable().orElse(argument);
+                Optional<?> converted = conversionService.convert(value.value(), typeVar);
+                //noinspection unchecked
+                return () -> (Optional<T>) Optional.of(converted);
+            } else if (value != null) {
+                Optional<T> converted = conversionService.convert(value.value(), context);
+                return () -> converted;
+            }
+        }
 
-        if (value.iterator().hasNext()) {
-            Optional<T> converted = ConversionService.SHARED.convert(value, context);
-            return () -> converted;
-        } else if (context.getArgument().getType() == Optional.class) {
+        if (argument.isOptional()) {
             //noinspection unchecked
-            return () -> (Optional<T>) Optional.of(Optional.empty());
+            return (BindingResult<T>) EMPTY_OPTIONAL;
         } else {
-            //noinspection unchecked
-            return BindingResult.EMPTY;
+            if ("topic".equalsIgnoreCase(name)) {
+                Optional<T> converted = conversionService.convert(source.topic(), context);
+                return () -> converted;
+            } else {
+                //noinspection unchecked
+                return BindingResult.EMPTY;
+            }
         }
     }
 }

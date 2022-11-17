@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.messaging.annotation.SendTo
+import io.micronaut.serde.annotation.Serdeable
 import io.reactivex.Flowable
 import reactor.core.publisher.Flux
 import spock.lang.Retry
@@ -312,6 +313,7 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
 
     @ToString(includePackage = false)
     @EqualsAndHashCode
+    @Serdeable
     static class Book {
         String title
     }
