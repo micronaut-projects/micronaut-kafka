@@ -92,8 +92,20 @@ public class KafkaStreamsHealth implements HealthIndicator {
                         .filter(p -> p.getValue().state().isRunningOrRebalancing())
                         .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
                                 .details(buildDetails(p.getValue())))
-                        .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(pair.getValue().state(), pair.getKey())))
+                        .switchIfEmpty(Flux.create(emitter -> {
+                            String key = pair.getKey();
+                            KafkaStreams value = pair.getValue();
+                            if (value.state().isRunningOrRebalancing()) {
+                                HealthResult.Builder upResult = HealthResult.builder(key, HealthStatus.UP)
+                                    .details(buildDetails(value));
+                                emitter.next(upResult);
+                            } else {
+                                HealthResult.Builder downResult = HealthResult.builder(key, HealthStatus.DOWN)
+                                    .details(buildDownDetails(value.state(), key));
+                                emitter.next(downResult);
+                            }
+                            emitter.complete();
+                        }))
                         .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
                                 .details(buildDownDetails(e.getMessage(), pair.getValue().state(), pair.getKey())))))
                 .map(HealthResult.Builder::build);
@@ -119,7 +131,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @return Map of details messages
      */
     private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId) {
-        LOG.debug("Reporting health DOWN. Kafka stream {} in state {} is down: {}", streamId, state, message);
+        LOG.debug("Reporting health DOWN. Kafka stream [{}] in state [{}] is DOWN: {}", streamId, state, message);
         final Map<String, String> details = new HashMap<>();
         details.put("threadState", state.name());
         details.put("error", message);
