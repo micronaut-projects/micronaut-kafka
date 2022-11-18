@@ -31,6 +31,7 @@ import org.apache.kafka.clients.consumer.StickyAssignor;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
 import org.apache.kafka.common.security.authenticator.AbstractLogin;
 import org.apache.kafka.common.security.authenticator.DefaultLogin;
+import org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler;
 import org.apache.kafka.common.security.authenticator.SaslServerCallbackHandler;
 import org.apache.kafka.common.security.plain.PlainLoginModule;
 import org.apache.kafka.common.serialization.*;
@@ -81,6 +82,7 @@ import java.util.Properties;
         DefaultLogin.class,
         SaslServerCallbackHandler.class,
         PlainLoginModule.class,
+        SaslClientCallbackHandler.class,
         AbstractLogin.DefaultLoginCallbackHandler.class
 
 })
