@@ -74,6 +74,7 @@ import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -794,7 +795,7 @@ class KafkaConsumerProcessor
                                         }
                                         try {
                                             LOG.trace("Sending offsets: {} to transaction for producer: {} and customer group id: {}", offsetsToCommit, consumerState.producerTransactionalId, consumerState.groupId);
-                                            kafkaProducer.sendOffsetsToTransaction(offsetsToCommit, consumerState.groupId);
+                                            kafkaProducer.sendOffsetsToTransaction(offsetsToCommit, new ConsumerGroupMetadata(consumerState.groupId));
                                             LOG.trace("Committing transaction for producer: {}", consumerState.producerTransactionalId);
                                             kafkaProducer.commitTransaction();
                                             LOG.trace("Committed transaction for producer: {}", consumerState.producerTransactionalId);

@@ -26,8 +26,8 @@ import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.processor.TaskMetadata;
-import org.apache.kafka.streams.processor.ThreadMetadata;
+import org.apache.kafka.streams.TaskMetadata;
+import org.apache.kafka.streams.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
 import jakarta.inject.Singleton;
@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -57,6 +56,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
     public static final String ENABLED_PROPERTY = AbstractKafkaConfiguration.PREFIX + ".health.streams.enabled";
 
     private static final String NAME = "kafkaStreams";
+    private static final String METADATA_PARTITIONS = "partitions";
 
     private final KafkaStreamsFactory kafkaStreamsFactory;
     private final HealthAggregator<?> healthAggregator;
@@ -130,7 +130,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
         final Map<String, Object> streamDetails = new HashMap<>();
 
         if (kafkaStreams.state().isRunningOrRebalancing()) {
-            for (ThreadMetadata metadata : kafkaStreams.localThreadsMetadata()) {
+            for (org.apache.kafka.streams.ThreadMetadata metadata : kafkaStreams.metadataForLocalThreads()) {
                 final Map<String, Object> threadDetails = new HashMap<>();
                 threadDetails.put("threadName", metadata.threadName());
                 threadDetails.put("threadState", metadata.threadState());
@@ -179,7 +179,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
     private static String getDefaultStreamName(final KafkaStreams kafkaStreams) {
         return Optional.ofNullable(kafkaStreams)
                 .filter(kafkaStreams1 -> kafkaStreams1.state().isRunningOrRebalancing())
-                .map(KafkaStreams::localThreadsMetadata)
+                .map(KafkaStreams::metadataForLocalThreads)
                 .map(Collection::stream)
                 .flatMap(Stream::findFirst)
                 .map(ThreadMetadata::threadName)
@@ -196,12 +196,12 @@ public class KafkaStreamsHealth implements HealthIndicator {
         final Map<String, Object> details = new HashMap<>();
         for (TaskMetadata taskMetadata : taskMetadataSet) {
             details.put("taskId", taskMetadata.taskId());
-            if (details.containsKey("partitions")) {
+            if (details.containsKey(METADATA_PARTITIONS)) {
                 @SuppressWarnings("unchecked")
-                List<String> partitionsInfo = (List<String>) details.get("partitions");
+                List<String> partitionsInfo = (List<String>) details.get(METADATA_PARTITIONS);
                 partitionsInfo.addAll(addPartitionsInfo(taskMetadata));
             } else {
-                details.put("partitions", addPartitionsInfo(taskMetadata));
+                details.put(METADATA_PARTITIONS, addPartitionsInfo(taskMetadata));
             }
         }
         return details;
@@ -216,7 +216,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
     private static List<String> addPartitionsInfo(TaskMetadata metadata) {
         return metadata.topicPartitions().stream()
                 .map(p -> "partition=" + p.partition() + ", topic=" + p.topic())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

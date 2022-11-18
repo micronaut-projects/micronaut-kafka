@@ -10,36 +10,6 @@
     "allDeclaredConstructors":true
   },
   {
-    "name":"org.apache.kafka.clients.consumer.RangeAssignor",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
-    "name":"org.apache.kafka.clients.producer.internals.DefaultPartitioner",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
-    "name":"org.apache.kafka.common.security.authenticator.AbstractLogin$DefaultLoginCallbackHandler",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
-    "name":"org.apache.kafka.common.security.authenticator.DefaultLogin",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
-    "name":"org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
-    "name":"org.apache.kafka.common.security.plain.PlainLoginModule",
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true
-  },
-  {
     "name":"sun.security.pkcs.SignerInfo[]"
   },
   {

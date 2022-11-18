@@ -28,7 +28,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.clients.consumer.StickyAssignor;
-import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
+import org.apache.kafka.clients.producer.RoundRobinPartitioner;
+import org.apache.kafka.common.security.authenticator.AbstractLogin;
+import org.apache.kafka.common.security.authenticator.DefaultLogin;
+import org.apache.kafka.common.security.authenticator.SaslServerCallbackHandler;
+import org.apache.kafka.common.security.plain.PlainLoginModule;
 import org.apache.kafka.common.serialization.*;
 
 import java.util.Optional;
@@ -67,11 +71,18 @@ import java.util.Properties;
         FloatDeserializer.class,
 
         // partitioners
-        DefaultPartitioner.class,
+        RoundRobinPartitioner.class,
         // assigners
         RangeAssignor.class,
         RoundRobinAssignor.class,
-        StickyAssignor.class
+        StickyAssignor.class,
+
+        // authentication
+        DefaultLogin.class,
+        SaslServerCallbackHandler.class,
+        PlainLoginModule.class,
+        AbstractLogin.DefaultLoginCallbackHandler.class
+
 })
 public class KafkaConsumerFactory {
 
