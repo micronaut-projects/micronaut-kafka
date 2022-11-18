@@ -8,7 +8,6 @@ import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.SendTo
-import io.opentracing.mock.MockTracer
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.producer.Producer
@@ -35,7 +34,6 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
     public static final String TOPIC_BLOCKING = "KafkaProducerSpec-users-blocking"
     public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
 
-    @Shared MockTracer mockTracer = new MockTracer()
     @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"))
     @Shared @AutoCleanup ApplicationContext context
 
@@ -61,7 +59,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
                  "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
                  "kafka.bootstrap.servers"                   : kafkaContainer.bootstrapServers,
                  (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
-        ).singletons(mockTracer).start()
+        ).start()
     }
 
     void "test customize defaults"() {
@@ -76,7 +74,6 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
 
         then:
         conditions.eventually {
-            mockTracer.finishedSpans().size() > 0
             userListener.keys.size() == 1
             userListener.keys.iterator().next() == "Bob"
             userListener.users.size() == 1
@@ -120,7 +117,6 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
 
         then:
         conditions.eventually {
-            mockTracer.finishedSpans().size() > 0
             listener.brands.size() == 1
             listener.brands["Raleigh"] == "Professional"
             listener.others.isEmpty()
@@ -142,7 +138,6 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
 
         then:
         conditions.eventually {
-            mockTracer.finishedSpans().size() > 0
             listener.brands.isEmpty()
             listener.others.size() == 1
             listener.others["Raleigh"] == "International"

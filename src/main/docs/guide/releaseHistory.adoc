@@ -1,3 +1,23 @@
 For this project, you can find a list of releases (with release notes) here:
 
 https://github.com/{githubSlug}/releases[https://github.com/{githubSlug}/releases]
+
+=== Upgrading to Micronaut Kafka 5.0
+
+Micronaut Kafka 5.0 is a significant major version which includes a number of changes you will need to consider when upgrading.
+
+=== Micronaut 4, Kafka 3 & Java 17 baseline
+
+Micronaut Kafka 5.0 requires the following minimum set of dependencies:
+
+* Java 17 or above
+* Kafka 3
+* Micronaut 4 or above
+
+=== `@KafkaClient` no longer recoverable by default
+
+Previous versions of Micronaut Kafka used the meta-annotation https://docs.micronaut.io/latest/api/io/micronaut/retry/annotation/Recoverable.html[@Recoverable] on the `@KafkaClient` annotation allowing you to define https://docs.micronaut.io/latest/guide/#clientFallback[fallbacks] in the case of failure. Micronaut Kafka 5 no longer includes this meta annotation and if you use fallbacks you should explicitly declare a dependency on `io.micronaut:micronaut-retry` and declare the `@Recoverable` explicitly.
+
+=== Open Tracing No Longer Supported
+
+Micronaut Kafka 5 no longer supports Open Tracing (which is deprecated and no longer maintained) and if you need distributed tracing you should instead https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka[use Open Telemetry].
