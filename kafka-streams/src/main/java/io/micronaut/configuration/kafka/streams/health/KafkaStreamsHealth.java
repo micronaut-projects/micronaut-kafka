@@ -107,7 +107,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
                             emitter.complete();
                         }))
                         .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(e.getMessage(), pair.getValue().state(), pair.getKey())))))
+                                .details(buildDownDetails(e.getMessage(), pair.getValue().state(), pair.getKey(), e)))))
                 .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
     }
@@ -119,7 +119,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @return Map of details messages
      */
     private Map<String, String> buildDownDetails(KafkaStreams.State state, String streamId) {
-        return buildDownDetails("Processor appears to be down", state, streamId);
+        return buildDownDetails("Processor appears to be down", state, streamId, null);
     }
 
     /**
@@ -128,10 +128,16 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param message Down message
      * @param state The stream state
      * @param streamId The stream ID
+     * @param e The exception
      * @return Map of details messages
      */
-    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId) {
-        LOG.debug("Reporting health DOWN. Kafka stream [{}] in state [{}] is DOWN: {}", streamId, state, message);
+    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId, Throwable e) {
+        if (e != null) {
+            LOG.debug("Reporting Kafka health DOWN. Kafka stream [{}] in state [{}] is DOWN. Reason: {}", streamId, state, message);
+            LOG.debug(e.getMessage(), e);
+        } else {
+            LOG.debug("Reporting Kafka health DOWN. Kafka stream [{}] in state [{}] is DOWN. Reason: {}", streamId, state, message);
+        }
         final Map<String, String> details = new HashMap<>();
         details.put("threadState", state.name());
         details.put("error", message);
