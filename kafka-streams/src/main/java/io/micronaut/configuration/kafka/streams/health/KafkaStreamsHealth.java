@@ -31,6 +31,8 @@ import org.apache.kafka.streams.ThreadMetadata;
 import org.reactivestreams.Publisher;
 
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 import java.util.Collection;
@@ -57,6 +59,8 @@ public class KafkaStreamsHealth implements HealthIndicator {
 
     private static final String NAME = "kafkaStreams";
     private static final String METADATA_PARTITIONS = "partitions";
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsHealth.class);
 
     private final KafkaStreamsFactory kafkaStreamsFactory;
     private final HealthAggregator<?> healthAggregator;
@@ -89,9 +93,9 @@ public class KafkaStreamsHealth implements HealthIndicator {
                         .map(p -> HealthResult.builder(p.getKey(), HealthStatus.UP)
                                 .details(buildDetails(p.getValue())))
                         .defaultIfEmpty(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(pair.getValue().state())))
+                                .details(buildDownDetails(pair.getValue().state(), pair.getKey())))
                         .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(e.getMessage(), pair.getValue().state())))))
+                                .details(buildDownDetails(e.getMessage(), pair.getValue().state(), pair.getKey())))))
                 .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
     }
@@ -102,8 +106,8 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param state The stream state
      * @return Map of details messages
      */
-    private Map<String, String> buildDownDetails(KafkaStreams.State state) {
-        return buildDownDetails("Processor appears to be down", state);
+    private Map<String, String> buildDownDetails(KafkaStreams.State state, String streamId) {
+        return buildDownDetails("Processor appears to be down", state, streamId);
     }
 
     /**
@@ -111,9 +115,11 @@ public class KafkaStreamsHealth implements HealthIndicator {
      *
      * @param message Down message
      * @param state The stream state
+     * @param streamId The stream ID
      * @return Map of details messages
      */
-    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state) {
+    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId) {
+        LOG.debug("Reporting health DOWN. Kafka stream {} in state {} is down: {}", streamId, state, message);
         final Map<String, String> details = new HashMap<>();
         details.put("threadState", state.name());
         details.put("error", message);
