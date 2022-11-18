@@ -240,6 +240,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
      */
     @SuppressWarnings("java:S6204") // needs to be mutable
     private static List<String> addPartitionsInfo(TaskMetadata metadata) {
+        // don't use stream().toList() as it returns an immutable collection
         return metadata.topicPartitions().stream()
                 .map(p -> "partition=" + p.partition() + ", topic=" + p.topic())
                 .collect(Collectors.toList());
