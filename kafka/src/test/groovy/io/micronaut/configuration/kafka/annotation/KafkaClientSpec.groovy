@@ -6,7 +6,6 @@ import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.messaging.exceptions.MessagingClientException
-import io.opentracing.contrib.kafka.TracingKafkaProducer
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
@@ -76,9 +75,7 @@ class KafkaClientSpec extends AbstractKafkaSpec {
         MySender sender = ctx.getBean(MySender)
 
         when:
-        Field producerField = TracingKafkaProducer.class.getDeclaredField("producer")
-        producerField.setAccessible(true)
-        KafkaProducer kafkaProducer = (KafkaProducer) producerField.get(sender.kafkaProducer)
+        KafkaProducer kafkaProducer = sender.kafkaProducer
 
         Field producerConfigField = KafkaProducer.class.getDeclaredField("producerConfig")
         producerConfigField.setAccessible(true)
