@@ -190,6 +190,43 @@
 <div class="paragraph">
 <p><a href="https://github.com/micronaut-projects/micronaut-kafka/releases">https://github.com/micronaut-projects/micronaut-kafka/releases</a></p>
 </div>
+<div class="sect2">
+<h3 id="_upgrading_to_micronaut_kafka_5_0">Upgrading to Micronaut Kafka 5.0</h3>
+<div class="paragraph">
+<p>Micronaut Kafka 5.0 is a significant major version which includes a number of changes you will need to consider when upgrading.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_micronaut_4_kafka_3_java_17_baseline">Micronaut 4, Kafka 3 &amp; Java 17 baseline</h3>
+<div class="paragraph">
+<p>Micronaut Kafka 5.0 requires the following minimum set of dependencies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java 17 or above</p>
+</li>
+<li>
+<p>Kafka 3</p>
+</li>
+<li>
+<p>Micronaut 4 or above</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kafkaclient_no_longer_recoverable_by_default"><code>@KafkaClient</code> no longer recoverable by default</h3>
+<div class="paragraph">
+<p>Previous versions of Micronaut Kafka used the meta-annotation <a href="https://docs.micronaut.io/latest/api/io/micronaut/retry/annotation/Recoverable.html">@Recoverable</a> on the <code>@KafkaClient</code> annotation allowing you to define <a href="https://docs.micronaut.io/latest/guide/#clientFallback">fallbacks</a> in the case of failure. Micronaut Kafka 5 no longer includes this meta annotation and if you use fallbacks you should explicitly declare a dependency on <code>io.micronaut:micronaut-retry</code> and declare the <code>@Recoverable</code> explicitly.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_open_tracing_no_longer_supported">Open Tracing No Longer Supported</h3>
+<div class="paragraph">
+<p>Micronaut Kafka 5 no longer supports Open Tracing (which is deprecated and no longer maintained) and if you need distributed tracing you should instead <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka">use Open Telemetry</a>.</p>
+</div>
+</div>
 
 <h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>3 Using the Micronaut CLI</h1>
 
@@ -2277,25 +2314,7 @@ By default, the details visible above are only shown to authenticated users. See
 
 
 <div class="paragraph">
-<p>You can enable distributed tracing with either Jaeger or Zipkin by first configuring <a href="https://docs.micronaut.io/latest/guide/index.html#distributedTracing">Micronaut Tracing</a>, then adding the following dependency:</p>
-</div>
-<div class="paragraph">
-<p>        <div class="listingblock multi-language-sample">
-<div class="title"></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">runtimeOnly(<span class="hljs-string">"io.opentracing.contrib:opentracing-kafka-client:0.0.16")</span></code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
-    &lt;groupId&gt;io.opentracing.contrib&lt;/groupId&gt;
-    &lt;artifactId&gt;opentracing-kafka-client&lt;/artifactId&gt;
-    &lt;version&gt;0.0.16&lt;/version&gt;
-    &lt;scope&gt;runtime&lt;/scope&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div></p>
+<p>Distributed tracing is supported via the <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide">Micronaut Tracing</a> module <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka">using Open Telemetry</a>.</p>
 </div>
 
 <h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>7.4 Disabling Micronaut-Kafka</h2>

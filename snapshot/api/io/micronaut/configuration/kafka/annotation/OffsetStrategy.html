@@ -235,7 +235,7 @@ the order they are declared.</div>
 <h3>SEND_TO_TRANSACTION</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></span>&nbsp;<span class="element-name">SEND_TO_TRANSACTION</span></div>
 <div class="block">Only applicable for transactional processing in combination with <code>SendTo</code>.
- Sends offsets to transaction using <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html#sendOffsetsToTransaction(java.util.Map,java.lang.String)" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>Producer.sendOffsetsToTransaction(java.util.Map, String)</code></a></div>
+ Sends offsets to transaction using <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html#sendOffsetsToTransaction(java.util.Map,org.apache.kafka.clients.consumer.ConsumerGroupMetadata)" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>Producer.sendOffsetsToTransaction(java.util.Map, org.apache.kafka.clients.consumer.ConsumerGroupMetadata)</code></a></div>
 </section>
 </li>
 </ul>
