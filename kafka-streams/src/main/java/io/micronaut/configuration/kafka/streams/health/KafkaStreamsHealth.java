@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -237,10 +238,11 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param metadata Task metadata
      * @return List of partition and topic details
      */
+    @SuppressWarnings("java:S6204") // needs to be mutable
     private static List<String> addPartitionsInfo(TaskMetadata metadata) {
         return metadata.topicPartitions().stream()
                 .map(p -> "partition=" + p.partition() + ", topic=" + p.topic())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
