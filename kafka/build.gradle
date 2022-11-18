@@ -14,15 +14,12 @@ dependencies {
     api libs.managed.kafka.clients
 
     compileOnly mn.micronaut.micrometer.core
-    compileOnly libs.opentracing.kafka.client
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
 
     testImplementation mn.micronaut.serde.jackson
     testImplementation mn.micronaut.rxjava2
     testImplementation mn.micronaut.http.client
-    testImplementation libs.opentracing.mock
-    testImplementation libs.opentracing.kafka.client
     testImplementation mn.micronaut.rxjava2
 
     testRuntimeOnly mn.micronaut.micrometer.registry.statsd

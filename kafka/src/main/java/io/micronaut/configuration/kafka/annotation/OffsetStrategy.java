@@ -15,10 +15,6 @@
  */
 package io.micronaut.configuration.kafka.annotation;
 
-import java.util.Map;
-
-import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
-
 /**
  * <p>An enum representing different strategies for committing offsets to Kafka when using {@link KafkaListener}.</p>
  *
@@ -56,7 +52,7 @@ public enum OffsetStrategy {
     ASYNC_PER_RECORD,
     /**
      * Only applicable for transactional processing in combination with {@link io.micronaut.messaging.annotation.SendTo}.
-     * Sends offsets to transaction using {@link org.apache.kafka.clients.producer.Producer#sendOffsetsToTransaction(Map, ConsumerGroupMetadata)}
+     * Sends offsets to transaction using {@link org.apache.kafka.clients.producer.Producer#sendOffsetsToTransaction(java.util.Map, org.apache.kafka.clients.consumer.ConsumerGroupMetadata)}
      */
     SEND_TO_TRANSACTION
 

@@ -1,3 +1,1 @@
-You can enable distributed tracing with either Jaeger or Zipkin by first configuring https://docs.micronaut.io/latest/guide/index.html#distributedTracing[Micronaut Tracing], then adding the following dependency:
-
-dependency:io.opentracing.contrib:opentracing-kafka-client:0.0.16[scope="runtime"]
+Distributed tracing is supported via the https://micronaut-projects.github.io/micronaut-tracing/latest/guide[Micronaut Tracing] module https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka[using Open Telemetry].
