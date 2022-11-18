@@ -8,6 +8,7 @@ import org.apache.kafka.common.utils.Utils
 import org.apache.kafka.streams.StreamsConfig
 import spock.lang.Shared
 
+import java.nio.file.AccessDeniedException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -79,10 +80,14 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
             // Only purge state when it's under java.io.tmpdir.  This is a safety net to prevent accidentally
             // deleting important local directory trees.
             if (node.getAbsolutePath().startsWith(tmpDir)) {
-                    Files.walk(p)
-                            .sorted(Comparator.reverseOrder())
-                            .map(Path::toFile)
-                            .forEach(File::delete);
+                    try {
+                        Files.walk(p)
+                                .sorted(Comparator.reverseOrder())
+                                .map(Path::toFile)
+                                .forEach(File::delete);
+                    } catch (AccessDeniedException e) {
+                        // ignore failure, disk read-only
+                    }
             }
         }
     }
