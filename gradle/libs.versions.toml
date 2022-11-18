@@ -4,7 +4,7 @@ micronaut-docs = "2.0.0"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka-compat = "3.3.1"
-managed-kafka = '2.8.2'
+managed-kafka = '3.3.1'
 
 groovy = "4.0.6"
 
