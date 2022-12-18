@@ -564,7 +564,8 @@ class KafkaConsumerProcessor
     }
 
     private void resetTheFollowingPartitions(ConsumerRecord<?, ?> errorConsumerRecord, ConsumerState consumerState, Iterator<? extends ConsumerRecord<?, ?>> iterator) {
-        Set<Integer> processedPartition = new HashSet<>(errorConsumerRecord.partition());
+        Set<Integer> processedPartition = new HashSet<>();
+        processedPartition.add(errorConsumerRecord.partition());
         while (iterator.hasNext()) {
             ConsumerRecord<?, ?> consumerRecord = iterator.next();
             if (!processedPartition.add(consumerRecord.partition())) {
