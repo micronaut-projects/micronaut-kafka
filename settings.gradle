@@ -6,22 +6,22 @@ pluginManagement {
 }
 
 plugins {
-    id("io.micronaut.build.shared.settings") version "6.1.0"
+    id("io.micronaut.build.shared.settings") version "6.1.1"
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-    }
-}
-
 rootProject.name = 'kafka-parent'
 
 micronautBuild {
+    addSnapshotRepository()
     importMicronautCatalog()
+    importMicronautCatalog("micronaut-cache")
+    importMicronautCatalog("micronaut-micrometer")
+    importMicronautCatalog("micronaut-reactor")
+    importMicronautCatalog("micronaut-rxjava2")
+    importMicronautCatalog("micronaut-serde")
+    importMicronautCatalog("micronaut-tracing")
 }
 
 include 'kafka-bom'

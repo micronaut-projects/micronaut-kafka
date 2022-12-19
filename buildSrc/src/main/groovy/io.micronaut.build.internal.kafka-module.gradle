@@ -13,12 +13,12 @@ dependencies {
 
     testAnnotationProcessor mn.micronaut.inject.java
 
-    testImplementation mn.micronaut.micrometer.core
+    testImplementation mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.management
     testImplementation libs.testcontainers.kafka
 
-    testRuntimeOnly mn.micronaut.cache.core
-    testRuntimeOnly mn.micronaut.reactor
+    testRuntimeOnly mnCache.micronaut.cache.core
+    testRuntimeOnly mnReactor.micronaut.reactor
     testRuntimeOnly mn.micronaut.http.server.netty
     testRuntimeOnly mn.micronaut.management
     testRuntimeOnly mn.snakeyaml
