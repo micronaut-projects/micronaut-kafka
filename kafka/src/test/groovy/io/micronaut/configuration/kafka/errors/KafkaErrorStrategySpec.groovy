@@ -77,9 +77,10 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         then:"The finished messages should be complete except the particularly failed one"
         RetryOnErrorMultiplePartitionsErrorCausingConsumer myConsumer = context.getBean(RetryOnErrorMultiplePartitionsErrorCausingConsumer)
+        var expected = new HashSet();
+        expected.add(RandomFailedMessage)
         conditions.eventually {
-           myConsumer.count.get() == 51
-           messages - myConsumer.finished == Set.of(RandomFailedMessage)
+           messages - myConsumer.finished == expected
         }
     }
 
@@ -170,12 +171,11 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         Set<String> finished = []
 
         @Topic("errors-retry-multiple-partitions")
-        void handleMessage(String message, long offset, int partition) {
-            println("message: " + message + " offset: " + offset + " partition: " + partition)
+        void handleMessage(String message) {
             received << message
             count.getAndIncrement()
             if (message == RandomFailedMessage) {
-                throw new RuntimeException("Won't handle first")
+                throw new RuntimeException("Won't handle the error message: " + RandomFailedMessage)
             }
             finished << message
         }
