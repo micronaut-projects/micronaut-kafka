@@ -13,15 +13,15 @@ dependencies {
 
     api libs.managed.kafka.clients
 
-    compileOnly mn.micronaut.micrometer.core
+    compileOnly mnMicrometer.micronaut.micrometer.core
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
 
-    testImplementation mn.micronaut.serde.jackson
-    testImplementation mn.micronaut.rxjava2
+    testImplementation mnSerde.micronaut.serde.jackson
+    testImplementation mnRxjava2.micronaut.rxjava2
     testImplementation mn.micronaut.http.client
-    testImplementation mn.micronaut.rxjava2
+    testImplementation mnRxjava2.micronaut.rxjava2
 
-    testRuntimeOnly mn.micronaut.micrometer.registry.statsd
-    testRuntimeOnly mn.micronaut.tracing.core
+    testRuntimeOnly mnMicrometer.micronaut.micrometer.registry.statsd
+    testRuntimeOnly mnTracing.micronaut.tracing.core
 }
