@@ -1,6 +1,7 @@
 [versions]
 micronaut = "4.0.0-SNAPSHOT"
 micronaut-docs = "2.0.0"
+micronaut-gradle-plugin = "3.6.6"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka-compat = "3.3.1"
@@ -11,7 +12,18 @@ groovy = "4.0.6"
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
+testcontainers = "1.17.6"
+
 zipkin-brave-kafka-clients = '5.14.1'
+
+micronaut-cache = "4.0.0-SNAPSHOT"
+micronaut-micrometer = "5.0.0-SNAPSHOT"
+micronaut-reactor = "3.0.0-SNAPSHOT"
+micronaut-rxjava2 = "2.0.0-SNAPSHOT"
+micronaut-serde = "2.0.0-SNAPSHOT"
+micronaut-tracing = "5.0.0-SNAPSHOT"
+micronaut-test = "4.0.0-SNAPSHOT"
+
 
 [libraries]
 # Duplicated to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
@@ -25,6 +37,15 @@ opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = '
 
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 
-testcontainers-bom = { module = "org.testcontainers:testcontainers-bom" }
-testcontainers-kafka = { module = 'org.testcontainers:kafka' }
-testcontainers-spock = { module = 'org.testcontainers:spock' }
+testcontainers-kafka = { module = 'org.testcontainers:kafka', version.ref = 'testcontainers' }
+testcontainers-spock = { module = 'org.testcontainers:spock', version.ref = 'testcontainers' }
+
+micronaut-cache = { module = "io.micronaut.cache:micronaut-cache-bom", version.ref = "micronaut-cache" }
+micronaut-micrometer = { module = "io.micronaut.micrometer:micronaut-micrometer-bom", version.ref = "micronaut-micrometer" }
+micronaut-reactor = { module = "io.micronaut.reactor:micronaut-reactor-bom", version.ref = "micronaut-reactor" }
+micronaut-rxjava2 = { module = "io.micronaut.rxjava2:micronaut-rxjava2-bom", version.ref = "micronaut-rxjava2" }
+micronaut-serde = { module = "io.micronaut.serde:micronaut-serde-bom", version.ref = "micronaut-serde" }
+micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", version.ref = "micronaut-tracing" }
+
+micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
+
