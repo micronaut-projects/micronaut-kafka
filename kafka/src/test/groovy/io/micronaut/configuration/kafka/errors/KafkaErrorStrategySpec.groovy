@@ -4,7 +4,6 @@ import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
@@ -19,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
@@ -57,6 +57,24 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
         and:"the retry of the first message is delivered at least 50ms afterwards"
         myConsumer.times[1] - myConsumer.times[0] >= 50
+    }
+
+    void "test when error strategy is 'retry exponentially on error' then message is retried with exponential backoff"() {
+        when: "A consumer throws an exception"
+        ExpRetryErrorClient myClient = context.getBean(ExpRetryErrorClient)
+        myClient.sendMessage("One")
+
+        RetryExpOnErrorErrorCausingConsumer myConsumer = context.getBean(RetryExpOnErrorErrorCausingConsumer)
+
+        then: "Message is consumed eventually"
+        conditions.eventually {
+            myConsumer.received == ["One", "One", "One", "One"]
+            myConsumer.count.get() == 4
+        }
+        and: "message was retried with exponential breaks between deliveries"
+        myConsumer.times[1] - myConsumer.times[0] >= 50
+        myConsumer.times[2] - myConsumer.times[1] >= 100
+        myConsumer.times[3] - myConsumer.times[2] >= 200
     }
 
     void "test simultaneous retry and consumer reassignment"() {
@@ -136,6 +154,27 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        errorStrategy = @ErrorStrategy(value = RETRY_EXPONENTIALLY_ON_ERROR, retryCount = 3, retryDelay = "50ms")
+    )
+    static class RetryExpOnErrorErrorCausingConsumer {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<Long> times = []
+
+        @Topic("errors-exp-retry")
+        void handleMessage(String message) {
+            received << message
+            times << System.currentTimeMillis()
+            if (count.getAndIncrement() < 4) {
+                throw new RuntimeException("Won't handle first three delivery attempts")
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, errorStrategy = @ErrorStrategy(value = NONE))
     static class PollNextErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
@@ -207,6 +246,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface RetryErrorClient {
         @Topic("errors-retry")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface ExpRetryErrorClient {
+        @Topic("errors-exp-retry")
         void sendMessage(String message)
     }
 

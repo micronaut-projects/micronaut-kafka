@@ -32,6 +32,14 @@ public enum ErrorStrategyValue {
     RETRY_ON_ERROR,
 
     /**
+     * This strategy will stop consuming subsequent records in the case of an error and will
+     * attempt to re-consume the current record with exponentially growing time breaks between
+     * consumption attempts. Breaks' duration is computed based on the n * 2^(k - 1) formula,
+     * where n is the initial delay, and k is the number of retries.
+     */
+    RETRY_EXPONENTIALLY_ON_ERROR,
+
+    /**
      * This strategy will ignore the current error and will resume at the next offset.
      */
     RESUME_AT_NEXT_RECORD,
