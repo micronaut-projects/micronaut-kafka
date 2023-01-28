@@ -582,7 +582,7 @@ class KafkaConsumerProcessor
 
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
-        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
             if (consumerState.partitionRetries != null) {
                 consumerState.partitionRetries.remove(consumerRecord.partition());
             }
@@ -590,7 +590,7 @@ class KafkaConsumerProcessor
             currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
         }
 
-        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
+        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyRetryCount != 0) {
             if (consumerState.partitionRetries == null) {
                 consumerState.partitionRetries = new HashMap<>();
             }
@@ -607,7 +607,7 @@ class KafkaConsumerProcessor
                 TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
-                Duration retryDelay = consumerState.errorStrategyRetryDelay;
+                Duration retryDelay = computeRetryDelay(currentErrorStrategy, consumerState.errorStrategyRetryDelay, retryState.currentRetryCount);
                 if (retryDelay != null) {
                     // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
                     Set<TopicPartition> paused = Collections.singleton(topicPartition);
@@ -626,6 +626,20 @@ class KafkaConsumerProcessor
         handleException(consumerState, consumerRecord, e);
 
         return currentErrorStrategy != ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+    }
+
+    private static boolean isRetryErrorStrategy(ErrorStrategyValue currentErrorStrategy) {
+        return currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR || currentErrorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR;
+    }
+
+    private Duration computeRetryDelay(ErrorStrategyValue errorStrategy, Duration fixedRetryDelay, long retryAttempts) {
+        if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
+            return fixedRetryDelay;
+        } else if (errorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
+            return fixedRetryDelay.multipliedBy(1L << (retryAttempts - 1));
+        } else {
+            return Duration.ZERO;
+        }
     }
 
     private boolean processConsumerRecordsAsBatch(final ConsumerState consumerState,
@@ -1059,7 +1073,7 @@ class KafkaConsumerProcessor
                     .map(ErrorStrategy::value)
                     .orElse(ErrorStrategyValue.NONE);
 
-            if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
+            if (isRetryErrorStrategy(errorStrategy)) {
                 Duration retryDelay = errorStrategyAnnotation.get("retryDelay", Duration.class)
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
