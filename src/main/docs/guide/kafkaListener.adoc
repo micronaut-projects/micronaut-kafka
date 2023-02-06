@@ -29,3 +29,17 @@ The above example will create 10 link:{kafkaapi}/org/apache/kafka/clients/consum
 NOTE: @KafkaListener beans are by default singleton. When using multiple threads you must either synchronize access to local state or declare the bean as `@Prototype`.
 
 By default Micronaut will inspect the method signature of the method annotated with `@Topic` that will listen for `ConsumerRecord` instances and from the types infer an appropriate key and value link:{kafkaapi}/org/apache/kafka/common/serialization/Deserializer.html[Deserializer].
+
+.Applying Configuration
+[source,yaml]
+----
+kafka:
+    consumers:
+        default:
+            allow.auto.create.topics: true
+        product:
+            bootstrap:
+              servers: localhost:9098
+----
+
+Any property in the link:{kafkaapi}\/org/apache/kafka/clients/consumer/ConsumerConfig.html[ConsumerConfig] class can be set for all `@KafkaListener` beans based on the . The above example will enable the consumer to create a topic if it doesn't exist for the `default` (`@KafkaListener`) client and set a custom bootstrap server for the `product` client (`@KafkaListener(value = "product")`)
