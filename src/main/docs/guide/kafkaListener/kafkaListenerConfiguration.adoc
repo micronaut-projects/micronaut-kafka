@@ -33,10 +33,9 @@ For more information, see for example https://kafka.apache.org/intro#intro_consu
 
 === @KafkaListener and Consumer Properties
 
-There are a number of ways to pass configuration properties to the `KafkaConsumer`. You can set default consumer properties using `kafka.consumers.default` in `application.yml`:
+There are a number of ways to pass configuration properties to the `KafkaConsumer`. You can set default consumer properties using `kafka.consumers.default` in the application configuration file:
 
-.Applying Default Configuration
-[source,yaml]
+[configuration, title = 'Applying Default Configuration']
 ----
 kafka:
     consumers:
@@ -50,8 +49,7 @@ The above example will set the default `session.timeout.ms` that Kafka uses to d
 
 You can also provide configuration specific to a consumer group. For example consider the following configuration:
 
-.Applying Consumer Group Specific config
-[source,yaml]
+[configuration, title = 'Applying Consumer Group Specific config']
 ----
 kafka:
     consumers:
@@ -83,10 +81,9 @@ TIP: You can replace the default api:configuration.kafka.serde.SerdeRegistry[] b
 
 All common `java.lang` types (`String`, `Integer`, primitives etc.) are supported and for POJOs by default a Jackson based JSON deserializer is used.
 
-You can, however, explicitly override the `Deserializer` used by providing the appropriate configuration in `application.yml`:
+You can, however, explicitly override the `Deserializer` used by providing the appropriate configuration in the application configuration file:
 
-.Applying Default Configuration
-[source,yaml]
+[configuration, title = 'Applying Default Configuration']
 ----
 kafka:
     consumers:

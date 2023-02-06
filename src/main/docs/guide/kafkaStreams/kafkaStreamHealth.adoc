@@ -36,7 +36,7 @@ NOTE: By default, the details visible above are only shown to authenticated user
 
 If you wish to disable the Kafka streams health check while still using the `management` dependency you can set the property `kafka.health.streams.enabled` to `false` in your application configuration.
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     health:

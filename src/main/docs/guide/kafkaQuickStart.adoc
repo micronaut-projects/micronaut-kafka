@@ -4,10 +4,9 @@ dependency:micronaut-kafka[groupId="io.micronaut.kafka"]
 
 == Configuring Kafka
 
-The minimum requirement to configure Kafka is set the value of the `kafka.bootstrap.servers` property in `application.yml`:
+The minimum requirement to configure Kafka is set the value of the `kafka.bootstrap.servers` property in the application configuration file:
 
-.Configuring Kafka
-[source,yaml]
+[configuration, title = 'Configuring Kafka']
 ----
 kafka:
     bootstrap:
@@ -16,8 +15,7 @@ kafka:
 
 The value can also be list of available servers:
 
-.Configuring Kafka
-[source,yaml]
+[configuration, title = 'Configuring Kafka']
 ----
 kafka:
     bootstrap:
@@ -30,8 +28,7 @@ TIP: You can also set the environment variable `KAFKA_BOOTSTRAP_SERVERS` to a co
 
 If your broker needs to setup SSL, it can be configured this way:
 
-.Configuring Kafka
-[source,yaml]
+[configuration, title = 'Configuring Kafka']
 ----
 kafka:
   bootstrap:
@@ -101,8 +98,7 @@ include::{testskafka}/quickstart/ProductListener.java[tags=clazz, indent=0]
 == Disabling Kafka
 If for some reason, you need to disable the creation of kafka consumers, or producers, you can through configuration:
 
-.Disabling Kafka
-[source,yaml]
+[configuration, title = 'Disabling Kafka']
 ----
 kafka:
   enabled: false

@@ -1,9 +1,8 @@
 === @KafkaClient and Producer Properties
 
-There are a number of ways to pass configuration properties to the link:{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html[KafkaProducer]. You can set default producer properties using `kafka.producers.default` in `application.yml`:
+There are a number of ways to pass configuration properties to the link:{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html[KafkaProducer]. You can set default producer properties using `kafka.producers.default` in the application configuration file:
 
-.Applying Default Configuration
-[source,yaml]
+[configuration, title = 'Applying Default Configuration']
 ----
 kafka:
     producers:
@@ -23,10 +22,9 @@ To configure different properties for each client, you should set a `@KafkaClien
 @KafkaClient("product-client")
 ----
 
-This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `Producer`. Secondly, it allows you to apply per producer configuration in `application.yml`:
+This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `Producer`. Secondly, it allows you to apply per producer configuration in the application configuration file:
 
-.Applying Default Configuration
-[source,yaml]
+[configuration, title = 'Applying Default Configuration']
 ----
 kafka:
     producers:
@@ -54,10 +52,9 @@ TIP: You can replace the default api:configuration.kafka.serde.SerdeRegistry[] b
 
 All common `java.lang` types (`String`, `Integer`, primitives etc.) are supported and for POJOs by default a Jackson based JSON serializer is used.
 
-You can, however, explicitly override the `Serializer` used by providing the appropriate configuration in `application.yml`:
+You can, however, explicitly override the `Serializer` used by providing the appropriate configuration in the application configuration file:
 
-.Applying Default Configuration
-[source,yaml]
+[configuration, title = 'Applying Default Configuration']
 ----
 kafka:
     producers:

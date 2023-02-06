@@ -39,7 +39,7 @@ include::{testskafka}/producer/headers/ProductClient.java[tags=clazz, indent=0]
 }
 ----
 
-The above example will send a header called `X-Token` with the value read from the setting `my.application.token` in `application.yml` (or the environnment variable `MY_APPLICATION_TOKEN`).
+The above example will send a header called `X-Token` with the value read from the setting `my.application.token` in `the application configuration file (or the environnment variable `MY_APPLICATION_TOKEN`).
 
 If the `my.application.token` is not set then an error will occur creating the client.
 

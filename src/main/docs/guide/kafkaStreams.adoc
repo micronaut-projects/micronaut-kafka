@@ -21,8 +21,7 @@ dependency:micronaut-kafka-streams[groupId="io.micronaut.kafka"]
 
 The minimum configuration required is to set the Kafka bootstrap servers:
 
-.Configuring Kafka
-[source,yaml]
+[configuration, title = 'Configuring Kafka']
 ----
 kafka:
     bootstrap:
@@ -73,7 +72,7 @@ include::{testskafkastreams}/wordcount/WordCountListener.java[]
 .Configuring a single Stream on a Micronaut application.
 If you have a single Kafka Stream configured on your Micronaut service, then you should use the `default` key on the configuration.
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
@@ -89,9 +88,7 @@ You can define multiple Kafka Streams on the same Micronaut application, each wi
 To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`.
 Assuming you have 2 or more Kafka Streams definitions on a single service, you will need to use the `default` key for at least one of them and then define `kafka.streams.[STREAM-NAME]` for the rest.
 
-For example in `application.yml`:
-
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
@@ -127,10 +124,7 @@ include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream,ind
 .Configuring Kafka Streams for testing
 When writing a test without starting the actual Kafka server, you can instruct Micronaut not to start Kafka Streams. To do this create a config file suffixed with an environment name, such as `application-test.yml` and set the `kafka.streams.[STREAM-NAME].start-kafka-streams` to `false`.
 
-
-For example in `application-test.yml`:
-
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
