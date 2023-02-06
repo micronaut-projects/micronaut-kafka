@@ -511,7 +511,9 @@ class KafkaConsumerProcessor
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = trackPartitions ? new HashMap<>() : null;
 
-        for (final ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+        Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
+        while (iterator.hasNext()) {
+            ConsumerRecord<?, ?> consumerRecord = iterator.next();
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Kafka consumer [{}] received record: {}", logMethod(method), consumerRecord);
@@ -543,6 +545,7 @@ class KafkaConsumerProcessor
                 }
             } catch (Throwable e) {
                 if (resolveWithErrorStrategy(consumerState, consumerRecord, e)) {
+                    resetTheFollowingPartitions(consumerRecord, consumerState, iterator);
                     return false;
                 }
             }
@@ -558,6 +561,19 @@ class KafkaConsumerProcessor
             }
         }
         return true;
+    }
+
+    private void resetTheFollowingPartitions(ConsumerRecord<?, ?> errorConsumerRecord, ConsumerState consumerState, Iterator<? extends ConsumerRecord<?, ?>> iterator) {
+        Set<Integer> processedPartition = new HashSet<>();
+        processedPartition.add(errorConsumerRecord.partition());
+        while (iterator.hasNext()) {
+            ConsumerRecord<?, ?> consumerRecord = iterator.next();
+            if (!processedPartition.add(consumerRecord.partition())) {
+                continue;
+            }
+            TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+        }
     }
 
     private boolean resolveWithErrorStrategy(ConsumerState consumerState,

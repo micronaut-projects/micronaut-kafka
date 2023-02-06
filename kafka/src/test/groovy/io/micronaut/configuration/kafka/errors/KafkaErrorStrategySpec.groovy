@@ -26,6 +26,12 @@ import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
 class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
+    private static final String RandomFailedMessage = (new Random().nextInt(30) + 10).toString();
+
+    @Override
+    void afterKafkaStarted() {
+        createTopic("errors-retry-multiple-partitions", 3, 1)
+    }
 
     void "test when the error strategy is 'resume at next offset' the next message is consumed"() {
         when:"A consumer throws an exception"
@@ -57,6 +63,25 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
         and:"the retry of the first message is delivered at least 50ms afterwards"
         myConsumer.times[1] - myConsumer.times[0] >= 50
+    }
+
+    void "test when the error strategy is 'retry on error' and retry failed, the finished messages should be complete except the failed message"() {
+        when:"A client sends a lot of messages to a same topic"
+        RetryErrorMultiplePartitionsClient myClient = context.getBean(RetryErrorMultiplePartitionsClient)
+
+        var messages = new HashSet()
+        for(int i = 0; i < 50; i++) {
+            myClient.sendMessage(i.toString())
+            messages.add(i.toString())
+        }
+
+        then:"The finished messages should be complete except the particularly failed one"
+        RetryOnErrorMultiplePartitionsErrorCausingConsumer myConsumer = context.getBean(RetryOnErrorMultiplePartitionsErrorCausingConsumer)
+        var expected = new HashSet();
+        expected.add(RandomFailedMessage)
+        conditions.eventually {
+           messages - myConsumer.finished == expected
+        }
     }
 
     void "test when error strategy is 'retry exponentially on error' then message is retried with exponential backoff"() {
@@ -155,6 +180,27 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
+            offsetStrategy = SYNC,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR)
+    )
+    static class RetryOnErrorMultiplePartitionsErrorCausingConsumer {
+        AtomicInteger count = new AtomicInteger(0)
+        Set<String> received = []
+        Set<String> finished = []
+
+        @Topic("errors-retry-multiple-partitions")
+        void handleMessage(String message) {
+            received << message
+            count.getAndIncrement()
+            if (message == RandomFailedMessage) {
+                throw new RuntimeException("Won't handle the error message: " + RandomFailedMessage)
+            }
+            finished << message
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
         offsetReset = EARLIEST,
         offsetStrategy = SYNC,
         errorStrategy = @ErrorStrategy(value = RETRY_EXPONENTIALLY_ON_ERROR, retryCount = 3, retryDelay = "50ms")
@@ -246,6 +292,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface RetryErrorClient {
         @Topic("errors-retry")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface RetryErrorMultiplePartitionsClient {
+        @Topic("errors-retry-multiple-partitions")
         void sendMessage(String message)
     }
 
