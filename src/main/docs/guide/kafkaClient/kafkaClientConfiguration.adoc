@@ -9,9 +9,12 @@ kafka:
     producers:
         default:
             retries: 5
+            bootstrap:
+              servers: localhost:9096
+
 ----
 
-Any property in the link:{kafkaapi}/org/apache/kafka/clients/producer/ProducerConfig.html[ProducerConfig] class can be set. The above example will set the default number of times to retry sending a record.
+Any property in the link:{kafkaapi}/org/apache/kafka/clients/producer/ProducerConfig.html[ProducerConfig] class can be set, _including_ any overrides over the global Micronaut Kafka configs. The above example will set the default number of times to retry sending a record as well as override `kafka.bootstrap.servers`.
 
 === Per @KafkaClient Producer Properties
 
@@ -32,6 +35,11 @@ kafka:
     producers:
         product-client:
             retries: 5
+            bootstrap:
+              servers: localhost:9097
+        product-client-2:
+            bootstrap:
+              servers: localhost:9098
 ----
 
 Finally, the ann:configuration.kafka.annotation.KafkaClient[] annotation itself provides a `properties` member that you can use to set producer specific properties:
