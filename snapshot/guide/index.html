@@ -741,11 +741,13 @@ part of the <code>kafka-clients</code> library:</p>
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     producers:
         default:
-            retries: 5</code></pre>
+            retries: 5
+            bootstrap:
+              servers: localhost:9096</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Any property in the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/ProducerConfig.html">ProducerConfig</a> class can be set. The above example will set the default number of times to retry sending a record.</p>
+<p>Any property in the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/ProducerConfig.html">ProducerConfig</a> class can be set, <em>including</em> any overrides over the global Micronaut Kafka configs. The above example will set the default number of times to retry sending a record as well as override <code>kafka.bootstrap.servers</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -768,7 +770,12 @@ part of the <code>kafka-clients</code> library:</p>
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     producers:
         product-client:
-            retries: 5</code></pre>
+            retries: 5
+            bootstrap:
+              servers: localhost:9097
+        product-client-2:
+            bootstrap:
+              servers: localhost:9098</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1125,6 +1132,21 @@ testImplementation 'org.apache.kafka:kafka_2.12:N/A:test'</code></pre>
 </div>
 <div class="paragraph">
 <p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Applying Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    consumers:
+        default:
+            allow.auto.create.topics: true
+        product:
+            bootstrap:
+              servers: localhost:9098</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Any property in the <a href="https://kafka.apache.org/27/javadoc/\/org/apache/kafka/clients/consumer/ConsumerConfig.html">ConsumerConfig</a> class can be set for all <code>@KafkaListener</code> beans based on the . The above example will enable the consumer to create a topic if it doesn&#8217;t exist for the <code>default</code> (<code>@KafkaListener</code>) client and set a custom bootstrap server for the <code>product</code> client (<code>@KafkaListener(value = "product")</code>)</p>
 </div>
 
 <h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
