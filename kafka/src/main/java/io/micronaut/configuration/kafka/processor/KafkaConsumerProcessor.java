@@ -949,7 +949,11 @@ class KafkaConsumerProcessor
     private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration) {
         final Properties properties = consumerConfiguration.getConfig();
         // figure out the Key deserializer
-        final Argument<?> bodyArgument = findBodyArgument(method);
+        boolean batch = method.isTrue(KafkaListener.class, "batch");
+
+        Argument<?> tempBodyArg = findBodyArgument(method);
+
+        final Argument<?> bodyArgument = batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
 
         if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getKeyDeserializer().isPresent()) {
             final Optional<Argument<?>> keyArgument = Arrays.stream(method.getArguments())
@@ -986,8 +990,7 @@ class KafkaConsumerProcessor
                         consumerConfiguration.setValueDeserializer(new StringDeserializer());
                     }
                 } else {
-                    final boolean batch = method.isTrue(KafkaListener.class, "batch");
-                    consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(batch ? getComponentType(bodyArgument) : bodyArgument));
+                    consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(bodyArgument));
                 }
             }
         }
