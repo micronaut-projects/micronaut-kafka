@@ -1069,9 +1069,9 @@ class KafkaConsumerProcessor
             redelivery = kafkaListener.isTrue("redelivery");
 
             AnnotationValue<ErrorStrategy> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class).orElse(null);
-            errorStrategy = errorStrategyAnnotation == null ? ErrorStrategyValue.NONE : kafkaListener.get("errorStrategy", ErrorStrategy.class)
-                    .map(ErrorStrategy::value)
-                    .orElse(ErrorStrategyValue.NONE);
+            errorStrategy = errorStrategyAnnotation != null
+                ? errorStrategyAnnotation.getRequiredValue(ErrorStrategyValue.class)
+                : ErrorStrategyValue.NONE;
 
             if (isRetryErrorStrategy(errorStrategy)) {
                 Duration retryDelay = errorStrategyAnnotation.get("retryDelay", Duration.class)
