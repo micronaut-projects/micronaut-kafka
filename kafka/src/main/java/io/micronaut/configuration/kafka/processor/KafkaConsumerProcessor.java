@@ -511,7 +511,9 @@ class KafkaConsumerProcessor
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = trackPartitions ? new HashMap<>() : null;
 
-        for (final ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+        Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
+        while (iterator.hasNext()) {
+            ConsumerRecord<?, ?> consumerRecord = iterator.next();
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Kafka consumer [{}] received record: {}", logMethod(method), consumerRecord);
@@ -543,6 +545,7 @@ class KafkaConsumerProcessor
                 }
             } catch (Throwable e) {
                 if (resolveWithErrorStrategy(consumerState, consumerRecord, e)) {
+                    resetTheFollowingPartitions(consumerRecord, consumerState, iterator);
                     return false;
                 }
             }
@@ -560,13 +563,26 @@ class KafkaConsumerProcessor
         return true;
     }
 
+    private void resetTheFollowingPartitions(ConsumerRecord<?, ?> errorConsumerRecord, ConsumerState consumerState, Iterator<? extends ConsumerRecord<?, ?>> iterator) {
+        Set<Integer> processedPartition = new HashSet<>();
+        processedPartition.add(errorConsumerRecord.partition());
+        while (iterator.hasNext()) {
+            ConsumerRecord<?, ?> consumerRecord = iterator.next();
+            if (!processedPartition.add(consumerRecord.partition())) {
+                continue;
+            }
+            TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+        }
+    }
+
     private boolean resolveWithErrorStrategy(ConsumerState consumerState,
                                              ConsumerRecord<?, ?> consumerRecord,
                                              Throwable e) {
 
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
-        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
             if (consumerState.partitionRetries != null) {
                 consumerState.partitionRetries.remove(consumerRecord.partition());
             }
@@ -574,7 +590,7 @@ class KafkaConsumerProcessor
             currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
         }
 
-        if (currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR && consumerState.errorStrategyRetryCount != 0) {
+        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyRetryCount != 0) {
             if (consumerState.partitionRetries == null) {
                 consumerState.partitionRetries = new HashMap<>();
             }
@@ -591,7 +607,7 @@ class KafkaConsumerProcessor
                 TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
-                Duration retryDelay = consumerState.errorStrategyRetryDelay;
+                Duration retryDelay = computeRetryDelay(currentErrorStrategy, consumerState.errorStrategyRetryDelay, retryState.currentRetryCount);
                 if (retryDelay != null) {
                     // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
                     Set<TopicPartition> paused = Collections.singleton(topicPartition);
@@ -610,6 +626,20 @@ class KafkaConsumerProcessor
         handleException(consumerState, consumerRecord, e);
 
         return currentErrorStrategy != ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+    }
+
+    private static boolean isRetryErrorStrategy(ErrorStrategyValue currentErrorStrategy) {
+        return currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR || currentErrorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR;
+    }
+
+    private Duration computeRetryDelay(ErrorStrategyValue errorStrategy, Duration fixedRetryDelay, long retryAttempts) {
+        if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
+            return fixedRetryDelay;
+        } else if (errorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
+            return fixedRetryDelay.multipliedBy(1L << (retryAttempts - 1));
+        } else {
+            return Duration.ZERO;
+        }
     }
 
     private boolean processConsumerRecordsAsBatch(final ConsumerState consumerState,
@@ -1042,11 +1072,11 @@ class KafkaConsumerProcessor
             redelivery = kafkaListener.isTrue("redelivery");
 
             AnnotationValue<ErrorStrategy> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class).orElse(null);
-            errorStrategy = errorStrategyAnnotation == null ? ErrorStrategyValue.NONE : kafkaListener.get("errorStrategy", ErrorStrategy.class)
-                    .map(ErrorStrategy::value)
-                    .orElse(ErrorStrategyValue.NONE);
+            errorStrategy = errorStrategyAnnotation != null
+                ? errorStrategyAnnotation.getRequiredValue(ErrorStrategyValue.class)
+                : ErrorStrategyValue.NONE;
 
-            if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
+            if (isRetryErrorStrategy(errorStrategy)) {
                 Duration retryDelay = errorStrategyAnnotation.get("retryDelay", Duration.class)
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;

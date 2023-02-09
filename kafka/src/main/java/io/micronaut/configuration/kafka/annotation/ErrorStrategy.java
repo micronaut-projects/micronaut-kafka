@@ -48,14 +48,16 @@ public @interface ErrorStrategy {
     int DEFAULT_RETRY_COUNT = 1;
 
     /**
-     * The delay used with RETRY_ON_ERROR {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     * The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
      * @return the delay by which to wait for the next retry
      */
     String retryDelay() default DEFAULT_DELAY_IN_SECONDS + "s";
 
     /**
-     * The retry count used with RETRY_ON_ERROR {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     * The retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
      * @return the retry count of how many attempts should be made
      */
