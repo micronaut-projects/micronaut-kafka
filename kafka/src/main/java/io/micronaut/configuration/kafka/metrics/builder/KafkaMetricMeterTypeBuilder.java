@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A builder class for constructing a typed kafka meter.  Will lookup the
+ * A builder class for constructing a typed kafka meter.  Will look up the
  * type in {@link KafkaMetricMeterTypeRegistry}.  Supported meter types can
  * be seen in {@link MeterType}.
  *
@@ -131,7 +131,7 @@ public class KafkaMetricMeterTypeBuilder {
             name = kafkaMetric.metricName().name();
         }
 
-        KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(this.name);
+        KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(name);
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE) {
                 return Optional.of(Gauge.builder(getMetricName(), () -> (Number) kafkaMetric.metricValue())
@@ -139,13 +139,13 @@ public class KafkaMetricMeterTypeBuilder {
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Double) {
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && kafkaMetric.metricValue() instanceof Double) {
             return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, value -> (Double) value.metricValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && this.kafkaMetric.metricValue() instanceof Double) {
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && kafkaMetric.metricValue() instanceof Double) {
             return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), value -> (Double) value.metricValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
@@ -159,6 +159,7 @@ public class KafkaMetricMeterTypeBuilder {
         return tagFunction != null &&
                 meterRegistry != null &&
                 kafkaMetric != null &&
+                kafkaMetric.metricValue() instanceof Number &&
                 StringUtils.isNotEmpty(prefix);
     }
 

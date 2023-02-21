@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 @Internal
 class KafkaMetricMeterType {
     private MeterType meterType = MeterType.GAUGE;
-    private String description = null;
+    private String description;
     private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-    private String baseUnit = null;
+    private String baseUnit;
 
     /**
      * Class for hosing a metric type, description, time unit and base unit.

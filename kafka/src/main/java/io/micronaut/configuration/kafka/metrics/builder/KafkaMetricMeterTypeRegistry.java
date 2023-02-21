@@ -45,7 +45,7 @@ class KafkaMetricMeterTypeRegistry {
     /**
      * Constructor that will populate the metric name to type map.
      */
-    public KafkaMetricMeterTypeRegistry() {
+    KafkaMetricMeterTypeRegistry() {
         meterTypeMap = new HashMap<>();
         meterTypeMap.put("records-lag", new KafkaMetricMeterType(MeterType.GAUGE, "The latest lag of the partition", RECORDS));
         meterTypeMap.put("records-lag-avg", new KafkaMetricMeterType(MeterType.GAUGE, "The average lag of the partition", RECORDS));
