@@ -535,7 +535,7 @@ class KafkaConsumerProcessor
                     final Flux<?> resultFlowable;
                     final boolean isBlocking;
                     if (Publishers.isConvertibleToPublisher(result)) {
-                        resultFlowable = Flux.from(Publishers.convertPublisher(result, Publisher.class));
+                        resultFlowable = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
                         isBlocking = method.hasAnnotation(Blocking.class);
                     } else {
                         resultFlowable = Flux.just(result);
@@ -660,7 +660,7 @@ class KafkaConsumerProcessor
             if (result instanceof Iterable iterable) {
                 resultFlux = Flux.fromIterable(iterable);
             } else if (isPublisher) {
-                resultFlux = Flux.from(Publishers.convertPublisher(result, Publisher.class));
+                resultFlux = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
             } else {
                 resultFlux = Flux.just(result);
             }
