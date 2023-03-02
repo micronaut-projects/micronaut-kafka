@@ -62,6 +62,9 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
      * @param keySerializer The key serializer
      */
     public void setKeySerializer(@Nullable Serializer<K> keySerializer) {
+        if (keySerializer != null) {
+            keySerializer.configure(null, true);
+        }
         this.keySerializer = keySerializer;
     }
 
@@ -79,6 +82,9 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
      * @param valueSerializer The value serializer
      */
     public void setValueSerializer(@Nullable Serializer<V> valueSerializer) {
+        if (valueSerializer != null) {
+            valueSerializer.configure(null, false);
+        }
         this.valueSerializer = valueSerializer;
     }
 }

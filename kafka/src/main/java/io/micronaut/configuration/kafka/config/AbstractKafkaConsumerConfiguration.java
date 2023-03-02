@@ -58,6 +58,9 @@ public abstract class AbstractKafkaConsumerConfiguration<K, V> extends AbstractK
      * @param keyDeserializer The key serializer
      */
     public void setKeyDeserializer(@Nullable Deserializer<K> keyDeserializer) {
+        if (keyDeserializer != null) {
+            keyDeserializer.configure(null, true);
+        }
         this.keyDeserializer = keyDeserializer;
     }
 
@@ -75,6 +78,9 @@ public abstract class AbstractKafkaConsumerConfiguration<K, V> extends AbstractK
      * @param valueDeserializer The value deserializer
      */
     public void setValueDeserializer(@Nullable Deserializer<V> valueDeserializer) {
+        if (valueDeserializer != null) {
+            valueDeserializer.configure(null, false);
+        }
         this.valueDeserializer = valueDeserializer;
     }
 }
