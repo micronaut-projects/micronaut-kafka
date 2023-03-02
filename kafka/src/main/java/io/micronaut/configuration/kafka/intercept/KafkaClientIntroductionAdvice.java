@@ -117,7 +117,6 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         this.conversionService = conversionService;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public final Object intercept(MethodInvocationContext<Object, Object> context) {
         if (context.hasAnnotation(KafkaClient.class)) {
@@ -126,23 +125,27 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             }
             ProducerState producerState = getProducer(context);
 
-            InterceptedMethod interceptedMethod = InterceptedMethod.of(context);
+            InterceptedMethod interceptedMethod = InterceptedMethod.of(context, beanContext.getConversionService());
             try {
                 Argument<?> returnType = interceptedMethod.returnTypeValue();
                 if (Argument.OBJECT_ARGUMENT.equalsType(returnType)) {
                     returnType = Argument.of(RecordMetadata.class);
                 }
                 switch (interceptedMethod.resultType()) {
-                    case COMPLETION_STAGE:
+                    case COMPLETION_STAGE -> {
                         CompletableFuture<Object> completableFuture = returnCompletableFuture(context, producerState, returnType);
                         return interceptedMethod.handleResult(completableFuture);
-                    case PUBLISHER:
+                    }
+                    case PUBLISHER -> {
                         Flux<Object> returnFlowable = returnPublisher(context, producerState, returnType);
                         return interceptedMethod.handleResult(returnFlowable);
-                    case SYNCHRONOUS:
+                    }
+                    case SYNCHRONOUS -> {
                         return returnSynchronous(context, producerState);
-                    default:
+                    }
+                    default -> {
                         return interceptedMethod.unsupported();
+                    }
                 }
             } catch (Exception e) {
                 return interceptedMethod.handleException(e);
@@ -408,7 +411,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     private Flux<Object> buildSendFluxForReactiveValue(MethodInvocationContext<Object, Object> context, ProducerState producerState, Argument<?> returnType, Object value) {
-        Flux<?> valueFlowable = Flux.from(Publishers.convertPublisher(value, Publisher.class));
+        Flux<?> valueFlowable = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), value, Publisher.class));
         Class<?> javaReturnType = returnType.getType();
 
         if (Iterable.class.isAssignableFrom(javaReturnType)) {
