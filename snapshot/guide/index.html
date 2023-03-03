@@ -1265,6 +1265,17 @@ Flowable&lt;RecordMetadata&gt; send(List&lt;Book&gt; books);</code></pre>
 Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>For sending the data with Kafka key you need to use <code>@KafkaKey</code> annotation with the list of keys (even if the list consists of single member):</p>
+</div>
+<div class="listingblock">
+<div class="title">Sending <code>ProducerRecord</code> batches with Kafka key</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(batch=true)
+@Topic("books")
+void send(@KafkaKey List&lt;String&gt; keys, List&lt;Book&gt; books);</code></pre>
+</div>
+</div>
 
 <h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>5.4 Injecting Kafka Producer Beans</h2>
 
