@@ -44,4 +44,13 @@ You can also use an unbound reactive type such as rx:Flowable[] as the source of
 Flowable<RecordMetadata> send(Flowable<Book> books);
 ----
 
+For sending the data with Kafka key you need to use `@KafkaKey` annotation with the list of keys (even if the list consists of single member):
+
+.Sending `ProducerRecord` batches with Kafka key
+[source,java]
+----
+@KafkaClient(batch=true)
+@Topic("books")
+void send(@KafkaKey List<String> keys, List<Book> books);
+----
 
