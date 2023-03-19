@@ -15,7 +15,7 @@
  */
 package io.micronaut.configuration.kafka.streams.event;
 
-import io.micronaut.context.event.ApplicationEvent;
+import io.micronaut.configuration.kafka.event.AbstractKafkaApplicationEvent;
 import org.apache.kafka.streams.KafkaStreams;
 
 /**
@@ -24,27 +24,19 @@ import org.apache.kafka.streams.KafkaStreams;
  * @author graemerocher
  * @since 2.0.0
  */
-public abstract class AbstractKafkaStreamsEvent extends ApplicationEvent {
-    private final KafkaStreams kafkaStreams;
-
+public abstract class AbstractKafkaStreamsEvent extends AbstractKafkaApplicationEvent<KafkaStreams> {
     /**
      * Default constructor.
      * @param kafkaStreams The streams
      */
     protected AbstractKafkaStreamsEvent(KafkaStreams kafkaStreams) {
         super(kafkaStreams);
-        this.kafkaStreams = kafkaStreams;
-    }
-
-    @Override
-    public KafkaStreams getSource() {
-        return (KafkaStreams) super.getSource();
     }
 
     /**
      * @return The kafka streams object.
      */
     public KafkaStreams getKafkaStreams() {
-        return kafkaStreams;
+        return getSource();
     }
 }

@@ -33,11 +33,14 @@ import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderReg
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
+import io.micronaut.configuration.kafka.event.KafkaConsumerStartedPollingEvent;
+import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Blocking;
@@ -147,6 +150,7 @@ class KafkaConsumerProcessor
     private final TransactionalProducerRegistry transactionalProducerRegistry;
     private final BatchConsumerRecordsBinderRegistry batchBinderRegistry;
     private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
@@ -162,6 +166,7 @@ class KafkaConsumerProcessor
      * @param exceptionHandler              The exception handler to use
      * @param schedulerService              The scheduler service
      * @param transactionalProducerRegistry The transactional producer registry
+     * @param eventPublisher The application event publisher
      */
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
@@ -174,7 +179,8 @@ class KafkaConsumerProcessor
             ProducerRegistry producerRegistry,
             KafkaListenerExceptionHandler exceptionHandler,
             @Named(TaskExecutors.SCHEDULED) ExecutorService schedulerService,
-            TransactionalProducerRegistry transactionalProducerRegistry) {
+            TransactionalProducerRegistry transactionalProducerRegistry,
+            ApplicationEventPublisher eventPublisher) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
         this.beanContext = beanContext;
@@ -186,6 +192,7 @@ class KafkaConsumerProcessor
         this.exceptionHandler = exceptionHandler;
         this.taskScheduler = new ScheduledExecutorTaskScheduler(schedulerService);
         this.transactionalProducerRegistry = transactionalProducerRegistry;
+        this.eventPublisher = eventPublisher;
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -421,6 +428,7 @@ class KafkaConsumerProcessor
             ca.setKafkaConsumer(kafkaConsumer);
         }
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
+        eventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
         ConsumerState consumerState = new ConsumerState(clientId, groupId, offsetStrategy, kafkaConsumer, consumerBean, Collections.unmodifiableSet(kafkaConsumer.subscription()), consumerAnnotation, method);
         consumers.put(clientId, consumerState);
         executorService.submit(() -> createConsumerThreadPollLoop(method, consumerState));
@@ -446,6 +454,7 @@ class KafkaConsumerProcessor
             consumerArg.ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
             //noinspection InfiniteLoopStatement
+            boolean pollingStarted = false;
             while (true) {
                 final Set<TopicPartition> newAssignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
                 if (LOG.isInfoEnabled() && !newAssignments.equals(consumerState.assignments)) {
@@ -482,6 +491,11 @@ class KafkaConsumerProcessor
                         consumerRecords = kafkaConsumer.poll(pollTimeout);
                     }
                     consumerState.closedState = ConsumerCloseState.POLLING;
+                    if (!pollingStarted) {
+                        pollingStarted = true;
+                        eventPublisher.publishEvent(new KafkaConsumerStartedPollingEvent(kafkaConsumer));
+                    }
+
                     failed = true;
                     consumerState.resumeTopicPartitions();
 
