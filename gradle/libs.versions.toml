@@ -1,7 +1,7 @@
 [versions]
 micronaut = "4.0.0-SNAPSHOT"
 micronaut-docs = "2.0.0"
-micronaut-gradle-plugin = "3.7.5"
+micronaut-gradle-plugin = "3.7.7"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka-compat = "3.4.0"
