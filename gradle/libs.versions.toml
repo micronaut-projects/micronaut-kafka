@@ -18,7 +18,7 @@ zipkin-brave-kafka-clients = '5.15.0'
 
 micronaut-cache = "4.0.0-M1"
 micronaut-micrometer = "5.0.0-SNAPSHOT"
-micronaut-reactor = "3.0.0-SNAPSHOT"
+micronaut-reactor = "3.0.0-M1"
 micronaut-rxjava2 = "2.0.0-SNAPSHOT"
 micronaut-serde = "2.0.0-SNAPSHOT"
 micronaut-tracing = "5.0.0-SNAPSHOT"
