@@ -24,6 +24,10 @@ dependencies {
     testImplementation mnTest.micronaut.test.spock
 }
 
+micronaut {
+    version = "4.0.0-SNAPSHOT"
+}
+
 graalvmNative {
     binaries {
         main {
