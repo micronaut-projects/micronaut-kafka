@@ -43,11 +43,11 @@ public enum OffsetStrategy {
      */
     ASYNC,
     /**
-     * Synchronously commit offsets using {@link org.apache.kafka.clients.consumer.Consumer#commitSync()} after each {@link org.apache.kafka.clients.consumer.ConsumerRecord} is consumed.
+     * Synchronously commit offsets using {@link org.apache.kafka.clients.consumer.Consumer#commitSync()} after each {@link org.apache.kafka.clients.consumer.ConsumerRecord} is processed.
      */
     SYNC_PER_RECORD,
     /**
-     * Asynchronously commit offsets using {@link org.apache.kafka.clients.consumer.Consumer#commitSync()} after each {@link org.apache.kafka.clients.consumer.ConsumerRecord} is consumed.
+     * Asynchronously commit offsets using {@link org.apache.kafka.clients.consumer.Consumer#commitSync()} after each {@link org.apache.kafka.clients.consumer.ConsumerRecord} is processed.
      */
     ASYNC_PER_RECORD,
     /**
