@@ -11,7 +11,7 @@ import spock.lang.Shared
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4")).withEnv(getEnvVariables())
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka")).withEnv(getEnvVariables())
     @Shared @AutoCleanup ApplicationContext context
 
     void setupSpec() {

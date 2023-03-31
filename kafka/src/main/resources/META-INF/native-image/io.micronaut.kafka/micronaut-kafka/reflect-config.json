@@ -20,7 +20,17 @@
     "allDeclaredConstructors":true
   },
   {
+    "name": "org.apache.kafka.common.security.scram.ScramSaslClient",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
     "name":"org.apache.kafka.common.security.authenticator.DefaultLogin",
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"org.apache.kafka.common.security.plain.PlainLoginModule",
     "allDeclaredMethods":true,
     "allDeclaredConstructors":true
   },
@@ -30,7 +40,32 @@
     "allDeclaredConstructors":true
   },
   {
-    "name":"org.apache.kafka.common.security.plain.PlainLoginModule",
+    "name": "org.apache.kafka.common.security.scram.ScramLoginModule",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.security.scram.internals.ScramSaslClient$ScramSaslClientFactory",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.security.oauthbearer.internals.OAuthBearerSaslClient",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "org.apache.kafka.common.security.oauthbearer.internals.OAuthBearerSaslClient$OAuthBearerSaslClientFactory",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name":"org.apache.kafka.common.security.oauthbearer.internals.OAuthBearerSaslClientCallbackHandler",
     "allDeclaredMethods":true,
     "allDeclaredConstructors":true
   },

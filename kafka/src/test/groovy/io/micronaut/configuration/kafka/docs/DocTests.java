@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 public class DocTests {
 
     static ApplicationContext applicationContext;
-    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"));
+    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"));
 
     @BeforeClass
     public static void setup() {

@@ -20,7 +20,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
     void "test kafka health indicator - UP"() {
         given:
-        KafkaContainer kafkaContainer = new KafkaContainer()
+        KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
         kafkaContainer.start()
         ApplicationContext applicationContext = ApplicationContext.run(
                 "kafka.bootstrap.servers": kafkaContainer.bootstrapServers
@@ -61,7 +61,7 @@ class KafkaHealthIndicatorSpec extends Specification {
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
-        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"))
+        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
         container.start()
         ApplicationContext applicationContext = ApplicationContext.run(
                 (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.bootstrapServers,

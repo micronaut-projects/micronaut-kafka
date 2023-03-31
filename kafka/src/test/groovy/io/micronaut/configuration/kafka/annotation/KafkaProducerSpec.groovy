@@ -19,6 +19,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -35,7 +36,7 @@ class KafkaProducerSpec extends AbstractKafkaSpec {
     public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
 
     @Shared MockTracer mockTracer = new MockTracer()
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer()
+    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
     @Shared @AutoCleanup ApplicationContext context
 
     void setupSpec() {
