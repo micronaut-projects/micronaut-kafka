@@ -9,10 +9,15 @@ import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.common.header.Headers
+import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import spock.lang.AutoCleanup
 import spock.lang.Issue
 import spock.lang.Specification
+
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*
@@ -34,6 +39,40 @@ class KafkaConfigurationSpec extends Specification {
 
         then:
         props[BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
+
+        when:
+        Consumer consumer = applicationContext.createBean(Consumer, config)
+
+        then:
+        consumer != null
+
+        cleanup:
+        consumer.close()
+    }
+
+    void "test custom consumer deserializer"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
+                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
+        )
+        StringDeserializer keyDeser = new CustomDeserializer()
+        StringDeserializer valueDeser = new CustomDeserializer()
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+        config.setKeyDeserializer(keyDeser)
+        config.setValueDeserializer(valueDeser)
+        Properties props = config.getConfig()
+
+        then:
+        props[BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
+        keyDeser.key == true
+        keyDeser.getEncodingOverride().name() == StandardCharsets.US_ASCII.name()
+        valueDeser.getEncodingOverride().name() == StandardCharsets.ISO_8859_1.name()
+
 
         when:
         Consumer consumer = applicationContext.createBean(Consumer, config)
@@ -260,6 +299,34 @@ class KafkaConfigurationSpec extends Specification {
         thrown(NoSuchBeanException)
     }
 
+}
+
+class CustomDeserializer extends StringDeserializer {
+    private boolean key
+
+    private Charset encodingOverride
+
+    boolean getKey() {
+        return key
+    }
+
+    Charset getEncodingOverride() {
+        return encodingOverride
+    }
+
+    @Override
+    void configure(Map<String, ?> configs, boolean isKey) {
+        super.configure(configs, isKey)
+        this.key = isKey
+
+        //Code taken from StringDeserializer as an example
+        String propertyName = isKey ? "key.deserializer.encoding" : "value.deserializer.encoding";
+        Object encodingValue = configs.get(propertyName);
+        if (encodingValue == null)
+            encodingValue = configs.get("deserializer.encoding");
+        if (encodingValue instanceof String)
+            encodingOverride = (String) encodingValue;
+    }
 }
 
 class FakeYamlPropertySource extends MapPropertySource {
