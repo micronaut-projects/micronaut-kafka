@@ -34,31 +34,4 @@ public class BookListener {
         );
     }
     // end::reactive[]
-
-    // tag::manual[]
-    @Topic("all-the-books")
-    public void receive(List<Book> books,
-                        List<Long> offsets,
-                        List<Integer> partitions,
-                        List<String> topics,
-                        Consumer kafkaConsumer) { // <1>
-
-        for (int i = 0; i < books.size(); i++) {
-
-            // process the book
-            Book book = books.get(i); // <2>
-
-            // commit offsets
-            String topic = topics.get(i);
-            int partition = partitions.get(i);
-            long offset = offsets.get(i); // <3>
-
-            kafkaConsumer.commitSync(Collections.singletonMap( // <4>
-                    new TopicPartition(topic, partition),
-                    new OffsetAndMetadata(offset + 1, "my metadata")
-            ));
-
-        }
-    }
-    // end::manual[]
 }

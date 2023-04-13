@@ -39,7 +39,7 @@ If you set the `OffsetStrategy` to api:configuration.kafka.annotation.OffsetStra
 
 There are a couple of ways that can be achieved.
 
-The simplest way is to define an argument of type api:configuration.kafka.Acknowledgement[] and call the `ack()` method to commit offsets synchronously:
+The simplest way is to define an argument of type link:{apimicronaut}messaging/Acknowledgement.html[Acknowledgement] and call the `ack()` method to commit offsets synchronously:
 
 .Committing offsets with `ack()`
 [source,java]
@@ -49,7 +49,7 @@ include::{testskafka}/consumer/offsets/ack/ProductListener.java[tags=method, ind
 ----
 
 <1> Committing offsets automatically is disabled
-<2> The listener method specifies a parameter of type api:configuration.kafka.Acknowledgement[]
+<2> The listener method specifies a parameter of type link:{apimicronaut}messaging/Acknowledgement.html[Acknowledgement]
 <3> The `ack()` method is called once the record has been processed
 
 Alternatively, you an supply a `KafkaConsumer` method argument and then call `commitSync` (or `commitAsync`) yourself when you are ready to commit offsets:
