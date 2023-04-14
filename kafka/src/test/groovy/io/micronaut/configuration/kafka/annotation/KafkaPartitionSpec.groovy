@@ -1,24 +1,25 @@
 package io.micronaut.configuration.kafka.annotation
 
-import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
+import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.context.annotation.Requires
 
 import java.util.concurrent.ConcurrentHashMap
 
 import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledge.ALL
-import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
-import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
+class KafkaPartitionSpec extends AbstractEmbeddedServerSpec {
 
     public static final String TOPIC_WORDS = "KafkaPartitionSpec-words"
 
-    protected Map<String, String> getEnvVariables() {
-        super.envVariables + ["KAFKA_NUM_PARTITIONS": "3"]
+    @Override
+    void afterKafkaStarted() {
+        createTopic(TOPIC_WORDS, 3, 1)
+        sleep 5_000
     }
 
-    protected Map<String, Object> getConfiguration() {
-        super.configuration + [(EMBEDDED_TOPICS): [TOPIC_WORDS]]
+    Map<String, Object> getConfiguration() {
+        super.configuration +
+                ["kafka.consumers.kafka-partition-group.allow.auto.create.topics" : false]
     }
 
     void "test client without partition"() {
@@ -170,7 +171,7 @@ class KafkaPartitionSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaPartitionSpec')
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(value = "kafka-partition-group")
     static class SentenceListener {
         Map<String, Integer> entries = new ConcurrentHashMap<>()
 

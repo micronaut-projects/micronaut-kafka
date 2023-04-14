@@ -4,20 +4,17 @@ import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4")).withEnv(getEnvVariables())
     @Shared @AutoCleanup ApplicationContext context
+    @Shared String bootstrapServers
 
     void setupSpec() {
-        kafkaContainer.start()
-        afterKafkaStarted()
         startContext()
+        afterKafkaStarted()
     }
 
     void afterKafkaStarted() {
@@ -25,21 +22,13 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     void startContext() {
         context = ApplicationContext.run(
-                getConfiguration() +
-                        ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
+                getConfiguration()
         )
-    }
-
-    void stopContext() {
-        context.stop()
-    }
-
-    void cleanupSpec() {
-        kafkaContainer.stop()
+        bootstrapServers = context.getRequiredProperty("kafka.bootstrap.servers", String.class);
     }
 
     void createTopic(String name, int numPartitions, int replicationFactor) {
-        try (def admin = AdminClient.create([(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG): kafkaContainer.bootstrapServers])) {
+        try (def admin = AdminClient.create([(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG): bootstrapServers])) {
             admin.createTopics([new NewTopic(name, numPartitions, (short) replicationFactor)]).all().get()
         }
     }

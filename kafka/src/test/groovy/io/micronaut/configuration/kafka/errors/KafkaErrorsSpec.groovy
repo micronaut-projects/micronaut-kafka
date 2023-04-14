@@ -1,23 +1,13 @@
 package io.micronaut.configuration.kafka.errors
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
-import io.micronaut.configuration.kafka.annotation.ErrorStrategy
-import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue
-import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.KafkaPartition
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.OffsetStrategy
-import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Introspected
-import org.jetbrains.annotations.NotNull
 import spock.lang.Shared
 
 import java.util.stream.IntStream
@@ -52,7 +42,9 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     }
 
     protected Map<String, Object> getConfiguration() {
-        super.configuration + ['kafka.consumers.default.max.poll.records': 10]
+        super.configuration +
+                ['kafka.consumers.default.max.poll.records': 10,
+                 'errors-spec-topic-name': "errors-spec-topic"]
     }
 
     void setupSpec() {
@@ -108,7 +100,7 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         }
 
         @Override
-        int compareTo(@NotNull TestEvent o) {
+        int compareTo(TestEvent o) {
             return count <=> o.count
         }
     }
@@ -146,7 +138,7 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
         TreeSet<TestEvent> events = []
         List<KafkaListenerException> exceptions = []
 
-        @Topic("test-topic")
+        @Topic('${errors-spec-topic-name}')
         void receive(@KafkaKey UUID key, @KafkaPartition int partition, TestEvent event) {
             partitions << partition
             if (event.count == 3) {
@@ -167,7 +159,7 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface TestProducer {
 
-        @Topic("test-topic")
+        @Topic('${errors-spec-topic-name}')
         void send(@KafkaKey UUID key, TestEvent event);
     }
 }

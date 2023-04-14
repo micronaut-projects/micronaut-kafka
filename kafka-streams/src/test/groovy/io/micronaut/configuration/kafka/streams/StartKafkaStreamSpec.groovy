@@ -3,9 +3,7 @@ package io.micronaut.configuration.kafka.streams
 import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff
 import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.streams.KafkaStreams.State
-import spock.lang.Retry
 
-@Retry
 class StartKafkaStreamSpec extends AbstractTestContainersSpec {
 
     void "should not start kafkaStreams"() {
@@ -22,7 +20,7 @@ class StartKafkaStreamSpec extends AbstractTestContainersSpec {
     }
 
     @Override
-    protected Map<String, Object> getConfiguration() {
-        super.getConfiguration() + ["kafka.streams.start-kafka-streams-off.start-kafka-streams": 'false']
+    Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ["kafka.streams.start-kafka-streams-off.start-kafka-streams": 'false']
     }
 }

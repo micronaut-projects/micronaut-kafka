@@ -2,20 +2,15 @@ package io.micronaut.configuration.kafka.annotation
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.configuration.kafka.ConsumerRegistry
-import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import io.micronaut.core.annotation.Introspected
 import io.micronaut.serde.annotation.Serdeable
 import spock.lang.Shared
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 
-class KafkaConsumerAutoStartupSpec extends AbstractEmbeddedServerSpec {
+class KafkaConsumerAutoStartupSpec extends AbstractKafkaContainerSpec {
 
     @Shared
     TestListener listener
@@ -26,7 +21,7 @@ class KafkaConsumerAutoStartupSpec extends AbstractEmbeddedServerSpec {
     @Shared
     ConsumerRegistry consumerRegistry
 
-    void setupSpec() {
+    void afterKafkaStarted() {
         listener = context.getBean(TestListener)
         producer = context.getBean(TestProducer)
         consumerRegistry = context.getBean(ConsumerRegistry)
@@ -34,12 +29,14 @@ class KafkaConsumerAutoStartupSpec extends AbstractEmbeddedServerSpec {
 
     void "should start consumer paused"() {
         when:
+        sleep 5_000
         for (int i = 0; i < 5; i++) {
             producer.send UUID.randomUUID(), new TestEvent(i)
         }
-        sleep 10_000
+        sleep 5_000
 
         then:
+        consumerRegistry.isPaused("xyz")
         listener.events.size() == 0
         consumerRegistry.resume("xyz")
         conditions.eventually {

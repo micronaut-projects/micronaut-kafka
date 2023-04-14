@@ -1,14 +1,12 @@
 package io.micronaut.configuration.kafka.health
 
-import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
+
+import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.management.health.indicator.HealthResult
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.utility.DockerImageName
-import spock.lang.Specification
 import spock.lang.Unroll
 
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
@@ -16,15 +14,11 @@ import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLI
 import static io.micronaut.health.HealthStatus.DOWN
 import static io.micronaut.health.HealthStatus.UP
 
-class KafkaHealthIndicatorSpec extends Specification {
+class KafkaHealthIndicatorSpec extends AbstractKafkaSpec {
 
     void "test kafka health indicator - UP"() {
         given:
-        KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"))
-        kafkaContainer.start()
-        ApplicationContext applicationContext = ApplicationContext.run(
-                "kafka.bootstrap.servers": kafkaContainer.bootstrapServers
-        )
+        ApplicationContext applicationContext = ApplicationContext.run(configuration)
 
         when:
         KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
@@ -37,13 +31,12 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
-        kafkaContainer.stop()
     }
 
     void "test kafka health indicator - DOWN"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(
-                'kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()
+        ApplicationContext applicationContext = ApplicationContext.run(configuration +
+                ['kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()]
         )
 
         when:
@@ -61,11 +54,8 @@ class KafkaHealthIndicatorSpec extends Specification {
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
-        KafkaContainer container = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"))
-        container.start()
-        ApplicationContext applicationContext = ApplicationContext.run(
-                (AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS): container.bootstrapServers,
-                "kafka.health.enabled": configvalue
+        ApplicationContext applicationContext = ApplicationContext.run(configuration +
+                ["kafka.health.enabled": configvalue]
         )
 
         when:
@@ -76,7 +66,6 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         cleanup:
         applicationContext.close()
-        container.stop()
 
         where:
         configvalue << [false, "false", "no", ""]

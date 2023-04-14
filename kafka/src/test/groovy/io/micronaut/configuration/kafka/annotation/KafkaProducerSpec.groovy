@@ -1,8 +1,7 @@
 package io.micronaut.configuration.kafka.annotation
 
 import groovy.util.logging.Slf4j
-import io.micronaut.configuration.kafka.AbstractKafkaSpec
-import io.micronaut.context.ApplicationContext
+import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
@@ -17,10 +16,6 @@ import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.utility.DockerImageName
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,37 +24,30 @@ import static io.micronaut.configuration.kafka.annotation.KafkaClient.Acknowledg
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-class KafkaProducerSpec extends AbstractKafkaSpec {
+class KafkaProducerSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_BLOCKING = "KafkaProducerSpec-users-blocking"
     public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
 
-    @Shared @AutoCleanup KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.4"))
-    @Shared @AutoCleanup ApplicationContext context
-
-    void setupSpec() {
-        kafkaContainer.start()
-        context =  ApplicationContext.builder(
-                configuration +
-                ['micronaut.application.name'                : 'test-app',
-                 "kafka.schema.registry.url"                 : "http://localhot:8081",
-                 "kafka.producers.named.key.serializer"      : StringSerializer.name,
-                 "kafka.producers.named.value.serializer"    : StringSerializer.name,
-                 "kafka.producers.default.key.serializer"    : StringSerializer.name,
-                 "kafka.producers.default.key-serializer"    : StringSerializer.name,
-                 "kafka.producers.default.keySerializer"     : StringSerializer.name,
-                 "kafka.producers.default.value.serializer"  : StringSerializer.name,
-                 "kafka.producers.default.value-serializer"  : StringSerializer.name,
-                 "kafka.producers.default.valueSerializer"   : StringSerializer.name,
-                 "kafka.consumers.default.key.deserializer"  : StringDeserializer.name,
-                 "kafka.consumers.default.key-deserializer"  : StringDeserializer.name,
-                 "kafka.consumers.default.keyDeserializer"   : StringDeserializer.name,
-                 "kafka.consumers.default.value.deserializer": StringDeserializer.name,
-                 "kafka.consumers.default.value-deserializer": StringDeserializer.name,
-                 "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
-                 "kafka.bootstrap.servers"                   : kafkaContainer.bootstrapServers,
-                 (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
-        ).start()
+    Map<String, Object> getConfiguration() {
+        super.configuration +
+        ['micronaut.application.name'                : 'test-app',
+         "kafka.schema.registry.url"                 : "http://localhot:8081",
+         "kafka.producers.named.key.serializer"      : StringSerializer.name,
+         "kafka.producers.named.value.serializer"    : StringSerializer.name,
+         "kafka.producers.default.key.serializer"    : StringSerializer.name,
+         "kafka.producers.default.key-serializer"    : StringSerializer.name,
+         "kafka.producers.default.keySerializer"     : StringSerializer.name,
+         "kafka.producers.default.value.serializer"  : StringSerializer.name,
+         "kafka.producers.default.value-serializer"  : StringSerializer.name,
+         "kafka.producers.default.valueSerializer"   : StringSerializer.name,
+         "kafka.consumers.default.key.deserializer"  : StringDeserializer.name,
+         "kafka.consumers.default.key-deserializer"  : StringDeserializer.name,
+         "kafka.consumers.default.keyDeserializer"   : StringDeserializer.name,
+         "kafka.consumers.default.value.deserializer": StringDeserializer.name,
+         "kafka.consumers.default.value-deserializer": StringDeserializer.name,
+         "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
+         (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
     }
 
     void "test customize defaults"() {

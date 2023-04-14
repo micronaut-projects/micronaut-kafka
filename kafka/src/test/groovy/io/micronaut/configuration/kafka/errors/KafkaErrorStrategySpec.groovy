@@ -28,6 +28,11 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
     private static final String RandomFailedMessage = (new Random().nextInt(30) + 10).toString();
 
+    Map<String, Object> getConfiguration() {
+        super.configuration +
+                ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false]
+    }
+
     @Override
     void afterKafkaStarted() {
         createTopic("errors-retry-multiple-partitions", 3, 1)
@@ -180,6 +185,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
+            value="errors-retry-multiple-partitions",
             offsetStrategy = SYNC,
             errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR)
     )

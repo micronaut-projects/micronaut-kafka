@@ -76,7 +76,7 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
             }, 100, TimeUnit.MILLISECONDS)
 
             // wait a moment for first wakeup / consumer to close
-            sleep(1_000)
+            sleep(5_000)
 
         then: "The messages are not committed"
             TopicPartition topicPartition = new TopicPartition("wakeup-with-successful-messages", 0)
@@ -215,7 +215,7 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
 
     KafkaConsumer<byte[], String> createKafkaConsumer() {
         Properties props = new Properties()
-        props.setProperty("bootstrap.servers", kafkaContainer.bootstrapServers)
+        props.setProperty("bootstrap.servers", bootstrapServers)
         props.setProperty("enable.auto.commit", "false")
         props.setProperty("auto.offset.reset", "earliest")
         props.setProperty("group.id", "myGroup")

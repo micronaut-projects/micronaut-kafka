@@ -1,9 +1,8 @@
-# TODO: restore security aspect of this test
-# kafka:
-#  security:
-#    protocol: SASL_PLAINTEXT
-#  sasl:
-#    mechanism: PLAIN
-#    jaas:
-#      config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+kafka:
+  security:
+    protocol: SASL_PLAINTEXT
+  sasl:
+    mechanism: PLAIN
+    jaas:
+      config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 
