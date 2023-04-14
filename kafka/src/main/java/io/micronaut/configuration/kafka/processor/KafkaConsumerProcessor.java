@@ -468,7 +468,7 @@ class KafkaConsumerProcessor
                     }
 
                     if (isBatch) {
-                        failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, ackArg, consumerRecords);
+                        failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, ackArg.orElse(null), consumerRecords);
                     } else {
                         failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, ackArg, consumerRecords);
                     }
@@ -645,17 +645,17 @@ class KafkaConsumerProcessor
     private boolean processConsumerRecordsAsBatch(final ConsumerState consumerState,
                                                   final ExecutableMethod<?, ?> method,
                                                   final Map<Argument<?>, Object> boundArguments,
-                                                  final Optional<Argument<?>> ackArg,
+                                                  @Nullable final Argument<?> ackArg,
                                                   final ConsumerRecords<?, ?> consumerRecords) {
-        ackArg.ifPresent(argument -> {
+        if (ackArg != null) {
             Map<TopicPartition, OffsetAndMetadata> batchOffsets = new HashMap<>();
             for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
                 final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
                 final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
                 batchOffsets.put(topicPartition, offsetAndMetadata);
             }
-            boundArguments.put(argument, (KafkaAcknowledgement) () -> consumerState.kafkaConsumer.commitSync(batchOffsets));
-        });
+            boundArguments.put(ackArg, (KafkaAcknowledgement) () -> consumerState.kafkaConsumer.commitSync(batchOffsets));
+        };
 
         final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
         final BoundExecutable boundExecutable = batchBinder.bind(method, batchBinderRegistry, consumerRecords);
