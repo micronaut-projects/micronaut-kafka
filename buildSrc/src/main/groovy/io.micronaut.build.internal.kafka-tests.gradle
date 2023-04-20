@@ -29,7 +29,7 @@ micronaut {
 graalvmNative {
     binaries {
         main {
-//            buildArgs.add('--trace-object-instantiation=ch.qos.logback.classic.Logger')
+            buildArgs.add('-H:AdditionalSecurityProviders=com.sun.security.sasl.Provider')
         }
     }
 }
