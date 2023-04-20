@@ -1,3 +1,44 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-base'
+    id 'io.micronaut.application'
+    id "io.micronaut.test-resources"
 }
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute module('io.micronaut.kafka:micronaut-kafka') using project(':micronaut-kafka')
+    }
+}
+dependencies {
+    implementation projects.micronautKafka
+    implementation mnSerde.micronaut.serde.jackson
+    implementation mn.snakeyaml
+    testImplementation mn.micronaut.http.client
+    testImplementation libs.awaitility
+}
+micronaut {
+    version libs.versions.micronaut.platform.get()
+    testRuntime "junit5"
+    runtime "netty"
+    testResources {
+        clientTimeout = 300
+        additionalModules.add(KAFKA)
+    }
+}
+
+
+graalvmNative {
+    binaries {
+        main {
+            buildArgs.add('-H:AdditionalSecurityProviders=com.sun.security.sasl.Provider')
+        }
+    }
+}
+tasks.named("check") { task ->
+    def graal = ["jvmci.Compiler", "java.vendor.version", "java.vendor"].any {
+        System.getProperty(it)?.toLowerCase(Locale.ENGLISH)?.contains("graal")
+    }
+    if (graal) {
+        task.dependsOn("nativeTest")
+    }
+}
+

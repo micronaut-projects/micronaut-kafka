@@ -56,9 +56,8 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
         this.conversionService = conversionService;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<ArgumentBinder<T, ConsumerRecords<?, ?>>> findArgumentBinder(Argument<T> argument, ConsumerRecords<?, ?> source) {
+    public <T> Optional<ArgumentBinder<T, ConsumerRecords<?, ?>>> findArgumentBinder(Argument<T> argument) {
         Class<T> argType = argument.getType();
         if (Iterable.class.isAssignableFrom(argType) || argType.isArray() || Publishers.isConvertibleToPublisher(argType)) {
             Argument<?> batchType = argument.getFirstTypeVariable().orElse(Argument.OBJECT_ARGUMENT);
@@ -71,8 +70,8 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
                         Argument<?> newArg = Argument.of(batchType.getType(), argument.getName(), argument.getAnnotationMetadata(), batchType.getTypeParameters());
                         ArgumentConversionContext conversionContext = ConversionContext.of(newArg);
                         ArgumentBinder.BindingResult<?> result = b.bind(
-                                conversionContext,
-                                consumerRecord);
+                            conversionContext,
+                            consumerRecord);
                         if (result.isPresentAndSatisfied()) {
                             bound.add(result.get());
                         }

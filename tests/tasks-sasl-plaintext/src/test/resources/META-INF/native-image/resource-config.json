@@ -1,0 +1,15 @@
+{
+    "resources": {
+        "includes": [
+            {
+                "pattern": "\\Qapplication.yml\\E"
+            },
+            {
+                "pattern": "\\Qkafka/kafka-version.properties\\E"
+            },
+            {
+                "pattern": "\\Qlogback.xml\\E"
+            }
+        ]
+    }
+}

@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api projects.kafka
+    api projects.micronautKafka
     api libs.managed.kafka.streams
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
