@@ -655,7 +655,7 @@ class KafkaConsumerProcessor
                 batchOffsets.put(topicPartition, offsetAndMetadata);
             }
             boundArguments.put(ackArg, (KafkaAcknowledgement) () -> consumerState.kafkaConsumer.commitSync(batchOffsets));
-        };
+        }
 
         final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
         final BoundExecutable boundExecutable = batchBinder.bind(method, batchBinderRegistry, consumerRecords);
