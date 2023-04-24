@@ -13,7 +13,7 @@ awaitility = '4.2.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
-testcontainers = "1.17.6"
+testcontainers = "1.18.0"
 
 zipkin-brave-kafka-clients = '5.15.1'
 
