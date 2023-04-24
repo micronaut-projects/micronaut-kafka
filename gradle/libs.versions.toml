@@ -1,5 +1,5 @@
 [versions]
-micronaut = "3.7.3"
+micronaut = "3.9.0"
 micronaut-docs = "2.0.0"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
