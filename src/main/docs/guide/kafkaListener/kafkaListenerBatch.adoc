@@ -24,18 +24,37 @@ Note in the previous case offsets will automatically be committed for the whole 
 
 == Manually Committing Offsets with Batch
 
+As with one by one message processing, if you set the `OffsetStrategy` to api:configuration.kafka.annotation.OffsetStrategy#DISABLED[] it becomes your responsibility to commit offsets.
+
+If you want to commit the entire batch of offsets at once during the course of processing, then the simplest approach is to add an argument of type link:{apimicronaut}messaging/Acknowledgement.html[Acknowledgement] and call the `ack()` method to commit the batch of offsets synchronously:
+
+.Committing a Batch of Offsets Manually with ack()
+[source,java]
+----
+include::{testskafka}/consumer/batch/ack/BookListener.java[tags=imports, indent=0]
+
+include::{testskafka}/consumer/batch/ack/BookListener.java[tags=method, indent=0]
+----
+
+<1> Committing offsets automatically is disabled
+<2> The listener method specifies a parameter of type link:{apimicronaut}messaging/Acknowledgement.html[Acknowledgement]
+<3> The `ack()` method is called once the records have been processed
+
 You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:
 
 .Committing Offsets Manually with Batch
 [source,java]
 ----
-include::{testskafka}/consumer/batch/BookListener.java[tags=manual, indent=0]
+include::{testskafka}/consumer/batch/manual/BookListener.java[tags=imports, indent=0]
+
+include::{testskafka}/consumer/batch/manual/BookListener.java[tags=method, indent=0]
 ----
 
-<1> The method receives the batch of records as well as the offsets, partitions and topics
-<2> Each record is processed
-<3> The offset, partition and topic is read for the record
-<4> Offsets are committed
+<1> Committing offsets automatically is disabled
+<2> The method receives the batch of records as well as the offsets, partitions and topics
+<3> Each record is processed
+<4> The offset, partition and topic is read for the record
+<5> Offsets are committed
 
 This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.
 
