@@ -1,3 +1,11 @@
+kafka:
+  security:
+    protocol: SASL_PLAINTEXT
+  sasl:
+    mechanism: PLAIN
+    jaas:
+      config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+
 test-resources:
   containers:
     kafka:
