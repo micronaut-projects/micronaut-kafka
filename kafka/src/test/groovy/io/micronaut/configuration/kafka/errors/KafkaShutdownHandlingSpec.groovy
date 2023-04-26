@@ -65,7 +65,7 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
             WakeupSuccessfulMessagesConsumer wakeupConsumer = context.getBean(WakeupSuccessfulMessagesConsumer)
             KafkaConsumer<byte[], String> consumer = createKafkaConsumer()
 
-            when: "A consumer shuts down before processing all the messages"
+        when: "A consumer shuts down before processing all the messages"
             for (i in 0..<100) {
                 myClient.sendLongTimeProcessingMessage("Message#${i}")
             }
@@ -73,17 +73,16 @@ class KafkaShutdownHandlingSpec extends AbstractEmbeddedServerSpec {
             ScheduledExecutorService schedule = Executors.newScheduledThreadPool(1)
             schedule.schedule(() -> {
                 wakeupConsumer.wakeup()
-            }, 100, TimeUnit.MILLISECONDS)
-
-            // wait a moment for first wakeup / consumer to close
-            sleep(5_000)
+            }, 2000, TimeUnit.MILLISECONDS)
 
         then: "The messages are not committed"
-            TopicPartition topicPartition = new TopicPartition("wakeup-with-successful-messages", 0)
-            Map<TopicPartition, OffsetAndMetadata> offsetAndMetadata = consumer.committed([topicPartition] as Set)
-            offsetAndMetadata != null
-                    && offsetAndMetadata[topicPartition] != null
-                    && offsetAndMetadata[topicPartition].offset() <= wakeupConsumer.received.unique().size()
+            conditions.eventually {
+                TopicPartition topicPartition = new TopicPartition("wakeup-with-successful-messages", 0)
+                Map<TopicPartition, OffsetAndMetadata> offsetAndMetadata = consumer.committed([topicPartition] as Set)
+                offsetAndMetadata != null
+                        && offsetAndMetadata[topicPartition] != null
+                        && offsetAndMetadata[topicPartition].offset() <= wakeupConsumer.received.unique().size()
+            }
 
         cleanup:
             consumer.close()
