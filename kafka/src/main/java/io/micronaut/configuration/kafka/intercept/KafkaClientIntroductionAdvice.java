@@ -258,7 +258,6 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             returnFlowable = buildSendFluxForReactiveValue(context, producerState, returnType, value);
         } else {
             if (producerState.isBatchSend) {
-                // TODO :batch
                 Object batchValue;
                 if (value != null && value.getClass().isArray()) {
                     batchValue = Arrays.asList((Object[]) value);

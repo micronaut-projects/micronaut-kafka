@@ -1135,6 +1135,7 @@ class KafkaConsumerProcessor
         }
 
         synchronized void resume(@NonNull Collection<TopicPartition> topicPartitions) {
+            autoPaused = false;
             if (_pauseRequests != null) {
                 _pauseRequests.removeAll(topicPartitions);
             }

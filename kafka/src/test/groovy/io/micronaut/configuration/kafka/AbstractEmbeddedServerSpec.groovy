@@ -12,10 +12,10 @@ abstract class AbstractEmbeddedServerSpec extends AbstractKafkaContainerSpec {
     @Override
     void startContext() {
         embeddedServer = ApplicationContext.run(EmbeddedServer,
-                getConfiguration() +
-                        ['kafka.bootstrap.servers': kafkaContainer.bootstrapServers]
+                getConfiguration()
         )
         context = embeddedServer.applicationContext
+        bootstrapServers = context.getRequiredProperty("kafka.bootstrap.servers", String.class);
     }
 
 }

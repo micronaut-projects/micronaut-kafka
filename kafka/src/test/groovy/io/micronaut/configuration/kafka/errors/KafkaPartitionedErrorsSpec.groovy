@@ -5,18 +5,20 @@ import spock.lang.Stepwise
 import spock.lang.Retry
 
 @Stepwise
-@Retry
-@Ignore("https://github.com/micronaut-projects/micronaut-kafka/issues/514")
 class KafkaPartitionedErrorsSpec extends KafkaErrorsSpec {
 
     @Override
     void afterKafkaStarted() {
-        createTopic("test-topic", 3, 1)
+        createTopic("partitioned-errors-spec-topic", 3, 1)
     }
 
     @Override
     protected Map<String, Object> getConfiguration() {
-        return super.getConfiguration() + ['spec.name': KafkaErrorsSpec.class.simpleName]
+        return super.configuration +
+                ['spec.name': KafkaErrorsSpec.class.simpleName,
+                 'kafka.consumers.default.max.poll.records': 10,
+                  'errors-spec-topic-name': 'partitioned-errors-spec-topic',
+                  'kafka.consumers.default.allow.auto.create.topics' : false]
     }
 
     void "should be correctly processing in partitions"() {

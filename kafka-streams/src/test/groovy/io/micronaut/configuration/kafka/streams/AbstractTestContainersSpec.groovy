@@ -1,10 +1,6 @@
 package io.micronaut.configuration.kafka.streams
 
 import groovy.util.logging.Slf4j
-import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream
-import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff
-import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream
-import org.apache.kafka.common.utils.Utils
 import org.apache.kafka.streams.StreamsConfig
 import spock.lang.Shared
 
@@ -29,7 +25,8 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
     String startKafkaStreamsOffApplicationId = 'start-kafka-streams-off-' + UUID.randomUUID().toString()
 
     protected Map<String, Object> getConfiguration() {
-        super.getConfiguration() + ['kafka.generic.config': "hello",
+        return super.getConfiguration() + ['kafka.generic.config': "hello",
+                                    'kafka.consumers.OptimizationListener.allow.auto.create.topics': false,
                                     'kafka.streams.my-stream.application.id': myStreamApplicationId,
                                     'kafka.streams.my-stream.num.stream.threads': 10,
                                     'kafka.streams.optimization-on.application.id': optimizationOnApplicationId,
@@ -37,22 +34,6 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
                                     'kafka.streams.optimization-off.application.id': optimizationOffApplicationId,
                                     'kafka.streams.optimization-off.topology.optimization': 'none',
                                     'kafka.streams.start-kafka-streams-off.application.id': startKafkaStreamsOffApplicationId]
-    }
-
-    @Override
-    void afterKafkaStarted() {
-        [
-                WordCountStream.INPUT,
-                WordCountStream.OUTPUT,
-                WordCountStream.NAMED_WORD_COUNT_INPUT,
-                WordCountStream.NAMED_WORD_COUNT_OUTPUT,
-                StartKafkaStreamsOff.STREAMS_OFF_INPUT,
-                StartKafkaStreamsOff.STREAMS_OFF_OUTPUT,
-                OptimizationStream.OPTIMIZATION_ON_INPUT,
-                OptimizationStream.OPTIMIZATION_OFF_INPUT
-        ].forEach(topic -> {
-            createTopic(topic.toString(), 1, 1)
-        })
     }
 
     def cleanupSpec() {
@@ -68,7 +49,6 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
         } catch (Exception ignore) {
             log.error("Could not stop containers")
         }
-        embeddedServer?.close()
     }
 
     static def purgeLocalStreamsState(final streamsConfiguration) throws IOException {

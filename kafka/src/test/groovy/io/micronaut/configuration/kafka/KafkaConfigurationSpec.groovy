@@ -15,11 +15,7 @@ import spock.lang.Issue
 import spock.lang.Specification
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
-import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
-import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG
-import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG
-import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG
+import static org.apache.kafka.clients.consumer.ConsumerConfig.*
 
 class KafkaConfigurationSpec extends Specification {
 
@@ -27,10 +23,10 @@ class KafkaConfigurationSpec extends Specification {
 
     void "test default consumer configuration"() {
         given:
-        applicationContext = ApplicationContext.run(
-                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
-        )
+        applicationContext = ApplicationContext.builder().enableDefaultPropertySources(false)
+                .properties(("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                            ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name)
+                .run(ApplicationContext.class);
 
         when:
         AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)

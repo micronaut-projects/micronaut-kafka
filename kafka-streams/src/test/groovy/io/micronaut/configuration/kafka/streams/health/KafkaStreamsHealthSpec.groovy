@@ -8,11 +8,9 @@ import io.micronaut.management.health.indicator.HealthResult
 import io.micronaut.runtime.ApplicationConfiguration
 import org.apache.kafka.streams.KafkaStreams
 import reactor.core.publisher.Mono
-import spock.lang.Retry
 
 import static io.micronaut.health.HealthStatus.UP
 
-@Retry
 class KafkaStreamsHealthSpec extends AbstractTestContainersSpec {
 
     void "should create object"() {

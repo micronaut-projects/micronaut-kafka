@@ -38,8 +38,6 @@ opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = '
 
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 awaitility = { module = 'org.awaitility:awaitility', version.ref = 'awaitility' }
-testcontainers-kafka = { module = 'org.testcontainers:kafka', version.ref = 'testcontainers' }
-testcontainers-spock = { module = 'org.testcontainers:spock', version.ref = 'testcontainers' }
 
 micronaut-cache = { module = "io.micronaut.cache:micronaut-cache-bom", version.ref = "micronaut-cache" }
 micronaut-micrometer = { module = "io.micronaut.micrometer:micronaut-micrometer-bom", version.ref = "micronaut-micrometer" }

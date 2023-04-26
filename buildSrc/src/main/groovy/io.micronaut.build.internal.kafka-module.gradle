@@ -15,7 +15,6 @@ dependencies {
 
     testImplementation mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.management
-    testImplementation libs.testcontainers.kafka
 
     testRuntimeOnly mnCache.micronaut.cache.core
     testRuntimeOnly mnReactor.micronaut.reactor
