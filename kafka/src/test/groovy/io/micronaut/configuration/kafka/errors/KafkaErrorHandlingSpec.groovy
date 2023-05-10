@@ -7,6 +7,7 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
+import nl.altindag.log.LogCaptor
 import org.apache.kafka.common.TopicPartition
 import reactor.core.publisher.Mono
 
@@ -17,6 +18,8 @@ import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
 class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
+
+    LogCaptor logCaptor = LogCaptor.forRoot()
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
@@ -52,8 +55,10 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
     }
 
     void "test custom exception handler throwing an exception"() {
+        given:
+        logCaptor.clearLogs()
+
         when:"Custom exception handler throws an exception "
-//        LogCaptor logCaptor = LogCaptor.forRoot()
         ErrorClient myClient = context.getBean(ErrorClient)
         myClient.sendMessage("One")
 
@@ -62,8 +67,8 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         then:"The bean exception handler's error is logged"
         conditions.eventually {
             assert myConsumer.exceptionHandlerInvoked == true
-//            assert logCaptor.errorLogs.stream().anyMatch(
-//                s -> s.matches("Unhandled exception caused infinite loop exit: Custom exception handler failed"))
+            assert logCaptor.errorLogs.stream().anyMatch(
+                s -> s.matches("Unhandled exception caused infinite loop exit: Custom exception handler failed"))
         }
     }
 

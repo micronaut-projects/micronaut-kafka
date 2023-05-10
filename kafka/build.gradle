@@ -24,7 +24,7 @@ dependencies {
     testImplementation libs.opentracing.mock
     testImplementation libs.opentracing.kafka.client
     testImplementation mn.micronaut.rxjava2
-//    testImplementation 'io.github.hakky54:logcaptor:2.9.0'
+    testImplementation 'io.github.hakky54:logcaptor:2.9.0'
 
     testRuntimeOnly mn.micronaut.micrometer.registry.statsd
     testRuntimeOnly mn.micronaut.tracing.core
