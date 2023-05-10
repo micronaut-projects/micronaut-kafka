@@ -499,6 +499,9 @@ class KafkaConsumerProcessor
             }
         } catch (WakeupException e) {
             consumerState.closedState = ConsumerCloseState.CLOSED;
+        } catch (Throwable ex) {
+            consumerState.closedState = ConsumerCloseState.CLOSED;
+            LOG.error("Unhandled exception caused infinite loop exit: {}", ex.getMessage(), ex);
         }
     }
 

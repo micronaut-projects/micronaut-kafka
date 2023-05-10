@@ -7,6 +7,7 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.context.annotation.Requires
+import nl.altindag.log.LogCaptor
 import org.apache.kafka.common.TopicPartition
 import reactor.core.publisher.Mono
 
@@ -51,6 +52,22 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    void "test custom exception handler throwing an exception"() {
+        when:"A reactive consumer with custom exception handler throws a Mono error"
+        LogCaptor logCaptor = LogCaptor.forRoot()
+        ErrorClient myClient = context.getBean(ErrorClient)
+        myClient.sendMessage("One")
+
+        ErrorCausingCustomExceptionHandlerConsumer myConsumer = context.getBean(ErrorCausingCustomExceptionHandlerConsumer)
+
+        then:"The bean exception handler's error is logged"
+        conditions.eventually {
+            assert myConsumer.exceptionHandlerInvoked == true
+            assert logCaptor.errorLogs.stream().anyMatch(
+                s -> s.matches("Unhandled exception caused infinite loop exit: Custom exception handler failed"))
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
     static class ErrorCausingConsumer implements KafkaListenerExceptionHandler {
@@ -89,6 +106,24 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         @Override
         void handle(KafkaListenerException exception) {
             exceptionHandled = true
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
+    static class ErrorCausingCustomExceptionHandlerConsumer implements KafkaListenerExceptionHandler {
+
+        def exceptionHandlerInvoked = false
+
+        @Topic("errors")
+        Mono<Void> handleMessage(String message) {
+            throw new RuntimeException("Won't handle")
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionHandlerInvoked = true
+            throw new RuntimeException("Custom exception handler failed")
         }
     }
 
