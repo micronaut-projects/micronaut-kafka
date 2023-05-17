@@ -25,6 +25,8 @@ micronaut-serde = "2.0.0-M1"
 micronaut-tracing = "5.0.0-SNAPSHOT"
 micronaut-test = "4.0.0-M1"
 
+logback = "1.4.6"
+
 
 [libraries]
 # Duplicated to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
