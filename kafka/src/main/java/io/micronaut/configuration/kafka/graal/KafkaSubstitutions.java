@@ -44,7 +44,6 @@ final class ChecksumFeature implements Feature {
 }
 
 @TargetClass(className = "org.apache.kafka.common.utils.Crc32C$Java9ChecksumFactory")
-@Substitute
 final class Java9ChecksumFactory {
 
     @Substitute
