@@ -10,6 +10,7 @@ configurations.all {
 
 dependencies {
     annotationProcessor mn.micronaut.graal
+    annotationProcessor mn.micronaut.serde.processor
 
     api libs.managed.kafka.clients
 
@@ -24,6 +25,7 @@ dependencies {
     testImplementation libs.opentracing.mock
     testImplementation libs.opentracing.kafka.client
     testImplementation mn.micronaut.rxjava2
+    testImplementation mn.micronaut.serde.jackson
 
     testRuntimeOnly mn.micronaut.micrometer.registry.statsd
     testRuntimeOnly mn.micronaut.tracing.core
