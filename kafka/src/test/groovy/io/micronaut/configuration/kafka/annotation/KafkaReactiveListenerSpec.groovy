@@ -4,6 +4,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
+import io.micronaut.serde.annotation.Serdeable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -450,6 +451,7 @@ class KafkaReactiveListenerSpec extends AbstractKafkaContainerSpec {
 
     @EqualsAndHashCode
     @ToString(includePackage = false)
+    @Serdeable
     static class Book {
         String title
     }

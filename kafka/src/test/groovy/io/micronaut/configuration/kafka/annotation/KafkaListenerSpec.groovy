@@ -18,6 +18,7 @@ import io.micronaut.json.JsonObjectSerializer
 import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
+import io.micronaut.serde.annotation.Serdeable
 import io.reactivex.Single
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.Producer
@@ -310,6 +311,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
     }
 
     @EqualsAndHashCode
+    @Serdeable
     static class Book {
         String title
     }

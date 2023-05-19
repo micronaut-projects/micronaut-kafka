@@ -3,9 +3,11 @@ package io.micronaut.configuration.kafka.annotation
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.SendTo
+import io.micronaut.serde.annotation.Serdeable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.serialization.Serde
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -208,6 +210,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         }
     }
 
+    @Serdeable
     static class Product {
         String name
         int quantity
