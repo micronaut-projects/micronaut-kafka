@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.Acknowledgement
+import io.micronaut.serde.annotation.Serdeable
 import jakarta.inject.Singleton
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -59,6 +60,7 @@ class ManualAckSpec extends AbstractKafkaContainerSpec {
         }
     }
 
+    @Serdeable
     static class Product {
         String name
     }
