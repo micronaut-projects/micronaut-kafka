@@ -15,10 +15,15 @@
  */
 package io.micronaut.configuration.kafka.config;
 
+import io.micronaut.context.env.Environment;
 import io.micronaut.core.util.Toggleable;
 
 import io.micronaut.core.annotation.NonNull;
+
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 /**
  * An abstract Kafka configuration class.
@@ -61,6 +66,30 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
      */
     protected AbstractKafkaConfiguration(Properties config) {
         this.config = config;
+    }
+
+    /**
+     * Convert the given map of values to kafka properties.
+     * @param environment The env
+     * @param values The values
+     * @return The kafka properties
+     */
+    protected static Properties toKafkaProperties(Environment environment, Map<?, ?> values) {
+        Properties properties = new Properties();
+        values.entrySet().stream().filter(entry -> {
+            String key = entry.getKey().toString();
+            return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
+        }).forEach(entry -> {
+            Object value = entry.getValue();
+            if (environment.canConvert(entry.getValue().getClass(), String.class)) {
+                Optional<?> converted = environment.convert(entry.getValue(), String.class);
+                if (converted.isPresent()) {
+                    value = converted.get();
+                }
+            }
+            properties.setProperty(entry.getKey().toString(), value.toString());
+        });
+        return properties;
     }
 
     /**

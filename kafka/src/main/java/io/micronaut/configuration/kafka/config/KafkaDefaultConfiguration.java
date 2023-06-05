@@ -18,9 +18,7 @@ package io.micronaut.configuration.kafka.config;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
@@ -82,20 +80,6 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
         Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
-        Properties properties = new Properties();
-        values.entrySet().stream().filter(entry -> {
-            String key = entry.getKey();
-            return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
-        }).forEach(entry -> {
-            Object value = entry.getValue();
-            if (environment.canConvert(entry.getValue().getClass(), String.class)) {
-                Optional<?> converted = environment.convert(entry.getValue(), String.class);
-                if (converted.isPresent()) {
-                    value = converted.get();
-                }
-            }
-            properties.setProperty(entry.getKey(), value.toString());
-        });
-        return properties;
+        return toKafkaProperties(environment, values);
     }
 }
