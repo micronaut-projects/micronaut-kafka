@@ -129,8 +129,8 @@ implements <a href="ProducerRegistry.html" title="interface in io.micronaut.conf
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>&lt;K,<wbr>
 V&gt;&nbsp;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">Producer</a>&lt;K,<wbr>V&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getProducer(io.micronaut.inject.InjectionPoint,io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration)" class="member-name-link">getProducer</a><wbr>(io.micronaut.inject.InjectionPoint&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">KafkaProducer</a>&lt;K,<wbr>V&gt;&gt;&nbsp;injectionPoint,
- <a href="config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,<wbr>V&gt;&nbsp;producerConfiguration)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getProducer(io.micronaut.inject.InjectionPoint,io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration)" class="member-name-link">getProducer</a><wbr>(@Nullable io.micronaut.inject.InjectionPoint&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">KafkaProducer</a>&lt;K,<wbr>V&gt;&gt;&nbsp;injectionPoint,
+ @Nullable <a href="config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,<wbr>V&gt;&nbsp;producerConfiguration)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Creates a new <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>KafkaProducer</code></a> for the given configuration.</div>
 </div>
@@ -203,9 +203,9 @@ V&gt;&nbsp;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients
 @Any
 </span><span class="modifiers">public</span>&nbsp;<span class="type-parameters">&lt;K,<wbr>
 V&gt;</span>&nbsp;<span class="return-type"><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">Producer</a>&lt;K,<wbr>V&gt;</span>&nbsp;<span class="element-name">getProducer</span><wbr><span class="parameters">(@Nullable
- io.micronaut.inject.InjectionPoint&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">KafkaProducer</a>&lt;K,<wbr>V&gt;&gt;&nbsp;injectionPoint,
+ @Nullable io.micronaut.inject.InjectionPoint&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link">KafkaProducer</a>&lt;K,<wbr>V&gt;&gt;&nbsp;injectionPoint,
  @Nullable @Parameter
- <a href="config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,<wbr>V&gt;&nbsp;producerConfiguration)</span></div>
+ @Nullable <a href="config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a>&lt;K,<wbr>V&gt;&nbsp;producerConfiguration)</span></div>
 <div class="block">Creates a new <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>KafkaProducer</code></a> for the given configuration.</div>
 <dl class="notes">
 <dt>Type Parameters:</dt>
