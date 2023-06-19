@@ -17,7 +17,7 @@ testcontainers = "1.18.0"
 
 zipkin-brave-kafka-clients = '5.15.1'
 
-micronaut-cache = "4.0.0-M2"
+micronaut-cache = "4.0.0-M5"
 micronaut-micrometer = "5.0.0-M3"
 micronaut-reactor = "3.0.0-M5"
 micronaut-rxjava2 = "2.0.0-M5"
