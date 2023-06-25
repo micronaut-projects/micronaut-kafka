@@ -8,6 +8,7 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.type.Argument
 import io.micronaut.messaging.annotation.SendTo
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.IntegerSerializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -108,6 +109,32 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
         conditions.eventually {
             idempotenceNumbersCollector.numbers.size() == 30
         }
+    }
+
+    void "should create producer per thread"() {
+        given:
+        Producer firstNumbersProducer
+        Producer secondNumbersProducer
+        TransactionalProducerRegistry transactionalProducerRegistry = context.getBean(TransactionalProducerRegistry)
+
+        when:
+        def one = Thread.start {
+            firstNumbersProducer = transactionalProducerRegistry.getTransactionalProducer("tx-nid-producer", "tx-nid-producer", Argument.of(String), Argument.of(Integer))
+        }
+
+        def second = Thread.start {
+            secondNumbersProducer = transactionalProducerRegistry.getTransactionalProducer("tx-nid-producer", "tx-nid-producer", Argument.of(String), Argument.of(Integer))
+        }
+
+        sleep 5_000
+
+        then:
+        one.join()
+        second.join()
+    }
+
+    void "should throw exception when producers limit"() {
+
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
