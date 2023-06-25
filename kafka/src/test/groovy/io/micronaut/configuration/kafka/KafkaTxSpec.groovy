@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.IntegerSerializer
 import org.apache.kafka.common.serialization.StringSerializer
+import spock.util.concurrent.PollingConditions
 
 import java.util.stream.Collectors
 import java.util.stream.Stream
@@ -118,23 +119,21 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
         TransactionalProducerRegistry transactionalProducerRegistry = context.getBean(TransactionalProducerRegistry)
 
         when:
-        def one = Thread.start {
+        Thread.start {
             firstNumbersProducer = transactionalProducerRegistry.getTransactionalProducer("tx-nid-producer", "tx-nid-producer", Argument.of(String), Argument.of(Integer))
         }
 
-        def second = Thread.start {
+        sleep 1_000
+
+        Thread.start {
             secondNumbersProducer = transactionalProducerRegistry.getTransactionalProducer("tx-nid-producer", "tx-nid-producer", Argument.of(String), Argument.of(Integer))
         }
 
-        sleep 5_000
+        sleep 1_000
 
         then:
-        one.join()
-        second.join()
-    }
-
-    void "should throw exception when producers limit"() {
-
+        firstNumbersProducer.transactionManager.transactionalId == "tx-nid-producer-1"
+        secondNumbersProducer.transactionManager.transactionalId == "tx-nid-producer-2"
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
