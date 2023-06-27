@@ -20,6 +20,7 @@ import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Inject;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -66,5 +67,13 @@ public class DefaultKafkaProducerConfiguration<K, V> extends AbstractKafkaProduc
             defaultProducerConfig.getKeySerializer().ifPresent(this::setKeySerializer);
             defaultProducerConfig.getValueSerializer().ifPresent(this::setValueSerializer);
         }
+    }
+
+    public boolean containsKey(String key) {
+        return getConfig().containsKey(key);
+    }
+
+    public void putAll(Map<String, String> properties) {
+        getConfig().putAll(properties);
     }
 }
