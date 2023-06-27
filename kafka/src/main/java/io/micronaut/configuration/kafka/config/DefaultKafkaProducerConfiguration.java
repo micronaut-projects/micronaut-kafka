@@ -20,7 +20,6 @@ import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Inject;
 
-import java.util.Map;
 import java.util.Properties;
 
 /**
