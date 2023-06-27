@@ -16,7 +16,13 @@
 package io.micronaut.configuration.kafka;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,9 +72,8 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
 
     /**
      * Default constructor.
-     *
-     * @param beanContext     The bean context
-     * @param serdeRegistry   The serde registry
+     * @param beanContext The bean context
+     * @param serdeRegistry The serde registry
      * @param producerFactory The producer factory
      */
     public KafkaProducerFactory(
@@ -84,17 +89,17 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     /**
      * Creates a new {@link KafkaProducer} for the given configuration.
      *
-     * @param injectionPoint        The injection point used to create the bean
+     * @param injectionPoint The injection point used to create the bean
      * @param producerConfiguration An optional producer configuration
-     * @param <K>                   The key type
-     * @param <V>                   The value type
+     * @param <K> The key type
+     * @param <V> The value type
      * @return The consumer
      */
     @Bean
     @Any
     public <K, V> Producer<K, V> getProducer(
-        @Nullable InjectionPoint<KafkaProducer<K, V>> injectionPoint,
-        @Nullable @Parameter AbstractKafkaProducerConfiguration<K, V> producerConfiguration) {
+            @Nullable InjectionPoint<KafkaProducer<K, V>> injectionPoint,
+            @Nullable @Parameter AbstractKafkaProducerConfiguration<K, V> producerConfiguration) {
         if (injectionPoint == null) {
             if (producerConfiguration != null) {
                 Optional<Serializer<K>> keySerializer = producerConfiguration.getKeySerializer();
@@ -199,8 +204,8 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     private <T> T createNonTransactionalKafkaProducer(Argument<?> keyType, Argument<?> valueType, Map<String, String> clientConfig, ClientKey key) {
         return (T) clients.computeIfAbsent(key, clientKey ->
             StringUtils.isNotEmpty(key.id) ?
-            createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration(key.id))
-        : createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration()));
+                createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration(key.id))
+                : createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration()));
     }
 
     @SuppressWarnings("unchecked")
