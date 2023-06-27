@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
  *
  * @author Graeme Rocher
+ * @author Pawel Szymczyk
  * @since 1.0
  */
 @Factory
