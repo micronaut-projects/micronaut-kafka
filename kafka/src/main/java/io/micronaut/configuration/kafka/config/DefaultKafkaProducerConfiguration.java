@@ -68,12 +68,4 @@ public class DefaultKafkaProducerConfiguration<K, V> extends AbstractKafkaProduc
             defaultProducerConfig.getValueSerializer().ifPresent(this::setValueSerializer);
         }
     }
-
-    public boolean containsKey(String key) {
-        return getConfig().containsKey(key);
-    }
-
-    public void putAll(Map<String, String> properties) {
-        getConfig().putAll(properties);
-    }
 }
