@@ -6,7 +6,7 @@ micronaut-gradle-plugin = "4.0.0-M4"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka-compat = "3.4.0"
-managed-kafka = '3.4.0'
+managed-kafka = '3.5.0'
 
 groovy = "4.0.12"
 awaitility = '4.2.0'
