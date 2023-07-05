@@ -32,10 +32,3 @@ configurations.all {
 test {
     maxHeapSize = '2048m'
 }
-
-micronautBuild {
-    binaryCompatibility {
-        // Enable before Micronaut next GA release
-        enabled.set(false)
-    }
-}
