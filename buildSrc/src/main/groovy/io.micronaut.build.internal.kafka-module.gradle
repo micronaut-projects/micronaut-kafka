@@ -2,6 +2,11 @@ plugins {
     id 'io.micronaut.build.internal.module'
     id 'io.micronaut.build.internal.kafka-base'
 }
+micronautBuild {
+    binaryCompatibility {
+        baselineVersion = "5.0.0-M6"
+    }
+}
 
 dependencies {
     api mn.micronaut.messaging
