@@ -75,6 +75,7 @@ public @interface ErrorStrategy {
      * By default, only the last failed attempt will be handed over to the exception handler.
      *
      * @return whether all exceptions should be handled or ignored
+     * @since 5.0
      */
     boolean handleAllExceptions() default DEFAULT_HANDLE_ALL_EXCEPTIONS;
 
