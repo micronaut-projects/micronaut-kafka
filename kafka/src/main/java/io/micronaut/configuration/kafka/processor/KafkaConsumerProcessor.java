@@ -604,6 +604,10 @@ class KafkaConsumerProcessor
             }
 
             if (consumerState.errorStrategyRetryCount >= retryState.currentRetryCount) {
+                if (consumerState.handleAllExceptions) {
+                    handleException(consumerState, consumerRecord, e);
+                }
+
                 TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
@@ -614,7 +618,6 @@ class KafkaConsumerProcessor
                     consumerState.pause(paused);
                     taskScheduler.schedule(retryDelay, () -> consumerState.resume(paused));
                 }
-                // skip handle exception
                 return true;
             } else {
                 consumerState.partitionRetries.remove(partition);
@@ -1043,6 +1046,7 @@ class KafkaConsumerProcessor
         @Nullable
         final Duration errorStrategyRetryDelay;
         final int errorStrategyRetryCount;
+        final boolean handleAllExceptions;
         final Class<? extends Throwable>[] errorStrategyExceptions;
 
         @Nullable
@@ -1081,11 +1085,13 @@ class KafkaConsumerProcessor
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
                 this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
+                this.handleAllExceptions = errorStrategyAnnotation.booleanValue("handleAllExceptions").orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);
                 //noinspection unchecked
                 this.errorStrategyExceptions = (Class<? extends Throwable>[]) errorStrategyAnnotation.classValues("exceptionTypes");
             } else {
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
+                this.handleAllExceptions = false;
                 //noinspection unchecked
                 this.errorStrategyExceptions = (Class<? extends Throwable>[]) ReflectionUtils.EMPTY_CLASS_ARRAY;
             }
