@@ -137,7 +137,7 @@ public @interface KafkaListener {
      *
      * @return The number of threads
      */
-    int threads() default 1;
+    String threads() default "1";
 
     /**
      * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)}.

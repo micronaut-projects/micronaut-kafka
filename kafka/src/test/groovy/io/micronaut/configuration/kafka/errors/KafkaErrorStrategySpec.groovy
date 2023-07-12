@@ -254,7 +254,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
         offsetReset = EARLIEST,
-        threads = 2,
+        threads = "2",
         errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR),
         properties = @Property(name = ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, value = "5000")
     )
