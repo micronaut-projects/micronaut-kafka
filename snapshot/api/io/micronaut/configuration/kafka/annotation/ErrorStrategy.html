@@ -100,21 +100,27 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#handleAllExceptions()" class="member-name-link">handleAllExceptions</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+ <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
+<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The strategy to use when an error occurs, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 </div>
@@ -134,9 +140,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Default retry delay in seconds.</div>
 </div>
-<div class="col-first odd-row-color"><code>static final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#DEFAULT_RETRY_COUNT" class="member-name-link">DEFAULT_RETRY_COUNT</a></code></div>
+<div class="col-first odd-row-color"><code>static final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#DEFAULT_HANDLE_ALL_EXCEPTIONS" class="member-name-link">DEFAULT_HANDLE_ALL_EXCEPTIONS</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Default handle all exceptions.</div>
+</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#DEFAULT_RETRY_COUNT" class="member-name-link">DEFAULT_RETRY_COUNT</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Default retry attempts.</div>
 </div>
 </div>
@@ -181,6 +192,21 @@ loadScripts(document, 'script');</script>
 </dl>
 </section>
 </li>
+<li>
+<section class="detail" id="DEFAULT_HANDLE_ALL_EXCEPTIONS">
+<h3>DEFAULT_HANDLE_ALL_EXCEPTIONS</h3>
+<div class="member-signature"><span class="modifiers">static final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">DEFAULT_HANDLE_ALL_EXCEPTIONS</span></div>
+<div class="block">Default handle all exceptions.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../../../../../constant-values.html#io.micronaut.configuration.kafka.annotation.ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -218,6 +244,26 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Default:</dt>
 <dd>1</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="handleAllExceptions()">
+<h3>handleAllExceptions</h3>
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">handleAllExceptions</span></div>
+<div class="block">Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+ <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.
+
+ By default, only the last failed attempt will be handed over to the exception handler.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>whether all exceptions should be handled or ignored</dd>
+<dt>Since:</dt>
+<dd>5.0</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd>false</dd>
 </dl>
 </section>
 </li>
