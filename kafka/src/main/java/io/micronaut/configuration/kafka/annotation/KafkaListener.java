@@ -132,7 +132,7 @@ public @interface KafkaListener {
      * for a consumer you can alter this setting. Note that this means that multiple partitions will
      * be allocated to a single application.
      *
-     * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be s
+     * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be
      * shared between invocations from different consumer threads</p>
      *
      * @return The number of threads
