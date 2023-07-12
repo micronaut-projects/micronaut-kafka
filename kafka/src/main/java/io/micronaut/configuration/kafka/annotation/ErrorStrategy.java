@@ -48,6 +48,11 @@ public @interface ErrorStrategy {
     int DEFAULT_RETRY_COUNT = 1;
 
     /**
+     * Default handle all exceptions.
+     */
+    boolean DEFAULT_HANDLE_ALL_EXCEPTIONS = false;
+
+    /**
      * The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
      * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
@@ -62,6 +67,17 @@ public @interface ErrorStrategy {
      * @return the retry count of how many attempts should be made
      */
     int retryCount() default DEFAULT_RETRY_COUNT;
+
+    /**
+     * Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     *
+     * By default, only the last failed attempt will be handed over to the exception handler.
+     *
+     * @return whether all exceptions should be handled or ignored
+     * @since 5.0
+     */
+    boolean handleAllExceptions() default DEFAULT_HANDLE_ALL_EXCEPTIONS;
 
     /**
      * The strategy to use when an error occurs, see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.

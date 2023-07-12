@@ -107,6 +107,28 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.times[3] - myConsumer.times[2] >= 200
     }
 
+    void "test when error strategy is 'retry on error' and 'handle all exceptions' is true"() {
+        when: "A consumer throws an exception"
+        RetryHandleAllErrorClient myClient = context.getBean(RetryHandleAllErrorClient)
+        myClient.sendMessage("One")
+        myClient.sendMessage("Two")
+        myClient.sendMessage("Three")
+
+        RetryHandleAllErrorCausingConsumer myConsumer = context.getBean(RetryHandleAllErrorCausingConsumer)
+
+        then: "Messages are consumed eventually"
+        conditions.eventually {
+            myConsumer.received == ["One", "Two", "Two", "Three", "Three", "Three"]
+            myConsumer.count.get() == 6
+        }
+        and: "messages were retried and all exceptions were handled"
+        myConsumer.errors.size() == 4
+        myConsumer.errors[0].message == "Two #2"
+        myConsumer.errors[1].message == "Three #4"
+        myConsumer.errors[2].message == "Three #5"
+        myConsumer.errors[3].message == "Three #6"
+    }
+
     void "test simultaneous retry and consumer reassignment"() {
         when: "A consumer throws an exception"
         TimeoutAndRetryErrorClient myClient = context.getBean(TimeoutAndRetryErrorClient)
@@ -227,6 +249,31 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 2, handleAllExceptions = true)
+    )
+    static class RetryHandleAllErrorCausingConsumer implements KafkaListenerExceptionHandler {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<KafkaListenerException> errors = []
+
+        @Topic("errors-retry-handle-all-exceptions")
+        void handleMessage(String message) {
+            received << message
+            if (count.getAndIncrement() == 1 || message == 'Three') {
+                throw new RuntimeException("${message} #${count}")
+            }
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            errors << exception
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, errorStrategy = @ErrorStrategy(value = NONE))
     static class PollNextErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
@@ -312,6 +359,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface ExpRetryErrorClient {
         @Topic("errors-exp-retry")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface RetryHandleAllErrorClient {
+        @Topic("errors-retry-handle-all-exceptions")
         void sendMessage(String message)
     }
 
