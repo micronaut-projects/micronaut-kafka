@@ -70,6 +70,22 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.times[1] - myConsumer.times[0] >= 50
     }
 
+    void "test when the error strategy is 'retry on error' and there are serialization errors"() {
+        when:"A record cannot be deserialized"
+        DeserializationErrorClient myClient = context.getBean(DeserializationErrorClient)
+        myClient.sendText("Not an integer")
+        myClient.sendNumber(123)
+
+        RetryOnErrorDeserializationErrorConsumer myConsumer = context.getBean(RetryOnErrorDeserializationErrorConsumer)
+
+        then:"The message that threw the exception is eventually left behind"
+        conditions.eventually {
+            myConsumer.number == 123
+        }
+        and:"the retry error strategy is honored"
+        myConsumer.exceptionCount.get() == 2
+    }
+
     void "test when the error strategy is 'retry on error' and retry failed, the finished messages should be complete except the failed message"() {
         when:"A client sends a lot of messages to a same topic"
         RetryErrorMultiplePartitionsClient myClient = context.getBean(RetryErrorMultiplePartitionsClient)
@@ -300,6 +316,27 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
+            offsetReset = EARLIEST,
+            value="errors-retry-deserialization-error",
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, handleAllExceptions = true)
+    )
+    static class RetryOnErrorDeserializationErrorConsumer implements KafkaListenerExceptionHandler {
+        int number = 0
+        AtomicInteger exceptionCount = new AtomicInteger(0)
+
+        @Topic("deserialization-errors-retry")
+        void handleMessage(int number) {
+            this.number = number
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionCount.getAndIncrement()
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
         offsetReset = EARLIEST,
         threads = 2,
         errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR),
@@ -346,6 +383,16 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static interface RetryErrorClient {
         @Topic("errors-retry")
         void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface DeserializationErrorClient {
+        @Topic("deserialization-errors-retry")
+        void sendText(String text)
+
+        @Topic("deserialization-errors-retry")
+        void sendNumber(int number)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
