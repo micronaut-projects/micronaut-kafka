@@ -1,35 +1,8 @@
-The previous section introduced the ability to embed Kafka for your tests. This is possible in Micronaut by specifying the `kafka.embedded.enabled` setting to `true` and adding the following dependencies to your test classpath:
+The previous section introduced the ability to use a Kafka docker container. This is possible by using 
+https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/[Micronaut Test Resources].
 
-.Kafka Gradle Test Dependencies
-[source,groovy,subs="attributes"]
-----
-testImplementation 'org.apache.kafka:kafka-clients:{kafka-version}:test'
-testImplementation 'org.apache.kafka:kafka_2.12:{kafka-version}'
-testImplementation 'org.apache.kafka:kafka_2.12:{kafka-version}:test'
-----
+The recommended approach to get started is to use https://micronaut.io/launch[Micronaut Launch] and select the `test-resources` feature.
 
-or
+Micronaut Test Resources will automatically start a Kafka container and provide the value of the `kafka.bootstrap.servers` property.
 
-.Kafka Maven Test Dependencies
-[source,xml,subs="specialchars,attributes"]
-----
-<dependency>
-  <groupId>org.apache.kafka</groupId>
-  <artifactId>kafka-clients</artifactId>
-  <version>{kafka-version}</version>
-  <classifier>test</classifier>
-</dependency>
-<dependency>
-  <groupId>org.apache.kafka</groupId>
-  <artifactId>kafka_2.12</artifactId>
-  <version>{kafka-version}</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.kafka</groupId>
-  <artifactId>kafka_2.12</artifactId>
-  <version>{kafka-version}</version>
-  <classifier>test</classifier>
-</dependency>
-----
-
-Note that because of the distributed nature of Kafka it is relatively slow to startup so it is generally better to do the initialization with `@BeforeClass` (or `setupSpec` in Spock) and have a large number of test methods rather than many test classes otherwise your test execution performance will suffer.
+TIP: For more information, see the https://micronaut-projects.github.io/micronaut-test-resources/snapshot/guide/#modules-kafka[Kafka section of the Test Resources documentation].
