@@ -1,8 +1,23 @@
-The previous section introduced the ability to use a Kafka docker container. This is possible by using 
-https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/[Micronaut Test Resources].
+https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/#modules-kafka[Micronaut Test Resources] simplifies running Kafka for local development and testing.  
 
-The recommended approach to get started is to use https://micronaut.io/launch[Micronaut Launch] and select the `test-resources` feature.
+> Micronaut Test Resources Kafka support will automatically start a Kafka container and provide the value of the `kafka.bootstrap.servers` property.
 
-Micronaut Test Resources will automatically start a Kafka container and provide the value of the `kafka.bootstrap.servers` property.
+https://micronaut.io/launch[Micronaut Launch] and CLI already apply Test Resources to your build when you https://micronaut.io/launch?features=kafka[select the `kafka` feature]. 
 
-TIP: For more information, see the https://micronaut-projects.github.io/micronaut-test-resources/snapshot/guide/#modules-kafka[Kafka section of the Test Resources documentation].
+Micronaut Test Resources uses https://testcontainers.com[Test Containers] under the hood. If you prefer to use Test Containers directly, you can create a https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers[Singleton Container] and combine it with https://micronaut-projects.github.io/micronaut-test/latest/api/io/micronaut/test/support/TestPropertyProvider.html[Micronaut Test `TestPropertyProvider`]:
+
+[source, java]
+----
+include::{testsmn}/AbstractKafkaTest.java[tags=imports, indent=0]
+
+include::{testsmn}/AbstractKafkaTest.java[tags=clazz, indent=0]
+----
+
+And then test:
+
+[source, java]
+----
+include::{testsmn}/MyTest.java[tags=imports, indent=0]
+
+include::{testsmn}/MyTest.java[tags=clazz, indent=0]
+----

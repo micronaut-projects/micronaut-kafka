@@ -42,6 +42,8 @@ managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
 
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = 'testcontainers' }
+
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 awaitility = { module = 'org.awaitility:awaitility', version.ref = 'awaitility' }
 
