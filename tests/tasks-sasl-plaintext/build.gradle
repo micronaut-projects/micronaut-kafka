@@ -2,10 +2,6 @@ plugins {
     id 'io.micronaut.build.internal.kafka-tests'
 }
 
-dependencies {
-    testImplementation libs.testcontainers.kafka
-}
-
 application {
     mainClass = 'example.Application'
 }
