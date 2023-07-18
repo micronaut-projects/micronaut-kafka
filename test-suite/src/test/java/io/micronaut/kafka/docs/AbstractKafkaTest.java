@@ -6,6 +6,9 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.*;
 
+/**
+ * @see <a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers">Singleton containers</a>
+ */
 abstract class AbstractKafkaTest implements TestPropertyProvider {
 
     static final KafkaContainer MY_KAFKA;

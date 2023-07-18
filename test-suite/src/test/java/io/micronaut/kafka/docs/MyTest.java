@@ -1,41 +1,35 @@
 package io.micronaut.kafka.docs;
 
 import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.context.annotation.*;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
+@Property(name = "spec.name", value = "MyTest")
 @MicronautTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MyTest extends AbstractKafkaTest {
-
-    @Inject
-    MyProducer producer;
-    @Inject
-    MyConsumer consumer;
-
     @Test
-    void testKafkaRunning() {
-        // Given
+    void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
         final String message = "hello";
-        // When
         producer.produce(message);
-        // Then
         await().atMost(5, SECONDS).until(() -> message.equals(consumer.consumed));
-        // Cleanup
         MY_KAFKA.stop();
     }
 
+    @Requires(property = "spec.name", value = "MyTest")
     @KafkaClient
-    public interface MyProducer {
+    interface MyProducer {
         @Topic("my-topic")
         void produce(String message);
     }
 
+    @Requires(property = "spec.name", value = "MyTest")
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
-    public static class MyConsumer {
+    static class MyConsumer {
         String consumed;
         @Topic("my-topic")
         public void consume(String message) {

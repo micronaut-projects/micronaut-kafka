@@ -5,6 +5,9 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import spock.lang.Specification
 
+/**
+ * @see <a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers">Singleton containers</a>
+ */
 abstract class AbstractKafkaTest extends Specification implements TestPropertyProvider {
 
     static final KafkaContainer MY_KAFKA
@@ -16,8 +19,6 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Override
     Map<String, String> getProperties() {
-        return Collections.singletonMap(
-                "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
-        )
+        ["kafka.bootstrap.servers": MY_KAFKA.getBootstrapServers()]
     }
 }
