@@ -137,9 +137,16 @@ implements io.micronaut.management.health.indicator.HealthIndicator</span></div>
 <div class="block">Retrieve the cluster "offsets.topic.replication.factor" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
  "default.replication.factor" if required, in order to support Confluent Cloud hosted Kafka.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>reactor.core.publisher.Flux&lt;io.micronaut.management.health.indicator.HealthResult&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResult()" class="member-name-link">getResult</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getMinNodeCount(org.apache.kafka.clients.admin.Config)" class="member-name-link">getMinNodeCount</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link">Config</a>&nbsp;config)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Retrieve the cluster "min.insync.replicas" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
+ "offsets.topic.replication.factor" or "default.replication.factor" if required, in order to
+ support Confluent Cloud hosted Kafka.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>reactor.core.publisher.Flux&lt;io.micronaut.management.health.indicator.HealthResult&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResult()" class="member-name-link">getResult</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -192,6 +199,21 @@ implements io.micronaut.management.health.indicator.HealthIndicator</span></div>
 <dd><code>config</code> - the cluster <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a></dd>
 <dt>Returns:</dt>
 <dd>the cluster replication factor, or Integer.MAX_VALUE if none found</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getMinNodeCount(org.apache.kafka.clients.admin.Config)">
+<h3>getMinNodeCount</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMinNodeCount</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link">Config</a>&nbsp;config)</span></div>
+<div class="block">Retrieve the cluster "min.insync.replicas" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
+ "offsets.topic.replication.factor" or "default.replication.factor" if required, in order to
+ support Confluent Cloud hosted Kafka.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>config</code> - the cluster <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a></dd>
+<dt>Returns:</dt>
+<dd>the optional cluster minimum number of replicas that must acknowledge a write</dd>
 </dl>
 </section>
 </li>
