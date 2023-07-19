@@ -137,6 +137,8 @@ public @interface KafkaListener {
      * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be
      * shared between invocations from different consumer threads</p>
      *
+     * <p>{@code threadsValue} takes precedence over {@code threads} if they are both set.
+     *
      * @return The number of threads
      * @See {@link KafkaListener#threads()}
      */
@@ -151,6 +153,8 @@ public @interface KafkaListener {
      *
      * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be
      * shared between invocations from different consumer threads</p>
+     *
+     * <p>{@code threads} will be overridden by {@code threadsValue} if they are both set.
      *
      * @return The number of threads
      * @See {@link KafkaListener#threadsValue()}
