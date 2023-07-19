@@ -209,6 +209,16 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         context.getBean(MyConsumer6).kafkaConsumers.size() == 3
     }
 
+    void "test kafka consumer with fixed number of threads"() {
+        expect:
+        context.getBean(MyConsumer7).kafkaConsumers.size() == 2
+    }
+
+    void "test kafka consumer with both thread settings set"() {
+        expect:
+        context.getBean(MyConsumer8).kafkaConsumers.size() == 3
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaClient
     static interface MyClient {
@@ -302,6 +312,50 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
             if (event.bean instanceof KafkaConsumer) {
                 final consumer = ((KafkaConsumer) event.bean)
                 if (consumer.clientId.startsWith("kafka-consumer-with-configurable-number-of-threads")) {
+                    kafkaConsumers << consumer
+                }
+            }
+            return event.bean
+        }
+
+        @Topic("words")
+        void consume(String sentence) {
+            // Do nothing
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
+    @KafkaListener(clientId = "kafka-consumer-with-fixed-number-of-threads", threads = 2)
+    static class MyConsumer7 implements BeanCreatedEventListener<Consumer> {
+        List<KafkaConsumer> kafkaConsumers = []
+
+        @Override
+        Consumer onCreated(BeanCreatedEvent<Consumer> event) {
+            if (event.bean instanceof KafkaConsumer) {
+                final consumer = ((KafkaConsumer) event.bean)
+                if (consumer.clientId.startsWith("kafka-consumer-with-fixed-number-of-threads")) {
+                    kafkaConsumers << consumer
+                }
+            }
+            return event.bean
+        }
+
+        @Topic("words")
+        void consume(String sentence) {
+            // Do nothing
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
+    @KafkaListener(clientId = "kafka-consumer-with-both-thread-settings-set", threads = 10, threadsValue = '${my.thread.count}')
+    static class MyConsumer8 implements BeanCreatedEventListener<Consumer> {
+        List<KafkaConsumer> kafkaConsumers = []
+
+        @Override
+        Consumer onCreated(BeanCreatedEvent<Consumer> event) {
+            if (event.bean instanceof KafkaConsumer) {
+                final consumer = ((KafkaConsumer) event.bean)
+                if (consumer.clientId.startsWith("kafka-consumer-with-both-thread-settings-set")) {
                     kafkaConsumers << consumer
                 }
             }
