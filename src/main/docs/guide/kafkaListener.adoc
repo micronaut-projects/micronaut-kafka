@@ -21,7 +21,15 @@ Alternatively, you can also scale via threads. By setting the number of `threads
 .Scaling with Threads
 [source,java]
 ----
-@KafkaListener(groupId="myGroup", threads="10")
+@KafkaListener(groupId="myGroup", threads=10)
+----
+
+You can also make your number of threads configurable by using `threadsValue`:
+
+.Dynamically Configuring Threads
+[source,java]
+----
+@KafkaListener(groupId="myGroup", threadsValue = "${my.thread.count}")
 ----
 
 The above example will create 10 link:{kafkaapi}/org/apache/kafka/clients/consumer/KafkaConsumer.html[KafkaConsumer] instances, each running in a unique thread and participating in the `myGroup` consumer group.

@@ -128,7 +128,9 @@ public @interface KafkaListener {
     ErrorStrategy errorStrategy() default @ErrorStrategy();
 
     /**
-     * Kafka consumers are by default single threaded. If you wish to increase the number of threads
+     * Dynamically configure the number of threads of a Kafka consumer.
+     *
+     * <p>Kafka consumers are by default single threaded. If you wish to increase the number of threads
      * for a consumer you can alter this setting. Note that this means that multiple partitions will
      * be allocated to a single application.
      *
@@ -136,8 +138,24 @@ public @interface KafkaListener {
      * shared between invocations from different consumer threads</p>
      *
      * @return The number of threads
+     * @See {@link KafkaListener#threads()}
      */
-    String threads() default "1";
+    String threadsValue() default "";
+
+    /**
+     * Statically configure the number of threads of a Kafka consumer.
+     *
+     * <p>Kafka consumers are by default single threaded. If you wish to increase the number of threads
+     * for a consumer you can alter this setting. Note that this means that multiple partitions will
+     * be allocated to a single application.
+     *
+     * <p>NOTE: When using this setting if your bean is {@link jakarta.inject.Singleton} then local state will be
+     * shared between invocations from different consumer threads</p>
+     *
+     * @return The number of threads
+     * @See {@link KafkaListener#threadsValue()}
+     */
+    int threads() default 1;
 
     /**
      * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)}.

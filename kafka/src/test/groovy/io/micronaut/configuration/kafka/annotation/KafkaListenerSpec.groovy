@@ -293,7 +293,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
-    @KafkaListener(clientId = "kafka-consumer-with-configurable-number-of-threads", threads = '${my.thread.count}')
+    @KafkaListener(clientId = "kafka-consumer-with-configurable-number-of-threads", threadsValue = '${my.thread.count}')
     static class MyConsumer6 implements BeanCreatedEventListener<Consumer> {
         List<KafkaConsumer> kafkaConsumers = []
 
