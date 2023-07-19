@@ -52,6 +52,7 @@ import java.util.Optional;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final String ID = "kafka";
+    private static final String MIN_INSYNC_REPLICAS_PROPERTY = "min.insync.replicas";
     private static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
     private static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
     private final AdminClient adminClient;
@@ -80,6 +81,19 @@ public class KafkaHealthIndicator implements HealthIndicator {
         return ce != null ? Integer.parseInt(ce.value()) : Integer.MAX_VALUE;
     }
 
+    /**
+     * Retrieve the cluster "min.insync.replicas" for the given {@link Config}, falling back to
+     * "offsets.topic.replication.factor" or "default.replication.factor" if required, in order to
+     * support Confluent Cloud hosted Kafka.
+     *
+     * @param config the cluster {@link Config}
+     * @return the optional cluster minimum number of replicas that must acknowledge a write
+     */
+    public static int getMinNodeCount(Config config) {
+        return Optional.ofNullable(config.get(MIN_INSYNC_REPLICAS_PROPERTY)).map(ConfigEntry::value).map(Integer::parseInt)
+            .orElseGet(() -> getClusterReplicationFactor(config));
+    }
+
     @Override
     public Flux<HealthResult> getResult() {
         DescribeClusterResult result = adminClient.describeCluster(
@@ -99,11 +113,11 @@ public class KafkaHealthIndicator implements HealthIndicator {
             Mono<Map<ConfigResource, Config>> configs = KafkaReactorUtil.fromKafkaFuture(configResult::all);
             return configs.flux().switchMap(resources -> {
                 Config config = resources.get(configResource);
-                int replicationFactor = getClusterReplicationFactor(config);
+                int minNodeCount = getMinNodeCount(config);
                 return nodes.flux().switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
                     HealthResult.Builder builder;
-                    if (nodeCount >= replicationFactor) {
+                    if (nodeCount >= minNodeCount) {
                         builder = HealthResult.builder(ID, HealthStatus.UP);
                     } else {
                         builder = HealthResult.builder(ID, HealthStatus.DOWN);

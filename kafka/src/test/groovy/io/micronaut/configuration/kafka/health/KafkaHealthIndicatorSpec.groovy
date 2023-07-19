@@ -12,6 +12,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.MIN_INSYNC_REPLICAS_PROPERTY
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
 import static io.micronaut.health.HealthStatus.UP
@@ -31,7 +32,6 @@ class KafkaHealthIndicatorSpec extends Specification {
         HealthResult result = healthIndicator.result.next().block()
 
         then:
-        // report down because the not enough nodes to meet replication factor
         result.status == UP
         result.details.nodes == 1
 
@@ -86,6 +86,9 @@ class KafkaHealthIndicatorSpec extends Specification {
     void "kafka health indicator handle missing replication factor config"() {
         given:
         Collection<ConfigEntry> configEntries = []
+        if (minReplicas) {
+            configEntries << new ConfigEntry(MIN_INSYNC_REPLICAS_PROPERTY, minReplicas)
+        }
         if (offsetFactor) {
             configEntries << new ConfigEntry(REPLICATION_PROPERTY, offsetFactor)
         }
@@ -95,16 +98,20 @@ class KafkaHealthIndicatorSpec extends Specification {
         Config config = new Config(configEntries)
 
         when:
-        int replicationFactor = KafkaHealthIndicator.getClusterReplicationFactor(config)
+        int replicationFactor = KafkaHealthIndicator.getMinNodeCount(config)
 
         then:
         replicationFactor == expected
 
         where:
-        offsetFactor | defaultFactor | expected
-        "10"         | null          | 10
-        "10"         | "8"           | 10
-        null         | "8"           | 8
-        null         | null          | Integer.MAX_VALUE
+        minReplicas | offsetFactor | defaultFactor | expected
+        "100"       | "10"         | null          | 100
+        "100"       | "10"         | "8"           | 100
+        "100"       | null         | "8"           | 100
+        "100"       | null         | null          | 100
+        null        | "10"         | null          | 10
+        null        | "10"         | "8"           | 10
+        null        | null         | "8"           | 8
+        null        | null         | null          | Integer.MAX_VALUE
     }
 }
