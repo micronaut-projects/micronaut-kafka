@@ -16,7 +16,7 @@ internal class MyTest : AbstractKafkaTest() {
         val message = "hello"
         producer.produce(message)
         await().atMost(5, TimeUnit.SECONDS)
-            .until(Callable<Boolean> { message == consumer.consumed })
+            .until { consumer.consumed == message }
         MY_KAFKA.stop()
     }
 

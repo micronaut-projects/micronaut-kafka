@@ -11,9 +11,9 @@ import java.util.*
 abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
-        var MY_KAFKA: KafkaContainer
+        var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+
         init {
-            MY_KAFKA = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
             MY_KAFKA.start()
         }
     }
