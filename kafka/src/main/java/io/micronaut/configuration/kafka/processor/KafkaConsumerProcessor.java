@@ -86,6 +86,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
+import org.apache.kafka.common.errors.RecordDeserializationException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -458,7 +459,28 @@ class KafkaConsumerProcessor
                 boolean failed = true;
                 try {
                     consumerState.pauseTopicPartitions();
-                    final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    final ConsumerRecords<?, ?> consumerRecords;
+                    // Deserialization errors can happen while polling
+                    if (!isBatch) {
+                        // Unless in batch mode, try to honor the configured error strategy
+                        try {
+                            consumerRecords = kafkaConsumer.poll(pollTimeout);
+                        } catch (RecordDeserializationException ex) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", logMethod(method), ex);
+                            }
+                            final TopicPartition tp = ex.topicPartition();
+                            // By default, seek past the record to continue consumption
+                            consumerState.kafkaConsumer.seek(tp, ex.offset() + 1);
+                            // The error strategy and the exception handler can still decide what to do about this record
+                            resolveWithErrorStrategy(consumerState, new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null), ex);
+                            // By now, it's been decided whether this record should be retried and the exception may have been handled
+                            continue;
+                        }
+                    } else {
+                        // Otherwise, propagate any errors
+                        consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    }
                     consumerState.closedState = ConsumerCloseState.POLLING;
                     failed = true;
                     consumerState.resumeTopicPartitions();
