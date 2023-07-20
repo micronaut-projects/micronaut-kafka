@@ -25,7 +25,7 @@ dependencies {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.graalvm.sdk:graal-sdk:23.0.0'
+        force 'org.graalvm.sdk:graal-sdk:23.0.1'
     }
 }
 
