@@ -11,7 +11,6 @@ import static org.awaitility.Awaitility.await;
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("It hangs forever in the CI")
 class MyTest extends AbstractKafkaTest {
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
