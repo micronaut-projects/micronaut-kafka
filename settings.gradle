@@ -28,4 +28,6 @@ include 'kafka-bom'
 include 'kafka'
 include 'kafka-streams'
 include 'tests:tasks-sasl-plaintext'
-
+include 'test-suite'
+include 'test-suite-groovy'
+include 'test-suite-kotlin'

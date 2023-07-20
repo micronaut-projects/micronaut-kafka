@@ -24,7 +24,7 @@ The previous example can be tested in JUnit with the following test:
 include::{testskafka}/producer/inject/BookSenderTest.java[tags=test, indent=0]
 ----
 
-<1> An embedded version of Kafka is used
+<1> A Kafka docker container is used
 <2> The `BookSender` is retrieved from the api:context.ApplicationContext[] and a `ProducerRecord` sent
 
 By using the link:{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html[KafkaProducer] API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.

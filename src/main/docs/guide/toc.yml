@@ -9,7 +9,7 @@ kafkaClient:
   kafkaClientBatch: Sending Records in Batch
   kafkaClientScope: Injecting Kafka Producer Beans
   kafkaClientTx: Transactions
-  kafkaEmbedded: Embedding Kafka
+  kafkaDockerized: Running Kafka while testing and developing
 kafkaListener:
   title: Kafka Consumers Using @KafkaListener
   kafkaListenerMethods: Defining @KafkaListener Methods
