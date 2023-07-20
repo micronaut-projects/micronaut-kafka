@@ -111,7 +111,7 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientTx"><a href="#kafkaClientTx"><strong>5.5</strong><span>Transactions</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaEmbedded"><a href="#kafkaEmbedded"><strong>5.6</strong><span>Embedding Kafka</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDockerized"><a href="#kafkaDockerized"><strong>5.6</strong><span>Running Kafka while testing and developing</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
         
@@ -979,7 +979,7 @@ public void testBookSender() {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>An embedded version of Kafka is used</td>
+<td>A Kafka docker container is used</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -1017,53 +1017,270 @@ try {
 </div>
 </div>
 
-<h2 id="kafkaEmbedded"><a class="anchor" href="#kafkaEmbedded"></a>5.6 Embedding Kafka</h2>
+<h2 id="kafkaDockerized"><a class="anchor" href="#kafkaDockerized"></a>5.6 Running Kafka while testing and developing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaEmbedded.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaClient/kafkaDockerized.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
 
 
 <div class="paragraph">
-<p>The previous section introduced the ability to embed Kafka for your tests. This is possible in Micronaut by specifying the <code>kafka.embedded.enabled</code> setting to <code>true</code> and adding the following dependencies to your test classpath:</p>
+<p><a href="https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/#modules-kafka">Micronaut Test Resources</a> simplifies running Kafka for local development and testing.</p>
 </div>
-<div class="listingblock">
-<div class="title">Kafka Gradle Test Dependencies</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Micronaut Test Resources Kafka support will automatically start a Kafka container and provide the value of the <code>kafka.bootstrap.servers</code> property.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p><a href="https://micronaut.io/launch">Micronaut Launch</a> and CLI already apply Test Resources to your build when you <a href="https://micronaut.io/launch?features=kafka">select the <code>kafka</code> feature</a>.</p>
+</div>
+<div class="paragraph">
+<p>Micronaut Test Resources uses <a href="https://testcontainers.com">Test Containers</a> under the hood. If you prefer to use Test Containers directly, you can create a <a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers">Singleton Container</a> and combine it with <a href="https://micronaut-projects.github.io/micronaut-test/latest/api/io/micronaut/test/support/TestPropertyProvider.html">Micronaut Test <code>TestPropertyProvider</code></a>:</p>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">testImplementation 'org.apache.kafka:kafka-clients:N/A:test'
-testImplementation 'org.apache.kafka:kafka_2.12:N/A'
-testImplementation 'org.apache.kafka:kafka_2.12:N/A:test'</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs;
+
+import io.micronaut.test.support.TestPropertyProvider;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import java.util.*;
+
+/**
+ * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
+ */
+abstract class AbstractKafkaTest implements TestPropertyProvider {
+
+    static final KafkaContainer MY_KAFKA;
+
+    static {
+        MY_KAFKA = new KafkaContainer(
+            DockerImageName.parse("confluentinc/cp-kafka:latest"));
+        MY_KAFKA.start();
+    }
+
+    @Override
+    public Map&lt;String, String&gt; getProperties() {
+        return Collections.singletonMap(
+            "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
+        );
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs
+
+import io.micronaut.test.support.TestPropertyProvider
+import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
+import spock.lang.Specification
+
+/**
+ * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
+ */
+abstract class AbstractKafkaTest extends Specification implements TestPropertyProvider {
+
+    static final KafkaContainer MY_KAFKA
+
+    static {
+        MY_KAFKA = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+        MY_KAFKA.start()
+    }
+
+    @Override
+    Map&lt;String, String&gt; getProperties() {
+        ["kafka.bootstrap.servers": MY_KAFKA.getBootstrapServers()]
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
+
+import io.micronaut.test.support.TestPropertyProvider
+import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
+import java.util.*
+
+/**
+ * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
+ */
+abstract class AbstractKafkaTest : TestPropertyProvider {
+
+    companion object {
+        var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+
+        init {
+            MY_KAFKA.start()
+        }
+    }
+
+    override fun getProperties(): MutableMap&lt;String, String&gt; {
+        return Collections.singletonMap(
+            "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
+        )
+    }
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>or</p>
+<p>And then test:</p>
 </div>
-<div class="listingblock">
-<div class="title">Kafka Maven Test Dependencies</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
-  &lt;artifactId&gt;kafka-clients&lt;/artifactId&gt;
-  &lt;version&gt;N/A&lt;/version&gt;
-  &lt;classifier&gt;test&lt;/classifier&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-  &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
-  &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;N/A&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-  &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
-  &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
-  &lt;version&gt;N/A&lt;/version&gt;
-  &lt;classifier&gt;test&lt;/classifier&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs;
+
+import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.context.annotation.*;
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import org.junit.jupiter.api.*;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+
+@Property(name = "spec.name", value = "MyTest")
+@MicronautTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled("It hangs forever in the CI")
+class MyTest extends AbstractKafkaTest {
+    @Test
+    void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
+        final String message = "hello";
+        producer.produce(message);
+        await().atMost(5, SECONDS).until(() -&gt; message.equals(consumer.consumed));
+        MY_KAFKA.stop();
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaClient
+    interface MyProducer {
+        @Topic("my-topic")
+        void produce(String message);
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    static class MyConsumer {
+        String consumed;
+        @Topic("my-topic")
+        public void consume(String message) {
+            consumed = message;
+        }
+    }
+}</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Note that because of the distributed nature of Kafka it is relatively slow to startup so it is generally better to do the initialization with <code>@BeforeClass</code> (or <code>setupSpec</code> in Spock) and have a large number of test methods rather than many test classes otherwise your test execution performance will suffer.</p>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs
+
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.*
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
+import spock.lang.Ignore
+
+import static java.util.concurrent.TimeUnit.SECONDS
+import static org.awaitility.Awaitility.await
+
+@Property(name = "spec.name", value = "MyTest")
+@MicronautTest
+@Ignore("It hangs forever in the CI")
+class MyTest extends AbstractKafkaTest {
+
+    @Inject
+    MyProducer producer
+    @Inject
+    MyConsumer consumer
+
+    void "test kafka running"() {
+        given:
+        String message = "hello"
+
+        when:
+        producer.produce(message)
+
+        then:
+        await().atMost(5, SECONDS).until(() -&gt; consumer.consumed == message)
+
+        cleanup:
+        MY_KAFKA.stop()
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaClient
+    static interface MyProducer {
+        @Topic("my-topic")
+        void produce(String message)
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    static class MyConsumer {
+        String consumed
+
+        @Topic("my-topic")
+        void consume(String message) {
+            consumed = message
+        }
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
+
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.*
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.*
+import java.util.concurrent.*
+
+@Property(name = "spec.name", value = "MyTest")
+@MicronautTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled("It hangs forever in the CI")
+internal class MyTest : AbstractKafkaTest() {
+    @Test
+    fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
+        val message = "hello"
+        producer.produce(message)
+        await().atMost(5, TimeUnit.SECONDS)
+            .until { consumer.consumed == message }
+        MY_KAFKA.stop()
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaClient
+    interface MyProducer {
+        @Topic("my-topic")
+        fun produce(message: String)
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    class MyConsumer {
+        var consumed: String? = null
+
+        @Topic("my-topic")
+        fun consume(message: String) {
+            consumed = message
+        }
+    }
+}</code></pre>
+</div>
 </div>
 
 <h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>6 Kafka Consumers Using @KafkaListener</h1>
