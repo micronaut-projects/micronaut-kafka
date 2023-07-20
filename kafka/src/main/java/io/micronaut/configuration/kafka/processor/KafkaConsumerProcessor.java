@@ -1084,7 +1084,7 @@ class KafkaConsumerProcessor
         final boolean useSendOffsetsToTransaction;
         final boolean isMessageReturnType;
         final boolean isMessagesIterableReturnType;
-        ConsumerCloseState closedState;
+        volatile ConsumerCloseState closedState;
 
         private ConsumerState(String clientId, String groupId, OffsetStrategy offsetStrategy, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions,
                               AnnotationValue<KafkaListener> kafkaListener, ExecutableMethod<?, ?> method) {
