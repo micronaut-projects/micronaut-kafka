@@ -21,7 +21,12 @@ public class MyStreamsUncaughtExceptionHandler
 
     @Override
     public StreamThreadExceptionResponse handle(Throwable exception) {
-        return StreamThreadExceptionResponse.REPLACE_THREAD;
+        if (exception instanceof MyException) {
+            return StreamThreadExceptionResponse.REPLACE_THREAD;
+        }
+        return StreamThreadExceptionResponse.SHUTDOWN_APPLICATION;
     }
 }
-// end::imports[]
+// end::clazz[]
+
+interface MyException { }

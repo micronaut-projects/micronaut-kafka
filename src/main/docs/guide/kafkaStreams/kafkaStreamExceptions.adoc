@@ -4,16 +4,7 @@ There are three possible https://kafka.apache.org/28/javadoc/org/apache/kafka/st
 
 TIP: You can find more details about this mechanism https://developer.confluent.io/tutorials/error-handling/confluent.html[here].
 
-To implement your own handler, you can listen to the application event api:io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart[] and configure the streams with your own business logic:
-
-[source,java]
-----
-include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=imports, indent=0]
-
-include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=clazz, indent=0]
-----
-
-However, if you just want to take the same action every time, you can set the application property `kafka.streams.[STREAM-NAME].uncaught-exception-handler` to a valid action, such as `REPLACE_THREAD`.
+If you just want to take the same action every time, you can set the application property `kafka.streams.[STREAM-NAME].uncaught-exception-handler` to a valid action, such as `REPLACE_THREAD`.
 
 For example in `application-test.yml`:
 
@@ -23,4 +14,13 @@ kafka:
     streams:
         my-stream:
             uncaught-exception-handler: REPLACE_THREAD
+----
+
+To implement your own handler, you can listen to the application event api:io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart[] and configure the streams with your own business logic:
+
+[source,java]
+----
+include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=imports, indent=0]
+
+include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=clazz, indent=0]
 ----
