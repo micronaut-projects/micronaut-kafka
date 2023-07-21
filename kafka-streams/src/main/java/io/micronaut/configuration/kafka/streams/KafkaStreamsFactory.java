@@ -173,7 +173,7 @@ public class KafkaStreamsFactory implements Closeable {
      * @param kafkaStreams The kafka streams to configure.
      * @return An optional exception handler if {@code uncaught-exception-handler} was configured.
      */
-    private static Optional<StreamsUncaughtExceptionHandler> setUncaughtExceptionHandler(Properties properties, KafkaStreams kafkaStreams) {
+    Optional<StreamsUncaughtExceptionHandler> setUncaughtExceptionHandler(Properties properties, KafkaStreams kafkaStreams) {
         final Optional<StreamsUncaughtExceptionHandler> uncaughtExceptionHandler = Optional
             .ofNullable(properties.getProperty(UNCAUGHT_EXCEPTION_HANDLER_PROPERTY))
             .filter(not(String::isBlank))
