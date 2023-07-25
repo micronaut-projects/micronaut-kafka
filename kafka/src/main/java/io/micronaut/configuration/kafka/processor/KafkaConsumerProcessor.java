@@ -388,8 +388,7 @@ class KafkaConsumerProcessor
                                        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
                                        final Properties properties,
                                        final Class<?> beanType) {
-        final int consumerThreads = consumerAnnotation.intValue("threadsValue")
-            .orElseGet(() -> consumerAnnotation.intValue("threads").orElse(1));
+        final int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
         for (int i = 0; i < consumerThreads; i++) {
             final String finalClientId;
             if (clientId != null) {
