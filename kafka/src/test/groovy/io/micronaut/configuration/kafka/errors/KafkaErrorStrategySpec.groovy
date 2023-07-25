@@ -167,7 +167,7 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         type      | consumerClass             | expectedErrorCount
         'fixed'   | FixedRetryCountConsumer   | 11
         'dynamic' | DynamicRetryCountConsumer | 4
-        'mixed'   | MixedRetryCountConsumer   | 4
+        'mixed'   | MixedRetryCountConsumer   | 11
     }
 
     void "test simultaneous retry and consumer reassignment"() {
