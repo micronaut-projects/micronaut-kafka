@@ -61,12 +61,26 @@ public @interface ErrorStrategy {
     String retryDelay() default DEFAULT_DELAY_IN_SECONDS + "s";
 
     /**
-     * The retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
      * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
+     * <p>{@code retryCount} will be overridden by {@code retryCountValue} if they are both set.
+     *
      * @return the retry count of how many attempts should be made
+     * @see ErrorStrategy#retryCountValue()
      */
     int retryCount() default DEFAULT_RETRY_COUNT;
+
+    /**
+     * The dynamic retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     *
+     * <p>{@code retryCountValue} takes precedence over {@code retryCount} if they are both set.
+     *
+     * @return the retry count of how many attempts should be made
+     * @see ErrorStrategy#retryCount()
+     */
+    String retryCountValue() default "";
 
     /**
      * Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
