@@ -140,7 +140,7 @@ public @interface KafkaListener {
      * <p>{@code threadsValue} takes precedence over {@code threads} if they are both set.
      *
      * @return The number of threads
-     * @See {@link KafkaListener#threads()}
+     * @see KafkaListener#threads()
      */
     String threadsValue() default "";
 
@@ -157,7 +157,7 @@ public @interface KafkaListener {
      * <p>{@code threads} will be overridden by {@code threadsValue} if they are both set.
      *
      * @return The number of threads
-     * @See {@link KafkaListener#threadsValue()}
+     * @see KafkaListener#threadsValue()
      */
     int threads() default 1;
 
