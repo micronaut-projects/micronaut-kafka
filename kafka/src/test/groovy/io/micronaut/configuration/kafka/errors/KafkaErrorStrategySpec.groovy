@@ -13,6 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import spock.lang.Unroll
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -30,7 +31,8 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     Map<String, Object> getConfiguration() {
         super.configuration +
-                ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false]
+                ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false,
+                 "my.retry.count": "3"]
     }
 
     @Override
@@ -143,6 +145,29 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.errors[1].message == "Three #4"
         myConsumer.errors[2].message == "Three #5"
         myConsumer.errors[3].message == "Three #6"
+    }
+
+    @Unroll
+    void "test when error strategy is 'retry on error' with #type retry count"(String type) {
+        when: "A consumer throws an exception"
+        RetryCountClient myClient = context.getBean(RetryCountClient)
+        myClient.sendMessage("${type}-retry-count", "ERROR")
+        myClient.sendMessage("${type}-retry-count", "OK")
+
+        AbstractRetryCountConsumer myConsumer = context.getBean(consumerClass)
+
+        then: "Messages are consumed eventually"
+        conditions.eventually {
+            myConsumer.received == "OK"
+        }
+        and: "messages were retried the correct number of times"
+        myConsumer.errors.size() == expectedErrorCount
+
+        where:
+        type      | consumerClass             | expectedErrorCount
+        'fixed'   | FixedRetryCountConsumer   | 11
+        'dynamic' | DynamicRetryCountConsumer | 4
+        'mixed'   | MixedRetryCountConsumer   | 4
     }
 
     void "test simultaneous retry and consumer reassignment"() {
@@ -371,6 +396,57 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    static abstract class AbstractRetryCountConsumer implements KafkaListenerExceptionHandler {
+        List<KafkaListenerException> errors = []
+        String received
+
+        void receive(String message) {
+            if (message == 'ERROR') throw new RuntimeException("Won't handle this one")
+            received = message
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            errors << exception
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10, handleAllExceptions = true)
+    )
+    static class FixedRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("fixed-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCountValue = '${my.retry.count}', handleAllExceptions = true)
+    )
+    static class DynamicRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("dynamic-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10, retryCountValue = '${my.retry.count}', handleAllExceptions = true)
+    )
+    static class MixedRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("mixed-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaClient
     static interface ResumeErrorClient {
@@ -428,5 +504,11 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static interface TimeoutAndRetryErrorClient {
         @Topic("errors-timeout-and-retry")
         void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface RetryCountClient {
+        void sendMessage(@Topic topic, String message)
     }
 }
