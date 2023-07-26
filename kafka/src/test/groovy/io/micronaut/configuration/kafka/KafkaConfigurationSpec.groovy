@@ -9,18 +9,20 @@ import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.common.header.Headers
-import org.apache.kafka.common.serialization.Deserializer
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import spock.lang.AutoCleanup
 import spock.lang.Issue
 import spock.lang.Specification
 
-import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*
+import static org.apache.kafka.clients.producer.ProducerConfig.*
 
 class KafkaConfigurationSpec extends Specification {
 
@@ -51,37 +53,55 @@ class KafkaConfigurationSpec extends Specification {
     }
 
     void "test custom consumer deserializer"() {
-        given:
+        given: "config with specific deserializer encodings"
         applicationContext = ApplicationContext.run(
                 ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
                 ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
                 ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
+                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
         )
-        StringDeserializer keyDeser = new CustomDeserializer()
-        StringDeserializer valueDeser = new CustomDeserializer()
 
-        when:
+        when: "custom deserializers are set"
         AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
-        config.setKeyDeserializer(keyDeser)
-        config.setValueDeserializer(valueDeser)
-        Properties props = config.getConfig()
+        config.setKeyDeserializer(new StringDeserializer())
+        config.setValueDeserializer(new StringDeserializer())
 
-        then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
-        keyDeser.key == true
-        keyDeser.getEncodingOverride().name() == StandardCharsets.US_ASCII.name()
-        valueDeser.getEncodingOverride().name() == StandardCharsets.ISO_8859_1.name()
+        and: "a consumer is created"
+        KafkaConsumer consumer = applicationContext.createBean(Consumer, config)
 
-
-        when:
-        Consumer consumer = applicationContext.createBean(Consumer, config)
-
-        then:
+        then: "the new consumer's deserializers have the configured encoding"
         consumer != null
+        (consumer.keyDeserializer as StringDeserializer).encoding == StandardCharsets.US_ASCII.name()
+        (consumer.valueDeserializer as StringDeserializer).encoding == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         consumer.close()
+    }
+
+    void "test custom producer serializer"() {
+        given: "config with specific serializer encodings"
+        applicationContext = ApplicationContext.run(
+                ("kafka." + KEY_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
+                ("kafka." + KEY_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
+                ("kafka." + VALUE_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
+                ("kafka." + VALUE_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
+        )
+
+        when: "custom serializers are set"
+        AbstractKafkaProducerConfiguration config = applicationContext.getBean(AbstractKafkaProducerConfiguration)
+        config.setKeySerializer(new StringSerializer())
+        config.setValueSerializer(new StringSerializer())
+
+        and: "a producer is created"
+        KafkaProducer producer = applicationContext.createBean(Producer, config)
+
+        then: "the new producer's serializers have the configured encoding"
+        producer != null
+        (producer.keySerializer as StringSerializer).encoding == StandardCharsets.US_ASCII.name()
+        (producer.valueSerializer as StringSerializer).encoding == StandardCharsets.ISO_8859_1.name()
+
+        cleanup:
+        producer.close()
     }
 
     void "test configure default properties"() {
@@ -299,34 +319,6 @@ class KafkaConfigurationSpec extends Specification {
         thrown(NoSuchBeanException)
     }
 
-}
-
-class CustomDeserializer extends StringDeserializer {
-    private boolean key
-
-    private Charset encodingOverride
-
-    boolean getKey() {
-        return key
-    }
-
-    Charset getEncodingOverride() {
-        return encodingOverride
-    }
-
-    @Override
-    void configure(Map<String, ?> configs, boolean isKey) {
-        super.configure(configs, isKey)
-        this.key = isKey
-
-        //Code taken from StringDeserializer as an example
-        String propertyName = isKey ? "key.deserializer.encoding" : "value.deserializer.encoding";
-        Object encodingValue = configs.get(propertyName);
-        if (encodingValue == null)
-            encodingValue = configs.get("deserializer.encoding");
-        if (encodingValue instanceof String)
-            encodingOverride = (String) encodingValue;
-    }
 }
 
 class FakeYamlPropertySource extends MapPropertySource {
