@@ -9,9 +9,11 @@ import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import spock.lang.AutoCleanup
@@ -21,8 +23,6 @@ import spock.lang.Specification
 import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
-import static org.apache.kafka.clients.consumer.ConsumerConfig.*
-import static org.apache.kafka.clients.producer.ProducerConfig.*
 
 class KafkaConfigurationSpec extends Specification {
 
@@ -31,8 +31,8 @@ class KafkaConfigurationSpec extends Specification {
     void "test default consumer configuration"() {
         given:
         applicationContext = ApplicationContext.builder().enableDefaultPropertySources(false)
-                .properties(("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                            ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name)
+                .properties(("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                            ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name)
                 .run(ApplicationContext.class);
 
         when:
@@ -40,7 +40,7 @@ class KafkaConfigurationSpec extends Specification {
         Properties props = config.getConfig()
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
 
         when:
         Consumer consumer = applicationContext.createBean(Consumer, config)
@@ -55,10 +55,10 @@ class KafkaConfigurationSpec extends Specification {
     void "test custom consumer deserializer"() {
         given: "config with specific deserializer encodings"
         applicationContext = ApplicationContext.run(
-                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
-                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
         )
 
         when: "custom deserializers are set"
@@ -81,10 +81,10 @@ class KafkaConfigurationSpec extends Specification {
     void "test custom producer serializer"() {
         given: "config with specific serializer encodings"
         applicationContext = ApplicationContext.run(
-                ("kafka." + KEY_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
-                ("kafka." + KEY_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
-                ("kafka." + VALUE_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
-                ("kafka." + VALUE_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
+                ("kafka." + ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
+                ("kafka." + ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.US_ASCII.name(),
+                ("kafka." + ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG): StringSerializer.name,
+                ("kafka." + ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG + ".encoding"): StandardCharsets.ISO_8859_1.name(),
         )
 
         when: "custom serializers are set"
@@ -107,11 +107,11 @@ class KafkaConfigurationSpec extends Specification {
     void "test configure default properties"() {
         given:
         applicationContext = ApplicationContext.run(
-                ('kafka.' + BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
-                ('kafka.' + GROUP_ID_CONFIG): "mygroup",
-                ('kafka.' + MAX_POLL_RECORDS_CONFIG): "100",
-                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.' + ConsumerConfig.GROUP_ID_CONFIG): "mygroup",
+                ('kafka.' + ConsumerConfig.MAX_POLL_RECORDS_CONFIG): "100",
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
         )
 
         when:
@@ -119,9 +119,9 @@ class KafkaConfigurationSpec extends Specification {
         Properties props = config.getConfig()
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == "localhost:1111"
-        props[GROUP_ID_CONFIG] == "mygroup"
-        props[MAX_POLL_RECORDS_CONFIG] == "100"
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == "localhost:1111"
+        props[ConsumerConfig.GROUP_ID_CONFIG] == "mygroup"
+        props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] == "100"
 
         when:
         Consumer consumer = applicationContext.createBean(Consumer, config)
@@ -136,13 +136,13 @@ class KafkaConfigurationSpec extends Specification {
     void "test override consumer default properties"() {
         given:
         applicationContext = ApplicationContext.run(
-                ('kafka.' + BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
-                ('kafka.' + GROUP_ID_CONFIG): "mygroup",
-                ('kafka.consumers.default.' + BOOTSTRAP_SERVERS_CONFIG): "localhost:2222",
-                ('kafka.' + GROUP_ID_CONFIG): "mygroup",
-                ('kafka.consumers.default.' + MAX_POLL_RECORDS_CONFIG): "100",
-                ("kafka.consumers.default." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka.consumers.default." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.' + ConsumerConfig.GROUP_ID_CONFIG): "mygroup",
+                ('kafka.consumers.default.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:2222",
+                ('kafka.' + ConsumerConfig.GROUP_ID_CONFIG): "mygroup",
+                ('kafka.consumers.default.' + ConsumerConfig.MAX_POLL_RECORDS_CONFIG): "100",
+                ("kafka.consumers.default." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka.consumers.default." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
         )
 
         when:
@@ -150,9 +150,9 @@ class KafkaConfigurationSpec extends Specification {
         Properties props = config.getConfig()
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == "localhost:2222"
-        props[GROUP_ID_CONFIG] == "mygroup"
-        props[MAX_POLL_RECORDS_CONFIG] == "100"
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == "localhost:2222"
+        props[ConsumerConfig.GROUP_ID_CONFIG] == "mygroup"
+        props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] == "100"
 
         when:
         Consumer consumer = applicationContext.createBean(Consumer, config)
@@ -167,10 +167,10 @@ class KafkaConfigurationSpec extends Specification {
     void "test configure list fields default properties"() {
         given:
         applicationContext = ApplicationContext.run(
-                ('kafka.' + BOOTSTRAP_SERVERS_CONFIG): ["localhost:1111", "localhost:1112"],
-                ('kafka.' + GROUP_ID_CONFIG): "mygroup",
-                ("kafka.consumers.default." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
-                ("kafka.consumers.default." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): ["localhost:1111", "localhost:1112"],
+                ('kafka.' + ConsumerConfig.GROUP_ID_CONFIG): "mygroup",
+                ("kafka.consumers.default." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka.consumers.default." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
         )
 
         when:
@@ -178,8 +178,8 @@ class KafkaConfigurationSpec extends Specification {
         Properties props = config.getConfig()
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == "localhost:1111,localhost:1112"
-        props[GROUP_ID_CONFIG] == "mygroup"
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == "localhost:1111,localhost:1112"
+        props[ConsumerConfig.GROUP_ID_CONFIG] == "mygroup"
 
         when:
         Consumer consumer = applicationContext.createBean(Consumer, config)
@@ -220,7 +220,7 @@ class KafkaConfigurationSpec extends Specification {
         Properties props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:1111,localhost:2222'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:1111,localhost:2222'
 
         when: 'only env source, list, expect 3333,4444'
         applicationContext.close()
@@ -231,7 +231,7 @@ class KafkaConfigurationSpec extends Specification {
         props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
 
         when: 'both sources, both list, expect 3333,4444'
         applicationContext.close()
@@ -242,7 +242,7 @@ class KafkaConfigurationSpec extends Specification {
         props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
 
         when: 'both sources, single yaml, list env, expect 3333,4444'
 
@@ -257,7 +257,7 @@ class KafkaConfigurationSpec extends Specification {
         props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333,localhost:4444'
 
         when: 'both sources, list yaml, single env, expect 3333'
 
@@ -272,7 +272,7 @@ class KafkaConfigurationSpec extends Specification {
         props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333'
 
         when: 'both sources, both single, expect 3333'
 
@@ -287,7 +287,7 @@ class KafkaConfigurationSpec extends Specification {
         props = config.config
 
         then:
-        props[BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333'
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:3333'
     }
 
     void "test disabled"() {
