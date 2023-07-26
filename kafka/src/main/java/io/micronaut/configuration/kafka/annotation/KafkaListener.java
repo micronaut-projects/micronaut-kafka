@@ -160,7 +160,6 @@ public @interface KafkaListener {
      * @return The number of threads
      * @see KafkaListener#threadsValue()
      */
-    @AliasFor(member = "threadsValue")
     int threads() default 1;
 
     /**
