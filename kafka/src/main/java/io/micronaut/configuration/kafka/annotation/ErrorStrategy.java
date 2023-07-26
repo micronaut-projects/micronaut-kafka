@@ -71,7 +71,6 @@ public @interface ErrorStrategy {
      * @return the retry count of how many attempts should be made
      * @see ErrorStrategy#retryCountValue()
      */
-    @AliasFor(member = "retryCountValue")
     int retryCount() default DEFAULT_RETRY_COUNT;
 
     /**
