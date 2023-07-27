@@ -26,9 +26,9 @@ import io.micronaut.context.event.ApplicationEvent;
  */
 public class AbstractKafkaApplicationEvent<T> extends ApplicationEvent {
     /**
-     * Constructs an event with a given Consumer source.
+     * Constructs a prototypical Event.
      *
-     * @param consumer The Consumer on which the Event initially occurred.
+     * @param source The object on which the Event initially occurred.
      * @throws IllegalArgumentException if source is null.
      */
     public AbstractKafkaApplicationEvent(T source) {
