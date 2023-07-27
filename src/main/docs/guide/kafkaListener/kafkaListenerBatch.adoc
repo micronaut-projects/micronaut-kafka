@@ -41,7 +41,7 @@ This example is fairly trivial in that it commits offsets after processing each 
 
 == Reactive Batch Processing
 
-Batch listeners also support defining reactive types (either rx:Flowable[] or Reactor `Flux`) as the method argument.
+Batch listeners also support defining reactive types (e.g. Reactor `Flux`) as the method argument.
 
 In this case the method will be passed a reactive type that can be returned from the method allowing non-blocking processing of the batch:
 

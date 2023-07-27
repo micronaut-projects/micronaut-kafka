@@ -31,17 +31,17 @@ In the above case instead of sending a serialized array the client implementatio
 ----
 @KafkaClient(batch=true)
 @Topic("books")
-Flowable<RecordMetadata> send(List<Book> books);
+Publisher<RecordMetadata> send(List<Book> books);
 ----
 
-You can also use an unbound reactive type such as rx:Flowable[] as the source of your batch data:
+You can also use an unbound reactive type such as rs:Publisher[] as the source of your batch data:
 
-.Sending `ProducerRecord` batches from a Flowable
+.Sending `ProducerRecord` batches from a Publisher
 [source,java]
 ----
 @KafkaClient(batch=true)
 @Topic("books")
-Flowable<RecordMetadata> send(Flowable<Book> books);
+Publisher<RecordMetadata> send(Publisher<Book> books);
 ----
 
 

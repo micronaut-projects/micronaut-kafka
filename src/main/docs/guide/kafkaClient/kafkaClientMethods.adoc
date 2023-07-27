@@ -39,7 +39,7 @@ include::{testskafka}/producer/headers/ProductClient.java[tags=clazz, indent=0]
 }
 ----
 
-The above example will send a header called `X-Token` with the value read from the setting `my.application.token` in `application.yml` (or the environnment variable `MY_APPLICATION_TOKEN`).
+The above example will send a header called `X-Token` with the value read from the setting `my.application.token` in `application.yml` (or the environment variable `MY_APPLICATION_TOKEN`).
 
 If the `my.application.token` is not set then an error will occur creating the client.
 
@@ -74,7 +74,7 @@ part of the `kafka-clients` library:
 
 === Reactive and Non-Blocking Method Definitions
 
-The ann:configuration.kafka.annotation.KafkaClient[] annotation supports the definition of reactive return types (such as rx:Flowable[] or Reactor `Flux`) as well as Futures.
+The ann:configuration.kafka.annotation.KafkaClient[] annotation supports the definition of reactive return types (e.g. rs:Publisher[]) as well as Futures.
 
 The following sections cover possible method signatures and behaviour:
 
@@ -82,37 +82,40 @@ The following sections cover possible method signatures and behaviour:
 
 [source,java]
 ----
-Single<Book> sendBook(
+@SingleResult
+Publisher<Book> sendBook(
     @KafkaKey String author,
-    Single<Book> book
+    Publisher<Book> book
 );
 ----
 
-The implementation will return a rx:Single[] that when subscribed to will subscribe to the passed rx:Single[] and send the emitted item as a `ProducerRecord` emitting the item again if successful or an error otherwise.
+The implementation will return a rs:Publisher[] that when subscribed to will subscribe to the passed rs:Publisher[] and send the emitted item as a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
-==== Flowable Value and Return Type
+NOTE: Micronaut uses the https://docs.micronaut.io/latest/api/io/micronaut/core/async/annotation/SingleResult.html[@SingleResult] annotation to indicate a single result is emitted for the rs:Publisher[] return type.
+
+==== Publisher Value and Return Type
 
 [source,java]
 ----
-Flowable<Book> sendBooks(
+Publisher<Book> sendBooks(
     @KafkaKey String author,
-    Flowable<Book> book
+    Publisher<Book> book
 );
 ----
 
-The implementation will return a rx:Flowable[] that when subscribed to will subscribe to the passed rx:Flowable[] and for each emitted item will send a `ProducerRecord` emitting the item again if successful or an error otherwise.
+The implementation will return a rs:Publisher[] that when subscribed to will subscribe to the passed rs:Publisher[] and for each emitted item will send a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
-==== Flowable Value and Return Type
+==== CompletableFuture Value and Return Type
 
 [source,java]
 ----
-Flux<RecordMetadata> sendBooks(
+CompletableFuture<RecordMetadata> sendBooks(
     @KafkaKey String author,
-    Flux<Book> book
+    CompletableFuture<Book> book
 );
 ----
 
-The implementation will return a Reactor `Flux` that when subscribed to will subscribe to the passed `Flux` and for each emitted item will send a `ProducerRecord` emitting the resulting Kafka `RecordMetadata` if successful or an error otherwise.
+The implementation will return a `CompletableFuture` that when subscribed to will subscribe to the passed `CompletableFuture` and for each emitted item will send a `ProducerRecord` emitting the resulting Kafka `RecordMetadata` if successful or an error otherwise.
 
 === Available Annotations
 

@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
@@ -28,7 +29,7 @@ public class BookListener {
 
     // tag::reactive[]
     @Topic("all-the-books")
-    public Flux<Book> receiveFlux(Flux<Book> books) {
+    public Publisher<Book> receiveFlux(Flux<Book> books) {
         return books.doOnNext(book ->
                 System.out.println("Got Book = " + book.getTitle())
         );
