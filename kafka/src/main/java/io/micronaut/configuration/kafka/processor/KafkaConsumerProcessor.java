@@ -166,7 +166,7 @@ class KafkaConsumerProcessor
      * @param exceptionHandler              The exception handler to use
      * @param schedulerService              The scheduler service
      * @param transactionalProducerRegistry The transactional producer registry
-     * @param eventPublisher The application event publisher
+     * @param eventPublisher                The application event publisher
      */
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,

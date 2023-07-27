@@ -25,9 +25,9 @@ import org.apache.kafka.clients.consumer.Consumer;
  */
 public final class KafkaConsumerStartedPollingEvent extends AbstractKafkaApplicationEvent<Consumer> {
     /**
-     * Default constructs.
+     * Constructs an event with a given Consumer source.
      *
-     * @param consumer The object on which the Event initially occurred.
+     * @param consumer The Consumer on which the Event initially occurred.
      * @throws IllegalArgumentException if source is null.
      */
     public KafkaConsumerStartedPollingEvent(Consumer consumer) {
