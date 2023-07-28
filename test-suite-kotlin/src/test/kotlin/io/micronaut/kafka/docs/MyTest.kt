@@ -10,7 +10,6 @@ import java.util.concurrent.*
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("It hangs forever in the CI")
 internal class MyTest : AbstractKafkaTest() {
     @Test
     fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {

@@ -4,14 +4,12 @@ import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.context.annotation.*
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
-import spock.lang.Ignore
 
 import static java.util.concurrent.TimeUnit.SECONDS
 import static org.awaitility.Awaitility.await
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
-@Ignore("It hangs forever in the CI")
 class MyTest extends AbstractKafkaTest {
 
     @Inject
