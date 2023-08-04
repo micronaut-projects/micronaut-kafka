@@ -21,7 +21,7 @@ import org.apache.kafka.clients.consumer.Consumer;
  * An event fired after a Kafka {@link Consumer} subscribes to a set of Kafka topics.
  *
  * @author Jorge F. Sanchez
- * @since 4.5.3
+ * @since 5.1.0
  */
 public final class KafkaConsumerSubscribedEvent extends AbstractKafkaApplicationEvent<Consumer> {
     /**
