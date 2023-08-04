@@ -5,6 +5,7 @@ io.micronaut.configuration.kafka.bind
 io.micronaut.configuration.kafka.bind.batch
 io.micronaut.configuration.kafka.config
 io.micronaut.configuration.kafka.convert
+io.micronaut.configuration.kafka.event
 io.micronaut.configuration.kafka.exceptions
 io.micronaut.configuration.kafka.executor
 io.micronaut.configuration.kafka.health

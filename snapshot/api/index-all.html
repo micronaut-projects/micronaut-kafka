@@ -53,6 +53,14 @@ loadScripts(document, 'script');</script>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.event">AbstractKafkaApplicationEvent</a>&lt;<a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" title="type parameter in AbstractKafkaApplicationEvent">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/event/package-summary.html">io.micronaut.configuration.kafka.event</a></dt>
+<dd>
+<div class="block">Abstract base class for all kafka application events.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html#%3Cinit%3E(T)" class="member-name-link">AbstractKafkaApplicationEvent(T)</a> - Constructor for class io.micronaut.configuration.kafka.event.<a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" title="class in io.micronaut.configuration.kafka.event">AbstractKafkaApplicationEvent</a></dt>
+<dd>
+<div class="block">Constructs a prototypical Event.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="type parameter in AbstractKafkaConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="type parameter in AbstractKafkaConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
 <div class="block">An abstract Kafka configuration class.</div>
@@ -609,7 +617,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Obtain a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link"><code>Serializer</code></a> for the given type.</div>
 </dd>
-<dt><a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html#getSource()" class="member-name-link">getSource()</a> - Method in class io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/AbstractKafkaStreamsEvent.html" title="class in io.micronaut.configuration.kafka.streams.event">AbstractKafkaStreamsEvent</a></dt>
+<dt><a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html#getSource()" class="member-name-link">getSource()</a> - Method in class io.micronaut.configuration.kafka.event.<a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" title="class in io.micronaut.configuration.kafka.event">AbstractKafkaApplicationEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/event/AfterKafkaStreamsStart.html#getStreams()" class="member-name-link">getStreams()</a> - Method in class io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/AfterKafkaStreamsStart.html" title="class in io.micronaut.configuration.kafka.streams.event">AfterKafkaStreamsStart</a></dt>
 <dd>&nbsp;</dd>
@@ -696,6 +704,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Additional <code>TypeConverter</code> instances specific to Kafka.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/event/package-summary.html">io.micronaut.configuration.kafka.event</a> - package io.micronaut.configuration.kafka.event</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/package-summary.html">io.micronaut.configuration.kafka.exceptions</a> - package io.micronaut.configuration.kafka.exceptions</dt>
 <dd>
 <div class="block">Kafka specific exceptions.</div>
@@ -801,6 +811,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#%3Cinit%3E(io.micronaut.context.BeanLocator)" class="member-name-link">KafkaConsumerMetrics(BeanLocator)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/event/KafkaConsumerStartedPollingEvent.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.event">KafkaConsumerStartedPollingEvent</a> - Class in <a href="io/micronaut/configuration/kafka/event/package-summary.html">io.micronaut.configuration.kafka.event</a></dt>
+<dd>
+<div class="block">An event fired after a Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a> executes the first polling.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/event/KafkaConsumerStartedPollingEvent.html#%3Cinit%3E(org.apache.kafka.clients.consumer.Consumer)" class="member-name-link">KafkaConsumerStartedPollingEvent(Consumer)</a> - Constructor for class io.micronaut.configuration.kafka.event.<a href="io/micronaut/configuration/kafka/event/KafkaConsumerStartedPollingEvent.html" title="class in io.micronaut.configuration.kafka.event">KafkaConsumerStartedPollingEvent</a></dt>
+<dd>
+<div class="block">Constructs an event with a given Consumer source.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/event/KafkaConsumerSubscribedEvent.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.event">KafkaConsumerSubscribedEvent</a> - Class in <a href="io/micronaut/configuration/kafka/event/package-summary.html">io.micronaut.configuration.kafka.event</a></dt>
+<dd>
+<div class="block">An event fired after a Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a> subscribes to a set of Kafka topics.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/event/KafkaConsumerSubscribedEvent.html#%3Cinit%3E(org.apache.kafka.clients.consumer.Consumer)" class="member-name-link">KafkaConsumerSubscribedEvent(Consumer)</a> - Constructor for class io.micronaut.configuration.kafka.event.<a href="io/micronaut/configuration/kafka/event/KafkaConsumerSubscribedEvent.html" title="class in io.micronaut.configuration.kafka.event">KafkaConsumerSubscribedEvent</a></dt>
+<dd>
+<div class="block">Constructs an event with a given Consumer source.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.bind">KafkaDefaultBinder</a>&lt;<a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html" title="type parameter in KafkaDefaultBinder">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
 <dd>
