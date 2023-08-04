@@ -109,18 +109,24 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>int</code></div>
 <div class="col-second even-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#retryCountValue()" class="member-name-link">retryCountValue</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">The dynamic retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+ <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
-<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The strategy to use when an error occurs, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 </div>
@@ -235,15 +241,48 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="retryCount()">
 <h3>retryCount</h3>
 <div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">retryCount</span></div>
-<div class="block">The retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
- <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+ <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.
+
+ <p><code>retryCount</code> takes precedence over <code>retryCountValue</code> if they are both set.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the retry count of how many attempts should be made</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="#retryCountValue()"><code>retryCountValue()</code></a></li>
+</ul>
+</dd>
 </dl>
 <dl class="notes">
 <dt>Default:</dt>
 <dd>1</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="retryCountValue()">
+<h3>retryCountValue</h3>
+<div class="member-signature"><span class="annotations">@AliasFor(member="retryCount")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">retryCountValue</span></div>
+<div class="block">The dynamic retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+ <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.
+
+ <p><code>retryCountValue</code> will be overridden by <code>retryCount</code> if they are both set.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the retry count of how many attempts should be made</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="#retryCount()"><code>retryCount()</code></a></li>
+</ul>
+</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd>""</dd>
 </dl>
 </section>
 </li>

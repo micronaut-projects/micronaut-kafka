@@ -2395,6 +2395,27 @@ The error strategies apply only for non-batch messages processing.
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>You can also make the number of retries configurable by using <code>retryCountValue</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Dynamically Configuring Retries</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCountValue = "${my.retry.count"}))</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>retryCountValue</code> will be overridden by <code>retryCount</code> if they are both set.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect3">
 <h4 id="_specify_exceptions_to_retry">Specify exceptions to retry</h4>
 <div class="paragraph">
