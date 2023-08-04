@@ -21,7 +21,7 @@ import io.micronaut.context.event.ApplicationEvent;
  * Abstract base class for all kafka application events.
  *
  * @author Jorge F. Sanchez
- * @since 4.5.3
+ * @since 5.1.0
  * @param <T> the {@link ApplicationEvent} source object type
  */
 public class AbstractKafkaApplicationEvent<T> extends ApplicationEvent {
