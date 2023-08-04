@@ -57,9 +57,9 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
         when: "A producer sends a message with wrong serialization"
         stringProducer.sendToDoNothingTopic("not-a-uuid")
 
-        then: "The message is neither skipped nor committed"
+        then: "The message is skipped, but not committed"
         conditions.eventually {
-            consumer.currentPosition == 0
+            consumer.currentPosition > 0
             consumer.committedOffset == 0
         }
     }
