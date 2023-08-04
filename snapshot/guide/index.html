@@ -1335,6 +1335,27 @@ internal class MyTest : AbstractKafkaTest() {
 </table>
 </div>
 <div class="paragraph">
+<p>You can also make your number of threads configurable by using <code>threadsValue</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Dynamically Configuring Threads</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup", threadsValue = "${my.thread.count}")</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>threads</code> will be overridden by <code>threadsValue</code> if they are both set.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
 <p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
 </div>
 <div class="listingblock">
