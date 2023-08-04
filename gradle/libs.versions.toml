@@ -1,30 +1,30 @@
 [versions]
-micronaut = "4.0.0-RC5"
-micronaut-platform = "4.0.0-M5"
+micronaut = "4.1.0"
+micronaut-platform = "4.0.0-RC1"
 micronaut-docs = "2.0.0"
-micronaut-gradle-plugin = "4.0.0-M8"
+micronaut-gradle-plugin = "4.0.2"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
-managed-kafka-compat = "3.5.0"
-managed-kafka = '3.5.0'
+managed-kafka-compat = "3.5.1"
+managed-kafka = '3.5.1'
 
 groovy = "4.0.12"
 awaitility = '4.2.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
-testcontainers = "1.18.0"
+testcontainers = "1.18.3"
 
 zipkin-brave-kafka-clients = '5.16.0'
 
-micronaut-cache = "4.0.0-M5"
-micronaut-micrometer = "5.0.0-M5"
-micronaut-reactor = "3.0.0-M9"
-micronaut-rxjava2 = "2.0.0-M6"
+micronaut-cache = "4.0.1"
+micronaut-micrometer = "5.0.1"
+micronaut-reactor = "3.0.1"
+micronaut-rxjava2 = "2.0.1"
 
-micronaut-serde = "2.0.0-M12"
-micronaut-tracing = "5.0.0-M6"
-micronaut-test = "4.0.0-M8"
+micronaut-serde = "2.2.0"
+micronaut-tracing = "5.0.1"
+micronaut-test = "4.0.0"
 
 logback = "1.4.6"
 
@@ -42,6 +42,8 @@ managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
 
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = 'testcontainers' }
+
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 awaitility = { module = 'org.awaitility:awaitility', version.ref = 'awaitility' }
 
@@ -51,6 +53,7 @@ micronaut-reactor = { module = "io.micronaut.reactor:micronaut-reactor-bom", ver
 micronaut-rxjava2 = { module = "io.micronaut.rxjava2:micronaut-rxjava2-bom", version.ref = "micronaut-rxjava2" }
 micronaut-serde = { module = "io.micronaut.serde:micronaut-serde-bom", version.ref = "micronaut-serde" }
 micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", version.ref = "micronaut-tracing" }
+junit-jupiter-engine = { module = 'org.junit.jupiter:junit-jupiter-engine' }
 
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
 

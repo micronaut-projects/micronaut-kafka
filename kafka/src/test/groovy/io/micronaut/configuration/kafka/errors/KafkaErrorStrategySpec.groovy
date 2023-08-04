@@ -13,6 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import spock.lang.Unroll
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -30,7 +31,8 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     Map<String, Object> getConfiguration() {
         super.configuration +
-                ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false]
+                ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false,
+                 "my.retry.count": "3"]
     }
 
     @Override
@@ -70,6 +72,22 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.times[1] - myConsumer.times[0] >= 50
     }
 
+    void "test when the error strategy is 'retry on error' and there are serialization errors"() {
+        when:"A record cannot be deserialized"
+        DeserializationErrorClient myClient = context.getBean(DeserializationErrorClient)
+        myClient.sendText("Not an integer")
+        myClient.sendNumber(123)
+
+        RetryOnErrorDeserializationErrorConsumer myConsumer = context.getBean(RetryOnErrorDeserializationErrorConsumer)
+
+        then:"The message that threw the exception is eventually left behind"
+        conditions.eventually {
+            myConsumer.number == 123
+        }
+        and:"the retry error strategy is honored"
+        myConsumer.exceptionCount.get() == 2
+    }
+
     void "test when the error strategy is 'retry on error' and retry failed, the finished messages should be complete except the failed message"() {
         when:"A client sends a lot of messages to a same topic"
         RetryErrorMultiplePartitionsClient myClient = context.getBean(RetryErrorMultiplePartitionsClient)
@@ -105,6 +123,51 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.times[1] - myConsumer.times[0] >= 50
         myConsumer.times[2] - myConsumer.times[1] >= 100
         myConsumer.times[3] - myConsumer.times[2] >= 200
+    }
+
+    void "test when error strategy is 'retry on error' and 'handle all exceptions' is true"() {
+        when: "A consumer throws an exception"
+        RetryHandleAllErrorClient myClient = context.getBean(RetryHandleAllErrorClient)
+        myClient.sendMessage("One")
+        myClient.sendMessage("Two")
+        myClient.sendMessage("Three")
+
+        RetryHandleAllErrorCausingConsumer myConsumer = context.getBean(RetryHandleAllErrorCausingConsumer)
+
+        then: "Messages are consumed eventually"
+        conditions.eventually {
+            myConsumer.received == ["One", "Two", "Two", "Three", "Three", "Three"]
+            myConsumer.count.get() == 6
+        }
+        and: "messages were retried and all exceptions were handled"
+        myConsumer.errors.size() == 4
+        myConsumer.errors[0].message == "Two #2"
+        myConsumer.errors[1].message == "Three #4"
+        myConsumer.errors[2].message == "Three #5"
+        myConsumer.errors[3].message == "Three #6"
+    }
+
+    @Unroll
+    void "test when error strategy is 'retry on error' with #type retry count"(String type) {
+        when: "A consumer throws an exception"
+        RetryCountClient myClient = context.getBean(RetryCountClient)
+        myClient.sendMessage("${type}-retry-count", "ERROR")
+        myClient.sendMessage("${type}-retry-count", "OK")
+
+        AbstractRetryCountConsumer myConsumer = context.getBean(consumerClass)
+
+        then: "Messages are consumed eventually"
+        conditions.eventually {
+            myConsumer.received == "OK"
+        }
+        and: "messages were retried the correct number of times"
+        myConsumer.errors.size() == expectedErrorCount
+
+        where:
+        type      | consumerClass             | expectedErrorCount
+        'fixed'   | FixedRetryCountConsumer   | 11
+        'dynamic' | DynamicRetryCountConsumer | 4
+        'mixed'   | MixedRetryCountConsumer   | 11
     }
 
     void "test simultaneous retry and consumer reassignment"() {
@@ -227,6 +290,31 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 2, handleAllExceptions = true)
+    )
+    static class RetryHandleAllErrorCausingConsumer implements KafkaListenerExceptionHandler {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<KafkaListenerException> errors = []
+
+        @Topic("errors-retry-handle-all-exceptions")
+        void handleMessage(String message) {
+            received << message
+            if (count.getAndIncrement() == 1 || message == 'Three') {
+                throw new RuntimeException("${message} #${count}")
+            }
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            errors << exception
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, errorStrategy = @ErrorStrategy(value = NONE))
     static class PollNextErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
@@ -248,6 +336,27 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
                     new TopicPartition("errors-poll", record.partition()),
                     record.offset()
             )
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            value="errors-retry-deserialization-error",
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, handleAllExceptions = true)
+    )
+    static class RetryOnErrorDeserializationErrorConsumer implements KafkaListenerExceptionHandler {
+        int number = 0
+        AtomicInteger exceptionCount = new AtomicInteger(0)
+
+        @Topic("deserialization-errors-retry")
+        void handleMessage(int number) {
+            this.number = number
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionCount.getAndIncrement()
         }
     }
 
@@ -287,6 +396,57 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    static abstract class AbstractRetryCountConsumer implements KafkaListenerExceptionHandler {
+        List<KafkaListenerException> errors = []
+        String received
+
+        void receive(String message) {
+            if (message == 'ERROR') throw new RuntimeException("Won't handle this one")
+            received = message
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            errors << exception
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10, handleAllExceptions = true)
+    )
+    static class FixedRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("fixed-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCountValue = '${my.retry.count}', handleAllExceptions = true)
+    )
+    static class DynamicRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("dynamic-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 10, retryCountValue = '${my.retry.count}', handleAllExceptions = true)
+    )
+    static class MixedRetryCountConsumer extends AbstractRetryCountConsumer {
+        @Topic("mixed-retry-count")
+        void receiveMessage(String message) {
+            receive(message)
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaClient
     static interface ResumeErrorClient {
@@ -299,6 +459,16 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static interface RetryErrorClient {
         @Topic("errors-retry")
         void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface DeserializationErrorClient {
+        @Topic("deserialization-errors-retry")
+        void sendText(String text)
+
+        @Topic("deserialization-errors-retry")
+        void sendNumber(int number)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
@@ -317,6 +487,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaClient
+    static interface RetryHandleAllErrorClient {
+        @Topic("errors-retry-handle-all-exceptions")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
     static interface PollNextErrorClient {
         @Topic("errors-poll")
         void sendMessage(String message)
@@ -327,5 +504,11 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static interface TimeoutAndRetryErrorClient {
         @Topic("errors-timeout-and-retry")
         void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface RetryCountClient {
+        void sendMessage(@Topic topic, String message)
     }
 }

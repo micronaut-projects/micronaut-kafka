@@ -86,6 +86,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
+import org.apache.kafka.common.errors.RecordDeserializationException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
@@ -458,7 +459,28 @@ class KafkaConsumerProcessor
                 boolean failed = true;
                 try {
                     consumerState.pauseTopicPartitions();
-                    final ConsumerRecords<?, ?> consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    final ConsumerRecords<?, ?> consumerRecords;
+                    // Deserialization errors can happen while polling
+                    if (!isBatch) {
+                        // Unless in batch mode, try to honor the configured error strategy
+                        try {
+                            consumerRecords = kafkaConsumer.poll(pollTimeout);
+                        } catch (RecordDeserializationException ex) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", logMethod(method), ex);
+                            }
+                            final TopicPartition tp = ex.topicPartition();
+                            // By default, seek past the record to continue consumption
+                            consumerState.kafkaConsumer.seek(tp, ex.offset() + 1);
+                            // The error strategy and the exception handler can still decide what to do about this record
+                            resolveWithErrorStrategy(consumerState, new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null), ex);
+                            // By now, it's been decided whether this record should be retried and the exception may have been handled
+                            continue;
+                        }
+                    } else {
+                        // Otherwise, propagate any errors
+                        consumerRecords = kafkaConsumer.poll(pollTimeout);
+                    }
                     consumerState.closedState = ConsumerCloseState.POLLING;
                     failed = true;
                     consumerState.resumeTopicPartitions();
@@ -604,6 +626,10 @@ class KafkaConsumerProcessor
             }
 
             if (consumerState.errorStrategyRetryCount >= retryState.currentRetryCount) {
+                if (consumerState.handleAllExceptions) {
+                    handleException(consumerState, consumerRecord, e);
+                }
+
                 TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
@@ -614,7 +640,6 @@ class KafkaConsumerProcessor
                     consumerState.pause(paused);
                     taskScheduler.schedule(retryDelay, () -> consumerState.resume(paused));
                 }
-                // skip handle exception
                 return true;
             } else {
                 consumerState.partitionRetries.remove(partition);
@@ -1043,6 +1068,7 @@ class KafkaConsumerProcessor
         @Nullable
         final Duration errorStrategyRetryDelay;
         final int errorStrategyRetryCount;
+        final boolean handleAllExceptions;
         final Class<? extends Throwable>[] errorStrategyExceptions;
 
         @Nullable
@@ -1058,7 +1084,7 @@ class KafkaConsumerProcessor
         final boolean useSendOffsetsToTransaction;
         final boolean isMessageReturnType;
         final boolean isMessagesIterableReturnType;
-        ConsumerCloseState closedState;
+        volatile ConsumerCloseState closedState;
 
         private ConsumerState(String clientId, String groupId, OffsetStrategy offsetStrategy, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions,
                               AnnotationValue<KafkaListener> kafkaListener, ExecutableMethod<?, ?> method) {
@@ -1081,11 +1107,13 @@ class KafkaConsumerProcessor
                         .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
                 this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
                 this.errorStrategyRetryCount = errorStrategyAnnotation.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT);
+                this.handleAllExceptions = errorStrategyAnnotation.booleanValue("handleAllExceptions").orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);
                 //noinspection unchecked
                 this.errorStrategyExceptions = (Class<? extends Throwable>[]) errorStrategyAnnotation.classValues("exceptionTypes");
             } else {
                 this.errorStrategyRetryDelay = null;
                 this.errorStrategyRetryCount = 0;
+                this.handleAllExceptions = false;
                 //noinspection unchecked
                 this.errorStrategyExceptions = (Class<? extends Throwable>[]) ReflectionUtils.EMPTY_CLASS_ARRAY;
             }

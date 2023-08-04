@@ -65,8 +65,7 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
 
             return Optional.of((context, consumerRecords) -> {
                 for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
-                    Optional<ArgumentBinder<?, ConsumerRecord<?, ?>>> binder = consumerRecordBinderRegistry.findArgumentBinder((Argument) argument, consumerRecord);
-                    binder.ifPresent(b -> {
+                    consumerRecordBinderRegistry.findArgumentBinder(argument).ifPresent(b -> {
                         Argument<?> newArg = Argument.of(batchType.getType(), argument.getName(), argument.getAnnotationMetadata(), batchType.getTypeParameters());
                         ArgumentConversionContext conversionContext = ConversionContext.of(newArg);
                         ArgumentBinder.BindingResult<?> result = b.bind(

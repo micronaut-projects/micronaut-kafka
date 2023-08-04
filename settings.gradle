@@ -6,7 +6,7 @@ pluginManagement {
 }
 
 plugins {
-    id("io.micronaut.build.shared.settings") version "6.5.3"
+    id("io.micronaut.build.shared.settings") version "6.5.4"
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
@@ -28,4 +28,6 @@ include 'kafka-bom'
 include 'kafka'
 include 'kafka-streams'
 include 'tests:tasks-sasl-plaintext'
-
+include 'test-suite'
+include 'test-suite-groovy'
+include 'test-suite-kotlin'
