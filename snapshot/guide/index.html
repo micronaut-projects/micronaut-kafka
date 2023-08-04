@@ -1150,7 +1150,6 @@ import static org.awaitility.Awaitility.await;
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("It hangs forever in the CI")
 class MyTest extends AbstractKafkaTest {
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
@@ -1187,14 +1186,12 @@ import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.context.annotation.*
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
-import spock.lang.Ignore
 
 import static java.util.concurrent.TimeUnit.SECONDS
 import static org.awaitility.Awaitility.await
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
-@Ignore("It hangs forever in the CI")
 class MyTest extends AbstractKafkaTest {
 
     @Inject
@@ -1251,7 +1248,6 @@ import java.util.concurrent.*
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("It hangs forever in the CI")
 internal class MyTest : AbstractKafkaTest() {
     @Test
     fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
