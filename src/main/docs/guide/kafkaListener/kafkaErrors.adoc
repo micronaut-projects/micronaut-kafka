@@ -36,6 +36,14 @@ NOTE: Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
 
 When an exception occurs in a ann:configuration.kafka.annotation.KafkaListener[] method by default the exception is simply logged. This is handled by api:configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler[].
 
+[TIP]
+====
+DefaultKafkaListenerExceptionHandler behavior can be configured via methods:
+
+- `setSkipRecordOnDeserializationFailure`: Sets whether the seek past records that are not deserializable (enabled by default).
+- `setCommitRecordOnDeserializationFailure`: Sets whether to commit the offset of past records that are not deserializable and are skipped (disabled by default).
+====
+
 If you wish to replace this default exception handling with another implementation you can use the Micronaut's <<replaces, Bean Replacement>> feature to define a bean that replaces it: `@Replaces(DefaultKafkaListenerExceptionHandler.class)`.
 
 You can also define per bean exception handling logic by implementing the api:configuration.kafka.exceptions.KafkaListenerExceptionHandler[] interface in your ann:configuration.kafka.annotation.KafkaListener[] class.
