@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka.docs.producer.fallback;
+package docs.producer.fallback;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.Topic;

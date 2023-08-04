@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka.docs.producer.fallback;
+package docs.producer.fallback;
 
 // tag::imports[]
 import io.micronaut.context.annotation.Replaces;
