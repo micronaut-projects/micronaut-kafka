@@ -28,6 +28,16 @@ The above example will create 10 link:{kafkaapi}/org/apache/kafka/clients/consum
 
 NOTE: @KafkaListener beans are by default singleton. When using multiple threads you must either synchronize access to local state or declare the bean as `@Prototype`.
 
+You can also make your number of threads configurable by using `threadsValue`:
+
+.Dynamically Configuring Threads
+[source,java]
+----
+@KafkaListener(groupId="myGroup", threadsValue = "${my.thread.count}")
+----
+
+NOTE: `threads` will be overridden by `threadsValue` if they are both set.
+
 By default Micronaut will inspect the method signature of the method annotated with `@Topic` that will listen for `ConsumerRecord` instances and from the types infer an appropriate key and value link:{kafkaapi}/org/apache/kafka/common/serialization/Deserializer.html[Deserializer].
 
 .Applying Configuration
