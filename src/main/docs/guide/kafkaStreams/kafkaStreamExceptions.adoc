@@ -8,7 +8,7 @@ If you just want to take the same action every time, you can set the application
 
 For example in `application-test.yml`:
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
