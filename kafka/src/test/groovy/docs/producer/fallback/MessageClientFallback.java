@@ -7,6 +7,7 @@ import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Singleton;
 // end::imports[]
 
+@Requires(property = "spec.name", value = "MessageClientFallbackSpec")
 // tag::clazz[]
 @Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <1>
 @Replaces(MessageClient.class) // <2>
