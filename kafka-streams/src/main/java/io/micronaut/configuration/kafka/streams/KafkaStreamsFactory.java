@@ -115,7 +115,7 @@ public class KafkaStreamsFactory implements Closeable {
                 builder.getConfiguration(),
                 kafkaClientSupplier
         );
-        setUncaughtExceptionHandler(builder.getConfiguration(), kafkaStreams);
+        makeUncaughtExceptionHandler(builder.getConfiguration()).ifPresent(kafkaStreams::setUncaughtExceptionHandler);
         final String startKafkaStreamsValue = builder.getConfiguration().getProperty(
             START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
         final boolean startKafkaStreams = Boolean.parseBoolean(startKafkaStreamsValue);
@@ -167,15 +167,13 @@ public class KafkaStreamsFactory implements Closeable {
     }
 
     /**
-     * Set the uncaught exception handler for a given kafka streams instance.
+     * Make an uncaught exception handler for a given kafka streams configuration.
      *
-     * @param properties   The configuration for the given kafka streams.
-     * @param kafkaStreams The kafka streams to configure.
+     * @param properties The kafka streams configuration.
      * @return An optional exception handler if {@code uncaught-exception-handler} was configured.
      */
-    Optional<StreamsUncaughtExceptionHandler> setUncaughtExceptionHandler(Properties properties, KafkaStreams kafkaStreams) {
-        final Optional<StreamsUncaughtExceptionHandler> uncaughtExceptionHandler = Optional
-            .ofNullable(properties.getProperty(UNCAUGHT_EXCEPTION_HANDLER_PROPERTY))
+    Optional<StreamsUncaughtExceptionHandler> makeUncaughtExceptionHandler(Properties properties) {
+        return Optional.ofNullable(properties.getProperty(UNCAUGHT_EXCEPTION_HANDLER_PROPERTY))
             .filter(not(String::isBlank))
             .map(action -> {
                 try {
@@ -194,7 +192,5 @@ public class KafkaStreamsFactory implements Closeable {
                     return null;
                 }
             });
-        uncaughtExceptionHandler.ifPresent(kafkaStreams::setUncaughtExceptionHandler);
-        return uncaughtExceptionHandler;
     }
 }

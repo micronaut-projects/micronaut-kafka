@@ -1,6 +1,5 @@
 package io.micronaut.configuration.kafka.streams
 
-import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
 import spock.lang.Unroll
 
@@ -11,29 +10,25 @@ class KafkaStreamsFactorySpec extends AbstractTestContainersSpec {
     void "set exception handler when no config is given"() {
         given:
         KafkaStreamsFactory kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-        KafkaStreams kafkaStreams = Mock()
         Properties props = new Properties()
 
         when:
-        def handler = kafkaStreamsFactory.setUncaughtExceptionHandler(props, kafkaStreams)
+        Optional<StreamsUncaughtExceptionHandler> handler = kafkaStreamsFactory.makeUncaughtExceptionHandler(props)
 
         then:
         handler.empty
-        0 * _
     }
 
     void "set exception handler when no valid config is given"() {
         given:
         KafkaStreamsFactory kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-        KafkaStreams kafkaStreams = Mock()
         Properties props = ['uncaught-exception-handler': config]
 
         when:
-        def handler = kafkaStreamsFactory.setUncaughtExceptionHandler(props, kafkaStreams)
+        Optional<StreamsUncaughtExceptionHandler> handler = kafkaStreamsFactory.makeUncaughtExceptionHandler(props)
 
         then:
         handler.empty
-        0 * _
 
         where:
         config << ['', ' ', 'ILLEGAL_VALUE', '!!REPLACE_THREAD!!']
@@ -43,17 +38,14 @@ class KafkaStreamsFactorySpec extends AbstractTestContainersSpec {
     void "set exception handler when given config is #config"(String config) {
         given:
         KafkaStreamsFactory kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-        KafkaStreams kafkaStreams = Mock()
         Properties props = ['uncaught-exception-handler': config]
 
         when:
-        def handler = kafkaStreamsFactory.setUncaughtExceptionHandler(props, kafkaStreams)
+        Optional<StreamsUncaughtExceptionHandler> handler = kafkaStreamsFactory.makeUncaughtExceptionHandler(props)
 
         then:
         handler.present
         handler.get().handle(null) == expected
-        1 * kafkaStreams.setUncaughtExceptionHandler(_ as StreamsUncaughtExceptionHandler)
-        0 * _
 
         where:
         config                 | expected
