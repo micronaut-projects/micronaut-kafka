@@ -107,6 +107,7 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
         }
     }
 
+    @Requires(property = "spec.name", value = "DefaultKafkaListenerExceptionHandlerSpec")
     @KafkaListener(
             offsetReset = EARLIEST,
             offsetStrategy = DISABLED,
@@ -127,6 +128,7 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
         }
     }
 
+    @Requires(property = "spec.name", value = "DefaultKafkaListenerExceptionHandlerSpec")
     @KafkaListener(
             offsetReset = EARLIEST,
             offsetStrategy = DISABLED,
