@@ -22,9 +22,20 @@ NOTE: By default, the details visible above are only shown to authenticated user
 
 If you wish to disable the kafka health check while still using the `management` dependency you can set the property `kafka.health.enabled` to `false` in your application configuration.
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     health:
         enabled: false
+----
+
+The health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn't have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn't require any additional permissions.
+
+To do that, you can set the property `kafka.health.restricted` to `true` in your application configuration.
+
+[configuration]
+----
+kafka:
+    health:
+        restricted: true
 ----
