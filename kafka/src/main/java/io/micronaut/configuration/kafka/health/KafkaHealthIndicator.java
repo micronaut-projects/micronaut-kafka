@@ -48,6 +48,7 @@ import java.util.Optional;
  */
 @Singleton
 @Requires(beans = AdminClient.class)
+@Requires(missingBeans = RestrictedKafkaHealthIndicator.class)
 @Requires(property = AbstractKafkaConfiguration.PREFIX + ".health.enabled", value = "true", defaultValue = "true")
 public class KafkaHealthIndicator implements HealthIndicator {
 
