@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
+import io.micronaut.configuration.kafka.ConsumerSeekAware;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.ProducerRegistry;
@@ -37,6 +38,8 @@ import io.micronaut.configuration.kafka.event.KafkaConsumerStartedPollingEvent;
 import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
+import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
@@ -447,6 +450,9 @@ class KafkaConsumerProcessor
         final Optional<Argument<?>> consumerArg = Arrays.stream(method.getArguments())
                 .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
                 .findFirst();
+        final Optional<Argument<?>> seekArg = Arrays.stream(method.getArguments())
+                .filter(arg -> KafkaSeekOperations.class.isAssignableFrom(arg.getType()))
+                .findFirst();
         final Optional<Argument<?>> ackArg = Arrays.stream(method.getArguments())
                 .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
                 .findFirst();
@@ -510,7 +516,7 @@ class KafkaConsumerProcessor
                     if (isBatch) {
                         failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, consumerRecords);
                     } else {
-                        failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, ackArg, consumerRecords);
+                        failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, seekArg, ackArg, consumerRecords);
                     }
                     if (!failed) {
                         if (consumerState.offsetStrategy == OffsetStrategy.SYNC) {
@@ -546,6 +552,7 @@ class KafkaConsumerProcessor
                                            final ExecutableMethod<?, ?> method,
                                            final Map<Argument<?>, Object> boundArguments,
                                            final boolean trackPartitions,
+                                           final Optional<Argument<?>> seekArg,
                                            final Optional<Argument<?>> ackArg,
                                            final ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
@@ -566,6 +573,8 @@ class KafkaConsumerProcessor
             }
 
             Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer;
+            final KafkaSeekOperations seek = seekArg.map(x -> KafkaSeekOperations.newInstance()).orElse(null);
+            seekArg.ifPresent(argument -> boundArguments.put(argument, seek));
             ackArg.ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
 
             try {
@@ -599,6 +608,11 @@ class KafkaConsumerProcessor
             } else if (consumerState.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
                 kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerState.consumerBean));
             }
+            Optional.ofNullable(seek).ifPresent(operations -> {
+                // Performs seek operations that were deferred by the user
+                final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
+                operations.forEach(seeker::perform);
+            });
         }
         return true;
     }
@@ -745,7 +759,9 @@ class KafkaConsumerProcessor
 
             if (hasTopics) {
                 final List<String> topics = Arrays.asList(topicNames);
-                if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                if (consumerBean instanceof ConsumerSeekAware csa) {
+                    kafkaConsumer.subscribe(topics, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
+                } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
                     kafkaConsumer.subscribe(topics, crl);
                 } else {
                     kafkaConsumer.subscribe(topics);
@@ -764,7 +780,9 @@ class KafkaConsumerProcessor
                     } catch (Exception e) {
                         throw new MessagingSystemException("Invalid topic pattern [" + pattern + "] for method [" + method + "]: " + e.getMessage(), e);
                     }
-                    if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                    if (consumerBean instanceof ConsumerSeekAware csa) {
+                        kafkaConsumer.subscribe(compiledPattern, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
+                    } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
                         kafkaConsumer.subscribe(compiledPattern, crl);
                     } else {
                         kafkaConsumer.subscribe(compiledPattern);
@@ -1243,4 +1261,17 @@ class KafkaConsumerProcessor
         NOT_STARTED, POLLING, CLOSED
     }
 
+    private record ConsumerSeekAwareAdapter(KafkaSeeker seeker, ConsumerSeekAware bean)
+        implements ConsumerRebalanceListener {
+
+        @Override
+        public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+            bean.onPartitionsRevoked(partitions);
+        }
+
+        @Override
+        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+            bean.onPartitionsAssigned(partitions, seeker);
+        }
+    }
 }
