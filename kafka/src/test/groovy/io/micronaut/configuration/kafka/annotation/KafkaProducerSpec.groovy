@@ -6,10 +6,13 @@ import io.micronaut.context.annotation.Requires
 import io.micronaut.context.event.BeanCreatedEvent
 import io.micronaut.context.event.BeanCreatedEventListener
 import io.micronaut.messaging.MessageHeaders
+import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.messaging.annotation.SendTo
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.Header
 import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -28,6 +31,8 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
 
     public static final String TOPIC_BLOCKING = "KafkaProducerSpec-users-blocking"
     public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
+    public static final String TOPIC_RECORDS = "KafkaProducerSpec-records"
+    public static final String TOPIC_RECORDS_BATCH = "KafkaProducerSpec-records-batch"
 
     Map<String, Object> getConfiguration() {
         super.configuration +
@@ -47,7 +52,7 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
          "kafka.consumers.default.value.deserializer": StringDeserializer.name,
          "kafka.consumers.default.value-deserializer": StringDeserializer.name,
          "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
-         (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING]]
+         (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING, TOPIC_RECORDS, TOPIC_RECORDS_BATCH]]
     }
 
     void "test customize defaults"() {
@@ -131,6 +136,103 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
             listener.others["Raleigh"] == "International"
             !listener.additionalInfo.isEmpty()
             listener.additionalInfo["year"] == "1971"
+        }
+    }
+
+    void "test send producer record"() {
+        given:
+        ProducerRecordClient client = context.getBean(ProducerRecordClient)
+        ConsumerRecordListener listener = context.getBean(ConsumerRecordListener)
+
+        when:
+        client.sendRecord("c", "DEFAULT KEY", new ProducerRecord<>("", "one", "ONE"))
+        client.sendRecord("c", "DEFAULT KEY", new ProducerRecord<>("", "TWO"))
+        client.sendRecord("c", "DEFAULT KEY", new ProducerRecord<>("", null, "three", "THREE", [
+                new RecordHeader("A", "a2".bytes),
+                new RecordHeader("B", "b2".bytes),
+                new RecordHeader("C", "c2".bytes),
+                new RecordHeader("D", "d2".bytes)]))
+
+        then:
+        conditions.eventually {
+            listener.records.size() == 3
+            listener.records[0].key() == "one"
+            listener.records[0].value() == "ONE"
+            listener.records[0].topic() == TOPIC_RECORDS
+            listener.records[0].partition() == 0
+            listener.records[0].timestamp() > 0
+            listener.records[0].headers().headers("A").any { it.value() == "a".bytes }
+            listener.records[0].headers().headers("B").any { it.value() == "b".bytes }
+            listener.records[0].headers().headers("C").any { it.value() == "c".bytes }
+            listener.records[1].key() == "DEFAULT KEY"
+            listener.records[1].value() == "TWO"
+            listener.records[1].topic() == TOPIC_RECORDS
+            listener.records[1].partition() == 0
+            listener.records[1].timestamp() > 0
+            listener.records[1].headers().headers("A").any { it.value() == "a".bytes }
+            listener.records[1].headers().headers("B").any { it.value() == "b".bytes }
+            listener.records[1].headers().headers("C").any { it.value() == "c".bytes }
+            listener.records[2].key() == "three"
+            listener.records[2].value() == "THREE"
+            listener.records[2].topic() == TOPIC_RECORDS
+            listener.records[2].partition() == 0
+            listener.records[2].timestamp() > 0
+            listener.records[2].headers().headers("A").any { it.value() == "a".bytes }
+            listener.records[2].headers().headers("B").any { it.value() == "b".bytes }
+            listener.records[2].headers().headers("C").any { it.value() == "c".bytes }
+            listener.records[2].headers().headers("A").any { it.value() == "a2".bytes }
+            listener.records[2].headers().headers("B").any { it.value() == "b2".bytes }
+            listener.records[2].headers().headers("C").any { it.value() == "c2".bytes }
+            listener.records[2].headers().headers("D").any { it.value() == "d2".bytes }
+        }
+    }
+
+    void "test batch send producer record"() {
+        given:
+        ProducerRecordBatchClient client = context.getBean(ProducerRecordBatchClient)
+        ConsumerRecordListener listener = context.getBean(ConsumerRecordListener)
+
+        when:
+        client.sendRecords("c", "DEFAULT KEY", List.of(
+                new ProducerRecord<>("", "one", "ONE"),
+                new ProducerRecord<>("", "TWO"),
+                new ProducerRecord<>("", null, "three", "THREE", [
+                        new RecordHeader("A", "a2".bytes),
+                        new RecordHeader("B", "b2".bytes),
+                        new RecordHeader("C", "c2".bytes),
+                        new RecordHeader("D", "d2".bytes)])))
+
+        then:
+        conditions.eventually {
+            listener.batch.size() == 3
+            listener.batch[0].key() == "one"
+            listener.batch[0].value() == "ONE"
+            listener.batch[0].topic() == TOPIC_RECORDS_BATCH
+            listener.batch[0].partition() == 0
+            listener.batch[0].timestamp() > 0
+            listener.batch[0].headers().headers("A").any { it.value() == "a".bytes }
+            listener.batch[0].headers().headers("B").any { it.value() == "b".bytes }
+            listener.batch[0].headers().headers("C").any { it.value() == "c".bytes }
+            listener.batch[1].key() == "DEFAULT KEY"
+            listener.batch[1].value() == "TWO"
+            listener.batch[1].topic() == TOPIC_RECORDS_BATCH
+            listener.batch[1].partition() == 0
+            listener.batch[1].timestamp() > 0
+            listener.batch[1].headers().headers("A").any { it.value() == "a".bytes }
+            listener.batch[1].headers().headers("B").any { it.value() == "b".bytes }
+            listener.batch[1].headers().headers("C").any { it.value() == "c".bytes }
+            listener.batch[2].key() == "three"
+            listener.batch[2].value() == "THREE"
+            listener.batch[2].topic() == TOPIC_RECORDS_BATCH
+            listener.batch[2].partition() == 0
+            listener.batch[2].timestamp() > 0
+            listener.batch[2].headers().headers("A").any { it.value() == "a".bytes }
+            listener.batch[2].headers().headers("B").any { it.value() == "b".bytes }
+            listener.batch[2].headers().headers("C").any { it.value() == "c".bytes }
+            listener.batch[2].headers().headers("A").any { it.value() == "a2".bytes }
+            listener.batch[2].headers().headers("B").any { it.value() == "b2".bytes }
+            listener.batch[2].headers().headers("C").any { it.value() == "c2".bytes }
+            listener.batch[2].headers().headers("D").any { it.value() == "d2".bytes }
         }
     }
 
@@ -258,5 +360,34 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
             counter.incrementAndGet()
             event.bean
         }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
+    @KafkaClient
+    @MessageHeader(name = "A", value = "a")
+    static interface ProducerRecordClient {
+        @Topic(TOPIC_RECORDS)
+        @MessageHeader(name = "B", value = "b")
+        String sendRecord(@MessageHeader(name = "C") String header, @KafkaKey String key, ProducerRecord<String, String> record)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
+    @KafkaClient(batch = true)
+    @MessageHeader(name = "A", value = "a")
+    static interface ProducerRecordBatchClient {
+        @Topic(TOPIC_RECORDS_BATCH)
+        @MessageHeader(name = "B", value = "b")
+        String sendRecords(@MessageHeader(name = "C") String header, @KafkaKey String key, List<ProducerRecord<String, String>> records)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
+    @KafkaListener(offsetReset = EARLIEST)
+    static class ConsumerRecordListener {
+        List<ConsumerRecord<String, String>> records = []
+        List<ConsumerRecord<String, String>> batch = []
+        @Topic(TOPIC_RECORDS)
+        void receive(ConsumerRecord<String, String> record) { records << record }
+        @Topic(TOPIC_RECORDS_BATCH)
+        void receiveBatch(ConsumerRecord<String, String> record) { batch << record }
     }
 }
