@@ -72,7 +72,19 @@ Sometimes you may wish to control exactly the position you wish to resume consum
 
 For example if you store offsets in a database you may wish to read the offsets from the database when the consumer starts and start reading from the position stored in the database.
 
-To support this use case your consumer bean can implement the link:{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html[ConsumerRebalanceListener] and api:configuration.kafka.ConsumerAware[] interfaces:
+To support this use case your consumer bean can implement the api:configuration.kafka.ConsumerSeekAware[] interface:
+
+.Manually seeking offsets with the `ConsumerSeekAware` API
+
+snippet::io.micronaut.kafka.docs.seek.ProductListener[]
+
+<1> Implement the interface `ConsumerSeekAware`
+<2> The `onPartitionsRevoked` can be used to save offsets
+<3> The `onPartitionsAssigned` can use used to read offsets and seek to a specific position. In this trivial example we just seek to the offset 1 (skipping the first record).
+
+TIP: api:configuration.kafka.ConsumerSeekAware[] provides a convenient api:configuration.kafka.seek.KafkaSeeker[] object that can be used to perform api:configuration.kafka.seek.KafkaSeekOperation[]s immediately on the underlying consumer.
+
+Alternatively, when more fine-grained access to the Kafka consumer is required, your consumer bean can instead implement the link:{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html[ConsumerRebalanceListener] and api:configuration.kafka.ConsumerAware[] interfaces:
 
 .Manually seeking offsets with the `KafkaConsumer` API
 
