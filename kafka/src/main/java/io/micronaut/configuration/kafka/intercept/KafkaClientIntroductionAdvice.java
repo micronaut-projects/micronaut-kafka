@@ -83,6 +83,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Stream.concat;
+
 /**
  * Implementation of the {@link io.micronaut.configuration.kafka.annotation.KafkaClient} advice annotation.
  *
@@ -475,14 +478,28 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     private ProducerRecord<?, ?> buildProducerRecord(MethodInvocationContext<Object, Object> context, ProducerState producerState, Object value) {
-        return new ProducerRecord<>(
+        return decorateProducerRecord(context, producerState, value)
+            .orElseGet(() -> new ProducerRecord<>(
                 producerState.topicSupplier.get(context),
                 producerState.partitionSupplier.get(context),
                 producerState.timestampSupplier.get(context),
                 producerState.keySupplier.get(context),
                 value,
-                producerState.headersSupplier.get(context)
-        );
+                producerState.headersSupplier.get(context)));
+    }
+
+    private Optional<ProducerRecord<?, ?>> decorateProducerRecord(MethodInvocationContext<Object, Object> context, ProducerState producerState, Object value) {
+        return Optional.ofNullable(value)
+            .filter(ProducerRecord.class::isInstance).map(ProducerRecord.class::cast)
+            .map(r -> new ProducerRecord<>(
+                Optional.ofNullable(r.topic()).filter(not(String::isEmpty)).orElseGet(() -> producerState.topicSupplier.get(context)),
+                Optional.ofNullable(r.partition()).orElseGet(() -> producerState.partitionSupplier.get(context)),
+                Optional.ofNullable(r.timestamp()).orElseGet(() -> producerState.timestampSupplier.get(context)),
+                Optional.ofNullable(r.key()).orElseGet(() -> producerState.keySupplier.get(context)),
+                r.value(),
+                concat(Optional.ofNullable(producerState.headersSupplier.get(context)).stream(),
+                    Optional.ofNullable(r.headers()).map(Headers::toArray).map(Arrays::asList).stream())
+                    .flatMap(Collection::stream).toList()));
     }
 
     @SuppressWarnings("unchecked")
