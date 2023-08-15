@@ -75,12 +75,8 @@ For example if you store offsets in a database you may wish to read the offsets 
 To support this use case your consumer bean can implement the link:{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html[ConsumerRebalanceListener] and api:configuration.kafka.ConsumerAware[] interfaces:
 
 .Manually seeking offsets with the `KafkaConsumer` API
-[source,java]
-----
-include::{testskafka}/consumer/offsets/rebalance/ProductListener.java[tags=imports, indent=0]
 
-include::{testskafka}/consumer/offsets/rebalance/ProductListener.java[tags=clazz, indent=0]
-----
+snippet::io.micronaut.kafka.docs.rebalance.ProductListener[]
 
 <1> The `setKafkaConsumer` of the api:configuration.kafka.ConsumerAware[] allows access to the underlying consumer
 <2> The `onPartitionsRevoked` can be used to save offsets

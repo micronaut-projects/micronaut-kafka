@@ -6,6 +6,7 @@ plugins {
 dependencies {
     kaptTest(platform(mn.micronaut.core.bom))
     kaptTest(mn.micronaut.inject.java)
+    testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(mnTest.micronaut.test.junit5)
     testRuntimeOnly(libs.junit.jupiter.engine)
