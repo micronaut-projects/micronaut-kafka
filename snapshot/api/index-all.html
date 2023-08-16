@@ -129,7 +129,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/admin/AdminClientFactory.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.admin">AdminClientFactory</a> - Class in <a href="io/micronaut/configuration/kafka/admin/package-summary.html">io.micronaut.configuration.kafka.admin</a></dt>
 <dd>
-<div class="block">Creates the Kakfa <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/AdminClient.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>AdminClient</code></a>.</div>
+<div class="block">Creates the Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/AdminClient.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>AdminClient</code></a>.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/admin/AdminClientFactory.html#%3Cinit%3E()" class="member-name-link">AdminClientFactory()</a> - Constructor for class io.micronaut.configuration.kafka.admin.<a href="io/micronaut/configuration/kafka/admin/AdminClientFactory.html" title="class in io.micronaut.configuration.kafka.admin">AdminClientFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -344,6 +344,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html#convert(org.apache.kafka.common.header.Header,java.lang.Class,io.micronaut.core.convert.ConversionContext)" class="member-name-link">convert(Header, Class&lt;Object&gt;, ConversionContext)</a> - Method in class io.micronaut.configuration.kafka.convert.<a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html" title="class in io.micronaut.configuration.kafka.convert">KafkaHeaderConverter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html#create(org.apache.kafka.common.ClusterResourceListener...)" class="member-name-link">create(ClusterResourceListener...)</a> - Method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html" title="class in io.micronaut.configuration.kafka.health">DefaultNetworkClientCreator</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html#create(org.apache.kafka.common.ClusterResourceListener...)" class="member-name-link">create(ClusterResourceListener...)</a> - Method in interface io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html" title="interface in io.micronaut.configuration.kafka.health">NetworkClientCreator</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaConsumerFactory.html#createConsumer(io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration)" class="member-name-link">createConsumer(AbstractKafkaConsumerConfiguration&lt;K, V&gt;)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaConsumerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaConsumerFactory</a></dt>
 <dd>
 <div class="block">Creates a new <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>KafkaConsumer</code></a> for the given configuration.</div>
@@ -371,6 +375,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Default retry delay in seconds.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#DEFAULT_ENABLED" class="member-name-link">DEFAULT_ENABLED</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default enable value.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#DEFAULT_HANDLE_ALL_EXCEPTIONS" class="member-name-link">DEFAULT_HANDLE_ALL_EXCEPTIONS</a> - Static variable in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
 <div class="block">Default handle all exceptions.</div>
@@ -382,6 +390,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html#DEFAULT_KAFKA_PORT" class="member-name-link">DEFAULT_KAFKA_PORT</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></dt>
 <dd>
 <div class="block">The default kafka port.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#DEFAULT_RESTRICTED" class="member-name-link">DEFAULT_RESTRICTED</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default restricted value.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#DEFAULT_RETRY_COUNT" class="member-name-link">DEFAULT_RETRY_COUNT</a> - Static variable in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
@@ -426,6 +438,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Construct a new <a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams"><code>KafkaStreamsConfiguration</code></a> for the given defaults.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.health">DefaultNetworkClientCreator</a> - Class in <a href="io/micronaut/configuration/kafka/health/package-summary.html">io.micronaut.configuration.kafka.health</a></dt>
+<dd>
+<div class="block">Default implementation of <a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html" title="interface in io.micronaut.configuration.kafka.health"><code>NetworkClientCreator</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html#%3Cinit%3E(io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration)" class="member-name-link">DefaultNetworkClientCreator(KafkaDefaultConfiguration)</a> - Constructor for class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html" title="class in io.micronaut.configuration.kafka.health">DefaultNetworkClientCreator</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html" class="type-name-link" title="class in io.micronaut.configuration.kafka">DefaultProducerFactory</a> - Class in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
 <dd>
 <div class="block">A default implementation of <a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka"><code>ProducerFactory</code></a> used for creating producer.</div>
@@ -744,6 +762,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a> - package io.micronaut.configuration.kafka.tracing.brave</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isEnabled()" class="member-name-link">isEnabled()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#isolation()" class="member-name-link">isolation()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>
 <div class="block">Kafka consumer isolation level to control how to read messages written transactionally.</div>
@@ -756,6 +776,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Is the consumer with the given ID paused to consume from the given topic partitions.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfiguration.html#isRestricted()" class="member-name-link">isRestricted()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">KafkaHealthConfiguration</a></dt>
+<dd>
+<div class="block">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isRestricted()" class="member-name-link">isRestricted()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:J">J</h2>
 <dl class="index">
@@ -870,13 +896,29 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html#%3Cinit%3E(io.micronaut.core.convert.ConversionService)" class="member-name-link">KafkaHeadersBinder(ConversionService)</a> - Constructor for class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeadersBinder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfiguration.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.config">KafkaHealthConfiguration</a> - Interface in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
+<dd>
+<div class="block">Kafka Health indicator Configuration.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a> - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
+<dd>
+<div class="block"><code>ConfigurationProperties</code> implementation of <a href="io/micronaut/configuration/kafka/config/KafkaHealthConfiguration.html" title="interface in io.micronaut.configuration.kafka.config"><code>KafkaHealthConfiguration</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#%3Cinit%3E()" class="member-name-link">KafkaHealthConfigurationProperties()</a> - Constructor for class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a> - Class in <a href="io/micronaut/configuration/kafka/health/package-summary.html">io.micronaut.configuration.kafka.health</a></dt>
 <dd>
 <div class="block">A <code>HealthIndicator</code> for Kafka.</div>
 </dd>
-<dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#%3Cinit%3E(org.apache.kafka.clients.admin.AdminClient,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration)" class="member-name-link">KafkaHealthIndicator(AdminClient, KafkaDefaultConfiguration)</a> - Constructor for class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
+<dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#%3Cinit%3E(io.micronaut.context.BeanContext,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration,io.micronaut.configuration.kafka.health.NetworkClientCreator,io.micronaut.configuration.kafka.config.KafkaHealthConfiguration)" class="member-name-link">KafkaHealthIndicator(BeanContext, KafkaDefaultConfiguration, NetworkClientCreator, KafkaHealthConfiguration)</a> - Constructor for class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>
 <div class="block">Constructs a new Kafka health indicator for the given arguments.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#%3Cinit%3E(org.apache.kafka.clients.admin.AdminClient,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration)" class="member-name-link">KafkaHealthIndicator(AdminClient, KafkaDefaultConfiguration)</a> - Constructor for class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#%3Cinit%3E(io.micronaut.context.BeanContext,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration,io.micronaut.configuration.kafka.health.NetworkClientCreator,io.micronaut.configuration.kafka.config.KafkaHealthConfiguration)"><code>KafkaHealthIndicator(io.micronaut.context.BeanContext,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration,io.micronaut.configuration.kafka.health.NetworkClientCreator,io.micronaut.configuration.kafka.config.KafkaHealthConfiguration)</code></a> instead.</div>
+</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaKey.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaKey</a> - Annotation Interface in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
 <dd>
@@ -1073,6 +1115,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#names()" class="member-name-link">names()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.health">NetworkClientCreator</a> - Interface in <a href="io/micronaut/configuration/kafka/health/package-summary.html">io.micronaut.configuration.kafka.health</a></dt>
+<dd>
+<div class="block"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/FunctionalInterface.html" title="class or interface in java.lang" class="external-link"><code>FunctionalInterface</code></a> to instantiate a <code>NetworkClient</code>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html#newBuilder()" class="member-name-link">newBuilder()</a> - Static method in class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html" title="class in io.micronaut.configuration.kafka.metrics.builder">KafkaMetricMeterTypeBuilder</a></dt>
 <dd>
 <div class="block">Method for creating a new builder class.</div>
@@ -1123,6 +1169,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Wait for the leader to acknowledge.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#onUpdate(org.apache.kafka.common.ClusterResource)" class="member-name-link">onUpdate(ClusterResource)</a> - Method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
@@ -1163,6 +1211,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaConsumerConfiguration</a></dt>
 <dd>
 <div class="block">The default consumers configuration.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default prefix used for Kafka Health configuration.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaProducerConfiguration</a></dt>
 <dd>
@@ -1276,6 +1328,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The session timeout for a consumer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setEnabled(boolean)" class="member-name-link">setEnabled(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>
+<div class="block">Whether the Kafka health check is enabled.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html#setHealthTimeout(java.time.Duration)" class="member-name-link">setHealthTimeout(Duration)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration</a></dt>
 <dd>
 <div class="block">The health check timeout.</div>
@@ -1291,6 +1347,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html#setKeySerializer(org.apache.kafka.common.serialization.Serializer)" class="member-name-link">setKeySerializer(Serializer&lt;K&gt;)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a></dt>
 <dd>
 <div class="block">Sets the key serializer.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setRestricted(boolean)" class="member-name-link">setRestricted(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>
+<div class="block">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#setSkipRecordOnDeserializationFailure(boolean)" class="member-name-link">setSkipRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
 <dd>
