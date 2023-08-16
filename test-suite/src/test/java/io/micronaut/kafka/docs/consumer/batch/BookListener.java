@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka.docs.consumer.batch;
+package io.micronaut.kafka.docs.consumer.batch;
 
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
