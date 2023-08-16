@@ -1,4 +1,4 @@
-package docs.producer.fallback;
+package io.micronaut.kafka.docs.producer.fallback;
 
 // tag::imports[]
 import io.micronaut.context.annotation.Replaces;
@@ -7,7 +7,7 @@ import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Singleton;
 // end::imports[]
 
-@Requires(property = "spec.name", value = "MessageClientFallbackSpec")
+@Requires(property = "spec.name", value = "MessageClientFallbackTest")
 // tag::clazz[]
 @Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <1>
 @Replaces(MessageClient.class) // <2>

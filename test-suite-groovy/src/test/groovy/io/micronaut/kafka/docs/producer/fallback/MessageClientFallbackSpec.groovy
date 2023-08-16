@@ -1,4 +1,4 @@
-package docs.producer.fallback
+package io.micronaut.kafka.docs.producer.fallback
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Property
