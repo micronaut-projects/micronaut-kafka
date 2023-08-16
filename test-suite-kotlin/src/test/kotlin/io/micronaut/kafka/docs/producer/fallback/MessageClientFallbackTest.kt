@@ -1,6 +1,6 @@
 package io.micronaut.kafka.docs.producer.fallback
 
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.BeanContext
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 internal class MessageClientFallbackTest {
 
     @Inject
-    lateinit var context: ApplicationContext
+    lateinit var context: BeanContext
 
     @Test
     fun contextContainsFallbackBean() {
