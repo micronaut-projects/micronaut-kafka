@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test
 internal class MessageClientFallbackTest {
 
     @Inject
-    var context: ApplicationContext? = null
+    lateinit var context: ApplicationContext
 
     @Test
     fun contextContainsFallbackBean() {
-        val bean = context!!.getBean(MessageClientFallback::class.java)
+        val bean = context.getBean(MessageClientFallback::class.java)
 
         assertNotNull(bean)
         assertThrows(UnsupportedOperationException::class.java) {
