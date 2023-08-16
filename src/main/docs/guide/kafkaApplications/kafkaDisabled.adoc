@@ -7,9 +7,9 @@ You must, however, provide your own replacement implementations of any `@KafkaCl
 .Creating Replacement KafkaClient Implementations
 [source,java]
 ----
-include::{testskafka}/producer/fallback/MessageClientFallback.java[tags=imports, indent=0]
+include::kafka/src/test/groovy/docs/producer/fallback/MessageClientFallback.java[tags=imports, indent=0]
 
-include::{testskafka}/producer/fallback/MessageClientFallback.java[tags=clazz, indent=0]
+include::kafka/src/test/groovy/docs/producer/fallback/MessageClientFallback.java[tags=clazz, indent=0]
 ----
 
 <1> Only instantiate when `kafka.enabled` is set to `false`
