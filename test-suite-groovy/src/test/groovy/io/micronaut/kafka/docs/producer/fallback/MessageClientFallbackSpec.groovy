@@ -1,6 +1,6 @@
-package docs.producer.fallback
+package io.micronaut.kafka.docs.producer.fallback
 
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.BeanContext
 import io.micronaut.context.annotation.Property
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
@@ -12,7 +12,7 @@ import spock.lang.Specification
 class MessageClientFallbackSpec extends Specification {
 
     @Inject
-    ApplicationContext context
+    BeanContext context
 
     void "test that context contains the fallback bean"() {
         when:
