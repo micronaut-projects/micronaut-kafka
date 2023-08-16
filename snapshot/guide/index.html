@@ -2099,6 +2099,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -2148,21 +2149,18 @@ public class BookListener {
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("all-the-books")
-public void receive(List&lt;Book&gt; books,
-                    List&lt;Long&gt; offsets,
-                    List&lt;Integer&gt; partitions,
-                    List&lt;String&gt; topics,
-                    Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
 
-    for (int i = 0; i &lt; books.size(); i++) {
+    for (int i = 0; i &lt; records.size(); i++) {
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i); <i class="conum" data-value="2"></i><b>(2)</b>
 
         // process the book
-        Book book = books.get(i); <i class="conum" data-value="2"></i><b>(2)</b>
+        Book book = record.value();
 
         // commit offsets
-        String topic = topics.get(i);
-        int partition = partitions.get(i);
-        long offset = offsets.get(i); <i class="conum" data-value="3"></i><b>(3)</b>
+        String topic = record.topic();
+        int partition = record.partition();
+        long offset = record.offset(); <i class="conum" data-value="3"></i><b>(3)</b>
 
         kafkaConsumer.commitSync(Collections.singletonMap( <i class="conum" data-value="4"></i><b>(4)</b>
                 new TopicPartition(topic, partition),
@@ -2177,7 +2175,7 @@ public void receive(List&lt;Book&gt; books,
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The method receives the batch of records as well as the offsets, partitions and topics</td>
+<td>The method receives the batch of books as a list of consumer records</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
