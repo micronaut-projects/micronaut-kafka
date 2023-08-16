@@ -32,6 +32,7 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
     public static final String TOPIC_BLOCKING = "KafkaProducerSpec-users-blocking"
     public static final String TOPIC_QUANTITY = "KafkaProducerSpec-users-quantity"
     public static final String TOPIC_RECORDS = "KafkaProducerSpec-records"
+    public static final String TOPIC_RECORDS_NO_HEADERS = "KafkaProducerSpec-records-no-headers"
     public static final String TOPIC_RECORDS_BATCH = "KafkaProducerSpec-records-batch"
 
     Map<String, Object> getConfiguration() {
@@ -52,7 +53,7 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
          "kafka.consumers.default.value.deserializer": StringDeserializer.name,
          "kafka.consumers.default.value-deserializer": StringDeserializer.name,
          "kafka.consumers.default.valueDeserializer" : StringDeserializer.name,
-         (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING, TOPIC_RECORDS, TOPIC_RECORDS_BATCH]]
+         (EMBEDDED_TOPICS)                           : [TOPIC_BLOCKING, TOPIC_RECORDS, TOPIC_RECORDS_NO_HEADERS, TOPIC_RECORDS_BATCH]]
     }
 
     void "test customize defaults"() {
@@ -184,6 +185,45 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
             listener.records[2].headers().headers("B").any { it.value() == "b2".bytes }
             listener.records[2].headers().headers("C").any { it.value() == "c2".bytes }
             listener.records[2].headers().headers("D").any { it.value() == "d2".bytes }
+        }
+    }
+
+    void "test send producer record - no headers"() {
+        given:
+        ProducerRecordNoHeadersClient client = context.getBean(ProducerRecordNoHeadersClient)
+        ConsumerRecordListener listener = context.getBean(ConsumerRecordListener)
+
+        when:
+        client.sendRecordNoHeaders("DEFAULT KEY", new ProducerRecord<>("", "one", "ONE"))
+        client.sendRecordNoHeaders("DEFAULT KEY", new ProducerRecord<>("", "TWO"))
+        client.sendRecordNoHeaders("DEFAULT KEY", new ProducerRecord<>("", null, "three", "THREE", [
+                new RecordHeader("A", "a2".bytes),
+                new RecordHeader("B", "b2".bytes),
+                new RecordHeader("C", "c2".bytes),
+                new RecordHeader("D", "d2".bytes)]))
+
+        then:
+        conditions.eventually {
+            listener.noHeaders.size() == 3
+            listener.noHeaders[0].key() == "one"
+            listener.noHeaders[0].value() == "ONE"
+            listener.noHeaders[0].topic() == TOPIC_RECORDS_NO_HEADERS
+            listener.noHeaders[0].partition() == 0
+            listener.noHeaders[0].timestamp() > 0
+            listener.noHeaders[1].key() == "DEFAULT KEY"
+            listener.noHeaders[1].value() == "TWO"
+            listener.noHeaders[1].topic() == TOPIC_RECORDS_NO_HEADERS
+            listener.noHeaders[1].partition() == 0
+            listener.noHeaders[1].timestamp() > 0
+            listener.noHeaders[2].key() == "three"
+            listener.noHeaders[2].value() == "THREE"
+            listener.noHeaders[2].topic() == TOPIC_RECORDS_NO_HEADERS
+            listener.noHeaders[2].partition() == 0
+            listener.noHeaders[2].timestamp() > 0
+            listener.noHeaders[2].headers().headers("A").any { it.value() == "a2".bytes }
+            listener.noHeaders[2].headers().headers("B").any { it.value() == "b2".bytes }
+            listener.noHeaders[2].headers().headers("C").any { it.value() == "c2".bytes }
+            listener.noHeaders[2].headers().headers("D").any { it.value() == "d2".bytes }
         }
     }
 
@@ -372,6 +412,13 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
+    @KafkaClient
+    static interface ProducerRecordNoHeadersClient {
+        @Topic(TOPIC_RECORDS_NO_HEADERS)
+        String sendRecordNoHeaders(@KafkaKey String key, ProducerRecord<String, String> record)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaProducerSpec')
     @KafkaClient(batch = true)
     @MessageHeader(name = "A", value = "a")
     static interface ProducerRecordBatchClient {
@@ -384,9 +431,12 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
     @KafkaListener(offsetReset = EARLIEST)
     static class ConsumerRecordListener {
         List<ConsumerRecord<String, String>> records = []
+        List<ConsumerRecord<String, String>> noHeaders = []
         List<ConsumerRecord<String, String>> batch = []
         @Topic(TOPIC_RECORDS)
         void receive(ConsumerRecord<String, String> record) { records << record }
+        @Topic(TOPIC_RECORDS_NO_HEADERS)
+        void receiveNoHeaders(ConsumerRecord<String, String> record) { noHeaders << record }
         @Topic(TOPIC_RECORDS_BATCH)
         void receiveBatch(ConsumerRecord<String, String> record) { batch << record }
     }
