@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.health
 import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
+import io.micronaut.core.util.StringUtils
 import io.micronaut.management.health.indicator.HealthResult
 
 import static io.micronaut.health.HealthStatus.DOWN
@@ -13,15 +14,14 @@ class RestrictedKafkaHealthIndicatorSpec extends AbstractKafkaSpec {
     void "test restricted kafka health indicator - UP"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ['kafka.health.restricted': 'true'])
+                ['kafka.health.restricted': StringUtils.TRUE, 'endpoints.health.details-visible': StringUtils.TRUE])
+        KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
 
-        when:
-        RestrictedKafkaHealthIndicator healthIndicator = applicationContext.getBean(RestrictedKafkaHealthIndicator)
-        HealthResult result = healthIndicator.result.next().block()
-
-        then:
-        result.status == UP
-        result.details['clusterId'] != null
+        expect:
+        conditions.eventually {
+            HealthResult result = healthIndicator.result.next().block()
+            result.status == UP && result.details && result.details['clusterId'] != null
+        }
 
         cleanup:
         applicationContext.close()
@@ -30,11 +30,11 @@ class RestrictedKafkaHealthIndicatorSpec extends AbstractKafkaSpec {
     void "test restricted kafka health indicator - DOWN"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ['kafka.health.restricted': 'true', 'kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()]
+                ['kafka.health.restricted': StringUtils.TRUE, 'kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()]
         )
 
         when:
-        RestrictedKafkaHealthIndicator healthIndicator = applicationContext.getBean(RestrictedKafkaHealthIndicator)
+        KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
         HealthResult result = healthIndicator.result.next().block()
 
         then:
@@ -45,27 +45,16 @@ class RestrictedKafkaHealthIndicatorSpec extends AbstractKafkaSpec {
         applicationContext.close()
     }
 
-    void "test restricted kafka health indicator is disabled"() {
+    void "test kafka health indicator can be disabled"() {
         given:
         ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ['kafka.health.enabled': enabled, 'kafka.health.restricted': restricted]
+                ['kafka.health.enabled': StringUtils.FALSE]
         )
 
-        when:
-        Optional<RestrictedKafkaHealthIndicator> optional = applicationContext.findBean(RestrictedKafkaHealthIndicator)
-
-        then:
-        optional.isEmpty()
+        expect:
+        !applicationContext.containsBean(KafkaHealthIndicator)
 
         cleanup:
         applicationContext.close()
-
-        where:
-        enabled | restricted
-        false   | false
-        false   | 'true'
-        true    | 'false'
-        true    | 'no'
-        true    | ''
     }
 }

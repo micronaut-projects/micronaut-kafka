@@ -20,22 +20,7 @@ For example if Kafka is not available the `/health` endpoint will return:
 
 NOTE: By default, the details visible above are only shown to authenticated users. See the <<healthEndpoint, Health Endpoint>> documentation for how to configure that setting.
 
-If you wish to disable the kafka health check while still using the `management` dependency you can set the property `kafka.health.enabled` to `false` in your application configuration.
+The following options are available to configure the Kafka Health indicator:
 
-[configuration]
-----
-kafka:
-    health:
-        enabled: false
-----
+include::{includedir}configurationProperties/io.micronaut.configuration.kafka.config.KafkaHealthConfigurationProperties.adoc[]
 
-The health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn't have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn't require any additional permissions.
-
-To do that, you can set the property `kafka.health.restricted` to `true` in your application configuration.
-
-[configuration]
-----
-kafka:
-    health:
-        restricted: true
-----
