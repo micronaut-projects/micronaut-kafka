@@ -507,7 +507,6 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 headers));
     }
 
-
     @SuppressWarnings("unchecked")
     private ProducerState getProducer(MethodInvocationContext<?, ?> context) {
         ProducerKey key = new ProducerKey(context.getTarget(), context.getExecutableMethod());
