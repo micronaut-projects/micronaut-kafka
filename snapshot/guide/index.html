@@ -2601,7 +2601,7 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="paragraph">
 <p>You must, however, provide your own replacement implementations of any <code>@KafkaClient</code> interfaces:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Creating Replacement KafkaClient Implementations</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.context.annotation.Replaces;
@@ -2609,14 +2609,53 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Singleton;
 
-@Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) <i class="conum" data-value="1"></i><b>(1)</b>
-@Replaces(MessageClient.class) <i class="conum" data-value="2"></i><b>(2)</b>
+@Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <b class="conum">(1)</b>
+@Replaces(MessageClient.class) // <b class="conum">(2)</b>
 @Singleton
-public class MessageClientFallback implements MessageClient { <i class="conum" data-value="3"></i><b>(3)</b>
+public class MessageClientFallback implements MessageClient { // <b class="conum">(3)</b>
 
     @Override
     public void send(String message) {
-        throw new UnsupportedOperationException(); <i class="conum" data-value="4"></i><b>(4)</b>
+        throw new UnsupportedOperationException(); // <b class="conum">(4)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating Replacement KafkaClient Implementations</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.context.annotation.Replaces
+import io.micronaut.context.annotation.Requires
+import io.micronaut.core.util.StringUtils
+import jakarta.inject.Singleton
+
+@Requires(property = 'kafka.enabled', notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <b class="conum">(1)</b>
+@Replaces(MessageClient.class) // <b class="conum">(2)</b>
+@Singleton
+class MessageClientFallback implements MessageClient { // <b class="conum">(3)</b>
+
+    @Override
+    void send(String message) {
+        throw new UnsupportedOperationException() // <b class="conum">(4)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating Replacement KafkaClient Implementations</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.context.annotation.Replaces
+import io.micronaut.context.annotation.Requires
+import io.micronaut.core.util.StringUtils
+import jakarta.inject.Singleton
+
+@Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <b class="conum">(1)</b>
+@Replaces(MessageClient::class) // <b class="conum">(2)</b>
+@Singleton
+class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
+
+    override fun send(message: String) {
+        throw UnsupportedOperationException() // <b class="conum">(4)</b>
     }
 }</code></pre>
 </div>
