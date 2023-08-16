@@ -485,7 +485,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         Supplier<Integer> partitionSupplier = () -> producerState.partitionSupplier.get(context);
         Supplier<Long> timestampSupplier = () -> producerState.timestampSupplier.get(context);
         Supplier<Object> keySupplier = () -> producerState.keySupplier.get(context);
-        Supplier<Iterable<Header>> headersSupplier = () -> producerState.headersSupplier.get(context);
+        Iterable<Header> headers = producerState.headersSupplier.get(context);
         return Optional.ofNullable(value)
             .filter(ProducerRecord.class::isInstance)
             .map(ProducerRecord.class::cast)
@@ -495,8 +495,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 Optional.ofNullable(r.timestamp()).orElseGet(timestampSupplier),
                 Optional.ofNullable(r.key()).orElseGet(keySupplier),
                 r.value(),
-                r.headers() == null ? headersSupplier.get() :
-                    concat(StreamSupport.stream(headersSupplier.get().spliterator(), false), Stream.of(r.headers().toArray())).toList()
+                headers == null ? r.headers() :
+                    concat(StreamSupport.stream(headers.spliterator(), false), Stream.of(r.headers().toArray())).toList()
                 )
             ).orElseGet(() -> new ProducerRecord<>(
                 topicSupplier.get(),
@@ -504,7 +504,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 timestampSupplier.get(),
                 keySupplier.get(),
                 value,
-                headersSupplier.get()));
+                headers));
     }
 
 
