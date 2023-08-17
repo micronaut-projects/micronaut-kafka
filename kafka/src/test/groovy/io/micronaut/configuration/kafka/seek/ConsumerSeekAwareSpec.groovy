@@ -51,6 +51,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
 
         expect: "consumers start consuming messages"
         conditions.eventually {
+            !consumer01.revoked
             !consumer01.messages.empty
             !consumer02.messages.empty
             !consumer03.messages.empty
@@ -66,9 +67,11 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         and: "A few more messages are produced after rebalance"
         final MyProducer producer = context.getBean(MyProducer)
         MESSAGES_POST_REBALANCE.forEach(producer::produce)
+        consumer01.onPartitionsLost([])
 
         and: "consumer#1 performed absolute seek operation to offset 3 -- offset 0 to 2 are skipped"
         conditions.eventually {
+            consumer01.revoked
             consumer01.messages == [
                     MESSAGE_3,
                     MESSAGE_4,
@@ -164,8 +167,15 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer01 extends MyAbstractConsumer {
         MyConsumer01(TestMessages test) {}
+        boolean revoked = false
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
             partitions.each(tp -> seeker.perform(seek(tp, 3)))
+        }
+        @Override void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+            revoked = true
+        }
+        @Override @Topic(patterns = TEST_TOPIC) void consume(String message) {
+            messages << message
         }
     }
 
