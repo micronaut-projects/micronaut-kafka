@@ -20,7 +20,7 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
     }
 
     @Topic("awesome-products")
-    def receive(Product product) {
+    void receive(Product product) {
         // process product
     }
 

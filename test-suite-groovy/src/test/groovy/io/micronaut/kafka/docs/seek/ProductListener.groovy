@@ -11,7 +11,7 @@ import org.apache.kafka.common.TopicPartition
 class ProductListener implements ConsumerSeekAware { // <1>
 
     @Topic("awesome-products")
-    def receive(Product product) {
+    void receive(Product product) {
         // process product
     }
 

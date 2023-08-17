@@ -10,7 +10,7 @@ import org.apache.kafka.common.TopicPartition
 class ProductListener {
 
     @Topic("awesome-products")
-    def receive(Product product, KafkaSeekOperations ops) { // <1>
+    void receive(Product product, KafkaSeekOperations ops) { // <1>
         // process product
         ops.defer(ops.seekToBeginning(new TopicPartition("awesome-products", 0))); // <2>
     }
