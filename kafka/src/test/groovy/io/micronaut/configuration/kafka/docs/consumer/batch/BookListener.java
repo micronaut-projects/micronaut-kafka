@@ -4,6 +4,7 @@ package io.micronaut.configuration.kafka.docs.consumer.batch;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import reactor.core.publisher.Flux;
@@ -37,21 +38,18 @@ public class BookListener {
 
     // tag::manual[]
     @Topic("all-the-books")
-    public void receive(List<Book> books,
-                        List<Long> offsets,
-                        List<Integer> partitions,
-                        List<String> topics,
-                        Consumer kafkaConsumer) { // <1>
+    public void receive(List<ConsumerRecord<String, Book>> records, Consumer kafkaConsumer) { // <1>
 
-        for (int i = 0; i < books.size(); i++) {
+        for (int i = 0; i < records.size(); i++) {
+            ConsumerRecord<String, Book> record = records.get(i); // <2>
 
             // process the book
-            Book book = books.get(i); // <2>
+            Book book = record.value();
 
             // commit offsets
-            String topic = topics.get(i);
-            int partition = partitions.get(i);
-            long offset = offsets.get(i); // <3>
+            String topic = record.topic();
+            int partition = record.partition();
+            long offset = record.offset(); // <3>
 
             kafkaConsumer.commitSync(Collections.singletonMap( // <4>
                     new TopicPartition(topic, partition),

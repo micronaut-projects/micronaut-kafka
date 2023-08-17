@@ -32,7 +32,7 @@ You can also take more control of committing offsets when doing batch processing
 include::{testskafka}/consumer/batch/BookListener.java[tags=manual, indent=0]
 ----
 
-<1> The method receives the batch of records as well as the offsets, partitions and topics
+<1> The method receives the batch of books as a list of consumer records
 <2> Each record is processed
 <3> The offset, partition and topic is read for the record
 <4> Offsets are committed

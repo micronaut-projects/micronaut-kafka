@@ -15,5 +15,5 @@
     <!--<logger name="org.apache.kafka" level="TRACE" />-->
 <!--    <logger name="io.micronaut.context" level="TRACE"/>-->
     <!--<logger name="io.micronaut.configuration.kafka.processor" level="TRACE"/>-->
-<!--    <logger name="io.micronaut.configuration.kafka " level="TRACE" />-->
+    <logger name="io.micronaut.configuration.kafka" level="TRACE" />
 </configuration>

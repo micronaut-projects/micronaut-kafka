@@ -38,6 +38,7 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
      * The default kafka port.
      */
     public static final int DEFAULT_KAFKA_PORT = 9092;
+
     /**
      * The default prefix used for Kafka configuration.
      */
