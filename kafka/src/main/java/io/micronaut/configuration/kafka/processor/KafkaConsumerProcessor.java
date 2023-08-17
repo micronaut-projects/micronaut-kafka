@@ -1261,17 +1261,17 @@ class KafkaConsumerProcessor
         NOT_STARTED, POLLING, CLOSED
     }
 
-    private record ConsumerSeekAwareAdapter(KafkaSeeker seeker, ConsumerSeekAware bean)
+    private record ConsumerSeekAwareAdapter(@NonNull KafkaSeeker seeker, @NonNull ConsumerSeekAware bean)
         implements ConsumerRebalanceListener {
 
         @Override
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            bean.onPartitionsRevoked(partitions);
+            bean.onPartitionsRevoked(Optional.ofNullable(partitions).orElseGet(Collections::emptyList));
         }
 
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            bean.onPartitionsAssigned(partitions, seeker);
+            bean.onPartitionsAssigned(Optional.ofNullable(partitions).orElseGet(Collections::emptyList), seeker);
         }
     }
 }

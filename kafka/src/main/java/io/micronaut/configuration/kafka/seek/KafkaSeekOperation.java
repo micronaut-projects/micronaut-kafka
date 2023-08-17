@@ -173,7 +173,7 @@ public interface KafkaSeekOperation {
          * @return a list of seek to the end operations.
          */
         @NonNull
-        default List<KafkaSeekOperation> seekToEnd(Collection<TopicPartition> partitions) {
+        default List<KafkaSeekOperation> seekToEnd(@NonNull Collection<TopicPartition> partitions) {
             return partitions.stream().map(this::seekToEnd).toList();
         }
 

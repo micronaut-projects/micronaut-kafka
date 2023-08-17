@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperation;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
+import io.micronaut.core.annotation.NonNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
@@ -59,7 +60,7 @@ public interface ConsumerSeekAware {
      * @param seeker     The object that can perform {@link KafkaSeekOperation seek operations}
      * @see ConsumerRebalanceListener#onPartitionsAssigned(Collection)
      */
-    void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker);
+    void onPartitionsAssigned(@NonNull Collection<TopicPartition> partitions, @NonNull KafkaSeeker seeker);
 
     /**
      * @see ConsumerRebalanceListener#onPartitionsRevoked(Collection)
@@ -67,7 +68,7 @@ public interface ConsumerSeekAware {
      *                   be revoked (may not include all currently assigned partitions, i.e. there
      *                   may still be some partitions left)
      */
-    default void onPartitionsRevoked(Collection<TopicPartition> partitions) { }
+    default void onPartitionsRevoked(@NonNull Collection<TopicPartition> partitions) { }
 
     /**
      * @see ConsumerRebalanceListener#onPartitionsLost(Collection)
@@ -75,7 +76,7 @@ public interface ConsumerSeekAware {
      *                   owned partitions will NOT be included, i.e. this list will only include
      *                   newly added partitions)
      */
-    default void onPartitionsLost(Collection<TopicPartition> partitions) {
+    default void onPartitionsLost(@NonNull Collection<TopicPartition> partitions) {
         onPartitionsRevoked(partitions);
     }
 }
