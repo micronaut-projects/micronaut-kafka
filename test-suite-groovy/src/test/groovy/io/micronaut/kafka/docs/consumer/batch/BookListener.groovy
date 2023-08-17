@@ -1,5 +1,7 @@
 package io.micronaut.kafka.docs.consumer.batch
 
+import groovy.util.logging.Slf4j
+
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -12,6 +14,7 @@ import reactor.core.publisher.Flux
 
 // tag::clazz[]
 @KafkaListener(batch = true) // <1>
+@Slf4j
 class BookListener {
 // end::clazz[]
 
@@ -19,7 +22,7 @@ class BookListener {
     @Topic("all-the-books")
     void receiveList(List<Book> books) { // <2>
         for (Book book : books) {
-            System.out.println("Got Book = " + book.title) // <3>
+            log.info("Got Book = {}", book.title) // <3>
         }
     }
     // end::method[]
@@ -27,7 +30,9 @@ class BookListener {
     // tag::reactive[]
     @Topic("all-the-books")
     Flux<Book> receiveFlux(Flux<Book> books) {
-        books.doOnNext(book -> System.out.println("Got Book = " + book.title))
+        books.doOnNext(book ->
+            log.info("Got Book = {}", book.title)
+        )
     }
     // end::reactive[]
 

@@ -7,22 +7,26 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
 // tag::clazz[]
 @KafkaListener(batch = true) // <1>
 public class BookListener {
 // end::clazz[]
+    private static final Logger LOG = getLogger(BookListener.class);
 
     // tag::method[]
     @Topic("all-the-books")
     public void receiveList(List<Book> books) { // <2>
         for (Book book : books) {
-            System.out.println("Got Book = " + book.getTitle()); // <3>
+            LOG.info("Got Book = {}", book.title()); // <3>
         }
     }
     // end::method[]
@@ -31,7 +35,7 @@ public class BookListener {
     @Topic("all-the-books")
     public Flux<Book> receiveFlux(Flux<Book> books) {
         return books.doOnNext(book ->
-                System.out.println("Got Book = " + book.getTitle())
+            LOG.info("Got Book = {}", book.title())
         );
     }
     // end::reactive[]

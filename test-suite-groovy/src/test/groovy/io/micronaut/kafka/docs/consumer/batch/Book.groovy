@@ -4,6 +4,5 @@ import io.micronaut.serde.annotation.Serdeable
 
 @Serdeable
 class Book {
-
-    private String title
+    String title
 }
