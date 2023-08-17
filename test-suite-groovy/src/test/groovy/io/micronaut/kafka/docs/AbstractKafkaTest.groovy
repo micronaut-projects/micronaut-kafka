@@ -19,6 +19,7 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Override
     Map<String, String> getProperties() {
+        while (!MY_KAFKA.isRunning()) MY_KAFKA.start()
         ["kafka.bootstrap.servers": MY_KAFKA.getBootstrapServers()]
     }
 }

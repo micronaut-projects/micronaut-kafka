@@ -1,18 +1,19 @@
 package io.micronaut.kafka.docs.rebalance;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
-import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import io.micronaut.core.annotation.NonNull;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
-import java.util.Collection;
+import java.util.*;
 
-@KafkaListener
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
 public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 
+    List<Product> processed = new ArrayList<>();
     private Consumer consumer;
 
     @Override
@@ -22,7 +23,7 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 
     @Topic("awesome-products")
     void receive(Product product) {
-        // process product
+        processed.add(product);
     }
 
     @Override

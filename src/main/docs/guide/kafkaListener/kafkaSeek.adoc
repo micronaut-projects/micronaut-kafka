@@ -44,7 +44,7 @@ To support this use case, your consumer method can receive a api:configuration.k
 snippet::io.micronaut.kafka.docs.seek.ops.ProductListener[]
 
 <1> An instance of api:configuration.kafka.seek.KafkaSeekOperations[] will be injected to the method
-<2> Any number of `seek` operations can be deferred. In this trivial example we just seek to the beginning of the partition.
+<2> Any number of `seek` operations can be deferred. In this trivial example we just seek to the end of the partition.
 
 The `seek` operations will be performed by Micronaut automatically, when the consumer method completes successfully, possibly after committing offsets via `OffsetStrategy.AUTO`.
 

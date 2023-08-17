@@ -1,18 +1,21 @@
 package io.micronaut.kafka.docs.seek
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.configuration.kafka.seek.KafkaSeeker
+import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
 import org.apache.kafka.common.TopicPartition
 
 @KafkaListener
+@Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
 class ProductListener : ConsumerSeekAware { // <1>
 
+    var processed: MutableList<Product> = mutableListOf()
+
     @Topic("awesome-products")
-    fun receive(product: Product?) {
-        // process product
+    fun receive(product: Product) {
+        processed.add(product)
     }
 
     override fun onPartitionsRevoked(partitions: Collection<TopicPartition>) { // <2>

@@ -1,18 +1,21 @@
 package io.micronaut.kafka.docs.seek
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.configuration.kafka.seek.KafkaSeeker
+import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
 import org.apache.kafka.common.TopicPartition
 
 @KafkaListener
+@Requires(property = "spec.name", value = "ConsumerSeekAwareSpec")
 class ProductListener implements ConsumerSeekAware { // <1>
+
+    List<Product> processed = []
 
     @Topic("awesome-products")
     void receive(Product product) {
-        // process product
+        processed << product
     }
 
     @Override

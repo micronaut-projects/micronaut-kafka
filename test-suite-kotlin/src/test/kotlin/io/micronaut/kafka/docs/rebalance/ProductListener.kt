@@ -1,16 +1,17 @@
 package io.micronaut.kafka.docs.rebalance
 
 import io.micronaut.configuration.kafka.ConsumerAware
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
+import org.apache.kafka.clients.consumer.*
 import org.apache.kafka.common.TopicPartition
 
-@KafkaListener
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
 class ProductListener : ConsumerRebalanceListener, ConsumerAware<Any?, Any?> {
 
+    var processed: MutableList<Product> = mutableListOf()
     private var consumer: Consumer<*, *>? = null
 
     override fun setKafkaConsumer(consumer: Consumer<Any?, Any?>?) { // <1>
@@ -18,8 +19,8 @@ class ProductListener : ConsumerRebalanceListener, ConsumerAware<Any?, Any?> {
     }
 
     @Topic("awesome-products")
-    fun receive(product: Product?) {
-        // process product
+    fun receive(product: Product) {
+        processed.add(product)
     }
 
     override fun onPartitionsRevoked(partitions: Collection<TopicPartition>) { // <2>
