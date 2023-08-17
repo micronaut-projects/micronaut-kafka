@@ -55,12 +55,8 @@ To create a Kafka `Producer` that sends messages you can simply define an interf
 For example the following is a trivial `@KafkaClient` interface:
 
 .ProductClient.java
-[source,java]
-----
-include::{testskafka}/quickstart/ProductClient.java[tags=imports, indent=0]
 
-include::{testskafka}/quickstart/ProductClient.java[tags=clazz, indent=0]
-----
+snippet::io.micronaut.kafka.docs.quickstart.ProductClient[tags="imports,clazz", indent=0]
 
 <1> The ann:configuration.kafka.annotation.KafkaClient[] annotation is used to designate this interface as a client
 <2> The ann:configuration.kafka.annotation.Topic[] annotation indicates which topics the `ProducerRecord` should be published to
@@ -72,11 +68,8 @@ NOTE: You can omit the key, however this will result in a `null` key which means
 At compile time Micronaut will produce an implementation of the above interface. You can retrieve an instance of `ProductClient` either by looking up the bean from the api:context.ApplicationContext[] or by injecting the bean with `@Inject`:
 
 .Using ProductClient
-[source,java]
-----
-include::{testskafka}/DocTests.java[tags=quickstart, indent=0]
-----
 
+snippet::io.micronaut.kafka.docs.quickstart.QuickstartTest[tags=quickstart, indent=0]
 
 Note that since the `sendProduct` method returns `void` this means the method will send the `ProducerRecord` and block until the response is received. You can return a `Future` or rs:Publisher[] to support non-blocking message delivery.
 
@@ -87,12 +80,9 @@ To listen to Kafka messages you can use the ann:configuration.kafka.annotation.K
 The following example will listen for messages published by the `ProductClient` in the previous section:
 
 .ProductListener.java
-[source,java]
-----
-include::{testskafka}/quickstart/ProductListener.java[tags=imports, indent=0]
 
-include::{testskafka}/quickstart/ProductListener.java[tags=clazz, indent=0]
-----
+snippet::io.micronaut.kafka.docs.quickstart.ProductListener[tags="imports,clazz", indent=0]
+
 
 <1> The ann:configuration.kafka.annotation.KafkaListener[] is used with `offsetReset` set to `EARLIEST` which makes the listener start listening to messages from the beginning of the partition.
 <2> The ann:configuration.kafka.annotation.Topic[] annotation is again used to indicate which topic(s) to subscribe to.
