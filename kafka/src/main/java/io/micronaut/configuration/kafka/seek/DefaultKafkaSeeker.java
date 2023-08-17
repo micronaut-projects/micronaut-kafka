@@ -58,7 +58,7 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
                 .orElseGet(() -> regular(operation));
         } catch (Exception e) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Seek operation failed: {} - offset: {}", operation, e);
+                LOG.error("Seek operation failed: {}", operation, e);
             }
             return false;
         }
