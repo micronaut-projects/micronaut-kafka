@@ -45,7 +45,7 @@ public interface KafkaSeekOperations extends Iterable<KafkaSeekOperation>, Kafka
     }
 
     /**
-     * Adds a {@link KafkaSeekOperation kafka seek operation} to the list.
+     * Adds a {@link KafkaSeekOperation} to the list.
      *
      * @param operation the kafka seek operation to eventually perform.
      */
