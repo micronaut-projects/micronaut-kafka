@@ -23,6 +23,6 @@ class ProductListener implements ConsumerSeekAware { // <1>
     @Override
     void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) { // <3>
         // seek to offset here
-        partitions.stream().map { seeker.seek(it, 1) }.forEach(seeker::perform)
+        partitions.collect {seeker.seek(it, 1) }.each(seeker.&perform)
     }
 }
