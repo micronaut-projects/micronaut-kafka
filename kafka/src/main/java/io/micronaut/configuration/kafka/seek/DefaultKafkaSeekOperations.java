@@ -43,7 +43,6 @@ final class DefaultKafkaSeekOperations implements KafkaSeekOperations {
 
     @Override
     public void defer(@NonNull KafkaSeekOperation operation) {
-        Objects.requireNonNull(operation, "operation");
-        operations.add(operation);
+        operations.add(Objects.requireNonNull(operation, "operation"));
     }
 }
