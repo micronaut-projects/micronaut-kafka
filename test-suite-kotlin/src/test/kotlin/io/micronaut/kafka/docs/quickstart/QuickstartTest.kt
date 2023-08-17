@@ -12,15 +12,10 @@ import org.junit.jupiter.api.TestInstance
 @Property(name = "spec.name", value = "QuickstartTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class QuickstartTest : AbstractKafkaTest() {
+internal class QuickstartTest {
 
     @Inject
     var applicationContext: ApplicationContext? = null
-
-    @AfterEach
-    fun cleanup() {
-        MY_KAFKA.stop()
-    }
 
     @Test
     fun testSendProduct() {
@@ -28,6 +23,5 @@ internal class QuickstartTest : AbstractKafkaTest() {
         val client = applicationContext!!.getBean(ProductClient::class.java)
         client.sendProduct("Nike", "Blue Trainers")
         // end::quickstart[]
-        MY_KAFKA.stop()
     }
 }

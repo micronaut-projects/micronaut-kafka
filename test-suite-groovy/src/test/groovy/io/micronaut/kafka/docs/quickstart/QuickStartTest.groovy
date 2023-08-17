@@ -2,13 +2,13 @@ package io.micronaut.kafka.docs.quickstart
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Property
-import io.micronaut.kafka.docs.AbstractKafkaTest
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
+import spock.lang.Specification
 
 @Property(name = 'spec.name', value = 'QuickStartTest')
 @MicronautTest
-class QuickStartTest extends AbstractKafkaTest {
+class QuickStartTest extends Specification {
 
     @Inject
     ApplicationContext applicationContext
@@ -19,8 +19,5 @@ class QuickStartTest extends AbstractKafkaTest {
         ProductClient client = applicationContext.getBean(ProductClient.class)
         client.sendProduct('Nike', 'Blue Trainers')
         // end::quickstart[]
-
-        cleanup:
-        MY_KAFKA.stop()
     }
 }
