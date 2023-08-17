@@ -3,7 +3,4 @@ package io.micronaut.kafka.docs
 import io.micronaut.serde.annotation.Serdeable
 
 @Serdeable
-class Product {
-    var name: String? = null
-    var quantity = 0
-}
+data class Product(val name: String? = null, val quantity: Int = 0) { }
