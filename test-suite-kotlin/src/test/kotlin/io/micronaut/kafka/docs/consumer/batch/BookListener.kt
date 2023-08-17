@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import reactor.core.publisher.Flux
 import java.util.*
@@ -17,7 +16,9 @@ import java.util.*
 @KafkaListener(batch = true) // <1>
 class BookListener {
 // end::clazz[]
-    private val LOG: Logger = getLogger(BookListener::class.java)
+    companion object {
+        private val LOG = getLogger(BookListener::class.java)
+    }
 
     // tag::method[]
     @Topic("all-the-books")
