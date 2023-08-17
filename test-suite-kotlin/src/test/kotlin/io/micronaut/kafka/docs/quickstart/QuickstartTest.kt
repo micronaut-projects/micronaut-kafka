@@ -11,7 +11,6 @@ import org.junit.jupiter.api.TestInstance
 
 @Property(name = "spec.name", value = "QuickstartTest")
 @MicronautTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class QuickstartTest {
 
     @Inject
