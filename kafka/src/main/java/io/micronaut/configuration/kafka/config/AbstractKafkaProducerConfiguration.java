@@ -18,6 +18,8 @@ package io.micronaut.configuration.kafka.config;
 import org.apache.kafka.common.serialization.Serializer;
 
 import io.micronaut.core.annotation.Nullable;
+import org.apache.kafka.common.utils.Utils;
+
 import java.util.Optional;
 import java.util.Properties;
 
@@ -62,6 +64,9 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
      * @param keySerializer The key serializer
      */
     public void setKeySerializer(@Nullable Serializer<K> keySerializer) {
+        if (keySerializer != null) {
+            keySerializer.configure(Utils.propsToMap(getConfig()), true);
+        }
         this.keySerializer = keySerializer;
     }
 
@@ -79,6 +84,9 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
      * @param valueSerializer The value serializer
      */
     public void setValueSerializer(@Nullable Serializer<V> valueSerializer) {
+        if (valueSerializer != null) {
+            valueSerializer.configure(Utils.propsToMap(getConfig()), false);
+        }
         this.valueSerializer = valueSerializer;
     }
 }
