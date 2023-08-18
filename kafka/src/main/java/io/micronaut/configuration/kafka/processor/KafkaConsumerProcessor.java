@@ -623,11 +623,11 @@ class KafkaConsumerProcessor
             } else if (consumerState.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
                 kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerState.consumerBean));
             }
-            Optional.ofNullable(seek).ifPresent(operations -> {
+            if (seek != null) {
                 // Performs seek operations that were deferred by the user
                 final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
-                operations.forEach(seeker::perform);
-            });
+                seek.forEach(seeker::perform);
+            }
         }
         return true;
     }
