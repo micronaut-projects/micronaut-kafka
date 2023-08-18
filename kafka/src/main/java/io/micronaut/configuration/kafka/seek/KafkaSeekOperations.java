@@ -31,7 +31,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
  * @see KafkaSeekOperation
  * @since 4.1
  */
-public interface KafkaSeekOperations extends Iterable<KafkaSeekOperation>, KafkaSeekOperation.Builder {
+public interface KafkaSeekOperations extends Iterable<KafkaSeekOperation> {
 
     /**
      * Creates a new {@link KafkaSeekOperations} instance.

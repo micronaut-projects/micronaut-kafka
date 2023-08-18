@@ -37,6 +37,140 @@ import java.util.List;
 public interface KafkaSeekOperation {
 
     /**
+     * Creates an absolute seek operation.
+     *
+     * @param topicPartition the topic partition.
+     * @param offset         the absolute offset. Must be zero or greater.
+     * @return an absolute seek operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seek(@NonNull TopicPartition topicPartition, long offset) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.ABSOLUTE, offset);
+    }
+
+    /**
+     * Creates a seek operation relative to the beginning.
+     *
+     * @param topicPartition the topic partition.
+     * @param offset         the offset. Must be zero or greater.
+     * @return a seek operation relative to the beginning.
+     */
+    @NonNull
+    static KafkaSeekOperation seekRelativeToBeginning(@NonNull TopicPartition topicPartition, long offset) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BEGINNING, offset);
+    }
+
+    /**
+     * Creates a seek to the beginning operation.
+     *
+     * @param topicPartition the topic partition.
+     * @return a seek to the beginning operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seekToBeginning(@NonNull TopicPartition topicPartition) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BEGINNING, 0L);
+    }
+
+    /**
+     * Creates a list of seek to the beginning operations.
+     *
+     * @param partitions the {@link TopicPartition}s.
+     * @return a list of seek to the beginning operations.
+     */
+    @NonNull
+    static List<KafkaSeekOperation> seekToBeginning(@NonNull Collection<TopicPartition> partitions) {
+        return partitions.stream().map(KafkaSeekOperation::seekToBeginning).toList();
+    }
+
+    /**
+     * Creates a seek operation relative to the end.
+     *
+     * @param topicPartition the topic partition.
+     * @param offset         the offset. Must be zero or greater.
+     * @return a seek operation relative to the end.
+     */
+    @NonNull
+    static KafkaSeekOperation seekRelativeToEnd(@NonNull TopicPartition topicPartition, long offset) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.END, offset);
+    }
+
+    /**
+     * Creates a seek to the end operation.
+     *
+     * @param topicPartition the topic partition.
+     * @return a seek to the end operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seekToEnd(@NonNull TopicPartition topicPartition) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.END, 0L);
+    }
+
+    /**
+     * Creates a list of seek to the end operations.
+     *
+     * @param partitions the {@link TopicPartition}s.
+     * @return a list of seek to the end operations.
+     */
+    @NonNull
+    static List<KafkaSeekOperation> seekToEnd(@NonNull Collection<TopicPartition> partitions) {
+        return partitions.stream().map(KafkaSeekOperation::seekToEnd).toList();
+    }
+
+    /**
+     * Creates a forward seek operation.
+     *
+     * @param topicPartition the topic partition.
+     * @param offset         the offset. Must be zero or greater.
+     * @return a forward seek operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seekForward(@NonNull TopicPartition topicPartition, long offset) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.FORWARD, offset);
+    }
+
+    /**
+     * Creates a backward seek operation.
+     *
+     * @param topicPartition the topic partition.
+     * @param offset         the offset. Must be zero or greater.
+     * @return a backward seek operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seekBackward(@NonNull TopicPartition topicPartition, long offset) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BACKWARD, offset);
+    }
+
+    /**
+     * Creates a seek to the timestamp operation.
+     *
+     * <p>This operation will seek to the first offset whose timestamp is greater than or equal to
+     * the given one if it exists; otherwise it will seek to the end.</p>
+     *
+     * @param topicPartition the topic partition.
+     * @param timestamp      the kafka time stamp.
+     * @return a seek to the timestamp operation.
+     */
+    @NonNull
+    static KafkaSeekOperation seekToTimestamp(@NonNull TopicPartition topicPartition, long timestamp) {
+        return new DefaultKafkaSeekOperation(topicPartition, OffsetType.TIMESTAMP, timestamp);
+    }
+
+    /**
+     * Creates a list of seek to the timestamp operations.
+     *
+     * <p>This operation will seek to the first offset whose timestamp is greater than or equal to
+     * the given one if it exists; otherwise it will seek to the end.</p>
+     *
+     * @param topicPartitions the topic/partitions.
+     * @param timestamp       the kafka time stamp.
+     * @return a list of seek to the timestamp operations.
+     */
+    @NonNull
+    static List<KafkaSeekOperation> seekToTimestamp(@NonNull Collection<TopicPartition> topicPartitions, long timestamp) {
+        return topicPartitions.stream().map(tp -> seekToTimestamp(tp, timestamp)).toList();
+    }
+
+    /**
      * @return the topic name and partition number on which the seek should be performed.
      */
     @NonNull
@@ -90,145 +224,5 @@ public interface KafkaSeekOperation {
 
         /** The offset represents a Kafka timestamp. */
         TIMESTAMP,
-    }
-
-    /**
-     * Convenience trait interface that can be used to create new {@link KafkaSeekOperation} instances.
-     */
-    interface Builder {
-
-        /**
-         * Creates an absolute seek operation.
-         *
-         * @param topicPartition the topic partition.
-         * @param offset         the absolute offset. Must be zero or greater.
-         * @return an absolute seek operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seek(@NonNull TopicPartition topicPartition, long offset) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.ABSOLUTE, offset);
-        }
-
-        /**
-         * Creates a seek operation relative to the beginning.
-         *
-         * @param topicPartition the topic partition.
-         * @param offset         the offset. Must be zero or greater.
-         * @return a seek operation relative to the beginning.
-         */
-        @NonNull
-        default KafkaSeekOperation seekRelativeToBeginning(@NonNull TopicPartition topicPartition, long offset) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BEGINNING, offset);
-        }
-
-        /**
-         * Creates a seek to the beginning operation.
-         *
-         * @param topicPartition the topic partition.
-         * @return a seek to the beginning operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seekToBeginning(@NonNull TopicPartition topicPartition) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BEGINNING, 0L);
-        }
-
-        /**
-         * Creates a list of seek to the beginning operations.
-         *
-         * @param partitions the {@link TopicPartition}s.
-         * @return a list of seek to the beginning operations.
-         */
-        @NonNull
-        default List<KafkaSeekOperation> seekToBeginning(@NonNull Collection<TopicPartition> partitions) {
-            return partitions.stream().map(this::seekToBeginning).toList();
-        }
-
-        /**
-         * Creates a seek operation relative to the end.
-         *
-         * @param topicPartition the topic partition.
-         * @param offset         the offset. Must be zero or greater.
-         * @return a seek operation relative to the end.
-         */
-        @NonNull
-        default KafkaSeekOperation seekRelativeToEnd(@NonNull TopicPartition topicPartition, long offset) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.END, offset);
-        }
-
-        /**
-         * Creates a seek to the end operation.
-         *
-         * @param topicPartition the topic partition.
-         * @return a seek to the end operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seekToEnd(@NonNull TopicPartition topicPartition) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.END, 0L);
-        }
-
-        /**
-         * Creates a list of seek to the end operations.
-         *
-         * @param partitions the {@link TopicPartition}s.
-         * @return a list of seek to the end operations.
-         */
-        @NonNull
-        default List<KafkaSeekOperation> seekToEnd(@NonNull Collection<TopicPartition> partitions) {
-            return partitions.stream().map(this::seekToEnd).toList();
-        }
-
-        /**
-         * Creates a forward seek operation.
-         *
-         * @param topicPartition the topic partition.
-         * @param offset         the offset. Must be zero or greater.
-         * @return a forward seek operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seekForward(@NonNull TopicPartition topicPartition, long offset) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.FORWARD, offset);
-        }
-
-        /**
-         * Creates a backward seek operation.
-         *
-         * @param topicPartition the topic partition.
-         * @param offset         the offset. Must be zero or greater.
-         * @return a backward seek operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seekBackward(@NonNull TopicPartition topicPartition, long offset) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.BACKWARD, offset);
-        }
-
-        /**
-         * Creates a seek to the timestamp operation.
-         *
-         * <p>This operation will seek to the first offset whose timestamp is greater than or equal to
-         * the given one if it exists; otherwise it will seek to the end.</p>
-         *
-         * @param topicPartition the topic partition.
-         * @param timestamp      the kafka time stamp.
-         * @return a seek to the timestamp operation.
-         */
-        @NonNull
-        default KafkaSeekOperation seekToTimestamp(@NonNull TopicPartition topicPartition, long timestamp) {
-            return new DefaultKafkaSeekOperation(topicPartition, OffsetType.TIMESTAMP, timestamp);
-        }
-
-        /**
-         * Creates a list of seek to the timestamp operations.
-         *
-         * <p>This operation will seek to the first offset whose timestamp is greater than or equal to
-         * the given one if it exists; otherwise it will seek to the end.</p>
-         *
-         * @param topicPartitions the topic/partitions.
-         * @param timestamp       the kafka time stamp.
-         * @return a list of seek to the timestamp operations.
-         */
-        @NonNull
-        default List<KafkaSeekOperation> seekToTimestamp(@NonNull Collection<TopicPartition> topicPartitions, long timestamp) {
-            return topicPartitions.stream().map(tp -> seekToTimestamp(tp, timestamp)).toList();
-        }
     }
 }

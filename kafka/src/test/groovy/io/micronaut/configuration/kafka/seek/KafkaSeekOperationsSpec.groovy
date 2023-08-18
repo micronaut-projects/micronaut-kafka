@@ -200,7 +200,7 @@ class KafkaSeekOperationsSpec extends AbstractKafkaContainerSpec {
         TestMessages(MyProducer producer) { ALL_MESSAGES.forEach(producer::produce) }
     }
 
-    static abstract class MyAbstractConsumer implements KafkaSeekOperation.Builder {
+    static abstract class MyAbstractConsumer {
         final List<String> messages = []
         final String targetMessage
         Exception error
@@ -221,69 +221,69 @@ class KafkaSeekOperationsSpec extends AbstractKafkaContainerSpec {
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer01 extends MyAbstractConsumer {
         MyConsumer01(TestMessages test) { super('one') }
-        KafkaSeekOperation doTheSeek() { seek(TP, 4) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seek(TP, 4) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer02 extends MyAbstractConsumer {
         MyConsumer02(TestMessages test) { super('two') }
-        KafkaSeekOperation doTheSeek() { seekToBeginning(TP) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekToBeginning(TP) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer03 extends MyAbstractConsumer {
         MyConsumer03(TestMessages test) { super('four') }
-        KafkaSeekOperation doTheSeek() { seekRelativeToBeginning(TP, 2) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekRelativeToBeginning(TP, 2) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer04 extends MyAbstractConsumer {
         MyConsumer04(TestMessages test) { super('three') }
-        KafkaSeekOperation doTheSeek() { seekToEnd(TP) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekToEnd(TP) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer05 extends MyAbstractConsumer {
         MyConsumer05(TestMessages test) { super('three') }
-        KafkaSeekOperation doTheSeek() { seekRelativeToEnd(TP, 2) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekRelativeToEnd(TP, 2) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer06 extends MyAbstractConsumer {
         MyConsumer06(TestMessages test) { super('two') }
-        KafkaSeekOperation doTheSeek() { seekToTimestamp(TP, Instant.now().plus(7, DAYS).toEpochMilli()) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekToTimestamp(TP, Instant.now().plus(7, DAYS).toEpochMilli()) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer07 extends MyAbstractConsumer {
         MyConsumer07(TestMessages test) { super('five') }
-        KafkaSeekOperation doTheSeek() { seek(TP, -5) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seek(TP, -5) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer08 extends MyAbstractConsumer {
         MyConsumer08(TestMessages test) { super('two') }
-        KafkaSeekOperation doTheSeek() { seek(WRONG_TP, 321) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seek(WRONG_TP, 321) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer09 extends MyAbstractConsumer {
         MyConsumer09(TestMessages test) { super('three') }
-        KafkaSeekOperation doTheSeek() { seekForward(TP, 3) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekForward(TP, 3) }
     }
 
     @KafkaListener(offsetReset = EARLIEST)
     @Requires(property = 'spec.name', value = 'KafkaSeekOperationsSpec')
     static class MyConsumer10 extends MyAbstractConsumer {
         MyConsumer10(TestMessages test) { super('six') }
-        KafkaSeekOperation doTheSeek() { seekBackward(TP, 3) }
+        KafkaSeekOperation doTheSeek() { KafkaSeekOperation.seekBackward(TP, 3) }
     }
 }

@@ -26,7 +26,7 @@ import org.apache.kafka.clients.consumer.Consumer;
  * @see KafkaSeekOperation
  * @since 4.1
  */
-public interface KafkaSeeker extends KafkaSeekOperation.Builder {
+public interface KafkaSeeker {
 
     /**
      * Creates a new {@link KafkaSeeker} with a given target {@link Consumer}.

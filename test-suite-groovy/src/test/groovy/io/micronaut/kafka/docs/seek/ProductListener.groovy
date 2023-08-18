@@ -2,7 +2,7 @@ package io.micronaut.kafka.docs.seek
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
 import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.configuration.kafka.seek.KafkaSeeker
+import io.micronaut.configuration.kafka.seek.*
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
 import org.apache.kafka.common.TopicPartition
@@ -26,6 +26,6 @@ class ProductListener implements ConsumerSeekAware { // <1>
     @Override
     void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) { // <3>
         // seek to offset here
-        partitions.collect {seeker.seek(it, 1) }.each(seeker.&perform)
+        partitions.collect { KafkaSeekOperation.seek(it, 1) }.each(seeker.&perform)
     }
 }

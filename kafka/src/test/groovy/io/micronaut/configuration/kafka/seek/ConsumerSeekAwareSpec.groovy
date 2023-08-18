@@ -158,7 +158,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         TestMessages(MyProducer producer) { MESSAGES_PRE_REBALANCE.forEach(producer::produce) }
     }
 
-    static abstract class MyAbstractConsumer implements ConsumerSeekAware, KafkaSeekOperation.Builder {
+    static abstract class MyAbstractConsumer implements ConsumerSeekAware {
         final List<String> messages = []
         @Topic(TEST_TOPIC) void consume(String message) { messages << message }
     }
@@ -169,7 +169,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         MyConsumer01(TestMessages test) {}
         boolean revoked = false
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seek(tp, 3)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seek(tp, 3)))
         }
         @Override void onPartitionsRevoked(Collection<TopicPartition> partitions) {
             revoked = true
@@ -184,7 +184,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer02 extends MyAbstractConsumer {
         MyConsumer02(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            seekToBeginning(partitions).forEach(seeker::perform)
+            KafkaSeekOperation.seekToBeginning(partitions).forEach(seeker::perform)
         }
     }
 
@@ -193,7 +193,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer03 extends MyAbstractConsumer {
         MyConsumer03(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seekRelativeToBeginning(tp, 2)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seekRelativeToBeginning(tp, 2)))
         }
     }
 
@@ -202,7 +202,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer04 extends MyAbstractConsumer {
         MyConsumer04(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            seekToEnd(partitions).forEach(seeker::perform)
+            KafkaSeekOperation.seekToEnd(partitions).forEach(seeker::perform)
         }
     }
 
@@ -211,7 +211,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer05 extends MyAbstractConsumer {
         MyConsumer05(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seekRelativeToEnd(tp, 2)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seekRelativeToEnd(tp, 2)))
         }
     }
 
@@ -220,7 +220,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer06 extends MyAbstractConsumer {
         MyConsumer06(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            seekToTimestamp(partitions, Instant.now().plus(7, DAYS).toEpochMilli()).forEach(seeker::perform)
+            KafkaSeekOperation.seekToTimestamp(partitions, Instant.now().plus(7, DAYS).toEpochMilli()).forEach(seeker::perform)
         }
     }
 
@@ -229,7 +229,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer07 extends MyAbstractConsumer {
         MyConsumer07(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            seekToTimestamp(partitions, 0L).forEach(seeker::perform)
+            KafkaSeekOperation.seekToTimestamp(partitions, 0L).forEach(seeker::perform)
         }
     }
     @KafkaListener(offsetReset = EARLIEST)
@@ -237,7 +237,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer08 extends MyAbstractConsumer {
         MyConsumer08(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seekForward(tp, 3)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seekForward(tp, 3)))
         }
     }
 
@@ -246,7 +246,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer09 extends MyAbstractConsumer {
         MyConsumer09(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seekBackward(tp, 3)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seekBackward(tp, 3)))
         }
     }
 
@@ -255,7 +255,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
     static class MyConsumer10 extends MyAbstractConsumer {
         MyConsumer10(TestMessages test) {}
         @Override void onPartitionsAssigned(Collection<TopicPartition> partitions, KafkaSeeker seeker) {
-            partitions.each(tp -> seeker.perform(seekForward(tp, 0)))
+            partitions.each(tp -> seeker.perform(KafkaSeekOperation.seekForward(tp, 0)))
         }
     }
 }

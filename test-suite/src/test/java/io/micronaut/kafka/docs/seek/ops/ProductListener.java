@@ -1,7 +1,7 @@
 package io.micronaut.kafka.docs.seek.ops;
 
 import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
+import io.micronaut.configuration.kafka.seek.*;
 import io.micronaut.context.annotation.*;
 import io.micronaut.kafka.docs.Product;
 import org.apache.kafka.common.TopicPartition;
@@ -16,6 +16,6 @@ public class ProductListener {
     @Topic("awesome-products")
     void receive(Product product, KafkaSeekOperations ops) { // <1>
         processed.add(product);
-        ops.defer(ops.seekToEnd(new TopicPartition("awesome-products", 0))); // <2>
+        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("awesome-products", 0))); // <2>
     }
 }

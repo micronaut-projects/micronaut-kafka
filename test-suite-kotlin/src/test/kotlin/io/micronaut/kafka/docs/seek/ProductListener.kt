@@ -2,7 +2,7 @@ package io.micronaut.kafka.docs.seek
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
 import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.configuration.kafka.seek.KafkaSeeker
+import io.micronaut.configuration.kafka.seek.*
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
 import org.apache.kafka.common.TopicPartition
@@ -24,6 +24,6 @@ class ProductListener : ConsumerSeekAware { // <1>
 
     override fun onPartitionsAssigned(partitions: Collection<TopicPartition>, seeker: KafkaSeeker) { // <3>
         // seek to offset here
-        partitions.stream().map { tp -> seeker.seek(tp, 1) }.forEach(seeker::perform)
+        partitions.stream().map { tp -> KafkaSeekOperation.seek(tp, 1) }.forEach(seeker::perform)
     }
 }
