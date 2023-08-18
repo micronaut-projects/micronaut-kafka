@@ -2093,7 +2093,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 <div class="paragraph">
 <p>To achieve this you can set the <code>batch</code> member of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> to <code>true</code> and specify a container type (typically <code>List</code>) to receive all of the data:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Receiving a Batch of Records</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
@@ -2102,21 +2102,69 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 import java.util.List;
 
-@KafkaListener(batch = true) <i class="conum" data-value="1"></i><b>(1)</b>
+import static org.slf4j.LoggerFactory.getLogger;
+
+@KafkaListener(batch = true) // <b class="conum">(1)</b>
 public class BookListener {
 
-  @Topic("all-the-books")
-  public void receiveList(List&lt;Book&gt; books) { <i class="conum" data-value="2"></i><b>(2)</b>
-      for (Book book : books) {
-          System.out.println("Got Book = " + book.getTitle()); <i class="conum" data-value="3"></i><b>(3)</b>
-      }
-  }
+@Topic("all-the-books")
+public void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
+    for (Book book : books) {
+        LOG.info("Got Book = {}", book.title()); // <b class="conum">(3)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Receiving a Batch of Records</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
+import reactor.core.publisher.Flux
 
+@KafkaListener(batch = true) // <b class="conum">(1)</b>
+@Slf4j
+class BookListener {
+
+@Topic("all-the-books")
+void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
+    for (Book book : books) {
+        log.info("Got Book = {}", book.title) // <b class="conum">(3)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Receiving a Batch of Records</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
+import org.slf4j.LoggerFactory.getLogger
+import reactor.core.publisher.Flux
+import java.util.*
+
+@KafkaListener(batch = true) // <b class="conum">(1)</b>
+class BookListener {
+
+@Topic("all-the-books")
+fun receiveList(books: List&lt;Book&gt;) { // <b class="conum">(2)</b>
+    for (book in books) {
+        LOG.info("Got Book = {}", book.title) // <b class="conum">(3)</b>
+    }
 }</code></pre>
 </div>
 </div>
@@ -2145,14 +2193,14 @@ public class BookListener {
 <div class="paragraph">
 <p>You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("all-the-books")
-public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { <i class="conum" data-value="1"></i><b>(1)</b>
+public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(1)</b>
 
     for (int i = 0; i &lt; records.size(); i++) {
-        ConsumerRecord&lt;String, Book&gt; record = records.get(i); <i class="conum" data-value="2"></i><b>(2)</b>
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i); // <b class="conum">(2)</b>
 
         // process the book
         Book book = record.value();
@@ -2160,13 +2208,64 @@ public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Cons
         // commit offsets
         String topic = record.topic();
         int partition = record.partition();
-        long offset = record.offset(); <i class="conum" data-value="3"></i><b>(3)</b>
+        long offset = record.offset(); // <b class="conum">(3)</b>
 
-        kafkaConsumer.commitSync(Collections.singletonMap( <i class="conum" data-value="4"></i><b>(4)</b>
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(4)</b>
                 new TopicPartition(topic, partition),
                 new OffsetAndMetadata(offset + 1, "my metadata")
         ));
 
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing Offsets Manually with Batch</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("all-the-books")
+void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(1)</b>
+
+    for (int i = 0; i &lt; records.size(); i++) {
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i) // <b class="conum">(2)</b>
+
+        // process the book
+        Book book = record.value()
+
+        // commit offsets
+        String topic = record.topic()
+        int partition = record.partition()
+        long offset = record.offset() // <b class="conum">(3)</b>
+
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(4)</b>
+                new TopicPartition(topic, partition),
+                new OffsetAndMetadata(offset + 1, "my metadata")
+        ))
+
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing Offsets Manually with Batch</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("all-the-books")
+fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(1)</b>
+    for (i in records.indices) {
+        val record = records[i] // <b class="conum">(2)</b>
+
+        // process the book
+        val book = record.value()
+
+        // commit offsets
+        val topic = record.topic()
+        val partition = record.partition()
+        val offset = record.offset() // <b class="conum">(3)</b>
+        kafkaConsumer.commitSync(
+            Collections.singletonMap( // <b class="conum">(4)</b>
+                TopicPartition(topic, partition),
+                OffsetAndMetadata(offset + 1, "my metadata")
+            )
+        )
     }
 }</code></pre>
 </div>
@@ -2205,14 +2304,36 @@ public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Cons
 <div class="paragraph">
 <p>In this case the method will be passed a reactive type that can be returned from the method allowing non-blocking processing of the batch:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Reactive Processing of Batch Records</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("all-the-books")
 public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
     return books.doOnNext(book -&gt;
-            System.out.println("Got Book = " + book.getTitle())
+        LOG.info("Got Book = {}", book.title())
     );
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Reactive Processing of Batch Records</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("all-the-books")
+Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
+    books.doOnNext(book -&gt;
+        log.info("Got Book = {}", book.title)
+    )
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Reactive Processing of Batch Records</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("all-the-books")
+fun receiveFlux(books: Flux&lt;Book&gt;): Flux&lt;Book&gt; {
+    return books.doOnNext { book: Book -&gt;
+        LOG.info("Got Book = {}", book.title)
+    }
 }</code></pre>
 </div>
 </div>
