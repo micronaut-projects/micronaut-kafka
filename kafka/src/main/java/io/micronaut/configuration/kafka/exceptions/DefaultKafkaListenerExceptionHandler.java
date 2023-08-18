@@ -15,7 +15,9 @@
  */
 package io.micronaut.configuration.kafka.exceptions;
 
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration;
 import io.micronaut.context.annotation.Primary;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -44,8 +46,19 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     private static final Logger LOG = LoggerFactory.getLogger(KafkaListenerExceptionHandler.class);
     private static final Pattern SERIALIZATION_EXCEPTION_MESSAGE_PATTERN = Pattern.compile(".+ for partition (.+)-(\\d+) at offset (\\d+)\\..+");
 
-    private boolean skipRecordOnDeserializationFailure = true;
-    private boolean commitRecordOnDeserializationFailure = false;
+    private boolean skipRecordOnDeserializationFailure;
+    private boolean commitRecordOnDeserializationFailure;
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config The default Kafka listener exception handler configuration
+     */
+    @Inject
+    public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
+        skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
+        commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
+    }
 
     @Override
     public void handle(KafkaListenerException exception) {

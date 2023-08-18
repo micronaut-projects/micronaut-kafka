@@ -1,5 +1,7 @@
 package io.micronaut.configuration.kafka.exceptions
 
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties
 import io.micronaut.context.annotation.Property
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -67,7 +69,8 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
     static abstract class AbstractOnDeserializationErrorConsumer implements KafkaListenerExceptionHandler {
         Long currentPosition = -1
         Long committedOffset = -1
-        DefaultKafkaListenerExceptionHandler errorHandler = new DefaultKafkaListenerExceptionHandler()
+        DefaultKafkaListenerExceptionHandlerConfiguration config = new DefaultKafkaListenerExceptionHandlerConfigurationProperties()
+        DefaultKafkaListenerExceptionHandler errorHandler = new DefaultKafkaListenerExceptionHandler(config)
         String topic
 
         AbstractOnDeserializationErrorConsumer(String topic) {
