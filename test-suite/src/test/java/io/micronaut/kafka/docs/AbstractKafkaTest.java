@@ -21,7 +21,9 @@ public abstract class AbstractKafkaTest implements TestPropertyProvider {
 
     @Override
     public Map<String, String> getProperties() {
-        while(!MY_KAFKA.isRunning()) MY_KAFKA.start();
+        while (!MY_KAFKA.isRunning()) {
+            MY_KAFKA.start();
+        }
         return Collections.singletonMap(
             "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
         );
