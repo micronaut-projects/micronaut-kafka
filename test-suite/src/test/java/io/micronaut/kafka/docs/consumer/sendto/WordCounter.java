@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka.docs.consumer.sendto;
+package io.micronaut.kafka.docs.consumer.sendto;
 
 import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
@@ -15,10 +15,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // tag::transactional[]
-@KafkaListener(producerClientId = "word-counter-producer", // <1>
-        producerTransactionalId = "tx-word-counter-id", // <2>
-        offsetStrategy = OffsetStrategy.SEND_TO_TRANSACTION, // <3>
-        isolation = IsolationLevel.READ_COMMITTED // <4>
+@KafkaListener(
+    producerClientId = "word-counter-producer", // <1>
+    producerTransactionalId = "tx-word-counter-id", // <2>
+    offsetStrategy = OffsetStrategy.SEND_TO_TRANSACTION, // <3>
+    isolation = IsolationLevel.READ_COMMITTED // <4>
 )
 public class WordCounter {
 
@@ -34,6 +35,5 @@ public class WordCounter {
         }
         return messages;
     }
-
 }
 // end::transactional[]
