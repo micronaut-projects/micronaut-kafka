@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration;
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -58,6 +59,14 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
         skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
         commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
+    }
+
+    /**
+     * @deprecated Use {@link DefaultKafkaListenerExceptionHandler#DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)}
+     */
+    @Deprecated(since = "5.1.0", forRemoval = true)
+    public DefaultKafkaListenerExceptionHandler() {
+        this(new DefaultKafkaListenerExceptionHandlerConfigurationProperties());
     }
 
     @Override
