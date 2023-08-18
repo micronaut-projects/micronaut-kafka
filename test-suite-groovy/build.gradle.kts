@@ -9,6 +9,7 @@ dependencies {
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(mnTest.micronaut.test.spock)
+    testRuntimeOnly(mnLogging.logback.classic)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testImplementation(mnReactor.micronaut.reactor)
     testImplementation(mnSerde.micronaut.serde.jackson)

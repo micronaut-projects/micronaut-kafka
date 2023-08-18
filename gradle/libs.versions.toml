@@ -18,6 +18,7 @@ testcontainers = "1.18.3"
 zipkin-brave-kafka-clients = '5.16.0'
 
 micronaut-cache = "4.0.2"
+micronaut-logging = "1.0.0"
 micronaut-micrometer = "5.0.1"
 micronaut-reactor = "3.0.1"
 micronaut-rxjava2 = "2.0.1"
@@ -26,7 +27,6 @@ micronaut-serde = "2.2.0"
 micronaut-tracing = "5.0.1"
 micronaut-test = "4.0.0"
 
-logback = "1.4.6"
 
 
 [libraries]
@@ -56,4 +56,3 @@ micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", ver
 junit-jupiter-engine = { module = 'org.junit.jupiter:junit-jupiter-engine' }
 
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
-
