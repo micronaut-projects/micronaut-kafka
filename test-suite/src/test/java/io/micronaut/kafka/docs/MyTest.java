@@ -12,6 +12,7 @@ import static org.awaitility.Awaitility.await;
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MyTest extends AbstractKafkaTest {
+
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
         final String message = "hello";

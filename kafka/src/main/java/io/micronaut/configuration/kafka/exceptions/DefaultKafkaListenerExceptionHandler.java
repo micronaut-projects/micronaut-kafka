@@ -15,16 +15,21 @@
  */
 package io.micronaut.configuration.kafka.exceptions;
 
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration;
+import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.micronaut.core.annotation.NonNull;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +47,27 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     private static final Logger LOG = LoggerFactory.getLogger(KafkaListenerExceptionHandler.class);
     private static final Pattern SERIALIZATION_EXCEPTION_MESSAGE_PATTERN = Pattern.compile(".+ for partition (.+)-(\\d+) at offset (\\d+)\\..+");
 
-    private boolean skipRecordOnDeserializationFailure = true;
+    private boolean skipRecordOnDeserializationFailure;
+    private boolean commitRecordOnDeserializationFailure;
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config The default Kafka listener exception handler configuration
+     */
+    @Inject
+    public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
+        skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
+        commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
+    }
+
+    /**
+     * @deprecated Use {@link DefaultKafkaListenerExceptionHandler#DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)}
+     */
+    @Deprecated(since = "5.1.0", forRemoval = true)
+    public DefaultKafkaListenerExceptionHandler() {
+        this(new DefaultKafkaListenerExceptionHandlerConfigurationProperties());
+    }
 
     @Override
     public void handle(KafkaListenerException exception) {
@@ -76,7 +101,15 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     }
 
     /**
-     * Seeks past a serialization exception if an error occurs.
+     * Sets whether to commit the offset of past records that are not deserializable and are skipped.
+     * @param commitRecordOnDeserializationFailure True if the offset for records that are not deserializable should be committed after being skipped.
+     */
+    public void setCommitRecordOnDeserializationFailure(boolean commitRecordOnDeserializationFailure) {
+        this.commitRecordOnDeserializationFailure = commitRecordOnDeserializationFailure;
+    }
+
+    /**
+     * Seeks past a serialization exception if an error occurs. Additionally commits the offset if commitRecordOnDeserializationFailure is set
      * @param cause The cause
      * @param consumerBean The consumer bean
      * @param kafkaConsumer The kafka consumer
@@ -87,6 +120,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             @NonNull Consumer<?, ?> kafkaConsumer) {
         try {
             final String message = cause.getMessage();
+            LOG.debug("Extracting unserializable consumer record topic, partition and offset from error message: {}", message);
             final Matcher matcher = SERIALIZATION_EXCEPTION_MESSAGE_PATTERN.matcher(message);
             if (matcher.find()) {
                 final String topic = matcher.group(1);
@@ -94,10 +128,24 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
                 final int offset = Integer.valueOf(matcher.group(3));
                 TopicPartition tp = new TopicPartition(topic, partition);
                 LOG.debug("Seeking past unserializable consumer record for partition {}-{} and offset {}", topic, partition, offset);
-                kafkaConsumer.seek(tp, offset + 1);
+
+                try {
+                    kafkaConsumer.seek(tp, offset + 1);
+                } catch (Throwable e) {
+                    LOG.error("Kafka consumer [{}] failed to seek past unserializable value: {}", consumerBean, e.getMessage(), e);
+                }
+
+                if (this.commitRecordOnDeserializationFailure) {
+                    try {
+                        LOG.debug("Permanently skipping unserializable consumer record by committing offset {} for partition {}-{}", offset, topic, partition);
+                        kafkaConsumer.commitSync(Collections.singletonMap(tp, new OffsetAndMetadata(offset + 1)));
+                    } catch (Throwable e) {
+                        LOG.error("Kafka consumer [{}] failed to commit offset of unserializable value: {}", consumerBean, e.getMessage(), e);
+                    }
+                }
             }
         } catch (Throwable e) {
-            LOG.error("Kafka consumer [{}] failed to seek past unserializable value: {}", consumerBean, e.getMessage(), e);
+            LOG.error("Failed to extract topic, partition and offset from serialization error message: {}", cause.getMessage(), e);
         }
     }
 }
