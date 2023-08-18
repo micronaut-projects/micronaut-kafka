@@ -55,30 +55,28 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
     public boolean perform(@NonNull KafkaSeekOperation operation) {
         try {
             final TopicPartition tp = operation.topicPartition();
+            final String topic = operation.topic();
+            final int partition = operation.partition();
             if (operation.offset() == 0) {
                 switch (operation.offsetType()) {
-                    case FORWARD, BACKWARD:
+                    case FORWARD, BACKWARD -> {
                         // Special case: relative zero-offset
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Relative zero-offset seek operation dropped: {}", operation);
-                        }
+                        LOG.info("Relative zero-offset seek operation dropped: {}", operation);
                         return false;
-                    case BEGINNING:
+                    }
+                    case BEGINNING -> {
                         // Optimized case: seek to the beginning
                         consumer.seekToBeginning(singletonList(tp));
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Seek to the beginning operation succeeded: {}-{}", operation.topic(), operation.partition());
-                        }
+                        LOG.info("Seek to the beginning operation succeeded: {}-{}", topic, partition);
                         return true;
-                    case END:
+                    }
+                    case END -> {
                         // Optimized case: seek to the end
                         consumer.seekToEnd(singletonList(tp));
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Seek to the end operation succeeded: {}-{}", operation.topic(), operation.partition());
-                        }
+                        LOG.info("Seek to the end operation succeeded: {}-{}", topic, partition);
                         return true;
-                    default:
-                        // Perform operation regularly
+                    }
+                    default -> { /* Perform operation regularly */ }
                 }
             }
             final long offset = switch (operation.offsetType()) {
@@ -90,14 +88,10 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
                 case TIMESTAMP -> earliest(tp, operation.offset()).orElseGet(() -> end(tp));
             };
             consumer.seek(tp, Math.max(0, offset));
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Seek operation succeeded: {} - offset: {}", operation, offset);
-            }
+            LOG.info("Seek operation succeeded: {} - offset: {}", operation, offset);
             return true;
         } catch (Exception e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Seek operation failed: {}", operation, e);
-            }
+            LOG.error("Seek operation failed: {}", operation, e);
             return false;
         }
     }
