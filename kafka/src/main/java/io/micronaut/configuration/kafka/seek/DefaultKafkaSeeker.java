@@ -112,6 +112,7 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
             case TIMESTAMP -> earliest(tp, operation.offset()).orElseGet(() -> end(tp));
         };
     }
+
     private long current(TopicPartition tp) {
         return consumer.position(tp);
     }
