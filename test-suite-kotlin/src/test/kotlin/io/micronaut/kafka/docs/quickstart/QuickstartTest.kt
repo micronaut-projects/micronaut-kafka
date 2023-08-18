@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 @Property(name = "kafka.enabled", value = "true")
 @MicronautTest
 internal class QuickstartTest {
+
     @Inject
     lateinit var beanContext: BeanContext
 
