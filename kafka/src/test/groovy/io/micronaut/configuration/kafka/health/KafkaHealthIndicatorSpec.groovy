@@ -1,6 +1,5 @@
 package io.micronaut.configuration.kafka.health
 
-
 import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils

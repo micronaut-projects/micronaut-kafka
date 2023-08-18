@@ -1,11 +1,13 @@
-package io.micronaut.configuration.kafka.docs.quickstart;
+package io.micronaut.kafka.docs.quickstart;
 
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Requires;
 // end::imports[]
 
+@Requires(property = "spec.name", value = "QuickstartTest")
 // tag::clazz[]
 @KafkaClient // <1>
 public interface ProductClient {

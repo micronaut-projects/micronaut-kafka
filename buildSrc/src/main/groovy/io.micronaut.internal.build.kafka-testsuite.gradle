@@ -1,0 +1,15 @@
+plugins {
+    id 'io.micronaut.build.internal.kafka-base'
+    id "io.micronaut.test-resources"
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+}
+
+micronaut {
+    importMicronautPlatform.set(false)
+    testResources {
+        sharedServer = true
+    }
+}

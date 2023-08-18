@@ -18,6 +18,8 @@ package io.micronaut.configuration.kafka.config;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import io.micronaut.core.annotation.Nullable;
+import org.apache.kafka.common.utils.Utils;
+
 import java.util.Optional;
 import java.util.Properties;
 
@@ -58,6 +60,9 @@ public abstract class AbstractKafkaConsumerConfiguration<K, V> extends AbstractK
      * @param keyDeserializer The key serializer
      */
     public void setKeyDeserializer(@Nullable Deserializer<K> keyDeserializer) {
+        if (keyDeserializer != null) {
+            keyDeserializer.configure(Utils.propsToMap(getConfig()), true);
+        }
         this.keyDeserializer = keyDeserializer;
     }
 
@@ -75,6 +80,9 @@ public abstract class AbstractKafkaConsumerConfiguration<K, V> extends AbstractK
      * @param valueDeserializer The value deserializer
      */
     public void setValueDeserializer(@Nullable Deserializer<V> valueDeserializer) {
+        if (valueDeserializer != null) {
+            valueDeserializer.configure(Utils.propsToMap(getConfig()), false);
+        }
         this.valueDeserializer = valueDeserializer;
     }
 }

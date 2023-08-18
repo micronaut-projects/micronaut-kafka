@@ -1,5 +1,6 @@
 plugins {
     groovy
+    id("io.micronaut.internal.build.kafka-testsuite")
 }
 
 dependencies {
@@ -9,9 +10,7 @@ dependencies {
     testImplementation(mnTest.micronaut.test.spock)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testImplementation(libs.awaitility)
+    testImplementation(mnReactor.micronaut.reactor)
+    testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(projects.micronautKafka)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
