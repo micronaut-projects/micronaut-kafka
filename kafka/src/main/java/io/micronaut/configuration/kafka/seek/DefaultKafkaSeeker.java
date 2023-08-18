@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.seek;
 
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.TopicPartition;
@@ -55,38 +56,13 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
     public boolean perform(@NonNull KafkaSeekOperation operation) {
         try {
             final TopicPartition tp = operation.topicPartition();
-            final String topic = operation.topic();
-            final int partition = operation.partition();
             if (operation.offset() == 0) {
-                switch (operation.offsetType()) {
-                    case FORWARD, BACKWARD -> {
-                        // Special case: relative zero-offset
-                        LOG.info("Relative zero-offset seek operation dropped: {}", operation);
-                        return false;
-                    }
-                    case BEGINNING -> {
-                        // Optimized case: seek to the beginning
-                        consumer.seekToBeginning(singletonList(tp));
-                        LOG.info("Seek to the beginning operation succeeded: {}-{}", topic, partition);
-                        return true;
-                    }
-                    case END -> {
-                        // Optimized case: seek to the end
-                        consumer.seekToEnd(singletonList(tp));
-                        LOG.info("Seek to the end operation succeeded: {}-{}", topic, partition);
-                        return true;
-                    }
-                    default -> { /* Perform operation regularly */ }
+                Optional<Boolean> performed = performForZeroOffset(operation, tp);
+                if (performed.isPresent()) {
+                    return performed.get();
                 }
             }
-            final long offset = switch (operation.offsetType()) {
-                case ABSOLUTE -> operation.offset();
-                case FORWARD -> current(tp) + operation.offset();
-                case BACKWARD -> current(tp) - operation.offset();
-                case BEGINNING -> beginning(tp) + operation.offset();
-                case END -> end(tp) - operation.offset();
-                case TIMESTAMP -> earliest(tp, operation.offset()).orElseGet(() -> end(tp));
-            };
+            final long offset = offset(operation, tp);
             consumer.seek(tp, Math.max(0, offset));
             LOG.info("Seek operation succeeded: {} - offset: {}", operation, offset);
             return true;
@@ -96,6 +72,46 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
         }
     }
 
+    @NonNull
+    private Optional<Boolean> performForZeroOffset(@NonNull KafkaSeekOperation operation,
+                                                   @Nullable TopicPartition tp) {
+        final String topic = operation.topic();
+        final int partition = operation.partition();
+        switch (operation.offsetType()) {
+            case FORWARD, BACKWARD -> {
+                // Special case: relative zero-offset
+                LOG.info("Relative zero-offset seek operation dropped: {}", operation);
+                return Optional.of(false);
+            }
+            case BEGINNING -> {
+                // Optimized case: seek to the beginning
+                consumer.seekToBeginning(singletonList(tp));
+                LOG.info("Seek to the beginning operation succeeded: {}-{}", topic, partition);
+                return Optional.of(true);
+            }
+            case END -> {
+                // Optimized case: seek to the end
+                consumer.seekToEnd(singletonList(tp));
+                LOG.info("Seek to the end operation succeeded: {}-{}", topic, partition);
+                return Optional.of(true);
+            }
+            default -> {
+                /* Perform operation regularly */
+                return Optional.empty();
+            }
+        }
+    }
+
+    private long offset(@NonNull KafkaSeekOperation operation, @Nullable TopicPartition tp) {
+        return switch (operation.offsetType()) {
+            case ABSOLUTE -> operation.offset();
+            case FORWARD -> current(tp) + operation.offset();
+            case BACKWARD -> current(tp) - operation.offset();
+            case BEGINNING -> beginning(tp) + operation.offset();
+            case END -> end(tp) - operation.offset();
+            case TIMESTAMP -> earliest(tp, operation.offset()).orElseGet(() -> end(tp));
+        };
+    }
     private long current(TopicPartition tp) {
         return consumer.position(tp);
     }
