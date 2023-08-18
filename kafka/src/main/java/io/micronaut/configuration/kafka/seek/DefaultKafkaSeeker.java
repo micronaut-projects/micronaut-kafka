@@ -54,62 +54,52 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
     @Override
     public boolean perform(@NonNull KafkaSeekOperation operation) {
         try {
-            return Optional.of(operation).filter(op -> op.offset() == 0L).flatMap(this::optimized)
-                .orElseGet(() -> regular(operation));
+            final TopicPartition tp = operation.topicPartition();
+            if (operation.offset() == 0) {
+                switch (operation.offsetType()) {
+                    case FORWARD, BACKWARD:
+                        // Special case: relative zero-offset
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Relative zero-offset seek operation dropped: {}", operation);
+                        }
+                        return false;
+                    case BEGINNING:
+                        // Optimized case: seek to the beginning
+                        consumer.seekToBeginning(singletonList(tp));
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Seek to the beginning operation succeeded: {}-{}", operation.topic(), operation.partition());
+                        }
+                        return true;
+                    case END:
+                        // Optimized case: seek to the end
+                        consumer.seekToEnd(singletonList(tp));
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Seek to the end operation succeeded: {}-{}", operation.topic(), operation.partition());
+                        }
+                        return true;
+                    default:
+                        // Perform operation regularly
+                }
+            }
+            final long offset = switch (operation.offsetType()) {
+                case ABSOLUTE -> operation.offset();
+                case FORWARD -> current(tp) + operation.offset();
+                case BACKWARD -> current(tp) - operation.offset();
+                case BEGINNING -> beginning(tp) + operation.offset();
+                case END -> end(tp) - operation.offset();
+                case TIMESTAMP -> earliest(tp, operation.offset()).orElseGet(() -> end(tp));
+            };
+            consumer.seek(tp, Math.max(0, offset));
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Seek operation succeeded: {} - offset: {}", operation, offset);
+            }
+            return true;
         } catch (Exception e) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Seek operation failed: {}", operation, e);
             }
             return false;
         }
-    }
-
-    private Optional<Boolean> optimized(@NonNull KafkaSeekOperation op) {
-        // Assuming offset is zero
-        final TopicPartition tp = op.topicPartition();
-        switch (op.offsetType()) {
-            case FORWARD, BACKWARD:
-                // Special case: relative zero-offset
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Relative zero-offset seek operation dropped: {}", op);
-                }
-                return Optional.of(false);
-            case BEGINNING:
-                // Optimized case: seek to the beginning
-                consumer.seekToBeginning(singletonList(tp));
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Seek to the beginning operation succeeded: {}-{}", op.topic(), op.partition());
-                }
-                return Optional.of(true);
-            case END:
-                // Optimized case: seek to the end
-                consumer.seekToEnd(singletonList(tp));
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Seek to the end operation succeeded: {}-{}", op.topic(), op.partition());
-                }
-                return Optional.of(true);
-            default:
-                // Perform operation regularly
-                return Optional.empty();
-        }
-    }
-
-    private boolean regular(@NonNull KafkaSeekOperation op) {
-        // Assuming offset is greater than zero
-        final TopicPartition tp = op.topicPartition();
-        final long offset = switch (op.offsetType()) {
-            case ABSOLUTE -> op.offset();
-            case FORWARD -> current(tp) + op.offset();
-            case BACKWARD -> current(tp) - op.offset();
-            case BEGINNING -> beginning(tp) + op.offset();
-            case END -> end(tp) - op.offset();
-            case TIMESTAMP -> earliest(tp, op.offset()).orElseGet(() -> end(tp));
-        };
-        consumer.seek(tp, Math.max(0, offset));
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Seek operation succeeded: {} - offset: {}", op, offset);
-        }
-        return true;
     }
 
     private long current(TopicPartition tp) {
