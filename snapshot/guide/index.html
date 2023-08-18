@@ -1174,26 +1174,21 @@ public abstract class AbstractKafkaTest implements TestPropertyProvider {
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
+import spock.lang.AutoCleanup
+import spock.lang.Shared
 import spock.lang.Specification
 
-/**
- * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
- */
 abstract class AbstractKafkaTest extends Specification implements TestPropertyProvider {
 
-    static final KafkaContainer MY_KAFKA
-
-    static {
-        MY_KAFKA = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
-        MY_KAFKA.start()
-    }
+    @Shared
+    @AutoCleanup
+    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
 
     @Override
     Map&lt;String, String&gt; getProperties() {
-        while (!MY_KAFKA.isRunning()) {
-            MY_KAFKA.start()
-        }
-        ["kafka.bootstrap.servers": MY_KAFKA.getBootstrapServers()]
+        kafkaContainer.start()
+
+        ["kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()]
     }
 }</code></pre>
 </div>
@@ -1250,6 +1245,7 @@ import static org.awaitility.Awaitility.await;
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MyTest extends AbstractKafkaTest {
+
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
         final String message = "hello";
@@ -1281,22 +1277,27 @@ class MyTest extends AbstractKafkaTest {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs
 
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.context.annotation.*
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
+import spock.util.concurrent.PollingConditions
 
-import static java.util.concurrent.TimeUnit.SECONDS
-import static org.awaitility.Awaitility.await
-
-@Property(name = "spec.name", value = "MyTest")
 @MicronautTest
+@Property(name = "spec.name", value = "MyTest")
 class MyTest extends AbstractKafkaTest {
 
     @Inject
     MyProducer producer
     @Inject
     MyConsumer consumer
+
+    PollingConditions conditions = new PollingConditions()
 
     void "test kafka running"() {
         given:
@@ -1306,10 +1307,9 @@ class MyTest extends AbstractKafkaTest {
         producer.produce(message)
 
         then:
-        await().atMost(5, SECONDS).until(() -&gt; consumer.consumed == message)
-
-        cleanup:
-        MY_KAFKA.stop()
+        conditions.within(5) {
+            consumer.consumed == message
+        }
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -2685,6 +2685,37 @@ Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
 <div class="paragraph">
 <p>When an exception occurs in a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> method by default the exception is simply logged. This is handled by <a href="../api/io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html">DefaultKafkaListenerExceptionHandler</a>.</p>
 </div>
+<div class="paragraph">
+<p>The following options are available to configure the default Kafka listener exception handler:</p>
+</div>
+<a id="io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties" href="#io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties">&#128279;</a>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.skip-record-on-deserialization-failure</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to skip record on deserialization failure. Default value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.commit-record-on-deserialization-failure</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to commit record on deserialization failure. Default value</p></td>
+</tr>
+</tbody>
+</table>
 <div class="paragraph">
 <p>If you wish to replace this default exception handling with another implementation you can use the Micronaut&#8217;s <a href="#replaces">Bean Replacement</a> feature to define a bean that replaces it: <code>@Replaces(DefaultKafkaListenerExceptionHandler.class)</code>.</p>
 </div>

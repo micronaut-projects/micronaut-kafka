@@ -371,6 +371,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The default bootstrap server address.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#DEFAULT_COMMIT_RECORD_ON_DESERIALIZATION_FAILURE" class="member-name-link">DEFAULT_COMMIT_RECORD_ON_DESERIALIZATION_FAILURE</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default value for <code>commitRecordOnDeserializationFailure</code>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#DEFAULT_DELAY_IN_SECONDS" class="member-name-link">DEFAULT_DELAY_IN_SECONDS</a> - Static variable in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
 <div class="block">Default retry delay in seconds.</div>
@@ -399,6 +403,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Default retry attempts.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#DEFAULT_SKIP_RECORD_ON_DESERIALIZATION_FAILURE" class="member-name-link">DEFAULT_SKIP_RECORD_ON_DESERIALIZATION_FAILURE</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default value for <code>skipRecordOnDeserializationFailure</code>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaConsumerConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" title="type parameter in DefaultKafkaConsumerConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" title="type parameter in DefaultKafkaConsumerConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
 <div class="block">Default Kafka consumer configuration that comes into play if no other config is specified.</div>
@@ -417,6 +425,24 @@ loadScripts(document, 'script');</script>
  fails to process a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/ConsumerRecord.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>ConsumerRecord</code></a>.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#%3Cinit%3E()" class="member-name-link">DefaultKafkaListenerExceptionHandler()</a> - Constructor for class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#%3Cinit%3E(io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration)"><code>DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)</code></a></div>
+</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#%3Cinit%3E(io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration)" class="member-name-link">DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)</a> - Constructor for class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
+<dd>
+<div class="block">Creates a new instance.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a> - Interface in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
+<dd>
+<div class="block">Default Kafka listener exception handler configuration.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a> - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
+<dd>
+<div class="block"><code>ConfigurationProperties</code> implementation of <a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config"><code>DefaultKafkaListenerExceptionHandlerConfiguration</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#%3Cinit%3E()" class="member-name-link">DefaultKafkaListenerExceptionHandlerConfigurationProperties()</a> - Constructor for class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaProducerConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaProducerConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/config/DefaultKafkaProducerConfiguration.html" title="type parameter in DefaultKafkaProducerConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/config/DefaultKafkaProducerConfiguration.html" title="type parameter in DefaultKafkaProducerConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
@@ -762,6 +788,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/tracing/brave/package-summary.html">io.micronaut.configuration.kafka.tracing.brave</a> - package io.micronaut.configuration.kafka.tracing.brave</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isEnabled()" class="member-name-link">isEnabled()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#isolation()" class="member-name-link">isolation()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
@@ -781,6 +811,10 @@ loadScripts(document, 'script');</script>
 <div class="block">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isRestricted()" class="member-name-link">isRestricted()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html#isSkipRecordOnDeserializationFailure()" class="member-name-link">isSkipRecordOnDeserializationFailure()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#isSkipRecordOnDeserializationFailure()" class="member-name-link">isSkipRecordOnDeserializationFailure()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:J">J</h2>
@@ -1208,6 +1242,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The default prefix used for Kafka configuration.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>
+<div class="block">The default prefix used for the default Kafka listener exception handler configuration.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaConsumerConfiguration</a></dt>
 <dd>
 <div class="block">The default consumers configuration.</div>
@@ -1328,6 +1366,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The session timeout for a consumer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#setCommitRecordOnDeserializationFailure(boolean)" class="member-name-link">setCommitRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>
+<div class="block">Whether to commit record on deserialization failure.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#setCommitRecordOnDeserializationFailure(boolean)" class="member-name-link">setCommitRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
+<dd>
+<div class="block">Sets whether to commit the offset of past records that are not deserializable and are skipped.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setEnabled(boolean)" class="member-name-link">setEnabled(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>
 <div class="block">Whether the Kafka health check is enabled.</div>
@@ -1351,6 +1397,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setRestricted(boolean)" class="member-name-link">setRestricted(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>
 <div class="block">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#setSkipRecordOnDeserializationFailure(boolean)" class="member-name-link">setSkipRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>
+<div class="block">Whether to skip record on deserialization failure.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#setSkipRecordOnDeserializationFailure(boolean)" class="member-name-link">setSkipRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
 <dd>
