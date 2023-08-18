@@ -1,4 +1,4 @@
-package io.micronaut.configuration.kafka.docs.producer.config;
+package io.micronaut.kafka.docs.producer.config;
 
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
@@ -13,5 +13,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
     properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")
 )
 public interface ProductClient {
-// end::clazz[]
+    // define client API
 }
+// end::clazz[]
