@@ -19,6 +19,9 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
     }
 
     override fun getProperties(): MutableMap<String, String> {
+        while(!MY_KAFKA.isRunning()) {
+            MY_KAFKA.start()
+        }
         return Collections.singletonMap(
             "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
         )

@@ -1,6 +1,7 @@
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
     id("org.jetbrains.kotlin.kapt") version "1.9.0"
+    id("io.micronaut.internal.build.kafka-testsuite")
 }
 
 dependencies {
@@ -13,8 +14,4 @@ dependencies {
     testImplementation(mnReactor.micronaut.reactor)
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(projects.micronautKafka)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

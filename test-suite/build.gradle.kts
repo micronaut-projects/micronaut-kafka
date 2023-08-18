@@ -1,5 +1,6 @@
 plugins {
     java
+    id("io.micronaut.internal.build.kafka-testsuite")
 }
 
 dependencies {
@@ -12,8 +13,4 @@ dependencies {
     testImplementation(mnReactor.micronaut.reactor)
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(projects.micronautKafka)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
