@@ -8,6 +8,7 @@ dependencies {
     testCompileOnly(mn.micronaut.inject.groovy)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(mnTest.micronaut.test.spock)
+    testRuntimeOnly(mnLogging.logback.classic)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testImplementation(mnReactor.micronaut.reactor)
     testImplementation(mnSerde.micronaut.serde.jackson)
