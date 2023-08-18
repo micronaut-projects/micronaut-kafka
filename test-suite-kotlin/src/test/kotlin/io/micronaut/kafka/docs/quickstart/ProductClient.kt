@@ -12,7 +12,7 @@ import io.micronaut.context.annotation.Requires
 @KafkaClient // <1>
 interface ProductClient {
     @Topic("my-products")  // <2>
-    fun  sendProduct(@KafkaKey brand: String, name: String) // <3>
+    fun sendProduct(@KafkaKey brand: String, name: String) // <3>
 
     fun sendProduct(@Topic topic: String, @KafkaKey brand: String, name: String) // <4>
 }
