@@ -14,8 +14,13 @@ kafkaListener:
   title: Kafka Consumers Using @KafkaListener
   kafkaListenerMethods: Defining @KafkaListener Methods
   kafkaListenerConfiguration: Configuring @KafkaListener beans
-  kafkaSeek: Assigning Kafka Offsets
   kafkaOffsets: Commiting Kafka Offsets
+  kafkaSeek:
+    title: Assigning Kafka Offsets
+    manuallyAssigningOffsetsToAConsumerBean: Manually Assigning Offsets to a Consumer Bean
+    manualOffsetsWithMultipleTopics: Manual Offsets with Multiple Topics
+    manuallyAssigningOffsetsFromAConsumerMethod: Manually Assigning Offsets from a Consumer Method
+    creatingKafkaSeekOperations: Creating Kafka Seek Operations
   kafkaListenerBatch: Kafka Batch Processing
   kafkaSendTo: Forwarding Messages with @SendTo
   kafkaErrors: Handling Consumer Exceptions
