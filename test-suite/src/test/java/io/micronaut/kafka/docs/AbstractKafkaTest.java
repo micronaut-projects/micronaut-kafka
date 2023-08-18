@@ -9,9 +9,9 @@ import java.util.*;
 /**
  * @see <a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers">Singleton containers</a>
  */
-abstract class AbstractKafkaTest implements TestPropertyProvider {
+public abstract class AbstractKafkaTest implements TestPropertyProvider {
 
-    static final KafkaContainer MY_KAFKA;
+    static protected final KafkaContainer MY_KAFKA;
 
     static {
         MY_KAFKA = new KafkaContainer(
@@ -21,6 +21,9 @@ abstract class AbstractKafkaTest implements TestPropertyProvider {
 
     @Override
     public Map<String, String> getProperties() {
+        while (!MY_KAFKA.isRunning()) {
+            MY_KAFKA.start();
+        }
         return Collections.singletonMap(
             "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
         );

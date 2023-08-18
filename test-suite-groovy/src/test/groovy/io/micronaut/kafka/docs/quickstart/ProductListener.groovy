@@ -11,8 +11,8 @@ import io.micronaut.context.annotation.Requires
 // end::imports[]
 
 @Requires(property = 'spec.name', value = 'QuickStartTest')
-@Slf4j
 // tag::clazz[]
+@Slf4j
 @KafkaListener(offsetReset = OffsetReset.EARLIEST) // <1>
 class ProductListener {
 

@@ -5,11 +5,13 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import io.micronaut.kafka.docs.AbstractKafkaTest;
 
 @Property(name = "spec.name", value = "QuickstartTest")
 @MicronautTest
-class QuickstartTest {
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class QuickstartTest extends AbstractKafkaTest {
     @Inject
     ApplicationContext applicationContext;
 
@@ -19,5 +21,7 @@ class QuickstartTest {
         ProductClient client = applicationContext.getBean(ProductClient.class);
         client.sendProduct("Nike", "Blue Trainers");
         // end::quickstart[]
+
+        MY_KAFKA.stop();
     }
 }
