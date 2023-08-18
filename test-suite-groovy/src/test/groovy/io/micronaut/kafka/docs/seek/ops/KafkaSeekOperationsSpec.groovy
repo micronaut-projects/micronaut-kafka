@@ -34,6 +34,9 @@ class KafkaSeekOperationsSpec extends AbstractKafkaTest {
             consumer.processed.contains(product0)
             !consumer.processed.contains(product1)
         }
+
+        cleanup:
+        MY_KAFKA.stop()
     }
 
     @Requires(property = "spec.name", value = "KafkaSeekOperationsSpec")
