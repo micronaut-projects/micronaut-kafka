@@ -10,6 +10,6 @@ tasks.withType(Test) {
 micronaut {
     importMicronautPlatform.set(false)
     testResources {
-        sharedServer = true
+        additionalModules.add("kafka")
     }
 }

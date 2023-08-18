@@ -2,16 +2,14 @@ package io.micronaut.kafka.docs.quickstart
 
 import io.micronaut.context.BeanContext
 import io.micronaut.context.annotation.Property
-import io.micronaut.kafka.docs.AbstractKafkaTest
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
 @Property(name = "spec.name", value = "QuickstartTest")
+@Property(name = "kafka.enabled", value = "true")
 @MicronautTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class QuickstartTest : AbstractKafkaTest() {
+internal class QuickstartTest {
     @Inject
     lateinit var beanContext: BeanContext
 
@@ -21,7 +19,5 @@ internal class QuickstartTest : AbstractKafkaTest() {
         val client = beanContext.getBean(ProductClient::class.java)
         client.sendProduct("Nike", "Blue Trainers")
         // end::quickstart[]
-
-        MY_KAFKA.stop()
     }
 }
