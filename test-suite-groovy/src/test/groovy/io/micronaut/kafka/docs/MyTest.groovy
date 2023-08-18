@@ -9,11 +9,12 @@ import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
+import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @MicronautTest
 @Property(name = "spec.name", value = "MyTest")
-class MyTest extends AbstractKafkaTest {
+class MyTest extends Specification {
 
     @Inject
     MyProducer producer

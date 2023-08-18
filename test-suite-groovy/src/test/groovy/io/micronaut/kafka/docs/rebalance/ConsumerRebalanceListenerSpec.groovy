@@ -4,15 +4,16 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
-import io.micronaut.kafka.docs.AbstractKafkaTest
+
 import io.micronaut.kafka.docs.Product
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
+import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @MicronautTest
 @Property(name = "spec.name", value = "ConsumerRebalanceListenerSpec")
-class ConsumerRebalanceListenerSpec extends AbstractKafkaTest {
+class ConsumerRebalanceListenerSpec extends Specification {
 
     @Inject
     ProductClient producer
@@ -34,9 +35,6 @@ class ConsumerRebalanceListenerSpec extends AbstractKafkaTest {
             !consumer.processed.contains(product0)
             consumer.processed.contains(product1)
         }
-
-        cleanup:
-        MY_KAFKA.stop()
     }
 
     @Requires(property = "spec.name", value = "ConsumerRebalanceListenerSpec")

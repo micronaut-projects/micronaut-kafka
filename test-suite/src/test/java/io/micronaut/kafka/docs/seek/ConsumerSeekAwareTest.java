@@ -4,19 +4,16 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.kafka.docs.AbstractKafkaTest;
 import io.micronaut.kafka.docs.Product;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
 @MicronautTest
 @Property(name = "spec.name", value = "ConsumerSeekAwareTest")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ConsumerSeekAwareTest extends AbstractKafkaTest {
+class ConsumerSeekAwareTest {
     @Test
     void testProductListener(ProductClient producer, ProductListener consumer) {
         Product product0 = new Product("Apple", 10);
@@ -29,8 +26,6 @@ class ConsumerSeekAwareTest extends AbstractKafkaTest {
             !consumer.processed.contains(product0) &&
             consumer.processed.contains(product1)
         );
-
-        MY_KAFKA.stop();
     }
 
     @Requires(property = "spec.name", value = "ConsumerSeekAwareTest")

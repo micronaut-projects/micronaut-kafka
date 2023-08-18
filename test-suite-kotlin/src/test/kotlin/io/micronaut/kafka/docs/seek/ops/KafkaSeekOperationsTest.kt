@@ -2,7 +2,6 @@ package io.micronaut.kafka.docs.seek.ops
 
 import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.context.annotation.*
-import io.micronaut.kafka.docs.AbstractKafkaTest
 import io.micronaut.kafka.docs.Product
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.awaitility.Awaitility.await
@@ -11,8 +10,7 @@ import java.util.concurrent.*
 
 @MicronautTest
 @Property(name = "spec.name", value = "KafkaSeekOperationsTest")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class KafkaSeekOperationsTest : AbstractKafkaTest() {
+internal class KafkaSeekOperationsTest {
     @Test
     fun testProductListener(producer: ProductClient, consumer: ProductListener) {
         val product0 = Product("Apple", 10)
@@ -25,8 +23,6 @@ internal class KafkaSeekOperationsTest : AbstractKafkaTest() {
             consumer.processed.contains(product0) &&
             !consumer.processed.contains(product1)
         }
-
-        MY_KAFKA.stop()
     }
 
     @Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
