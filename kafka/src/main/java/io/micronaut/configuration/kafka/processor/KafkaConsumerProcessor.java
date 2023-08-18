@@ -1281,12 +1281,12 @@ class KafkaConsumerProcessor
 
         @Override
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            bean.onPartitionsRevoked(Optional.ofNullable(partitions).orElseGet(Collections::emptyList));
+            bean.onPartitionsRevoked(partitions != null ? partitions : Collections.emptyList());
         }
 
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            bean.onPartitionsAssigned(Optional.ofNullable(partitions).orElseGet(Collections::emptyList), seeker);
+            bean.onPartitionsAssigned(partitions != null ? partitions : Collections.emptyList(), seeker);
         }
     }
 }
