@@ -5,16 +5,8 @@ There may be cases where you prefer to receive all of the link:{kafkaapi}/org/ap
 To achieve this you can set the `batch` member of the ann:configuration.kafka.annotation.KafkaListener[] to `true` and specify a container type (typically `List`) to receive all of the data:
 
 .Receiving a Batch of Records
-[source,java]
-----
-include::{testskafka}/consumer/batch/BookListener.java[tags=imports, indent=0]
 
-include::{testskafka}/consumer/batch/BookListener.java[tags=clazz, indent=0]
-
-include::{testskafka}/consumer/batch/BookListener.java[tags=method, indent=2]
-
-}
-----
+snippet::io.micronaut.kafka.docs.consumer.batch.BookListener[tags="imports,clazz,method", indent=0]
 
 <1> The ann:configuration.kafka.annotation.KafkaListener[] annotation's `batch` member is set to `true`
 <2> The method defines that it receives a list of `Book` instances
@@ -27,10 +19,8 @@ Note in the previous case offsets will automatically be committed for the whole 
 You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:
 
 .Committing Offsets Manually with Batch
-[source,java]
-----
-include::{testskafka}/consumer/batch/BookListener.java[tags=manual, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.batch.BookListener[tags=manual, indent=0]
 
 <1> The method receives the batch of books as a list of consumer records
 <2> Each record is processed
@@ -46,10 +36,8 @@ Batch listeners also support defining reactive types (either rx:Flowable[] or Re
 In this case the method will be passed a reactive type that can be returned from the method allowing non-blocking processing of the batch:
 
 .Reactive Processing of Batch Records
-[source,java]
-----
-include::{testskafka}/consumer/batch/BookListener.java[tags=reactive, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.batch.BookListener[tags=reactive, indent=0]
 
 Remember that as with non batch processing, the reactive type will be subscribed to on a different thread and offsets will be committed automatically likely prior to the point when the reactive type is subscribed to.
 
