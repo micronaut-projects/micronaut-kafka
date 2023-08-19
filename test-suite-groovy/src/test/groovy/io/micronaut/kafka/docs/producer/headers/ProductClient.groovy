@@ -7,7 +7,7 @@ import io.micronaut.messaging.annotation.MessageHeader
 
 // tag::clazz[]
 @KafkaClient(id='product-client')
-@MessageHeader(name = 'X-Token', value = "${my.application.token}")
+@MessageHeader(name = 'X-Token', value = '${my.application.token}')
 interface ProductClient {
     // define client API
 }
