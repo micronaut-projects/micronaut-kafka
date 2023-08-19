@@ -7,9 +7,6 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.messaging.annotation.SendTo
 import org.apache.kafka.common.IsolationLevel
 
-import java.util.stream.Collectors
-import java.util.stream.Stream
-
 // tag::transactional[]
 @KafkaListener(
         producerClientId = 'word-counter-producer', // <1>
@@ -21,15 +18,12 @@ class WordCounter {
 
     @Topic('tx-incoming-strings')
     @SendTo('my-words-count')
-    List<KafkaMessage> wordsCounter(String string) {
-        Map<String, Integer> wordsCount = Stream.of(string.split(" "))
-                .map(word -> new AbstractMap.SimpleEntry<>(word, 1))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum))
-        List<KafkaMessage> messages = new ArrayList<>()
-        for (Map.Entry<String, Integer> e : wordsCount.entrySet()) {
-            messages.add(KafkaMessage.Builder.withBody(e.getValue()).key(e.getKey()).build())
-        }
-        return messages
+    List<KafkaMessage<String, Integer>> wordsCounter(String string) {
+        string.split("\\s+")
+            .groupBy()
+            .collect { key, instanceList ->
+                KafkaMessage.Builder.withBody(instanceList.size()).key(key).build()
+            }
     }
 }
 // end::transactional[]

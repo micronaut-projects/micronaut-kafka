@@ -7,10 +7,8 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.messaging.annotation.SendTo;
 import org.apache.kafka.common.IsolationLevel;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,15 +23,13 @@ public class WordCounter {
 
     @Topic("tx-incoming-strings")
     @SendTo("my-words-count")
-    List<KafkaMessage> wordsCounter(String string) {
-        Map<String, Integer> wordsCount = Stream.of(string.split(" "))
-                .map(word -> new AbstractMap.SimpleEntry<>(word, 1))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
-        List<KafkaMessage> messages = new ArrayList<>();
-        for (Map.Entry<String, Integer> e : wordsCount.entrySet()) {
-            messages.add(KafkaMessage.Builder.withBody(e.getValue()).key(e.getKey()).build());
-        }
-        return messages;
+    List<KafkaMessage<String, Integer>> wordsCounter(String string) {
+        return Stream.of(string.split("\\s+"))
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(i -> 1)))
+            .entrySet()
+            .stream()
+            .map(e -> KafkaMessage.Builder.<String, Integer>withBody(e.getValue()).key(e.getKey()).build())
+            .toList();
     }
 }
 // end::transactional[]

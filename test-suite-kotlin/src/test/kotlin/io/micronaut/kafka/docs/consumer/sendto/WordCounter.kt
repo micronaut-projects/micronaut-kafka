@@ -15,10 +15,11 @@ import org.apache.kafka.common.IsolationLevel
     isolation = IsolationLevel.READ_COMMITTED
 )
 class WordCounter {
+
     @Topic("tx-incoming-strings")
     @SendTo("my-words-count")
     fun wordsCounter(string: String) = string
         .split(Regex("\\s+"))
         .groupBy { it }
-        .map { KafkaMessage.Builder.withBody<Any, Int>(it.value.size).key(it.key).build() }
+        .map { KafkaMessage.Builder.withBody<String, Int>(it.value.size).key(it.key).build() }
 }
