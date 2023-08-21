@@ -4,6 +4,7 @@ package io.micronaut.kafka.docs.consumer.sendto;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.consumer.batch.BookListener;
 import io.micronaut.messaging.annotation.SendTo;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
+@Requires(property = "spec.name", value = "ProductListenerTest")
 @KafkaListener
 public class ProductListener {
     private static final Logger LOG = getLogger(BookListener.class);

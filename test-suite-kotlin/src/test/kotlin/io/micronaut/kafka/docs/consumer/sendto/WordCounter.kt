@@ -4,9 +4,11 @@ import io.micronaut.configuration.kafka.KafkaMessage
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.SendTo
 import org.apache.kafka.common.IsolationLevel
 
+@Requires(property = "spec.name", value = "WordCounterTest")
 // tag::transactional[]
 @KafkaListener(
     producerClientId = "word-counter-producer",

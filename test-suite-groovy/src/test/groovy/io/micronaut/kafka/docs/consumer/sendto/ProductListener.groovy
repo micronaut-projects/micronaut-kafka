@@ -6,11 +6,13 @@ import groovy.util.logging.Slf4j
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.SendTo
 import reactor.core.publisher.Mono
 // end::imports[]
 
 @Slf4j
+@Requires(property = 'spec.name', value = 'ProductListenerTest')
 @KafkaListener
 class ProductListener {
 
