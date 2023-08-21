@@ -83,10 +83,9 @@ The following table summarizes example parameters and how they related to the `C
 As an example, following listener method will receive all of the above mentioned parameters:
 
 .Specifying Parameters for offset, topic etc.
-[source,java]
-----
-include::{testskafka}/consumer/config/ProductListener.java[tags=method, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ProductListener[tags=method, indent=0]
+
 
 <1> The Kafka key
 <2> The message body
@@ -102,10 +101,8 @@ If you prefer you can also receive the entire `ConsumerRecord` object being list
 Consider the following example:
 
 .Specifying Parameters for offset, topic etc.
-[source,java]
-----
-include::{testskafka}/consumer/config/ProductListener.java[tags=consumeRecord, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ProductListener[tags=consumeRecord, indent=0]
 
 <1> The method signature accepts a `ConsumerRecord` that specifies a `String` for the key type and a POJO (`Product`) for the value type.
 <2> The `value()` method is used to retrieve the value

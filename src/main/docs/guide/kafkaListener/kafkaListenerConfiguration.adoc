@@ -66,14 +66,8 @@ The above configuration will pass properties to only the `@KafkaListener` beans 
 Finally, the ann:configuration.kafka.annotation.KafkaListener[] annotation itself provides a `properties` member that you can use to set consumer specific properties:
 
 .Configuring Consumer Properties with @KafkaListener
-[source,java]
-----
-include::{testskafka}/consumer/config/ProductListener.java[tags=imports, indent=0]
 
-include::{testskafka}/consumer/config/ProductListener.java[tags=clazz, indent=0]
-    ...
-}
-----
+snippet::io.micronaut.kafka.docs.consumer.config.ProductListener[tags="imports,clazz", indent=0]
 
 === @KafkaListener and Deserializers
 

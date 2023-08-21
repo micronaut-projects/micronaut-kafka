@@ -1,14 +1,20 @@
-package io.micronaut.configuration.kafka.docs.consumer.config;
+package io.micronaut.kafka.docs.consumer.config;
 
 // tag::imports[]
+
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
+@Requires(property = "spec.name", value = "ConfigProductListenerTest")
 // tag::clazz[]
 @KafkaListener(
     groupId = "products",
@@ -18,6 +24,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 public class ProductListener {
 // end::clazz[]
 
+    private static final Logger LOG = getLogger(ProductListener.class);
+
     // tag::method[]
     @Topic("awesome-products")
     public void receive(@KafkaKey String brand, // <1>
@@ -26,7 +34,7 @@ public class ProductListener {
                         int partition, // <4>
                         String topic, // <5>
                         long timestamp) { // <6>
-        System.out.println("Got Product - " + product.getName() + " by " + brand);
+        LOG.info("Got Product - {} by {}",product.name(), brand);
     }
     // end::method[]
 
@@ -35,7 +43,7 @@ public class ProductListener {
     public void receive(ConsumerRecord<String, Product> record) { // <1>
         Product product = record.value(); // <2>
         String brand = record.key(); // <3>
-        System.out.println("Got Product - " + product.getName() + " by " + brand);
+        LOG.info("Got Product - {} by {}",product.name(), brand);
     }
     // end::consumeRecord[]
 }
