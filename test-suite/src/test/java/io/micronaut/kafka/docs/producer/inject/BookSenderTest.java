@@ -11,12 +11,13 @@ class BookSenderTest {
     @Test
     void testBookSender() {
 
-        ApplicationContext ctx = ApplicationContext.run( // <1>
-            Map.of("kafka.enabled", "true","spec.name", "BookSenderTest")
-        );
-        BookSender bookSender = ctx.getBean(BookSender.class); // <2>
-        Book book = new Book("The Stand");
-        bookSender.send("Stephen King", book);
+        try (ApplicationContext ctx = ApplicationContext.run( // <1>
+            Map.of("kafka.enabled", "true", "spec.name", "BookSenderTest")
+        )) {
+            BookSender bookSender = ctx.getBean(BookSender.class); // <2>
+            Book book = new Book("The Stand");
+            bookSender.send("Stephen King", book);
+        }
     }
     // end::test[]
 }
