@@ -8,13 +8,15 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
-class MyTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class MyTest extends AbstractKafkaTest {
 
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
