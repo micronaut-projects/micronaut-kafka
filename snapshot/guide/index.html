@@ -652,7 +652,7 @@ void sendProduct(
 <div class="paragraph">
 <p>Another way to include headers is at the type level with the values driven from configuration:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Declaring @KafkaClient Headers</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
@@ -661,7 +661,33 @@ import io.micronaut.messaging.annotation.MessageHeader;
 @KafkaClient(id="product-client")
 @MessageHeader(name = "X-Token", value = "${my.application.token}")
 public interface ProductClient {
-    ...
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring @KafkaClient Headers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.messaging.annotation.MessageHeader
+
+@KafkaClient(id='product-client')
+@MessageHeader(name = 'X-Token', value = '${my.application.token}')
+interface ProductClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring @KafkaClient Headers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.messaging.annotation.MessageHeader
+
+@KafkaClient(id = "product-client")
+@MessageHeader(name = "X-Token", value = "\${my.application.token}")
+interface ProductClient {
+// define client API
 }</code></pre>
 </div>
 </div>
@@ -1140,24 +1166,21 @@ import io.micronaut.test.support.TestPropertyProvider;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
  */
 public abstract class AbstractKafkaTest implements TestPropertyProvider {
 
-    static protected final KafkaContainer MY_KAFKA;
-
-    static {
-        MY_KAFKA = new KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:latest"));
-        MY_KAFKA.start();
-    }
+    static protected final KafkaContainer MY_KAFKA = new KafkaContainer(
+        DockerImageName.parse("confluentinc/cp-kafka:latest")
+    );
 
     @Override
     public Map&lt;String, String&gt; getProperties() {
-        while (!MY_KAFKA.isRunning()) {
+        if (!MY_KAFKA.isRunning()) {
             MY_KAFKA.start();
         }
         return Collections.singletonMap(
@@ -1200,7 +1223,6 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 
 /**
  * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
@@ -1209,18 +1231,14 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
         var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
-
-        init {
-            MY_KAFKA.start()
-        }
     }
 
     override fun getProperties(): MutableMap&lt;String, String&gt; {
-        while(!MY_KAFKA.isRunning()) {
+        if(!MY_KAFKA.isRunning) {
             MY_KAFKA.start()
         }
-        return Collections.singletonMap(
-            "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
+        return mutableMapOf(
+            "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
         )
     }
 }</code></pre>
@@ -1233,10 +1251,15 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs;
 
-import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.context.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
@@ -1251,7 +1274,6 @@ class MyTest extends AbstractKafkaTest {
         final String message = "hello";
         producer.produce(message);
         await().atMost(5, SECONDS).until(() -&gt; message.equals(consumer.consumed));
-        MY_KAFKA.stop();
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -1337,24 +1359,28 @@ class MyTest extends AbstractKafkaTest {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
 
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.context.annotation.*
+import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.*
-import java.util.concurrent.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import java.util.concurrent.TimeUnit
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MyTest : AbstractKafkaTest() {
+
     @Test
     fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
         val message = "hello"
         producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS)
-            .until { consumer.consumed == message }
-        MY_KAFKA.stop()
+        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
     }
 
     @Requires(property = "spec.name", value = "MyTest")
