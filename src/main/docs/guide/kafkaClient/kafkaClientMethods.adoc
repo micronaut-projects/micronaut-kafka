@@ -30,14 +30,8 @@ The example above will include the value of the `myHeader` argument as a header 
 Another way to include headers is at the type level with the values driven from configuration:
 
 .Declaring @KafkaClient Headers
-[source,java]
-----
-include::{testskafka}/producer/headers/ProductClient.java[tags=imports, indent=0]
 
-include::{testskafka}/producer/headers/ProductClient.java[tags=clazz, indent=0]
-    ...
-}
-----
+snippet::io.micronaut.kafka.docs.producer.headers.ProductClient[tags="imports,clazz", indent=0]
 
 The above example will send a header called `X-Token` with the value read from the setting `my.application.token` in `application.yml` (or the environnment variable `MY_APPLICATION_TOKEN`).
 

@@ -3,12 +3,8 @@ If you need maximum flexibility and don't want to use the ann:configuration.kafk
 Consider the following example:
 
 .Using a KafkaProducer directly
-[source,java]
-----
-include::{testskafka}/producer/inject/BookSender.java[tags=imports, indent=0]
 
-include::{testskafka}/producer/inject/BookSender.java[tags=clazz, indent=0]
-----
+snippet::io.micronaut.kafka.docs.producer.inject.BookSender[tags="imports,clazz"]
 
 <1> The `Producer` is dependency injected into the constructor. If not specified in configuration, the key and value serializer are inferred from the generic type arguments.
 <2> The `Producer` is used to send records
@@ -17,12 +13,9 @@ Note that there is no need to call the `close()` method to shut down the `KafkaP
 
 The previous example can be tested in JUnit with the following test:
 
-
 .Using a KafkaProducer directly
-[source,java]
-----
-include::{testskafka}/producer/inject/BookSenderTest.java[tags=test, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.producer.inject.BookSenderTest[tags=test, indent=0]
 
 <1> A Kafka docker container is used
 <2> The `BookSender` is retrieved from the api:context.ApplicationContext[] and a `ProducerRecord` sent
