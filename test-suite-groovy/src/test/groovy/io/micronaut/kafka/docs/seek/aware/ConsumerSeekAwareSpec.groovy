@@ -1,4 +1,4 @@
-package io.micronaut.kafka.docs.seek.ops
+package io.micronaut.kafka.docs.seek.aware
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.kafka.docs.Products
@@ -8,8 +8,8 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @MicronautTest
-@Property(name = "spec.name", value = "KafkaSeekOperationsSpec")
-class KafkaSeekOperationsSpec extends Specification {
+@Property(name = "spec.name", value = "ConsumerSeekAwareSpec")
+class ConsumerSeekAwareSpec extends Specification {
 
     @Inject
     ProductListener consumer
@@ -17,8 +17,8 @@ class KafkaSeekOperationsSpec extends Specification {
     void "test product listener"() {
         expect:
         new PollingConditions(timeout: 5).eventually {
-            consumer.processed.contains(Products.PRODUCT_0)
-            !consumer.processed.contains(Products.PRODUCT_1)
+            !consumer.processed.contains(Products.PRODUCT_0)
+            consumer.processed.contains(Products.PRODUCT_1)
         }
     }
 }

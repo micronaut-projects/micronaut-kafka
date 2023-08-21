@@ -1,19 +1,20 @@
-package io.micronaut.kafka.docs.seek
+package io.micronaut.kafka.docs.seek.aware
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
 import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.configuration.kafka.seek.*
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
+import jakarta.inject.Inject
 import org.apache.kafka.common.TopicPartition
 
 @KafkaListener
 @Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
-class ProductListener : ConsumerSeekAware { // <1>
+class ProductListener @Inject constructor(config: ProductListenerConfiguration) : ConsumerSeekAware { // <1>
 
     var processed: MutableList<Product> = mutableListOf()
 
-    @Topic("awesome-products")
+    @Topic("wonderful-products")
     fun receive(product: Product) {
         processed.add(product)
     }

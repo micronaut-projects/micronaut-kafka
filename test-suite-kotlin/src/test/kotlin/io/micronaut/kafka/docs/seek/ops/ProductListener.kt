@@ -4,17 +4,18 @@ import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.configuration.kafka.seek.*
 import io.micronaut.context.annotation.*
 import io.micronaut.kafka.docs.Product
+import jakarta.inject.Inject
 import org.apache.kafka.common.TopicPartition
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = [Property(name = "max.poll.records", value = "1")])
 @Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
-class ProductListener {
+class ProductListener @Inject constructor(config: ProductListenerConfiguration) {
 
     var processed: MutableList<Product> = mutableListOf()
 
-    @Topic("awesome-products")
+    @Topic("amazing-products")
     fun receive(product: Product, ops: KafkaSeekOperations) { // <1>
         processed.add(product)
-        ops.defer(KafkaSeekOperation.seekToBeginning(TopicPartition("awesome-products", 0))) // <2>
+        ops.defer(KafkaSeekOperation.seekToBeginning(TopicPartition("amazing-products", 0))) // <2>
     }
 }

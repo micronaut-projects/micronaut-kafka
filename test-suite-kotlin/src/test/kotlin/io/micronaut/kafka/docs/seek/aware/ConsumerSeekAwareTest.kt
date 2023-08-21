@@ -1,4 +1,4 @@
-package io.micronaut.kafka.docs.seek.ops
+package io.micronaut.kafka.docs.seek.aware
 
 import io.micronaut.context.annotation.Property
 import io.micronaut.kafka.docs.Products
@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
 @MicronautTest
-@Property(name = "spec.name", value = "KafkaSeekOperationsTest")
-internal class KafkaSeekOperationsTest {
+@Property(name = "spec.name", value = "ConsumerSeekAwareTest")
+internal class ConsumerSeekAwareTest {
     @Test
     fun testProductListener(consumer: ProductListener) {
         await().atMost(10, TimeUnit.SECONDS).until {
-            consumer.processed.contains(Products.PRODUCT_0) &&
-            !consumer.processed.contains(Products.PRODUCT_1)
+            !consumer.processed.contains(Products.PRODUCT_0) &&
+            consumer.processed.contains(Products.PRODUCT_1)
         }
     }
 }

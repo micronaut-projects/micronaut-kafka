@@ -12,9 +12,13 @@ class ProductListener {
 
     List<Product> processed = []
 
-    @Topic("awesome-products")
+    ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Topic("amazing-products")
     void receive(Product product, KafkaSeekOperations ops) { // <1>
         processed << product
-        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("awesome-products", 0))); // <2>
+        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("amazing-products", 0))); // <2>
     }
 }

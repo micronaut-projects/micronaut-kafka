@@ -1,4 +1,4 @@
-package io.micronaut.kafka.docs.seek.ops;
+package io.micronaut.kafka.docs.seek.aware;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.kafka.docs.Products;
@@ -9,13 +9,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
 @MicronautTest
-@Property(name = "spec.name", value = "KafkaSeekOperationsTest")
-class KafkaSeekOperationsTest {
+@Property(name = "spec.name", value = "ConsumerSeekAwareTest")
+class ConsumerSeekAwareTest {
     @Test
     void testProductListener(ProductListener consumer) {
         await().atMost(10, SECONDS).until(() ->
-            consumer.processed.contains(Products.PRODUCT_0) &&
-            !consumer.processed.contains(Products.PRODUCT_1)
+            !consumer.processed.contains(Products.PRODUCT_0) &&
+            consumer.processed.contains(Products.PRODUCT_1)
         );
     }
 }

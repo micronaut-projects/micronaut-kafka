@@ -1,4 +1,4 @@
-package io.micronaut.kafka.docs.rebalance
+package io.micronaut.kafka.docs.seek.rebalance
 
 import io.micronaut.configuration.kafka.ConsumerAware
 import io.micronaut.configuration.kafka.annotation.*
@@ -14,6 +14,10 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 
     List<Product> processed = []
     private Consumer consumer
+
+    ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
 
     @Override
     void setKafkaConsumer(@NonNull Consumer consumer) { // <1>

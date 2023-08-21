@@ -1,10 +1,11 @@
-package io.micronaut.kafka.docs.rebalance;
+package io.micronaut.kafka.docs.seek.rebalance;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import io.micronaut.core.annotation.NonNull;
+import jakarta.inject.Inject;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import java.util.*;
@@ -15,6 +16,11 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 
     List<Product> processed = new ArrayList<>();
     private Consumer consumer;
+
+    @Inject
+    public ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
 
     @Override
     public void setKafkaConsumer(@NonNull Consumer consumer) { // <1>

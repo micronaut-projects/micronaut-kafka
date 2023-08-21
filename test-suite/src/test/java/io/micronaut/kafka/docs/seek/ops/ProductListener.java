@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.seek.*;
 import io.micronaut.context.annotation.*;
 import io.micronaut.kafka.docs.Product;
+import jakarta.inject.Inject;
 import org.apache.kafka.common.TopicPartition;
 import java.util.*;
 
@@ -13,9 +14,14 @@ public class ProductListener {
 
     List<Product> processed = new ArrayList<>();
 
-    @Topic("awesome-products")
+    @Inject
+    public ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Topic("amazing-products")
     void receive(Product product, KafkaSeekOperations ops) { // <1>
         processed.add(product);
-        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("awesome-products", 0))); // <2>
+        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("amazing-products", 0))); // <2>
     }
 }
