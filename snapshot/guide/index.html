@@ -1030,11 +1030,11 @@ Flowable&lt;RecordMetadata&gt; send(Flowable&lt;Book&gt; books);</code></pre>
 <div class="paragraph">
 <p>Consider the following example:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Using a KafkaProducer directly</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
-import io.micronaut.configuration.kafka.docs.consumer.batch.Book;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -1047,15 +1047,62 @@ public class BookSender {
 
     private final Producer&lt;String, Book&gt; kafkaProducer;
 
-    public BookSender(
-            @KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { <i class="conum" data-value="1"></i><b>(1)</b>
+    public BookSender(@KafkaClient("book-producer") Producer&lt;String, Book&gt; kafkaProducer) { // <b class="conum">(1)</b>
         this.kafkaProducer = kafkaProducer;
     }
 
     public Future&lt;RecordMetadata&gt; send(String author, Book book) {
-        return kafkaProducer.send(new ProducerRecord&lt;&gt;("books", author, book)); <i class="conum" data-value="2"></i><b>(2)</b>
+        return kafkaProducer.send(new ProducerRecord&lt;&gt;("books", author, book)); // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
+import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+
+import java.util.concurrent.Future
+
+@Singleton
+class BookSender {
+
+    private final Producer&lt;String, Book&gt; kafkaProducer
+
+    BookSender(@KafkaClient('book-producer') Producer&lt;String, Book&gt; kafkaProducer) { // <b class="conum">(1)</b>
+        this.kafkaProducer = kafkaProducer
     }
 
+    Future&lt;RecordMetadata&gt; send(String author, Book book) {
+        kafkaProducer.send(new ProducerRecord&lt;&gt;('books', author, book)) // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
+import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import java.util.concurrent.Future
+
+@Requires(property = "spec.name", value = "BookSenderTest")
+@Singleton
+class BookSender(
+    @param:KafkaClient("book-producer") private val kafkaProducer: Producer&lt;String, Book&gt;) { // <b class="conum">(1)</b>
+
+    fun send(author: String, book: Book): Future&lt;RecordMetadata&gt; {
+        return kafkaProducer.send(ProducerRecord("books", author, book)) // <b class="conum">(2)</b>
+    }
 }</code></pre>
 </div>
 </div>
@@ -1077,18 +1124,67 @@ public class BookSender {
 <div class="paragraph">
 <p>The previous example can be tested in JUnit with the following test:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Using a KafkaProducer directly</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Test
-public void testBookSender() {
-    try (ApplicationContext ctx = ApplicationContext.run()) { <i class="conum" data-value="1"></i><b>(1)</b>
-        BookSender bookSender = ctx.getBean(BookSender.class); <i class="conum" data-value="2"></i><b>(2)</b>
-        Book book = new Book();
-        book.setTitle("The Stand");
-        bookSender.send("Stephen King", book);
+void testBookSender() {
+
+    try (ApplicationContext ctx = ApplicationContext.run( // <b class="conum">(1)</b>
+        Map.of("kafka.enabled", "true", "spec.name", "BookSenderTest")
+    )) {
+        BookSender bookSender = ctx.getBean(BookSender.class); // <b class="conum">(2)</b>
+        Book book = new Book("The Stand");
+        Future&lt;RecordMetadata&gt; stephenKing = bookSender.send("Stephen King", book);
+        assertDoesNotThrow(() -&gt; {
+            RecordMetadata recordMetadata = stephenKing.get();
+            assertEquals("books", recordMetadata.topic());
+        });
     }
 }</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">void "test Book Sender"() {
+    given:
+    ApplicationContext ctx = ApplicationContext.run(  // <b class="conum">(1)</b>
+        'kafka.enabled': true, 'spec.name': 'BookSenderTest'
+    )
+    BookSender bookSender = ctx.getBean(BookSender) // <b class="conum">(2)</b>
+    Book book = new Book('The Stand')
+
+    when:
+    bookSender.send('Stephen King', book)
+    Future&lt;RecordMetadata&gt; stephenKing = bookSender.send('Stephen King', book);
+    def recordMetadata = stephenKing.get();
+
+    then:
+    noExceptionThrown()
+    recordMetadata.topic() == 'books'
+
+    cleanup:
+    ctx.close()
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Test
+fun testBookSender() {
+    ApplicationContext.run(mutableMapOf&lt;String, Any&gt;( // <b class="conum">(1)</b>
+        "kafka.enabled" to "true", "spec.name" to "BookSenderTest")).use { ctx -&gt;
+        val bookSender = ctx.getBean(BookSender::class.java) // <b class="conum">(2)</b>
+        val book = Book("The Stand")
+        bookSender.send("Stephen King", book)
+        val stephenKing = bookSender.send("Stephen King", book)
+        Assertions.assertDoesNotThrow {
+            val recordMetadata = stephenKing.get()
+            Assertions.assertEquals("books", recordMetadata.topic())
+        }
+    }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
