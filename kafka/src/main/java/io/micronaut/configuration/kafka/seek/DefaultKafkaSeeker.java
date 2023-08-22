@@ -57,9 +57,9 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
         try {
             final TopicPartition tp = operation.topicPartition();
             if (operation.offset() == 0) {
-                Boolean performed = performForZeroOffset(operation, tp);
-                if (performed != null) {
-                    return performed;
+                Optional<Boolean> performed = performForZeroOffset(operation, tp);
+                if (performed.isPresent()) {
+                    return performed.get();
                 }
             }
             final long offset = offset(operation, tp);
@@ -72,32 +72,32 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
         }
     }
 
-    @Nullable
-    private Boolean performForZeroOffset(@NonNull KafkaSeekOperation operation,
-                                         @NonNull TopicPartition tp) {
+    @NonNull
+    private Optional<Boolean> performForZeroOffset(@NonNull KafkaSeekOperation operation,
+                                                   @NonNull TopicPartition tp) {
         final String topic = operation.topic();
         final int partition = operation.partition();
         switch (operation.offsetType()) {
             case FORWARD, BACKWARD -> {
                 // Special case: relative zero-offset
                 LOG.debug("Relative zero-offset seek operation dropped: {}", operation);
-                return Boolean.FALSE;
+                return Optional.of(false);
             }
             case BEGINNING -> {
                 // Optimized case: seek to the beginning
                 consumer.seekToBeginning(singletonList(tp));
                 LOG.debug("Seek to the beginning operation succeeded: {}-{}", topic, partition);
-                return Boolean.TRUE;
+                return Optional.of(true);
             }
             case END -> {
                 // Optimized case: seek to the end
                 consumer.seekToEnd(singletonList(tp));
                 LOG.debug("Seek to the end operation succeeded: {}-{}", topic, partition);
-                return Boolean.TRUE;
+                return Optional.of(true);
             }
             default -> {
                 /* Perform operation regularly */
-                return null;
+                return Optional.empty();
             }
         }
     }
