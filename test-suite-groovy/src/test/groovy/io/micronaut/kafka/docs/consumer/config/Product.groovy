@@ -7,5 +7,4 @@ import io.micronaut.serde.annotation.Serdeable
 @Canonical
 class Product {
     String name
-    int quantity
 }
