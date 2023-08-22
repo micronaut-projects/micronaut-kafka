@@ -3,6 +3,7 @@ package io.micronaut.kafka.docs.consumer.batch
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
@@ -12,6 +13,7 @@ import reactor.core.publisher.Flux
 import java.util.*
 // end::imports[]
 
+@Requires(property = "spec.name", value = "BookListenerTest")
 // tag::clazz[]
 @KafkaListener(batch = true) // <1>
 class BookListener {
