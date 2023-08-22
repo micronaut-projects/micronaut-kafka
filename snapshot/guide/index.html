@@ -897,11 +897,12 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="paragraph">
 <p>Finally, the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation itself provides a <code>properties</code> member that you can use to set producer specific properties:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Configuring Producer Properties with @KafkaClient</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 @KafkaClient(
@@ -910,7 +911,43 @@ import org.apache.kafka.clients.producer.ProducerConfig;
     properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")
 )
 public interface ProductClient {
-    ...
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Configuring Producer Properties with @KafkaClient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.producer.ProducerConfig
+
+@KafkaClient(
+        id = "product-client",
+        acks = KafkaClient.Acknowledge.ALL,
+        properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = '5')
+)
+interface ProductClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Configuring Producer Properties with @KafkaClient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.producer.ProducerConfig
+
+@KafkaClient(
+    id = "product-client",
+    acks = KafkaClient.Acknowledge.ALL,
+    properties = [Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")]
+)
+interface ProductClient {
+    // define client API
 }</code></pre>
 </div>
 </div>
