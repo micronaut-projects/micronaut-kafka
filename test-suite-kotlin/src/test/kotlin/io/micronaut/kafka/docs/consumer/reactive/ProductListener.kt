@@ -13,7 +13,7 @@ class ProductListener {
 
     // tag::method[]
     @Topic("reactive-products")
-    fun receive(@KafkaKey brand: String?,  // <1>
+    fun receive(@KafkaKey brand: String,  // <1>
         productFlowable: Mono<Product>): Mono<Product> { // <2>
         return productFlowable.doOnSuccess { (name): Product ->
             println("Got Product - $name by $brand") // <3>
@@ -24,7 +24,7 @@ class ProductListener {
     // tag::blocking[]
     @Blocking
     @Topic("reactive-products")
-    fun receiveBlocking(@KafkaKey brand: String?, productFlowable: Mono<Product>): Mono<Product> {
+    fun receiveBlocking(@KafkaKey brand: String, productFlowable: Mono<Product>): Mono<Product> {
         return productFlowable.doOnSuccess { (name): Product ->
             println("Got Product - $name by $brand")
         }
