@@ -121,11 +121,21 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>6.3</strong><span>Commiting Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>6.4</strong><span>Kafka Batch Processing</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSeek"><a href="#kafkaSeek"><strong>6.4</strong><span>Assigning Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>6.5</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsToAConsumerBean"><a href="#manuallyAssigningOffsetsToAConsumerBean"><strong>6.4.1</strong><span>Manually Assigning Offsets to a Consumer Bean</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>6.6</strong><span>Handling Consumer Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manualOffsetsWithMultipleTopics"><a href="#manualOffsetsWithMultipleTopics"><strong>6.4.2</strong><span>Manual Offsets with Multiple Topics</span></a></div>
+        
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsFromAConsumerMethod"><a href="#manuallyAssigningOffsetsFromAConsumerMethod"><strong>6.4.3</strong><span>Manually Assigning Offsets from a Consumer Method</span></a></div>
+        
+        <div class="toc-item" style="margin-left:20px" id="toc-item-creatingKafkaSeekOperations"><a href="#creatingKafkaSeekOperations"><strong>6.4.4</strong><span>Creating Kafka Seek Operations</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>6.5</strong><span>Kafka Batch Processing</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>6.6</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>6.7</strong><span>Handling Consumer Exceptions</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
         
@@ -2239,8 +2249,27 @@ void receive(Product product,
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_manually_assigning_offsets_to_a_consumer_bean">Manually Assigning Offsets to a Consumer Bean</h3>
+
+<h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>6.4 Assigning Kafka Offsets</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSeek.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+
+
+<h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>6.4.1 Manually Assigning Offsets to a Consumer Bean</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsToAConsumerBean.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
 <div class="paragraph">
 <p>Sometimes you may wish to control exactly the position you wish to resume consuming messages from.</p>
 </div>
@@ -2248,48 +2277,119 @@ void receive(Product product,
 <p>For example if you store offsets in a database you may wish to read the offsets from the database when the consumer starts and start reading from the position stored in the database.</p>
 </div>
 <div class="paragraph">
-<p>To support this use case your consumer bean can implement the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html">ConsumerRebalanceListener</a> and <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> interfaces:</p>
+<p>To support this use case your consumer bean can implement the <a href="../api/io/micronaut/configuration/kafka/ConsumerSeekAware.html">ConsumerSeekAware</a> interface:</p>
 </div>
-<div class="listingblock">
-<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.ConsumerAware;
-import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.Topic;
-import io.micronaut.configuration.kafka.docs.consumer.config.Product;
-import io.micronaut.core.annotation.NonNull;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
-import org.apache.kafka.common.TopicPartition;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.aware;
 
-import java.util.Collection;
+import io.micronaut.configuration.kafka.ConsumerSeekAware;
+import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.seek.*;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.kafka.docs.Product;
+import org.apache.kafka.common.TopicPartition;
+import java.util.*;
 
 @KafkaListener
-public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
+@Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
+public class ProductListener implements ConsumerSeekAware { // <b class="conum">(1)</b>
 
-    private Consumer consumer;
+    List&lt;Product&gt; processed = new ArrayList&lt;&gt;();
 
-    @Override
-    public void setKafkaConsumer(@NonNull Consumer consumer) { <i class="conum" data-value="1"></i><b>(1)</b>
-        this.consumer = consumer;
+    public ProductListener(ProductListenerConfiguration config) {
+        // ...
     }
 
-    @Topic("awesome-products")
+    @Topic("wonderful-products")
     void receive(Product product) {
-        // process product
+        processed.add(product);
     }
 
     @Override
-    public void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { <i class="conum" data-value="2"></i><b>(2)</b>
+    public void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(2)</b>
         // save offsets here
     }
 
     @Override
-    public void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions) { <i class="conum" data-value="3"></i><b>(3)</b>
+    public void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions, KafkaSeeker seeker) { // <b class="conum">(3)</b>
         // seek to offset here
-        for (TopicPartition partition : partitions) {
-            consumer.seek(partition, 1);
-        }
+        partitions.stream().map(tp -&gt; KafkaSeekOperation.seek(tp, 1)).forEach(seeker::perform);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs.seek.aware
+
+import io.micronaut.configuration.kafka.ConsumerSeekAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener
+@Requires(property = "spec.name", value = "ConsumerSeekAwareSpec")
+class ProductListener implements ConsumerSeekAware { // <b class="conum">(1)</b>
+
+    List&lt;Product&gt; processed = []
+
+    ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Topic("wonderful-products")
+    void receive(Product product) {
+        processed &lt;&lt; product
+    }
+
+    @Override
+    void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    @Override
+    void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions, KafkaSeeker seeker) { // <b class="conum">(3)</b>
+        // seek to offset here
+        partitions.collect { KafkaSeekOperation.seek(it, 1) }.each(seeker.&amp;perform)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.aware
+
+import io.micronaut.configuration.kafka.ConsumerSeekAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener
+@Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
+class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerSeekAware { // <b class="conum">(1)</b>
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+
+    @Topic("wonderful-products")
+    fun receive(product: Product) {
+        processed.add(product)
+    }
+
+    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;, seeker: KafkaSeeker) { // <b class="conum">(3)</b>
+        // seek to offset here
+        partitions.stream().map { tp -&gt; KafkaSeekOperation.seek(tp, 1) }.forEach(seeker::perform)
     }
 }</code></pre>
 </div>
@@ -2298,7 +2398,7 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>setKafkaConsumer</code> of the <a href="../api/io/micronaut/configuration/kafka/KafkaConsumerAware.html">KafkaConsumerAware</a> allows access to the underlying producer</td>
+<td>Implement the interface <code>ConsumerSeekAware</code></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -2310,9 +2410,187 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
 </tr>
 </table>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<a href="../api/io/micronaut/configuration/kafka/ConsumerSeekAware.html">ConsumerSeekAware</a> provides a convenient <a href="../api/io/micronaut/configuration/kafka/seek/KafkaSeeker.html">KafkaSeeker</a> object that can be used to perform <a href="../api/io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html">KafkaSeekOperation</a>s immediately on the underlying consumer.
+</td>
+</tr>
+</table>
 </div>
-<div class="sect2">
-<h3 id="_manual_offsets_with_multiple_topics">Manual Offsets with Multiple Topics</h3>
+<div class="paragraph">
+<p>Alternatively, when more fine-grained access to the Kafka consumer is required, your consumer bean can instead implement the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html">ConsumerRebalanceListener</a> and <a href="../api/io/micronaut/configuration/kafka/ConsumerAware.html">ConsumerAware</a> interfaces:</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.rebalance;
+
+import io.micronaut.configuration.kafka.ConsumerAware;
+import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.kafka.docs.Product;
+import io.micronaut.core.annotation.NonNull;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
+import java.util.*;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
+public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
+
+    List&lt;Product&gt; processed = new ArrayList&lt;&gt;();
+    private Consumer consumer;
+
+    public ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Override
+    public void setKafkaConsumer(@NonNull Consumer consumer) { // <b class="conum">(1)</b>
+        this.consumer = consumer;
+    }
+
+    @Topic("awesome-products")
+    void receive(Product product) {
+        processed.add(product);
+    }
+
+    @Override
+    public void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    @Override
+    public void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(3)</b>
+        // seek to offset here
+        for (TopicPartition partition : partitions) {
+            consumer.seek(partition, 1);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs.seek.rebalance
+
+import io.micronaut.configuration.kafka.ConsumerAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.core.annotation.NonNull
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.*
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerSpec")
+class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
+
+    List&lt;Product&gt; processed = []
+    private Consumer consumer
+
+    ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Override
+    void setKafkaConsumer(@NonNull Consumer consumer) { // <b class="conum">(1)</b>
+        this.consumer = consumer
+    }
+
+    @Topic("awesome-products")
+    void receive(Product product) {
+        processed &lt;&lt; product
+    }
+
+    @Override
+    void onPartitionsRevoked(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    @Override
+    void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions) { // <b class="conum">(3)</b>
+        // seek to offset here
+        for (TopicPartition partition : partitions) {
+            consumer.seek(partition, 1)
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.rebalance
+
+import io.micronaut.configuration.kafka.ConsumerAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.*
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
+class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerRebalanceListener, ConsumerAware&lt;Any?, Any?&gt; {
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+    private var consumer: Consumer&lt;*, *&gt;? = null
+
+    override fun setKafkaConsumer(consumer: Consumer&lt;Any?, Any?&gt;?) { // <b class="conum">(1)</b>
+        this.consumer = consumer
+    }
+
+    @Topic("awesome-products")
+    fun receive(product: Product) {
+        processed.add(product)
+    }
+
+    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(3)</b>
+        // seek to offset here
+        for (partition in partitions) {
+            consumer!!.seek(partition, 1)
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>setKafkaConsumer</code> of the <a href="../api/io/micronaut/configuration/kafka/ConsumerAware.html">ConsumerAware</a> allows access to the underlying consumer</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>onPartitionsRevoked</code> can be used to save offsets</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>onPartitionsAssigned</code> can use used to read offsets and seek to a specific position. In this trivial example we just seek to the offset 1 (skipping the first record).</td>
+</tr>
+</table>
+</div>
+
+<h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>6.4.2 Manual Offsets with Multiple Topics</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSeek/manualOffsetsWithMultipleTopics.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
 <div class="paragraph">
 <p>It is possible for a single <code>@KafkaListener</code> bean to represent multiple consumers. If you have more than one method annotated with <code>@Topic</code> then <code>setKafkaConsumer</code> will be called multiple times for each backing consumer.</p>
 </div>
@@ -2331,9 +2609,173 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 </tr>
 </table>
 </div>
+
+<h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>6.4.3 Manually Assigning Offsets from a Consumer Method</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsFromAConsumerMethod.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
 </div>
 
-<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>6.4 Kafka Batch Processing</h2>
+
+<div class="paragraph">
+<p>There may be some scenarios where you realize you need to <code>seek</code> to a different offset while consuming another one.</p>
+</div>
+<div class="paragraph">
+<p>To support this use case, your consumer method can receive a <a href="../api/io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html">KafkaSeekOperations</a> instance as a parameter:</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.ops;
+
+import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.seek.*;
+import io.micronaut.context.annotation.*;
+import io.micronaut.kafka.docs.Product;
+import org.apache.kafka.common.TopicPartition;
+import java.util.*;
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = @Property(name = "max.poll.records", value = "1"))
+@Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
+public class ProductListener {
+
+    List&lt;Product&gt; processed = new ArrayList&lt;&gt;();
+
+    public ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Topic("amazing-products")
+    void receive(Product product, KafkaSeekOperations ops) { // <b class="conum">(1)</b>
+        processed.add(product);
+        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("amazing-products", 0))); // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs.seek.ops
+
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.*
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = @Property(name = "max.poll.records", value = "1"))
+@Requires(property = "spec.name", value = "KafkaSeekOperationsSpec")
+class ProductListener {
+
+    List&lt;Product&gt; processed = []
+
+    ProductListener(ProductListenerConfiguration config) {
+        // ...
+    }
+
+    @Topic("amazing-products")
+    void receive(Product product, KafkaSeekOperations ops) { // <b class="conum">(1)</b>
+        processed &lt;&lt; product
+        ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("amazing-products", 0))); // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.ops
+
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.*
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = [Property(name = "max.poll.records", value = "1")])
+@Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
+class ProductListener constructor(config: ProductListenerConfiguration) {
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+
+    @Topic("amazing-products")
+    fun receive(product: Product, ops: KafkaSeekOperations) { // <b class="conum">(1)</b>
+        processed.add(product)
+        ops.defer(KafkaSeekOperation.seekToBeginning(TopicPartition("amazing-products", 0))) // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>An instance of <a href="../api/io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html">KafkaSeekOperations</a> will be injected to the method</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Any number of <code>seek</code> operations can be deferred. In this trivial example we just seek to the end of the partition.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>seek</code> operations will be performed by Micronaut automatically, when the consumer method completes successfully, possibly after committing offsets via <code>OffsetStrategy.AUTO</code>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+These operations determine the next offset retrieved by <code>poll</code>. Take into account that, even if the <code>seek</code> operation performs successfully, your consumer method may keep receiving records that were cached by the previous call. You can configure <code>max.poll.records</code> to control the maximum number of records returned by a single call to <code>poll</code>.
+</td>
+</tr>
+</table>
+</div>
+
+<h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>6.4.4 Creating Kafka Seek Operations</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSeek/creatingKafkaSeekOperations.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The interface KafkaSeekOperation.<a href="../api/io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html">KafkaSeekOperation</a> provides several static methods to create <code>seek</code> operations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>seek</code>: Creates an absolute seek operation.</p>
+</li>
+<li>
+<p><code>seekRelativeToBeginning</code>: Creates a seek operation relative to the beginning.</p>
+</li>
+<li>
+<p><code>seekToBeginning</code>: Creates a seek to the beginning operation.</p>
+</li>
+<li>
+<p><code>seekRelativeToEnd</code>: Creates a seek operation relative to the end.</p>
+</li>
+<li>
+<p><code>seekToEnd</code>: Creates a seek to the end operation.</p>
+</li>
+<li>
+<p><code>seekForward</code>: Creates a forward seek operation.</p>
+</li>
+<li>
+<p><code>seekBackward</code>: Creates a backward seek operation.</p>
+</li>
+<li>
+<p><code>seekToTimestamp</code>: Creates a seek to the timestamp operation.</p>
+</li>
+</ul>
+</div>
+
+<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>6.5 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
@@ -2604,7 +3046,7 @@ fun receiveFlux(books: Flux&lt;Book&gt;): Flux&lt;Book&gt; {
 </div>
 </div>
 
-<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>6.5 Forwarding Messages with @SendTo</h2>
+<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>6.6 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
@@ -2742,7 +3184,7 @@ public class WordCounter {
 </table>
 </div>
 
-<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>6.6 Handling Consumer Exceptions</h2>
+<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>6.7 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>

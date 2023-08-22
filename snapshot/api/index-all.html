@@ -53,6 +53,10 @@ loadScripts(document, 'script');</script>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#ABSOLUTE" class="member-name-link">ABSOLUTE</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset is absolute.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.event">AbstractKafkaApplicationEvent</a>&lt;<a href="io/micronaut/configuration/kafka/event/AbstractKafkaApplicationEvent.html" title="type parameter in AbstractKafkaApplicationEvent">T</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/event/package-summary.html">io.micronaut.configuration.kafka.event</a></dt>
 <dd>
 <div class="block">Abstract base class for all kafka application events.</div>
@@ -180,6 +184,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#BACKWARD" class="member-name-link">BACKWARD</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset goes backward, relative to the current position.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html#batch()" class="member-name-link">batch()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaClient</a></dt>
 <dd>
 <div class="block">By default when specifying an array or List the object will be serializes to a JSON array.</div>
@@ -203,6 +211,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html#%3Cinit%3E(org.apache.kafka.streams.KafkaStreams,org.apache.kafka.streams.kstream.KStream%5B%5D)" class="member-name-link">BeforeKafkaStreamStart(KafkaStreams, KStream&lt;?, ?&gt;[])</a> - Constructor for class io.micronaut.configuration.kafka.streams.event.<a href="io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html" title="class in io.micronaut.configuration.kafka.streams.event">BeforeKafkaStreamStart</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#BEGINNING" class="member-name-link">BEGINNING</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset goes forward, relative to the beginning of the partition.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html#bind(io.micronaut.core.convert.ArgumentConversionContext,org.apache.kafka.clients.consumer.ConsumerRecord)" class="member-name-link">bind(ArgumentConversionContext&lt;MessageHeaders&gt;, ConsumerRecord&lt;?, ?&gt;)</a> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/KafkaHeadersBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaHeadersBinder</a></dt>
 <dd>&nbsp;</dd>
@@ -342,6 +354,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">A registry for created Kafka consumers.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerSeekAware</a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">Interface for <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> instances to implement if they wish to perform
+ <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> when the set of partitions assigned to the
+ <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a> changes.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html#convert(org.apache.kafka.common.header.Header,java.lang.Class,io.micronaut.core.convert.ConversionContext)" class="member-name-link">convert(Header, Class&lt;Object&gt;, ConversionContext)</a> - Method in class io.micronaut.configuration.kafka.convert.<a href="io/micronaut/configuration/kafka/convert/KafkaHeaderConverter.html" title="class in io.micronaut.configuration.kafka.convert">KafkaHeaderConverter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html#create(org.apache.kafka.common.ClusterResourceListener...)" class="member-name-link">create(ClusterResourceListener...)</a> - Method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/DefaultNetworkClientCreator.html" title="class in io.micronaut.configuration.kafka.health">DefaultNetworkClientCreator</a></dt>
@@ -476,6 +494,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html#%3Cinit%3E()" class="member-name-link">DefaultProducerFactory()</a> - Constructor for class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/DefaultProducerFactory.html" title="class in io.micronaut.configuration.kafka">DefaultProducerFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html#defer(io.micronaut.configuration.kafka.seek.KafkaSeekOperation)" class="member-name-link">defer(KafkaSeekOperation)</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperations</a></dt>
+<dd>
+<div class="block">Adds a <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>KafkaSeekOperation</code></a> to the list.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserialize(java.lang.String,byte%5B%5D)" class="member-name-link">deserialize(String, byte[])</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserializer()" class="member-name-link">deserializer()</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
@@ -499,6 +521,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/health/KafkaStreamsHealth.html#ENABLED_PROPERTY" class="member-name-link">ENABLED_PROPERTY</a> - Static variable in class io.micronaut.configuration.kafka.streams.health.<a href="io/micronaut/configuration/kafka/streams/health/KafkaStreamsHealth.html" title="class in io.micronaut.configuration.kafka.streams.health">KafkaStreamsHealth</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#END" class="member-name-link">END</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset goes backward, relative to the end of the partition.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#errorStrategy()" class="member-name-link">errorStrategy()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>
 <div class="block">Setting the error strategy allows you to resume at the next offset
@@ -531,6 +557,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html#findArgumentBinder(io.micronaut.core.type.Argument)" class="member-name-link">findArgumentBinder(Argument&lt;T&gt;)</a> - Method in class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind">ConsumerRecordBinderRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#FORWARD" class="member-name-link">FORWARD</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset goes forward, relative to the current position.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html#fromKafkaFuture(java.util.function.Supplier)" class="member-name-link">fromKafkaFuture(Supplier&lt;KafkaFuture&lt;T&gt;&gt;)</a> - Static method in class io.micronaut.configuration.kafka.reactor.<a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor">KafkaReactorUtil</a></dt>
 <dd>
 <div class="block">Factory for creating Mono instances from Kafka Future instances.</div>
@@ -771,6 +801,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Contains classes specific to capturing Kafka metric builders.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/reactor/package-summary.html">io.micronaut.configuration.kafka.reactor</a> - package io.micronaut.configuration.kafka.reactor</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a> - package io.micronaut.configuration.kafka.seek</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/package-summary.html">io.micronaut.configuration.kafka.serde</a> - package io.micronaut.configuration.kafka.serde</dt>
 <dd>
@@ -1066,6 +1098,23 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html#%3Cinit%3E()" class="member-name-link">KafkaReactorUtil()</a> - Constructor for class io.micronaut.configuration.kafka.reactor.<a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor">KafkaReactorUtil</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a> - Interface in <a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a></dt>
+<dd>
+<div class="block">Performs <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> on a target consumer.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a> - Interface in <a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a></dt>
+<dd>
+<div class="block">Represents a <code>seek</code> operation that may be performed on a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a> - Enum Class in <a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a></dt>
+<dd>
+<div class="block">Determines the interpretation of the <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offset()"><code>KafkaSeekOperation.offset()</code></a> value.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperations</a> - Interface in <a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a></dt>
+<dd>
+<div class="block">Defines an interface that can be injected into <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that
+ <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> can be eventually performed on a consumer.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="type parameter in KafkaStreamsConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="type parameter in KafkaStreamsConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/streams/package-summary.html">io.micronaut.configuration.kafka.streams</a></dt>
 <dd>
 <div class="block">The default configuration passed to <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a>.</div>
@@ -1157,6 +1206,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Method for creating a new builder class.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html#newInstance()" class="member-name-link">newInstance()</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperations</a></dt>
+<dd>
+<div class="block">Creates a new <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" title="interface in io.micronaut.configuration.kafka.seek"><code>KafkaSeekOperations</code></a> instance.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html#newInstance(org.apache.kafka.clients.consumer.Consumer)" class="member-name-link">newInstance(Consumer&lt;?, ?&gt;)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a></dt>
+<dd>
+<div class="block">Creates a new <a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek"><code>KafkaSeeker</code></a> with a given target <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#NODE_ID_TAG" class="member-name-link">NODE_ID_TAG</a> - Static variable in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#NONE" class="member-name-link">NONE</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
@@ -1175,6 +1232,8 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offset()" class="member-name-link">offset()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#offsetReset()" class="member-name-link">offsetReset()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a> - Enum Class in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
@@ -1189,6 +1248,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">An enum representing different strategies for committing offsets to Kafka when using <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offsetType()" class="member-name-link">offsetType()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#onCreated(io.micronaut.context.event.BeanCreatedEvent)" class="member-name-link">onCreated(BeanCreatedEvent&lt;AbstractKafkaConsumerConfiguration&gt;)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#onCreated(io.micronaut.context.event.BeanCreatedEvent)" class="member-name-link">onCreated(BeanCreatedEvent&lt;AbstractKafkaProducerConfiguration&gt;)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
@@ -1203,11 +1264,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Wait for the leader to acknowledge.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html#onPartitionsAssigned(java.util.Collection,io.micronaut.configuration.kafka.seek.KafkaSeeker)" class="member-name-link">onPartitionsAssigned(Collection&lt;TopicPartition&gt;, KafkaSeeker)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html" title="interface in io.micronaut.configuration.kafka">ConsumerSeekAware</a></dt>
+<dd>
+<div class="block">A callback method the user can implement to provide handling of customized offsets
+ on completion of a successful partition re-assignment.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html#onPartitionsLost(java.util.Collection)" class="member-name-link">onPartitionsLost(Collection&lt;TopicPartition&gt;)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html" title="interface in io.micronaut.configuration.kafka">ConsumerSeekAware</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html#onPartitionsRevoked(java.util.Collection)" class="member-name-link">onPartitionsRevoked(Collection&lt;TopicPartition&gt;)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerSeekAware.html" title="interface in io.micronaut.configuration.kafka">ConsumerSeekAware</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#onUpdate(org.apache.kafka.common.ClusterResource)" class="member-name-link">onUpdate(ClusterResource)</a> - Method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#partition()" class="member-name-link">partition()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#partition(java.lang.Integer)" class="member-name-link">partition(Integer)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#PARTITION_TAG" class="member-name-link">PARTITION_TAG</a> - Static variable in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
@@ -1221,6 +1293,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#pause(java.lang.String,java.util.Collection)" class="member-name-link">pause(String, Collection&lt;TopicPartition&gt;)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
 <dd>
 <div class="block">Pause the consumer for the given ID to consume from the given topic partitions.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html#perform(io.micronaut.configuration.kafka.seek.KafkaSeekOperation)" class="member-name-link">perform(KafkaSeekOperation)</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a></dt>
+<dd>
+<div class="block">Performs a kafka seek operation immediately.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html#pickDeserializer(io.micronaut.core.type.Argument)" class="member-name-link">pickDeserializer(Argument&lt;T&gt;)</a> - Method in interface io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a></dt>
 <dd>
@@ -1346,9 +1422,53 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seek(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seek(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates an absolute seek operation.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekBackward(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seekBackward(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a backward seek operation.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekForward(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seekForward(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a forward seek operation.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html#seekPastDeserializationError(org.apache.kafka.common.errors.SerializationException,java.lang.Object,org.apache.kafka.clients.consumer.Consumer)" class="member-name-link">seekPastDeserializationError(SerializationException, Object, Consumer&lt;?, ?&gt;)</a> - Method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions">DefaultKafkaListenerExceptionHandler</a></dt>
 <dd>
 <div class="block">Seeks past a serialization exception if an error occurs.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekRelativeToBeginning(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seekRelativeToBeginning(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a seek operation relative to the beginning.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekRelativeToEnd(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seekRelativeToEnd(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a seek operation relative to the end.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToBeginning(java.util.Collection)" class="member-name-link">seekToBeginning(Collection&lt;TopicPartition&gt;)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a list of seek to the beginning operations.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToBeginning(org.apache.kafka.common.TopicPartition)" class="member-name-link">seekToBeginning(TopicPartition)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a seek to the beginning operation.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToEnd(java.util.Collection)" class="member-name-link">seekToEnd(Collection&lt;TopicPartition&gt;)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a list of seek to the end operations.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToEnd(org.apache.kafka.common.TopicPartition)" class="member-name-link">seekToEnd(TopicPartition)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a seek to the end operation.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToTimestamp(java.util.Collection,long)" class="member-name-link">seekToTimestamp(Collection&lt;TopicPartition&gt;, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a list of seek to the timestamp operations.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#seekToTimestamp(org.apache.kafka.common.TopicPartition,long)" class="member-name-link">seekToTimestamp(TopicPartition, long)</a> - Static method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>
+<div class="block">Creates a seek to the timestamp operation.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SEND_TO_TRANSACTION" class="member-name-link">SEND_TO_TRANSACTION</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></dt>
 <dd>
@@ -1449,10 +1569,16 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#timestamp(java.lang.Long)" class="member-name-link">timestamp(Long)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#TIMESTAMP" class="member-name-link">TIMESTAMP</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">The offset represents a Kafka timestamp.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html#toKafkaProperties(io.micronaut.context.env.Environment,java.util.Map)" class="member-name-link">toKafkaProperties(Environment, Map&lt;?, ?&gt;)</a> - Static method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></dt>
 <dd>
 <div class="block">Convert the given map of values to kafka properties.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#topic()" class="member-name-link">topic()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#topic(java.lang.String)" class="member-name-link">topic(String)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/Topic.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topic</a> - Annotation Interface in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
@@ -1460,6 +1586,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Method level annotation used to specify which topics should be subscribed to.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#TOPIC_TAG" class="member-name-link">TOPIC_TAG</a> - Static variable in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#topicPartition()" class="member-name-link">topicPartition()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/Topics.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topics</a> - Annotation Interface in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
 <dd>
@@ -1527,6 +1655,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
@@ -1545,6 +1677,11 @@ the order they are declared.</div>
 <dt><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#values()" class="member-name-link">values()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html" title="enum class in io.micronaut.configuration.kafka.metrics.builder">MeterType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
