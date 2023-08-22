@@ -4,13 +4,12 @@ import io.micronaut.configuration.kafka.ConsumerAware
 import io.micronaut.configuration.kafka.annotation.*
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
-import jakarta.inject.Inject
 import org.apache.kafka.clients.consumer.*
 import org.apache.kafka.common.TopicPartition
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST)
 @Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
-class ProductListener @Inject constructor(config: ProductListenerConfiguration) : ConsumerRebalanceListener, ConsumerAware<Any?, Any?> {
+class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerRebalanceListener, ConsumerAware<Any?, Any?> {
 
     var processed: MutableList<Product> = mutableListOf()
     private var consumer: Consumer<*, *>? = null

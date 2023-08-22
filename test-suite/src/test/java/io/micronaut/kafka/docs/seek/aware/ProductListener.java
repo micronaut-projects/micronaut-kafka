@@ -5,7 +5,6 @@ import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.seek.*;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
-import jakarta.inject.Inject;
 import org.apache.kafka.common.TopicPartition;
 import java.util.*;
 
@@ -15,7 +14,6 @@ public class ProductListener implements ConsumerSeekAware { // <1>
 
     List<Product> processed = new ArrayList<>();
 
-    @Inject
     public ProductListener(ProductListenerConfiguration config) {
         // ...
     }
