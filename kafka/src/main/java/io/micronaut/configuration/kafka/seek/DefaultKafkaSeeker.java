@@ -64,7 +64,7 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
             }
             final long offset = offset(operation, tp);
             consumer.seek(tp, Math.max(0, offset));
-            LOG.info("Seek operation succeeded: {} - offset: {}", operation, offset);
+            LOG.debug("Seek operation succeeded: {} - offset: {}", operation, offset);
             return true;
         } catch (Exception e) {
             LOG.error("Seek operation failed: {}", operation, e);
@@ -80,19 +80,19 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
         switch (operation.offsetType()) {
             case FORWARD, BACKWARD -> {
                 // Special case: relative zero-offset
-                LOG.info("Relative zero-offset seek operation dropped: {}", operation);
+                LOG.debug("Relative zero-offset seek operation dropped: {}", operation);
                 return Optional.of(false);
             }
             case BEGINNING -> {
                 // Optimized case: seek to the beginning
                 consumer.seekToBeginning(singletonList(tp));
-                LOG.info("Seek to the beginning operation succeeded: {}-{}", topic, partition);
+                LOG.debug("Seek to the beginning operation succeeded: {}-{}", topic, partition);
                 return Optional.of(true);
             }
             case END -> {
                 // Optimized case: seek to the end
                 consumer.seekToEnd(singletonList(tp));
-                LOG.info("Seek to the end operation succeeded: {}-{}", topic, partition);
+                LOG.debug("Seek to the end operation succeeded: {}-{}", topic, partition);
                 return Optional.of(true);
             }
             default -> {
