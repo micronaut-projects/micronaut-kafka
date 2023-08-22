@@ -3,18 +3,14 @@
 Kafka consumers created with `@KafkaListener` will by default run within a consumer group that is the value of `micronaut.application.name` unless you explicitly specify a value to the `@KafkaListener` annotation. For example:
 
 .Specifying a Consumer Group
-[source,java]
-----
-@KafkaListener("myGroup")
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ConsumerGroupListener[tags=annotation, indent=0]
 
 or
 
 .Specifying a Consumer Group alternative
-[source,java]
-----
-@KafkaListener(groupId="myGroup")
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ConsumerGroupIdListener[tags=annotation, indent=0]
 
 The above examples will run the consumer within a consumer group called `myGroup`.
 In this case, each record will be consumed by one consumer instance of the consumer group.
@@ -24,10 +20,8 @@ TIP: You can make the consumer group configurable using a placeholder: `@KafkaLi
 To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), `uniqueGroupId` can be set to `true`:
 
 .Unique group IDs
-[source,java]
-----
-@KafkaListener(groupId="myGroup", uniqueGroupId=true)
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ConsumerUniqueGroupIdListener[tags=annotation, indent=0]
 
 For more information, see for example https://kafka.apache.org/intro#intro_consumers
 
