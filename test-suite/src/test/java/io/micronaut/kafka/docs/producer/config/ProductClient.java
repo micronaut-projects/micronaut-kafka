@@ -1,11 +1,13 @@
-package io.micronaut.configuration.kafka.docs.producer.config;
+package io.micronaut.kafka.docs.producer.config;
 
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import org.apache.kafka.clients.producer.ProducerConfig;
 // end::imports[]
 
+@Requires(property = "spec.name", value = "ProductClientTest")
 // tag::clazz[]
 @KafkaClient(
     id = "product-client",
@@ -13,5 +15,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
     properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")
 )
 public interface ProductClient {
-// end::clazz[]
+    // define client API
 }
+// end::clazz[]

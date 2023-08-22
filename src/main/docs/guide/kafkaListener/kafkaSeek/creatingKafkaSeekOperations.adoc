@@ -1,0 +1,10 @@
+The interface KafkaSeekOperation.api:configuration.kafka.seek.KafkaSeekOperation[] provides several static methods to create `seek` operations:
+
+* `seek`: Creates an absolute seek operation.
+* `seekRelativeToBeginning`: Creates a seek operation relative to the beginning.
+* `seekToBeginning`: Creates a seek to the beginning operation.
+* `seekRelativeToEnd`: Creates a seek operation relative to the end.
+* `seekToEnd`: Creates a seek to the end operation.
+* `seekForward`: Creates a forward seek operation.
+* `seekBackward`: Creates a backward seek operation.
+* `seekToTimestamp`: Creates a seek to the timestamp operation.
