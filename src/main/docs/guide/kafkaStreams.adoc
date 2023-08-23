@@ -32,18 +32,9 @@ kafka:
 
 You should then define a ann:context.annotation.Factory[] for your streams that defines beans that return a `KStream`. For example to implement the Word Count example from the Kafka Streams documentation:
 
-
 .Kafka Streams Word Count
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=imports, indent=0]
 
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=clazz, indent=0]
-
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=wordCountStream, indent=4]
-
-}
-----
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="imports, clazz, wordCountStream", indent=0]
 
 <1> The input topic
 <2> The output topic
@@ -55,18 +46,14 @@ NOTE: With Kafka streams the key and value `Serdes` (serializer/deserializer) mu
 You can use the ann:configuration.kafka.annotation.KafkaClient[] annotation to send a sentence to be processed by the above stream:
 
 .Defining a Kafka Client
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountClient.java[]
-----
+
+snippet::io.micronaut.kafka.docs.streams.WordCountClient[tags="imports, clazz", indent=0]
 
 You can also define a ann:configuration.kafka.annotation.KafkaListener[] to listen for the result of the word count stream:
 
 .Defining a Kafka Listener
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountListener.java[]
-----
+
+snippet::io.micronaut.kafka.docs.streams.WordCountListener[tags="imports, clazz", indent=0]
 
 == Configuring Kafka Streams
 

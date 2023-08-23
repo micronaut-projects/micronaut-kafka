@@ -17,4 +17,5 @@ dependencies {
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(mnRxjava2.micronaut.rxjava2)
     testImplementation(projects.micronautKafka)
+    testImplementation(projects.micronautKafkaStreams)
 }
