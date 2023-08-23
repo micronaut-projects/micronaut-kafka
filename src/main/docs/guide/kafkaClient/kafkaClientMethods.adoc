@@ -4,11 +4,8 @@ The Kafka key can be specified by providing a parameter annotated with `@KafkaKe
 
 The value to send is resolved by selecting the argument annotated with https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html[@MessageBody], otherwise the first argument with no specific binding annotation is used. For example:
 
-[source,java]
-----
-@Topic("my-products")
-void sendProduct(@KafkaKey String brand, String name);
-----
+
+snippet::io.micronaut.kafka.docs.producer.methods.ProductClient[tags=key,indents=0]
 
 The method above will use the parameter `brand` as the key and the parameter `name` as the value.
 
@@ -16,14 +13,7 @@ The method above will use the parameter `brand` as the key and the parameter `na
 
 There are a number of ways you can include message headers. One way is to annotate an argument with the https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html[@MessageHeader] annotation and include a value when calling the method:
 
-[source,java]
-----
-@Topic("my-products")
-void sendProduct(
-    @KafkaKey String brand,
-    String name,
-    @MessageHeader("My-Header") String myHeader);
-----
+snippet::io.micronaut.kafka.docs.producer.methods.ProductClient[tags=messageheader,indents=0]
 
 The example above will include the value of the `myHeader` argument as a header called `My-Header`.
 
@@ -40,26 +30,14 @@ If the `my.application.token` is not set then an error will occur creating the c
 It is also possible to pass `Collection<Header>` or `Headers` object as method arguments as seen below.
 
 .Collection<Header> Argument
-[source,java]
-----
-@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Collection<Header> headers);
-----
+
+snippet::io.micronaut.kafka.docs.producer.methods.ProductClient[tags=collectionheaders,indents=0]
 
 https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Header.html[Kafka Header Javadocs]
 
 .Headers Argument
-[source,java]
-----
-@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Headers headers);
-----
+
+snippet::io.micronaut.kafka.docs.producer.methods.ProductClient[tags=kafkaheaders,indents=0]
 
 https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Headers.html[Kafka Headers Javadocs]
 
@@ -74,37 +52,19 @@ The following sections cover possible method signatures and behaviour:
 
 ==== Single Value and Return Type
 
-[source,java]
-----
-Single<Book> sendBook(
-    @KafkaKey String author,
-    Single<Book> book
-);
-----
+snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=single,indents=0]
 
 The implementation will return a rx:Single[] that when subscribed to will subscribe to the passed rx:Single[] and send the emitted item as a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
 ==== Flowable Value and Return Type
 
-[source,java]
-----
-Flowable<Book> sendBooks(
-    @KafkaKey String author,
-    Flowable<Book> book
-);
-----
+snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=flowable,indents=0]
 
 The implementation will return a rx:Flowable[] that when subscribed to will subscribe to the passed rx:Flowable[] and for each emitted item will send a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
-==== Flowable Value and Return Type
+==== Flux Value and Return Type
 
-[source,java]
-----
-Flux<RecordMetadata> sendBooks(
-    @KafkaKey String author,
-    Flux<Book> book
-);
-----
+snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=flux,indents=0]
 
 The implementation will return a Reactor `Flux` that when subscribed to will subscribe to the passed `Flux` and for each emitted item will send a `ProducerRecord` emitting the resulting Kafka `RecordMetadata` if successful or an error otherwise.
 
