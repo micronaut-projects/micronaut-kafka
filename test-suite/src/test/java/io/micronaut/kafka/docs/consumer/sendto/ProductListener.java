@@ -5,6 +5,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.kafka.docs.Product;
 import io.micronaut.kafka.docs.consumer.batch.BookListener;
 import io.micronaut.messaging.annotation.SendTo;
 import org.slf4j.Logger;
@@ -22,8 +23,8 @@ public class ProductListener {
     @Topic("awesome-products") // <1>
     @SendTo("product-quantities") // <2>
     public int receive(@KafkaKey String brand, Product product) {
-        LOG.info("Got Product - {} by {}", product.getName(), brand);
-        return product.getQuantity(); // <3>
+        LOG.info("Got Product - {} by {}", product.name(), brand);
+        return product.quantity(); // <3>
     }
     // end::method[]
 
@@ -34,8 +35,8 @@ public class ProductListener {
                                         Mono<Product> productSingle) {
 
         return productSingle.map(product -> {
-            LOG.info("Got Product - {} by {}", product.getName(), brand);
-            return product.getQuantity(); // <3>
+            LOG.info("Got Product - {} by {}", product.name(), brand);
+            return product.quantity(); // <3>
         });
     }
     // end::reactive[]
