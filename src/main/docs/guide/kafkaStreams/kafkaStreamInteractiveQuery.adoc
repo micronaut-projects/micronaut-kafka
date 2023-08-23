@@ -9,7 +9,4 @@ include::{kafkastreams}/InteractiveQueryService.java[tags=getQueryableStore, ind
 
 An example service that wraps the `InteractiveQueryService` is included below.  This is here to illustrate that when calling the `getQueryableStore` method you must provide the store name and preferably the type of key and value you are trying to retrieve.
 
-[source,java]
-----
-include::{testskafkastreams}/wordcount/InteractiveQueryServiceExample.java[]
-----
+snippet::io.micronaut.kafka.docs.streams.InteractiveQueryServiceExample[tags="imports, clazz", indent=0]
