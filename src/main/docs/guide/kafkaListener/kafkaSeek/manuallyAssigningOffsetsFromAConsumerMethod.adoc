@@ -1,0 +1,12 @@
+There may be some scenarios where you realize you need to `seek` to a different offset while consuming another one.
+
+To support this use case, your consumer method can receive a api:configuration.kafka.seek.KafkaSeekOperations[] instance as a parameter:
+
+snippet::io.micronaut.kafka.docs.seek.ops.ProductListener[]
+
+<1> An instance of api:configuration.kafka.seek.KafkaSeekOperations[] will be injected to the method
+<2> Any number of `seek` operations can be deferred. In this trivial example we just seek to the end of the partition.
+
+The `seek` operations will be performed by Micronaut automatically, when the consumer method completes successfully, possibly after committing offsets via `OffsetStrategy.AUTO`.
+
+TIP: These operations determine the next offset retrieved by `poll`. Take into account that, even if the `seek` operation performs successfully, your consumer method may keep receiving records that were cached by the previous call. You can configure `max.poll.records` to control the maximum number of records returned by a single call to `poll`.

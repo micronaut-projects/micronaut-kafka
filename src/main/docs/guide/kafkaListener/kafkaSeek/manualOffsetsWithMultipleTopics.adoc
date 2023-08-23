@@ -1,0 +1,6 @@
+It is possible for a single `@KafkaListener` bean to represent multiple consumers. If you have more than one method annotated with `@Topic` then `setKafkaConsumer` will be called multiple times for each backing consumer.
+
+
+It is recommended in the case of manually seeking offsets that you use a single listener bean per consumer, the alternative is to store an internal `Set` of all consumers associated with a particular listener and manually search for the correct listener in the `onPartitionsAssigned` using the partition assignment data.
+
+WARNING: Not doing so will lead to a `ConcurrentModificationException` error.

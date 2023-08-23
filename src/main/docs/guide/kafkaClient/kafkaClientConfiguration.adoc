@@ -45,14 +45,8 @@ kafka:
 Finally, the ann:configuration.kafka.annotation.KafkaClient[] annotation itself provides a `properties` member that you can use to set producer specific properties:
 
 .Configuring Producer Properties with @KafkaClient
-[source,java]
-----
-include::{testskafka}/producer/config/ProductClient.java[tags=imports, indent=0]
 
-include::{testskafka}/producer/config/ProductClient.java[tags=clazz, indent=0]
-    ...
-}
-----
+snippet::io.micronaut.kafka.docs.producer.config.ProductClient[tags="imports, clazz"]
 
 === @KafkaClient and Serializers
 
