@@ -5,6 +5,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Blocking
+import io.micronaut.kafka.docs.Product
 import reactor.core.publisher.Mono
 
 @Requires(property = "spec.name", value = "ReactiveProductListenerTest")

@@ -8,6 +8,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 // end::imports[]
@@ -27,10 +28,10 @@ class ProductListener {
     @Topic('awesome-products')
     void receive(@KafkaKey String brand,  // <1>
                  Product product, // <2>
-                long offset, // <3>
-                int partition, // <4>
-                String topic, // <5>
-                long timestamp) { // <6>
+                 long offset, // <3>
+                 int partition, // <4>
+                 String topic, // <5>
+                 long timestamp) { // <6>
         log.info("Got Product - {} by {}", product.name, brand)
     }
     // end::method[]
