@@ -10,7 +10,8 @@ import io.micronaut.context.annotation.Requires
 // tag::clazz[]
 @KafkaClient
 interface WordCountClient {
-    @Topic(WordCountStream.INPUT)
+
+    @Topic("streams-plaintext-input")
     fun publishSentence(sentence: String?)
 }
 // tag::clazz[]

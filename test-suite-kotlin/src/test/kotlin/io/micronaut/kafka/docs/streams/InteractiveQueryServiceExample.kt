@@ -22,7 +22,7 @@ class InteractiveQueryServiceExample(private val interactiveQueryService: Intera
      * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
      * @return the Long count of the word in the store
      */
-    fun getWordCount(stateStore: String?, word: String): Long {
+    fun getWordCount(stateStore: String, word: String): Long {
         val queryableStore = interactiveQueryService.getQueryableStore(
             stateStore, QueryableStoreTypes.keyValueStore<String, Long>())
         return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore<String, Long> ->
@@ -36,7 +36,7 @@ class InteractiveQueryServiceExample(private val interactiveQueryService: Intera
      * @param blobName   the key to get, in this case the name of the blob
      * @return the byte[] stored in the state store
      */
-    fun getBytes(stateStore: String?, blobName: String): ByteArray? {
+    fun getBytes(stateStore: String, blobName: String): ByteArray? {
         val queryableStore = interactiveQueryService.getQueryableStore(
             stateStore, QueryableStoreTypes.keyValueStore<String, ByteArray>())
         return queryableStore.map { stringReadOnlyKeyValueStore: ReadOnlyKeyValueStore<String, ByteArray> ->
@@ -50,7 +50,7 @@ class InteractiveQueryServiceExample(private val interactiveQueryService: Intera
      * @param name       the key to get
      * @return the value of type V stored in the state store
      */
-    fun <K, V> getGenericKeyValue(stateStore: String?, name: K): V? {
+    fun <K, V> getGenericKeyValue(stateStore: String, name: K): V {
         val queryableStore = interactiveQueryService.getQueryableStore(
             stateStore, QueryableStoreTypes.keyValueStore<K, V>())
         return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore<K, V> ->

@@ -1,11 +1,7 @@
 When using streams you can set a state store for your stream using a store builder and telling the stream to store its data.  In the above example for the Kafka Streams Word Count, the output is materialized to a named store that can later be retrieved via the Interactive Query Service.  Apache Kafka docs https://kafka.apache.org/10/documentation/streams/developer-guide/interactive-queries.html#querying-local-key-value-stores[available here].
 
-You can inject the `InteractiveQueryService` and use the method `getQueryableStore` to get values from a state store.
+You can inject the api:configuration.kafka.streams.InteractiveQueryService[] and use the method `getQueryableStore(String storeName, QueryableStoreType<T> storeType)` to get values from a state store.
 
-[source,java]
-----
-include::{kafkastreams}/InteractiveQueryService.java[tags=getQueryableStore, indent=0]
-----
 
 An example service that wraps the `InteractiveQueryService` is included below.  This is here to illustrate that when calling the `getQueryableStore` method you must provide the store name and preferably the type of key and value you are trying to retrieve.
 

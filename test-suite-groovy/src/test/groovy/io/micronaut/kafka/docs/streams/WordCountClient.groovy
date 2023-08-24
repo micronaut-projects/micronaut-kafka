@@ -11,7 +11,7 @@ import io.micronaut.context.annotation.Requires
 @KafkaClient
 interface WordCountClient {
 
-    @Topic(WordCountStream.INPUT)
+    @Topic("streams-plaintext-input")
     void publishSentence(String sentence)
 }
 // end::clazz[]

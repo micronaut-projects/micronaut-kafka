@@ -32,8 +32,10 @@ public class InteractiveQueryServiceExample {
      * @return the Long count of the word in the store
      */
     public Long getWordCount(String stateStore, String word) {
-        Optional<ReadOnlyKeyValueStore<String, Long>> queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
-        return queryableStore.map(kvReadOnlyKeyValueStore -> kvReadOnlyKeyValueStore.get(word)).orElse(0L);
+        Optional<ReadOnlyKeyValueStore<String, Long>> queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore ->
+            kvReadOnlyKeyValueStore.get(word)).orElse(0L);
     }
 
     /**
@@ -44,8 +46,10 @@ public class InteractiveQueryServiceExample {
      * @return the byte[] stored in the state store
      */
     public byte[] getBytes(String stateStore, String blobName) {
-        Optional<ReadOnlyKeyValueStore<String, byte[]>> queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.keyValueStore());
-        return queryableStore.map(stringReadOnlyKeyValueStore -> stringReadOnlyKeyValueStore.get(blobName)).orElse(null);
+        Optional<ReadOnlyKeyValueStore<String, byte[]>> queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.keyValueStore());
+        return queryableStore.map(stringReadOnlyKeyValueStore ->
+            stringReadOnlyKeyValueStore.get(blobName)).orElse(null);
     }
 
     /**
@@ -56,8 +60,10 @@ public class InteractiveQueryServiceExample {
      * @return the value of type V stored in the state store
      */
     public <K, V> V getGenericKeyValue(String stateStore, K name) {
-        Optional<ReadOnlyKeyValueStore<K, V>> queryableStore = interactiveQueryService.getQueryableStore(stateStore, QueryableStoreTypes.<K, V>keyValueStore());
-        return queryableStore.map(kvReadOnlyKeyValueStore -> kvReadOnlyKeyValueStore.get(name)).orElse(null);
+        Optional<ReadOnlyKeyValueStore<K, V>> queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.<K, V>keyValueStore());
+        return queryableStore.map(kvReadOnlyKeyValueStore ->
+            kvReadOnlyKeyValueStore.get(name)).orElse(null);
     }
 }
 // end::clazz[]

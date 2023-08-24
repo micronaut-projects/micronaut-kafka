@@ -16,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
 class WordCountListener {
 
     private val wordCounts: MutableMap<String, Long> = ConcurrentHashMap()
-    @Topic(WordCountStream.OUTPUT)
+
+    @Topic("streams-wordcount-output")
     fun count(@KafkaKey word: String, count: Long) {
         wordCounts[word] = count
     }

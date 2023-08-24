@@ -24,18 +24,12 @@ import java.util.Properties;
 // tag::clazz[]
 @Factory
 public class WordCountStream {
-
-    public static final String STREAM_WORD_COUNT = "word-count";
-    public static final String INPUT = "streams-plaintext-input"; // <1>
-    public static final String OUTPUT = "streams-wordcount-output"; // <2>
-    public static final String WORD_COUNT_STORE = "word-count-store";
-
 // end::clazz[]
 
     // tag::wordCountStream[]
     @Singleton
-    @Named(STREAM_WORD_COUNT)
-    KStream<String, String> wordCountStream(ConfiguredStreamBuilder builder) { // <3>
+    @Named("word-count")
+    KStream<String, String> wordCountStream(ConfiguredStreamBuilder builder) { // <1>
         // set default serdes
         Properties props = builder.getConfiguration();
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -43,33 +37,28 @@ public class WordCountStream {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
-        KStream<String, String> source = builder.stream(INPUT);
+        KStream<String, String> source = builder.stream("streams-plaintext-input"); // <2>
 
         KTable<String, Long> groupedByWord = source
-                .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-                .groupBy((key, word) -> word, Grouped.with(Serdes.String(), Serdes.String()))
-                //Store the result in a store for lookup later
-                .count(Materialized.as(WORD_COUNT_STORE)); // <4>
+            .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
+            .groupBy((key, word) -> word, Grouped.with(Serdes.String(), Serdes.String()))
+            //Store the result in a store for lookup later
+            .count(Materialized.as("word-count-store")); // <3>
 
         groupedByWord
-                //convert to stream
-                .toStream()
-                //send to output using specific serdes
-                .to(OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+            //convert to stream
+            .toStream()
+            //send to output using specific serdes
+            .to("streams-wordcount-output", Produced.with(Serdes.String(), Serdes.Long())); // <4>
 
         return source;
     }
     // end::wordCountStream[]
 
     // tag::namedStream[]
-    public static final String MY_STREAM = "my-stream";
-    public static final String NAMED_WORD_COUNT_INPUT = "named-word-count-input";
-    public static final String NAMED_WORD_COUNT_OUTPUT = "named-word-count-output";
-
     @Singleton
-    @Named(MY_STREAM)
-    KStream<String, String> myStream(
-            @Named(MY_STREAM) ConfiguredStreamBuilder builder) {
+    @Named("my-stream")
+    KStream<String, String> myStream(@Named("my-stream") ConfiguredStreamBuilder builder) {
 
         // end::namedStream[]
         // set default serdes
@@ -79,14 +68,22 @@ public class WordCountStream {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500");
 
-        KStream<String, String> source = builder.stream(NAMED_WORD_COUNT_INPUT);
+        KStream<String, String> source = builder.stream("named-word-count-input");
         KTable<String, Long> counts = source
-                .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
-                .groupBy((key, value) -> value)
-                .count();
+            .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split(" ")))
+            .groupBy((key, value) -> value)
+            .count();
 
         // need to override value serde to Long type
-        counts.toStream().to(NAMED_WORD_COUNT_OUTPUT, Produced.with(Serdes.String(), Serdes.Long()));
+        counts.toStream().to("named-word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
         return source;
     }
+
+    // tag::myOtherStream[]
+    @Singleton
+    @Named("my-other-stream")
+    KStream<String, String> myOtherKStream(@Named("my-other-stream") ConfiguredStreamBuilder builder)  {
+        return builder.stream("my-other-stream");
+    }
+    // end::myOtherStream[]
 }

@@ -18,7 +18,7 @@ class WordCountListener {
 
     private final Map<String, Long> wordCounts = new ConcurrentHashMap<>()
 
-    @Topic(WordCountStream.OUTPUT)
+    @Topic("streams-wordcount-output")
     void count(@KafkaKey String word, long count) {
         wordCounts.put(word, count)
     }
