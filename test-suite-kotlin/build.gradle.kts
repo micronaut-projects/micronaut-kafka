@@ -1,12 +1,13 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    id("org.jetbrains.kotlin.kapt") version "1.9.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.10"
+    id("org.jetbrains.kotlin.kapt") version "1.9.10"
     id("io.micronaut.internal.build.kafka-testsuite")
 }
 
 dependencies {
     kaptTest(platform(mn.micronaut.core.bom))
     kaptTest(mn.micronaut.inject.java)
+    testImplementation(mn.micronaut.messaging)
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(mnTest.micronaut.test.junit5)
