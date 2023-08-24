@@ -19,10 +19,8 @@ You may wish to scale the number of consumers you have listening on a particular
 Alternatively, you can also scale via threads. By setting the number of `threads` a particular consumer bean will create:
 
 .Scaling with Threads
-[source,java]
-----
-@KafkaListener(groupId="myGroup", threads=10)
-----
+
+snippet::io.micronaut.kafka.docs.consumer.threads.ScalingThreadsListener[tags="annotation", indent=0]
 
 The above example will create 10 link:{kafkaapi}/org/apache/kafka/clients/consumer/KafkaConsumer.html[KafkaConsumer] instances, each running in a unique thread and participating in the `myGroup` consumer group.
 
@@ -31,10 +29,8 @@ NOTE: @KafkaListener beans are by default singleton. When using multiple threads
 You can also make your number of threads configurable by using `threadsValue`:
 
 .Dynamically Configuring Threads
-[source,java]
-----
-@KafkaListener(groupId="myGroup", threadsValue = "${my.thread.count}")
-----
+
+snippet::io.micronaut.kafka.docs.consumer.threads.DynamicThreadsListener[tags="annotation", indent=0]
 
 NOTE: `threads` will be overridden by `threadsValue` if they are both set.
 
