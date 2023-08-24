@@ -42,11 +42,8 @@ There are a couple of ways that can be achieved.
 The simplest way is to define an argument of type api:configuration.kafka.Acknowledgement[] and call the `ack()` method to commit offsets synchronously:
 
 .Committing offsets with `ack()`
-[source,java]
-[source,java]
-----
-include::{testskafka}/consumer/offsets/ack/ProductListener.java[tags=method, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.offsets.ack.ProductListener[tags="clazz"]
 
 <1> Committing offsets automatically is disabled
 <2> The listener method specifies a parameter of type api:configuration.kafka.Acknowledgement[]
@@ -55,12 +52,8 @@ include::{testskafka}/consumer/offsets/ack/ProductListener.java[tags=method, ind
 Alternatively, you an supply a `KafkaConsumer` method argument and then call `commitSync` (or `commitAsync`) yourself when you are ready to commit offsets:
 
 .Committing offsets with the `KafkaConsumer` API
-[source,java]
-----
-include::{testskafka}/consumer/offsets/manual/ProductListener.java[tags=imports, indent=0]
 
-include::{testskafka}/consumer/offsets/manual/ProductListener.java[tags=method, indent=0]
-----
+snippet::io.micronaut.kafka.docs.consumer.offsets.manual.ProductListener[tags="imports,clazz"]
 
 <1> Committing offsets automatically is disabled
 <2> The listener method specifies that it receives the offset data and a `KafkaConsumer`
