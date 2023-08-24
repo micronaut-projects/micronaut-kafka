@@ -632,10 +632,22 @@ class ProductListener {
 <div class="paragraph">
 <p>The value to send is resolved by selecting the argument annotated with <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageBody.html">@MessageBody</a>, otherwise the first argument with no specific binding annotation is used. For example:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-products")
-void sendProduct(@KafkaKey String brand, String name);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-products")
+    void sendProduct(@KafkaKey String brand, String name);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
+    void sendProduct(@KafkaKey String brand, String name)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
+    fun sendProduct(@KafkaKey brand: String, name: String)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -647,13 +659,22 @@ void sendProduct(@KafkaKey String brand, String name);</code></pre>
 <div class="paragraph">
 <p>There are a number of ways you can include message headers. One way is to annotate an argument with the <a href="https://docs.micronaut.io/latest/api/io/micronaut/messaging/annotation/MessageHeader.html">@MessageHeader</a> annotation and include a value when calling the method:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-products")
-void sendProduct(
-    @KafkaKey String brand,
-    String name,
-    @MessageHeader("My-Header") String myHeader);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-products")
+    void sendProduct(@KafkaKey String brand, String name, @MessageHeader("My-Header") String myHeader);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
+    void sendProduct(@KafkaKey String brand, String name, @MessageHeader('My-Header') String myHeader)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
+    fun sendProduct(@KafkaKey brand: String, name: String, @MessageHeader("My-Header") myHeader: String)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -710,27 +731,49 @@ interface ProductClient {
 <div class="paragraph">
 <p>It is also possible to pass <code>Collection&lt;Header&gt;</code> or <code>Headers</code> object as method arguments as seen below.</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Collection&lt;Header&gt; Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Collection&lt;Header&gt; headers);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-bicycles")
+    void sendBicycle(@KafkaKey String brand, String model, Collection&lt;Header&gt; headers);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Collection&lt;Header&gt; Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
+    void sendBicycle(@KafkaKey String brand, String model, Collection&lt;Header&gt; headers)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Collection&lt;Header&gt; Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
+    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Collection&lt;Header&gt;)</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p><a href="https://javadoc.io/doc/org.apache.kafka/kafka-clients/latest/org/apache/kafka/common/header/Header.html">Kafka Header Javadocs</a></p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Headers Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("my-bicycles")
-void sendBicycle(
-    @KafkaKey String brand,
-    String model,
-    Headers headers);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-bicycles")
+    void sendBicycle(@KafkaKey String brand, String model, Headers headers);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Headers Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
+    void sendBicycle(@KafkaKey String brand, String model, Headers headers)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Headers Argument</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
+    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Headers)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -751,12 +794,22 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 <div class="sect3">
 <h4 id="_single_value_and_return_type">Single Value and Return Type</h4>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Single&lt;Book&gt; sendBook(
-    @KafkaKey String author,
-    Single&lt;Book&gt; book
-);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-books")
+    Single&lt;Book&gt; sendBook(@KafkaKey String author, Single&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
+    Single&lt;Book&gt; sendBook(@KafkaKey String author, Single&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
+    fun sendBook(@KafkaKey author: String, book: Single&lt;Book&gt;): Single&lt;Book&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -765,12 +818,22 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 <div class="sect3">
 <h4 id="_flowable_value_and_return_type">Flowable Value and Return Type</h4>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flowable&lt;Book&gt; sendBooks(
-    @KafkaKey String author,
-    Flowable&lt;Book&gt; book
-);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-books")
+    Flowable&lt;Book&gt; sendBooks(@KafkaKey String author, Flowable&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
+    Flowable&lt;Book&gt; sendBooks(@KafkaKey String author, Flowable&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
+    fun sendBooks(@KafkaKey author: String, book: Flowable&lt;Book&gt;): Flowable&lt;Book&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -778,13 +841,23 @@ part of the <code>kafka-clients</code> library:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_flowable_value_and_return_type_2">Flowable Value and Return Type</h4>
-<div class="listingblock">
+<h4 id="_flux_value_and_return_type">Flux Value and Return Type</h4>
+<div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flux&lt;RecordMetadata&gt; sendBooks(
-    @KafkaKey String author,
-    Flux&lt;Book&gt; book
-);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    @Topic("my-books")
+    Flux&lt;RecordMetadata&gt; sendBooks(@KafkaKey String author, Flux&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
+    Flux&lt;RecordMetadata&gt; sendBooks(@KafkaKey String author, Flux&lt;Book&gt; book);</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
+    fun sendBooks(@KafkaKey author: String, book: Flux&lt;Book&gt;): Flux&lt;RecordMetadata&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -881,10 +954,22 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="paragraph">
 <p>To configure different properties for each client, you should set a <code>@KafkaClient</code> id using the annotation:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Using a Client ID</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient("product-client")</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a Client ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient('product-client')</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a Client ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient("product-client")</code></pre>
 </div>
 </div>
 <div class="paragraph">
