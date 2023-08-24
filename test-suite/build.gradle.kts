@@ -6,6 +6,7 @@ plugins {
 dependencies {
     testAnnotationProcessor(platform(mn.micronaut.core.bom))
     testAnnotationProcessor(mn.micronaut.inject.java)
+    testImplementation(mn.micronaut.messaging)
     testImplementation(mnSerde.micronaut.serde.jackson)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(mnTest.micronaut.test.junit5)
