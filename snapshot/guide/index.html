@@ -1752,10 +1752,22 @@ internal class MyTest : AbstractKafkaTest() {
 <div class="paragraph">
 <p>Alternatively, you can also scale via threads. By setting the number of <code>threads</code> a particular consumer bean will create:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Scaling with Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup", threads=10)</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId = "myGroup", threads = 10)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Scaling with Threads</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId='myGroup', threads = 10)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Scaling with Threads</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threads = 10)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1776,10 +1788,22 @@ internal class MyTest : AbstractKafkaTest() {
 <div class="paragraph">
 <p>You can also make your number of threads configurable by using <code>threadsValue</code>:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Dynamically Configuring Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId="myGroup", threadsValue = "${my.thread.count}")</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(groupId = "myGroup", threadsValue = "${my.thread.count}")</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Dynamically Configuring Threads</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', threadsValue = '${my.thread.count}')</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Dynamically Configuring Threads</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threadsValue = "\${my.thread.count}")</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -2338,17 +2362,45 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="paragraph">
 <p>The simplest way is to define an argument of type <a href="../api/io/micronaut/configuration/kafka/Acknowledgement.html">Acknowledgement</a> and call the <code>ack()</code> method to commit offsets synchronously:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with <code>ack()</code></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) <i class="conum" data-value="1"></i><b>(1)</b>
-@Topic("awesome-products")
-void receive(Product product,
-             Acknowledgement acknowledgement) { <i class="conum" data-value="2"></i><b>(2)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+public class ProductListener {
 
-    // process product record
+    @Topic("awesome-products")
+    public void receive(Product product, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+        // process product record
+        acknowledgement.ack(); // <b class="conum">(3)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing offsets with <code>ack()</code></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+class ProductListener {
 
-    acknowledgement.ack(); <i class="conum" data-value="3"></i><b>(3)</b>
+    @Topic('awesome-products')
+    void receive(Product product, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+        // process product record
+        acknowledgement.ack() // <b class="conum">(3)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing offsets with <code>ack()</code></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+class ProductListener {
+
+    @Topic("awesome-products")
+    fun receive(product: Product, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
+        // process product record
+        acknowledgement.ack() // <b class="conum">(3)</b>
+    }
 }</code></pre>
 </div>
 </div>
@@ -2371,12 +2423,13 @@ void receive(Product product,
 <div class="paragraph">
 <p>Alternatively, you an supply a <code>KafkaConsumer</code> method argument and then call <code>commitSync</code> (or <code>commitAsync</code>) yourself when you are ready to commit offsets:</p>
 </div>
-<div class="listingblock">
+<div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
-import io.micronaut.configuration.kafka.docs.consumer.config.Product;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.kafka.docs.Product;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -2386,20 +2439,81 @@ import java.util.Collections;
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST;
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED;
 
-@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) <i class="conum" data-value="1"></i><b>(1)</b>
-@Topic("awesome-products")
-void receive(Product product,
-             long offset,
-             int partition,
-             String topic,
-             Consumer kafkaConsumer) { <i class="conum" data-value="2"></i><b>(2)</b>
-    // process product record
+@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+public class ProductListener {
 
-    // commit offsets
-    kafkaConsumer.commitSync(Collections.singletonMap( <i class="conum" data-value="3"></i><b>(3)</b>
-            new TopicPartition(topic, partition),
-            new OffsetAndMetadata(offset + 1, "my metadata")
-    ));
+    @Topic("awesome-products")
+    public void receive(Product product, long offset, int partition, String topic, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+        // process product record
+
+        // commit offsets
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(3)</b>
+                new TopicPartition(topic, partition),
+                new OffsetAndMetadata(offset + 1, "my metadata")
+        ));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+
+@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+class ProductListener {
+
+    @Topic('awesome-products')
+    void receive(Product product, long offset, int partition, String topic, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+        // process product record
+
+        // commit offsets
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(3)</b>
+                new TopicPartition(topic, partition),
+                new OffsetAndMetadata(offset + 1, 'my metadata')
+        ))
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
+import java.util.*
+
+import io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+
+@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+class ProductListener {
+
+    @Topic("awesome-products")
+    fun receive(product: Product, offset: Long, partition: Int, topic: String, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(2)</b>
+        // process product record
+
+        // commit offsets
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(3)</b>
+                TopicPartition(topic, partition),
+                OffsetAndMetadata(offset + 1, "my metadata")
+            )
+        )
+    }
 }</code></pre>
 </div>
 </div>
