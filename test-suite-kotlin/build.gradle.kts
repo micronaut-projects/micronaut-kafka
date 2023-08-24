@@ -1,6 +1,6 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    id("org.jetbrains.kotlin.kapt") version "1.9.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.10"
+    id("org.jetbrains.kotlin.kapt") version "1.9.10"
     id("io.micronaut.internal.build.kafka-testsuite")
 }
 
