@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class SendToProductListenerTest {
+class SendToProductListenerTest {
 
     @Test
     void testSendProduct() {

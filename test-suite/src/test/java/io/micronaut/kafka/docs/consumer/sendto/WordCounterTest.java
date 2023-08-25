@@ -7,7 +7,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class WordCounterTest {
+class WordCounterTest {
 
     @Test
     void testWordCounter() {
