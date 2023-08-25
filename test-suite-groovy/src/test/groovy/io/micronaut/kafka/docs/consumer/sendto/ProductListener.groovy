@@ -13,12 +13,12 @@ import reactor.core.publisher.Mono
 // end::imports[]
 
 @Slf4j
-@Requires(property = 'spec.name', value = 'ProductListenerTest')
+@Requires(property = 'spec.name', value = 'SendToProductListenerTest')
 @KafkaListener
 class ProductListener {
 
     // tag::method[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     int receive(@KafkaKey String brand, Product product) {
         log.info("Got Product - {} by {}", product.name, brand)
@@ -27,12 +27,12 @@ class ProductListener {
     // end::method[]
 
     // tag::reactive[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     Mono<Integer> receiveProduct(@KafkaKey String brand, Mono<Product> productSingle) {
         productSingle.map(product -> {
             log.info("Got Product - {} by {}", product.name, brand)
-            return product.quantity // <3>
+            product.quantity // <3>
         })
     }
     // end::reactive[]

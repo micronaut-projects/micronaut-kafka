@@ -22,7 +22,7 @@ class ProductListener {
     }
 
     // tag::method[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     fun receive(@KafkaKey brand: String?, product: Product): Int {
         LOG.info("Got Product - {} by {}", product.name, brand)
@@ -31,7 +31,7 @@ class ProductListener {
     // end::method[]
 
     // tag::reactive[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     fun receiveProduct(@KafkaKey brand: String?, productSingle: Mono<Product>): Mono<Int> {
         return productSingle.map(Function<Product, Int> { product: Product ->

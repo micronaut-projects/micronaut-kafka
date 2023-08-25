@@ -14,13 +14,13 @@ import reactor.core.publisher.Mono;
 import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
-@Requires(property = "spec.name", value = "ProductListenerTest")
+@Requires(property = "spec.name", value = "SendToProductListenerTest")
 @KafkaListener
 public class ProductListener {
     private static final Logger LOG = getLogger(BookListener.class);
 
     // tag::method[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     public int receive(@KafkaKey String brand, Product product) {
         LOG.info("Got Product - {} by {}", product.name(), brand);
@@ -29,7 +29,7 @@ public class ProductListener {
     // end::method[]
 
     // tag::reactive[]
-    @Topic("awesome-products") // <1>
+    @Topic("sendto-products") // <1>
     @SendTo("product-quantities") // <2>
     public Mono<Integer> receiveProduct(@KafkaKey String brand,
                                         Mono<Product> productSingle) {
