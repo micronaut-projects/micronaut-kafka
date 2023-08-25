@@ -96,13 +96,13 @@ The above configuration sets the `num.stream.threads` setting of the Kafka `Stre
 
 You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specifically for the above configuration using `jakarta.inject.Named`:
 
-snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="clazz, myOtherStream"]
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="myOtherStream", indent=0]
 
 NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
 
-snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="clazz, namedStream"]
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="namedStream", indent=0]
 
 .Configuring Kafka Streams for testing
 When writing a test without starting the actual Kafka server, you can instruct Micronaut not to start Kafka Streams. To do this create a config file suffixed with an environment name, such as `application-test.yml` and set the `kafka.streams.[STREAM-NAME].start-kafka-streams` to `false`.
