@@ -16,12 +16,12 @@ class ProductListener {
     void receiveMultiTopics(@KafkaKey String brand, String name) {
         log.info("Got Product - {} by {}", name, brand)
     }
-    // tag::multiTopics[]
+    // end::multiTopics[]
 
     // tag::patternTopics[]
     @Topic(patterns='products-\\w+')
     void receivePatternTopics(@KafkaKey String brand, String name) {
         log.info("Got Product - {} by {}", name, brand)
     }
-    // tag::patternTopics[]
+    // end::patternTopics[]
 }

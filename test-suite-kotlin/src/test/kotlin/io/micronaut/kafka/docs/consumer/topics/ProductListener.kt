@@ -14,12 +14,12 @@ class ProductListener {
     fun receiveMultiTopics(@KafkaKey brand: String, name: String) {
         println("Got Product - $name by $brand")
     }
-    // tag::multiTopics[]
+    // end::multiTopics[]
 
     // tag::patternTopics[]
     @Topic(patterns = ["products-\\w+"])
     fun receivePatternTopics(@KafkaKey brand: String, name: String) {
         println("Got Product - $name by $brand")
     }
-    // tag::patternTopics[]
+    // end::patternTopics[]
 }
