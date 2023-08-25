@@ -18,7 +18,7 @@ class ProductListener constructor(config: ProductListenerConfiguration) : Consum
         this.consumer = consumer
     }
 
-    @Topic("awesome-products")
+    @Topic("fantastic-products")
     fun receive(product: Product) {
         processed.add(product)
     }
