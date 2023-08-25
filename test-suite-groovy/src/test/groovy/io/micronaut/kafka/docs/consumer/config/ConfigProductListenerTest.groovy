@@ -15,7 +15,7 @@ class ConfigProductListenerTest extends Specification {
         when:
         Product product = new Product('Blue Trainers', 5)
         ProductClient client = ctx.getBean(ProductClient.class)
-        client.receive('Nike', product)
+        client.send('Nike', product)
 
         then:
         noExceptionThrown()

@@ -10,5 +10,5 @@ import io.micronaut.kafka.docs.Product
 @KafkaClient("product-client")
 interface ProductClient {
     @Topic("awesome-products")
-    fun receive(@KafkaKey brand: String, product: Product)
+    fun send(@KafkaKey brand: String, product: Product)
 }

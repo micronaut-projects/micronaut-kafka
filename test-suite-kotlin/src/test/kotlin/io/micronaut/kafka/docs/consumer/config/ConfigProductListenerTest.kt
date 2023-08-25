@@ -14,7 +14,7 @@ class ConfigProductListenerTest {
         ).use { ctx ->
             val product = Product("Blue Trainers", 5)
             val client = ctx.getBean(ProductClient::class.java)
-            client.receive("Nike", product)
+            client.send("Nike", product)
         }
     }
 }

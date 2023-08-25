@@ -11,5 +11,5 @@ import io.micronaut.kafka.docs.Product;
 public interface ProductClient {
 
     @Topic("awesome-products")
-    void receive(@KafkaKey String brand, Product product);
+    void send(@KafkaKey String brand, Product product);
 }
