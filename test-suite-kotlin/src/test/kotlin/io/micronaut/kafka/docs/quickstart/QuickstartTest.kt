@@ -2,12 +2,13 @@ package io.micronaut.kafka.docs.quickstart
 
 import io.micronaut.context.BeanContext
 import io.micronaut.context.annotation.Property
+import io.micronaut.core.util.StringUtils
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 
 @Property(name = "spec.name", value = "QuickstartTest")
-@Property(name = "kafka.enabled", value = "true")
+@Property(name = "kafka.enabled", value = StringUtils.TRUE)
 @MicronautTest
 internal class QuickstartTest {
 
