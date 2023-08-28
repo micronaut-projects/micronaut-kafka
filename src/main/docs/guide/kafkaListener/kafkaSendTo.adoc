@@ -2,7 +2,7 @@ On any `@KafkaListener` method that returns a value, you can use the https://doc
 
 The key of the original `ConsumerRecord` will be used as the key when forwarding the message.
 
-.Committing offsets with the `KafkaConsumer` API
+.Forwarding with @SendTo
 
 snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=method, indent=0]
 
@@ -13,7 +13,7 @@ snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=method, in
 
 You can also do the same using Reactive programming:
 
-.Committing offsets with the `KafkaConsumer` API
+.Forwarding Reactively with @SendTo
 
 snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=reactive, indent=0]
 
