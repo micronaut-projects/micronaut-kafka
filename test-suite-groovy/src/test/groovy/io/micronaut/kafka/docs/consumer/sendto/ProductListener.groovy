@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
@@ -14,7 +15,7 @@ import reactor.core.publisher.Mono
 
 @Slf4j
 @Requires(property = 'spec.name', value = 'SendToProductListenerTest')
-@KafkaListener
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
 class ProductListener {
 
     // tag::method[]

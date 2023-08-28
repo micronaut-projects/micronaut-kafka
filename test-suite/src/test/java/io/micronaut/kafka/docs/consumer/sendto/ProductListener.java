@@ -3,6 +3,7 @@ package io.micronaut.kafka.docs.consumer.sendto;
 // tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
@@ -15,7 +16,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
 @Requires(property = "spec.name", value = "SendToProductListenerTest")
-@KafkaListener
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
 public class ProductListener {
     private static final Logger LOG = getLogger(BookListener.class);
 

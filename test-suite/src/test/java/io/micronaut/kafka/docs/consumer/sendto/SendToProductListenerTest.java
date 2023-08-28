@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 
 class SendToProductListenerTest {
 
@@ -15,11 +16,14 @@ class SendToProductListenerTest {
         try (ApplicationContext ctx = ApplicationContext.run(
             Map.of("kafka.enabled", "true", "spec.name", "SendToProductListenerTest")
         )) {
-            assertDoesNotThrow(() -> {
-                Product product = new Product("Blue Trainers", 5);
-                ProductClient client = ctx.getBean(ProductClient.class);
-                client.send("Nike", product);
-            });
+            Product product = new Product("Blue Trainers", 5);
+            ProductClient client = ctx.getBean(ProductClient.class);
+            client.send("Nike", product);
+            QuantityListener listener = ctx.getBean(QuantityListener.class);
+            await().atMost(10, SECONDS).until(() ->
+                listener.quantity != null &&
+                listener.quantity == 5
+            );
         }
     }
 }
