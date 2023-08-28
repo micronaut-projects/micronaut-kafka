@@ -44,7 +44,7 @@ class WordCountStream {
                 Grouped.with(Serdes.String(), Serdes.String())
             )
             //Store the result in a store for lookup later
-            .count(Materialized.`as`("word-count-store")) // <3>
+            .count(Materialized.`as`("word-count-store-kotlin")) // <3>
         groupedByWord
             //convert to stream
             .toStream()
