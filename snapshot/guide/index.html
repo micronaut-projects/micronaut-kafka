@@ -153,6 +153,8 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>8.2</strong><span>Kafka Stream Health Checks</span></a></div>
         
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>8.3</strong><span>Handling Uncaught Exceptions</span></a></div>
+        
         <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>9</strong><span>Repository</span></a></div>
         
         </div>
@@ -4445,6 +4447,135 @@ By default, the details visible above are only shown to authenticated users. See
     health:
         streams:
             enabled: false</code></pre>
+</div>
+</div>
+
+<h2 id="kafkaStreamExceptions"><a class="anchor" href="#kafkaStreamExceptions"></a>8.3 Handling Uncaught Exceptions</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaStreams/kafkaStreamExceptions.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>Since version 2.8.0, Kafka allows you to <a href="https://kafka.apache.org/28/javadoc/org/apache/kafka/streams/errors/StreamsUncaughtExceptionHandler.html">handle uncaught exceptions</a> that may be thrown from your streams. This handler must return the action that must be taken, depending on the thrown exception.</p>
+</div>
+<div class="paragraph">
+<p>There are three possible <a href="https://kafka.apache.org/28/javadoc/org/apache/kafka/streams/errors/StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.html">responses</a>: <code>REPLACE_THREAD</code>, <code>SHUTDOWN_CLIENT</code>, or <code>SHUTDOWN_APPLICATION</code>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can find more details about this mechanism <a href="https://developer.confluent.io/tutorials/error-handling/confluent.html">here</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you just want to take the same action every time, you can set the application property <code>kafka.streams.[STREAM-NAME].uncaught-exception-handler</code> to a valid action, such as <code>REPLACE_THREAD</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example in <code>application-test.yml</code>:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.my-stream.uncaught-exception-handler=REPLACE_THREAD</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        my-stream:
+            uncaught-exception-handler: REPLACE_THREAD</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.streams]
+    [kafka.streams.my-stream]
+      uncaught-exception-handler="REPLACE_THREAD"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    myStream {
+      uncaughtExceptionHandler = "REPLACE_THREAD"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      my-stream {
+        uncaught-exception-handler = "REPLACE_THREAD"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "my-stream": {
+        "uncaught-exception-handler": "REPLACE_THREAD"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To implement your own handler, you can listen to the application event <a href="../api/io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html">BeforeKafkaStreamStart</a> and configure the streams with your own business logic:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.event.ApplicationEventListener;
+import jakarta.inject.Singleton;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
+
+@Singleton
+public class MyStreamsUncaughtExceptionHandler
+    implements ApplicationEventListener&lt;BeforeKafkaStreamStart&gt;, StreamsUncaughtExceptionHandler {
+
+    boolean dangerAvoided = false;
+
+    @Override
+    public void onApplicationEvent(BeforeKafkaStreamStart event) {
+        event.getKafkaStreams().setUncaughtExceptionHandler(this);
+    }
+
+    @Override
+    public StreamThreadExceptionResponse handle(Throwable exception) {
+        if (exception.getCause() instanceof MyException) {
+            this.dangerAvoided = true;
+            return StreamThreadExceptionResponse.REPLACE_THREAD;
+        }
+        return StreamThreadExceptionResponse.SHUTDOWN_APPLICATION;
+    }
+}</code></pre>
 </div>
 </div>
 
