@@ -2,13 +2,10 @@ On any `@KafkaListener` method that returns a value, you can use the https://doc
 
 The key of the original `ConsumerRecord` will be used as the key when forwarding the message.
 
-.Committing offsets with the `KafkaConsumer` API
-[source,java]
-----
-include::{testskafka}/consumer/sendto/ProductListener.java[tags=imports, indent=0]
+.Forwarding with @SendTo
 
-include::{testskafka}/consumer/sendto/ProductListener.java[tags=method, indent=0]
-----
+snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=method, indent=0]
+
 
 <1> The topic subscribed to is `awesome-products`
 <2> The topic to send the result to is `product-quantities`
@@ -16,11 +13,9 @@ include::{testskafka}/consumer/sendto/ProductListener.java[tags=method, indent=0
 
 You can also do the same using Reactive programming:
 
-.Committing offsets with the `KafkaConsumer` API
-[source,java]
-----
-include::{testskafka}/consumer/sendto/ProductListener.java[tags=reactive, indent=0]
-----
+.Forwarding Reactively with @SendTo
+
+snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=reactive, indent=0]
 
 <1> The topic subscribed to is `awesome-products`
 <2> The topic to send the result to is `product-quantities`
@@ -31,10 +26,9 @@ In the reactive case the `poll` loop will continue and will not wait for the rec
 To enable transactional sending of the messages you need to define `producerTransactionalId` in `@KafkaListener`.
 
 .Transactional consumer-producer
-[source,java]
-----
-include::{testskafka}/consumer/sendto/WordCounter.java[tags=transactional, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.sendto.WordCounter[tags=transactional, indent=0]
+
 
 <1> The id of the producer to load additional config properties
 <2> The transactional id that is required to enable transactional processing
