@@ -8,6 +8,6 @@ import io.micronaut.kafka.docs.Product
 @Requires(property = "spec.name", value = "ConsumerRebalanceListenerSpec")
 @KafkaClient
 interface ProductClient {
-    @Topic("awesome-products")
+    @Topic("fantastic-products")
     void produce(Product product)
 }

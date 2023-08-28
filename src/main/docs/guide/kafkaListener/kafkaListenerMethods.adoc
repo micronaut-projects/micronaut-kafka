@@ -11,18 +11,14 @@ Care needs to be taken when using ann:configuration.kafka.annotation.Topic[] at 
 You can specify multiple topics to listen for:
 
 .Specifying Multiple Topics
-[source,java]
-----
-@Topic({"fun-products", "awesome-products"})
-----
+
+snippet::io.micronaut.kafka.docs.consumer.topics.ProductListener[tags=multiTopics, indent=0]
 
 You can also specify one or many regular expressions to listen for:
 
 .Using regular expressions to match Topics
-[source,java]
-----
-@Topic(patterns="products-\\w+")
-----
+
+snippet::io.micronaut.kafka.docs.consumer.topics.ProductListener[tags=patternTopics, indent=0]
 
 
 == Available Annotations
@@ -83,10 +79,8 @@ The following table summarizes example parameters and how they related to the `C
 As an example, following listener method will receive all of the above mentioned parameters:
 
 .Specifying Parameters for offset, topic etc.
-[source,java]
-----
-include::{testskafka}/consumer/config/ProductListener.java[tags=method, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ProductListener[tags=method, indent=0]
 
 <1> The Kafka key
 <2> The message body
@@ -102,10 +96,8 @@ If you prefer you can also receive the entire `ConsumerRecord` object being list
 Consider the following example:
 
 .Specifying Parameters for offset, topic etc.
-[source,java]
-----
-include::{testskafka}/consumer/config/ProductListener.java[tags=consumeRecord, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.config.ProductListener[tags=consumeRecord, indent=0]
 
 <1> The method signature accepts a `ConsumerRecord` that specifies a `String` for the key type and a POJO (`Product`) for the value type.
 <2> The `value()` method is used to retrieve the value
@@ -116,10 +108,8 @@ include::{testskafka}/consumer/config/ProductListener.java[tags=consumeRecord, i
 In addition to common Java types and POJOs you can also define listener methods that receive a Reactive type such as a rx:Single[] or a Reactor `Mono`. For example:
 
 .Using Reactive Types
-[source,java]
-----
-include::{testskafka}/consumer/reactive/ProductListener.java[tags=method, indent=0]
-----
+
+snippet::io.micronaut.kafka.docs.consumer.reactive.ProductListener[tags=method, indent=0]
 
 <1> The `@KafkaKey` annotation is used to indicate the key
 <2> A rx:Single[] is used to receive the message body
@@ -132,11 +122,5 @@ The idea here is that you are able to write consumers that don't block, however 
 Alternatively, you can use the https://micronaut-projects.github.io/micronaut-core/latest/api/io/micronaut/core/annotation/Blocking.html[@Blocking] annotation to tell Micronaut to subscribe to the returned reactive type in a blocking manner which will result in blocking the `poll` loop, preventing offsets from being committed automatically:
 
 .Blocking with Reactive Consumers
-[source,java]
-----
-@Blocking
-@Topic("reactive-products")
-public Single<Product> receive(
-    ...
-}
-----
+
+snippet::io.micronaut.kafka.docs.consumer.reactive.ProductListener[tags=blocking, indent=0]

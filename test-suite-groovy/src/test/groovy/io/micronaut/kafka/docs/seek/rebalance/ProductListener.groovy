@@ -24,7 +24,7 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
         this.consumer = consumer
     }
 
-    @Topic("awesome-products")
+    @Topic("fantastic-products")
     void receive(Product product) {
         processed << product
     }
