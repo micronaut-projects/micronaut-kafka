@@ -7,8 +7,11 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
+import io.micronaut.kafka.docs.consumer.topics.ProductListener
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
+
 // end::imports[]
 
 @Requires(property = "spec.name", value = "ConfigProductListenerTest")
@@ -21,6 +24,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 class ProductListener {
 // end::clazz[]
 
+    private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+
     // tag::method[]
     @Topic("awesome-products")
     fun receive(
@@ -31,7 +36,7 @@ class ProductListener {
         topic: String?,  // <5>
         timestamp: Long // <6>
     ) {
-        println("Got Product - $product.name by $brand")
+        LOG.info("Got Product - {} by {}", product.name, brand)
     }
     // end::method[]
 
@@ -40,7 +45,7 @@ class ProductListener {
     fun receive(record: ConsumerRecord<String, Product>) { // <1>
         val name = record.value() // <2>
         val brand = record.key() // <3>
-        println("Got Product - $name by $brand")
+        LOG.info("Got Product - $name by $brand")
     }
     // end::consumeRecord[]
 }
