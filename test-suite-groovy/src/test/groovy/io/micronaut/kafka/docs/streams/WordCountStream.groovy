@@ -54,7 +54,7 @@ class WordCountStream {
     // tag::namedStream[]
     @Singleton
     @Named('my-stream')
-    KStream<String, String> myStream(@Named('my-stream') ConfiguredStreamBuilder builder) {
+    KStream<String, String> myStream(ConfiguredStreamBuilder builder) {
 
         // end::namedStream[]
         // set default serdes
@@ -78,7 +78,7 @@ class WordCountStream {
     // tag::myOtherStream[]
     @Singleton
     @Named('my-other-stream')
-    KStream<String, String> myOtherKStream(@Named('my-other-stream') ConfiguredStreamBuilder builder)  {
+    KStream<String, String> myOtherKStream(ConfiguredStreamBuilder builder)  {
         return builder.stream('my-other-stream')
     }
     // end::myOtherStream[]

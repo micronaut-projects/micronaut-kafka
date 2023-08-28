@@ -55,7 +55,8 @@ public class KafkaTestInitializer implements BootstrapPropertySourceLocator {
     private void createTopics(Set<NewTopic> topicsToCreate) {
         try (AdminClient admin = AdminClient.create(adminProps)) {
             Set<String> existingTopics = admin.listTopics().names().get();
-            Set<NewTopic> newTopics = topicsToCreate.stream().filter(newTopic -> !existingTopics.contains(newTopic.name())).collect(Collectors.toSet());
+            Set<NewTopic> newTopics = topicsToCreate.stream().filter(newTopic ->
+                !existingTopics.contains(newTopic.name())).collect(Collectors.toSet());
             admin.createTopics(newTopics).all().get();
         } catch (ExecutionException | InterruptedException e) {
             throw new IllegalStateException("Failed to initialize test kafka topics", e);
