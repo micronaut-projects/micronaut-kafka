@@ -28,6 +28,8 @@ import jakarta.inject.Singleton;
 import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.processor.internals.DefaultKafkaClientSupplier;
 import org.slf4j.Logger;
@@ -36,8 +38,12 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Arrays.asList;
+import static java.util.function.Predicate.not;
 
 /**
  * A factory that constructs the {@link KafkaStreams} bean.
@@ -51,6 +57,7 @@ public class KafkaStreamsFactory implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsFactory.class);
 
     private static final String START_KAFKA_STREAMS_PROPERTY = "start-kafka-streams";
+    private static final String UNCAUGHT_EXCEPTION_HANDLER_PROPERTY = "uncaught-exception-handler";
 
     private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();
 
@@ -108,6 +115,7 @@ public class KafkaStreamsFactory implements Closeable {
                 builder.getConfiguration(),
                 kafkaClientSupplier
         );
+        makeUncaughtExceptionHandler(builder.getConfiguration()).ifPresent(kafkaStreams::setUncaughtExceptionHandler);
         final String startKafkaStreamsValue = builder.getConfiguration().getProperty(
             START_KAFKA_STREAMS_PROPERTY, Boolean.TRUE.toString());
         final boolean startKafkaStreams = Boolean.parseBoolean(startKafkaStreamsValue);
@@ -158,4 +166,31 @@ public class KafkaStreamsFactory implements Closeable {
         }
     }
 
+    /**
+     * Make an uncaught exception handler for a given kafka streams configuration.
+     *
+     * @param properties The kafka streams configuration.
+     * @return An optional exception handler if {@code uncaught-exception-handler} was configured.
+     */
+    Optional<StreamsUncaughtExceptionHandler> makeUncaughtExceptionHandler(Properties properties) {
+        return Optional.ofNullable(properties.getProperty(UNCAUGHT_EXCEPTION_HANDLER_PROPERTY))
+            .filter(not(String::isBlank))
+            .map(action -> {
+                try {
+                    final StreamThreadExceptionResponse response = StreamThreadExceptionResponse.valueOf(action.toUpperCase());
+                    return exception -> {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Responding with {} to unexpected exception thrown by kafka stream thread", response, exception);
+                        }
+                        return response;
+                    };
+                } catch (IllegalArgumentException e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Ignoring illegal exception handler: {}. Please use one of: {}", action,
+                            asList(StreamThreadExceptionResponse.values()));
+                    }
+                    return null;
+                }
+            });
+    }
 }

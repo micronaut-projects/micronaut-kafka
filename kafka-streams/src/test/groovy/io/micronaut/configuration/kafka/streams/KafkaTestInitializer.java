@@ -2,6 +2,8 @@ package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.streams.optimization.OptimizationStream;
 import io.micronaut.configuration.kafka.streams.startkafkastreams.StartKafkaStreamsOff;
+import io.micronaut.configuration.kafka.streams.uncaught.CustomUncaughtHandlerStreamFactory;
+import io.micronaut.configuration.kafka.streams.uncaught.OnErrorStreamFactory;
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream;
 import io.micronaut.context.annotation.BootstrapContextCompatible;
 import io.micronaut.context.annotation.Value;
@@ -39,6 +41,12 @@ public class KafkaTestInitializer implements BootstrapPropertySourceLocator {
             WordCountStream.OUTPUT,
             WordCountStream.NAMED_WORD_COUNT_INPUT,
             WordCountStream.NAMED_WORD_COUNT_OUTPUT,
+            OnErrorStreamFactory.ON_ERROR_NO_CONFIG_INPUT,
+            OnErrorStreamFactory.ON_ERROR_NO_CONFIG_OUTPUT,
+            OnErrorStreamFactory.ON_ERROR_REPLACE_INPUT,
+            OnErrorStreamFactory.ON_ERROR_REPLACE_OUTPUT,
+            CustomUncaughtHandlerStreamFactory.CUSTOM_HANDLER_INPUT,
+            CustomUncaughtHandlerStreamFactory.CUSTOM_HANDLER_OUTPUT,
             StartKafkaStreamsOff.STREAMS_OFF_INPUT,
             StartKafkaStreamsOff.STREAMS_OFF_OUTPUT,
             OptimizationStream.OPTIMIZATION_ON_INPUT,
