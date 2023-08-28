@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
+import io.micronaut.configuration.kafka.ConsumerSeekAware;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.ProducerRegistry;
@@ -33,11 +34,16 @@ import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderReg
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaConsumerConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
+import io.micronaut.configuration.kafka.event.KafkaConsumerStartedPollingEvent;
+import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
+import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Blocking;
@@ -99,6 +105,7 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -147,6 +154,8 @@ class KafkaConsumerProcessor
     private final TransactionalProducerRegistry transactionalProducerRegistry;
     private final BatchConsumerRecordsBinderRegistry batchBinderRegistry;
     private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
+    private final ApplicationEventPublisher<KafkaConsumerStartedPollingEvent> kafkaConsumerStartedPollingEventPublisher;
+    private final ApplicationEventPublisher<KafkaConsumerSubscribedEvent> kafkaConsumerSubscribedEventPublisher;
 
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
@@ -162,6 +171,8 @@ class KafkaConsumerProcessor
      * @param exceptionHandler              The exception handler to use
      * @param schedulerService              The scheduler service
      * @param transactionalProducerRegistry The transactional producer registry
+     * @param startedEventPublisher         The KafkaConsumerStartedPollingEvent publisher
+     * @param subscribedEventPublisher      The KafkaConsumerSubscribedEvent publisher
      */
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
@@ -174,7 +185,9 @@ class KafkaConsumerProcessor
             ProducerRegistry producerRegistry,
             KafkaListenerExceptionHandler exceptionHandler,
             @Named(TaskExecutors.SCHEDULED) ExecutorService schedulerService,
-            TransactionalProducerRegistry transactionalProducerRegistry) {
+            TransactionalProducerRegistry transactionalProducerRegistry,
+            ApplicationEventPublisher<KafkaConsumerStartedPollingEvent> startedEventPublisher,
+            ApplicationEventPublisher<KafkaConsumerSubscribedEvent> subscribedEventPublisher) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
         this.beanContext = beanContext;
@@ -186,6 +199,8 @@ class KafkaConsumerProcessor
         this.exceptionHandler = exceptionHandler;
         this.taskScheduler = new ScheduledExecutorTaskScheduler(schedulerService);
         this.transactionalProducerRegistry = transactionalProducerRegistry;
+        this.kafkaConsumerStartedPollingEventPublisher = startedEventPublisher;
+        this.kafkaConsumerSubscribedEventPublisher = subscribedEventPublisher;
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -317,8 +332,22 @@ class KafkaConsumerProcessor
             consumerState.kafkaConsumer.wakeup();
         }
         for (ConsumerState consumerState : consumers.values()) {
-            while (consumerState.closedState == ConsumerCloseState.POLLING) {
-                LOG.trace("consumer not closed yet");
+            if (consumerState.closedState == ConsumerCloseState.POLLING) {
+                final Instant start = Instant.now();
+                Instant silentTime = start;
+                do {
+                    if (LOG.isTraceEnabled()) {
+                        final Instant now = Instant.now();
+                        if (now.isAfter(silentTime)) {
+                            LOG.trace("Consumer {} is not closed yet (waiting {})", consumerState.clientId, Duration.between(start, now));
+                            // Inhibit TRACE messages for a while to avoid polluting the logs
+                            silentTime = now.plusSeconds(5);
+                        }
+                    }
+                } while (consumerState.closedState == ConsumerCloseState.POLLING);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Consumer {} is closed", consumerState.clientId);
             }
         }
         consumers.clear();
@@ -421,6 +450,7 @@ class KafkaConsumerProcessor
             ca.setKafkaConsumer(kafkaConsumer);
         }
         setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
+        kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
         ConsumerState consumerState = new ConsumerState(clientId, groupId, offsetStrategy, kafkaConsumer, consumerBean, Collections.unmodifiableSet(kafkaConsumer.subscription()), consumerAnnotation, method);
         consumers.put(clientId, consumerState);
         executorService.submit(() -> createConsumerThreadPollLoop(method, consumerState));
@@ -435,6 +465,9 @@ class KafkaConsumerProcessor
         final Optional<Argument<?>> consumerArg = Arrays.stream(method.getArguments())
                 .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
                 .findFirst();
+        final Optional<Argument<?>> seekArg = Arrays.stream(method.getArguments())
+                .filter(arg -> KafkaSeekOperations.class.isAssignableFrom(arg.getType()))
+                .findFirst();
         final Optional<Argument<?>> ackArg = Arrays.stream(method.getArguments())
                 .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
                 .findFirst();
@@ -446,6 +479,7 @@ class KafkaConsumerProcessor
             consumerArg.ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
             //noinspection InfiniteLoopStatement
+            boolean pollingStarted = false;
             while (true) {
                 final Set<TopicPartition> newAssignments = Collections.unmodifiableSet(kafkaConsumer.assignment());
                 if (LOG.isInfoEnabled() && !newAssignments.equals(consumerState.assignments)) {
@@ -482,6 +516,11 @@ class KafkaConsumerProcessor
                         consumerRecords = kafkaConsumer.poll(pollTimeout);
                     }
                     consumerState.closedState = ConsumerCloseState.POLLING;
+                    if (!pollingStarted) {
+                        pollingStarted = true;
+                        kafkaConsumerStartedPollingEventPublisher.publishEvent(new KafkaConsumerStartedPollingEvent(kafkaConsumer));
+                    }
+
                     failed = true;
                     consumerState.resumeTopicPartitions();
 
@@ -492,7 +531,7 @@ class KafkaConsumerProcessor
                     if (isBatch) {
                         failed = !processConsumerRecordsAsBatch(consumerState, method, boundArguments, consumerRecords);
                     } else {
-                        failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, ackArg, consumerRecords);
+                        failed = !processConsumerRecords(consumerState, method, boundArguments, trackPartitions, seekArg, ackArg, consumerRecords);
                     }
                     if (!failed) {
                         if (consumerState.offsetStrategy == OffsetStrategy.SYNC) {
@@ -528,6 +567,7 @@ class KafkaConsumerProcessor
                                            final ExecutableMethod<?, ?> method,
                                            final Map<Argument<?>, Object> boundArguments,
                                            final boolean trackPartitions,
+                                           final Optional<Argument<?>> seekArg,
                                            final Optional<Argument<?>> ackArg,
                                            final ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
@@ -548,6 +588,8 @@ class KafkaConsumerProcessor
             }
 
             Consumer<?, ?> kafkaConsumer = consumerState.kafkaConsumer;
+            final KafkaSeekOperations seek = seekArg.map(x -> KafkaSeekOperations.newInstance()).orElse(null);
+            seekArg.ifPresent(argument -> boundArguments.put(argument, seek));
             ackArg.ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
 
             try {
@@ -580,6 +622,11 @@ class KafkaConsumerProcessor
                 }
             } else if (consumerState.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
                 kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback(consumerState.consumerBean));
+            }
+            if (seek != null) {
+                // Performs seek operations that were deferred by the user
+                final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
+                seek.forEach(seeker::perform);
             }
         }
         return true;
@@ -727,7 +774,9 @@ class KafkaConsumerProcessor
 
             if (hasTopics) {
                 final List<String> topics = Arrays.asList(topicNames);
-                if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                if (consumerBean instanceof ConsumerSeekAware csa) {
+                    kafkaConsumer.subscribe(topics, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
+                } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
                     kafkaConsumer.subscribe(topics, crl);
                 } else {
                     kafkaConsumer.subscribe(topics);
@@ -746,7 +795,9 @@ class KafkaConsumerProcessor
                     } catch (Exception e) {
                         throw new MessagingSystemException("Invalid topic pattern [" + pattern + "] for method [" + method + "]: " + e.getMessage(), e);
                     }
-                    if (consumerBean instanceof ConsumerRebalanceListener crl) {
+                    if (consumerBean instanceof ConsumerSeekAware csa) {
+                        kafkaConsumer.subscribe(compiledPattern, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
+                    } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
                         kafkaConsumer.subscribe(compiledPattern, crl);
                     } else {
                         kafkaConsumer.subscribe(compiledPattern);
@@ -1084,7 +1135,7 @@ class KafkaConsumerProcessor
         final boolean useSendOffsetsToTransaction;
         final boolean isMessageReturnType;
         final boolean isMessagesIterableReturnType;
-        ConsumerCloseState closedState;
+        volatile ConsumerCloseState closedState;
 
         private ConsumerState(String clientId, String groupId, OffsetStrategy offsetStrategy, Consumer<?, ?> consumer, Object consumerBean, Set<String> subscriptions,
                               AnnotationValue<KafkaListener> kafkaListener, ExecutableMethod<?, ?> method) {
@@ -1225,4 +1276,17 @@ class KafkaConsumerProcessor
         NOT_STARTED, POLLING, CLOSED
     }
 
+    private record ConsumerSeekAwareAdapter(@NonNull KafkaSeeker seeker, @NonNull ConsumerSeekAware bean)
+        implements ConsumerRebalanceListener {
+
+        @Override
+        public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+            bean.onPartitionsRevoked(partitions != null ? partitions : Collections.emptyList());
+        }
+
+        @Override
+        public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+            bean.onPartitionsAssigned(partitions != null ? partitions : Collections.emptyList(), seeker);
+        }
+    }
 }

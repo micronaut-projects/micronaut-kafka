@@ -1,23 +1,26 @@
 package io.micronaut.kafka.docs
 
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.context.annotation.*
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
-import spock.lang.Ignore
+import spock.util.concurrent.PollingConditions
 
-import static java.util.concurrent.TimeUnit.SECONDS
-import static org.awaitility.Awaitility.await
-
-@Property(name = "spec.name", value = "MyTest")
 @MicronautTest
-@Ignore("It hangs forever in the CI")
+@Property(name = "spec.name", value = "MyTest")
 class MyTest extends AbstractKafkaTest {
 
     @Inject
     MyProducer producer
     @Inject
     MyConsumer consumer
+
+    PollingConditions conditions = new PollingConditions()
 
     void "test kafka running"() {
         given:
@@ -27,10 +30,9 @@ class MyTest extends AbstractKafkaTest {
         producer.produce(message)
 
         then:
-        await().atMost(5, SECONDS).until(() -> consumer.consumed == message)
-
-        cleanup:
-        MY_KAFKA.stop()
+        conditions.within(5) {
+            consumer.consumed == message
+        }
     }
 
     @Requires(property = "spec.name", value = "MyTest")

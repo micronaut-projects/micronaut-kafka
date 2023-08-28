@@ -133,20 +133,20 @@ public class KafkaMetricMeterTypeBuilder {
 
         KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(this.name);
 
-        if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE) {
+        if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
                 return Optional.of(Gauge.builder(getMetricName(), () -> (Number) kafkaMetric.metricValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Double) {
-            return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, value -> (Double) value.metricValue())
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Number) {
+            return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, value -> ((Number) value.metricValue()).doubleValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && this.kafkaMetric.metricValue() instanceof Double) {
-            return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), value -> (Double) value.metricValue())
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
+            return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), value -> ((Number) value.metricValue()).doubleValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .register(meterRegistry));

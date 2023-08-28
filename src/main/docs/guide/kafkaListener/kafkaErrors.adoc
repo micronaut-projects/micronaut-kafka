@@ -3,10 +3,7 @@
 It's possible to define a different error strategy for ann:configuration.kafka.annotation.KafkaListener[] using `errorStrategy` attribute:
 
 .Specifying an error strategy
-[source,java]
-----
-@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms", retryCount=3))
-----
+snippet::io.micronaut.kafka.docs.consumer.errors.StrategyProductListener[tags = annotation, indent = 0]
 
 Setting the error strategy allows you to resume at the next offset or to seek the consumer (stop on error) to the failed offset so that it can retry if an error occurs.
 
@@ -20,21 +17,31 @@ You can choose one of the error strategies:
 
 NOTE: The error strategies apply only for non-batch messages processing.
 
+You can also make the number of retries configurable by using `retryCountValue`:
+
+.Dynamically Configuring Retries
+
+snippet::io.micronaut.kafka.docs.consumer.errors.RetryProductListener[tags = annotation, indent = 0]
+
+NOTE: `retryCountValue` will be overridden by `retryCount` if they are both set.
+
 ==== Specify exceptions to retry
 
 It's possible to define only exceptions from which the retry will occur.
 
 .Specifying exceptions to retry
-[source,java]
-----
-@KafkaListener(value = "myGroup", errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryDelay = "50ms", retryCount=3, exceptionTypes = { MyException.class, MySecondException.class }))
-----
+
+snippet::io.micronaut.kafka.docs.consumer.errors.ExceptionProductListener[tags = annotation, indent = 0]
 
 NOTE: Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
 
 === Exception handlers
 
 When an exception occurs in a ann:configuration.kafka.annotation.KafkaListener[] method by default the exception is simply logged. This is handled by api:configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler[].
+
+The following options are available to configure the default Kafka listener exception handler:
+
+include::{includedir}configurationProperties/io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties.adoc[]
 
 If you wish to replace this default exception handling with another implementation you can use the Micronaut's <<replaces, Bean Replacement>> feature to define a bean that replaces it: `@Replaces(DefaultKafkaListenerExceptionHandler.class)`.
 

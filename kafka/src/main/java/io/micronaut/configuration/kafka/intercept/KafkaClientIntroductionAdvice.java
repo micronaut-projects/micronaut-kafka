@@ -82,6 +82,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.function.Predicate.not;
+import static java.util.stream.Stream.concat;
 
 /**
  * Implementation of the {@link io.micronaut.configuration.kafka.annotation.KafkaClient} advice annotation.
@@ -475,14 +481,30 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     private ProducerRecord<?, ?> buildProducerRecord(MethodInvocationContext<Object, Object> context, ProducerState producerState, Object value) {
-        return new ProducerRecord<>(
-                producerState.topicSupplier.get(context),
-                producerState.partitionSupplier.get(context),
-                producerState.timestampSupplier.get(context),
-                producerState.keySupplier.get(context),
+        Supplier<String> topicSupplier = () -> producerState.topicSupplier.get(context);
+        Supplier<Integer> partitionSupplier = () -> producerState.partitionSupplier.get(context);
+        Supplier<Long> timestampSupplier = () -> producerState.timestampSupplier.get(context);
+        Supplier<Object> keySupplier = () -> producerState.keySupplier.get(context);
+        Iterable<Header> headers = producerState.headersSupplier.get(context);
+        return Optional.ofNullable(value)
+            .filter(ProducerRecord.class::isInstance)
+            .map(ProducerRecord.class::cast)
+            .map(r -> new ProducerRecord<>(
+                Optional.ofNullable(r.topic()).filter(not(String::isEmpty)).orElseGet(topicSupplier),
+                Optional.ofNullable(r.partition()).orElseGet(partitionSupplier),
+                Optional.ofNullable(r.timestamp()).orElseGet(timestampSupplier),
+                Optional.ofNullable(r.key()).orElseGet(keySupplier),
+                r.value(),
+                headers == null ? r.headers() :
+                    concat(StreamSupport.stream(headers.spliterator(), false), Stream.of(r.headers().toArray())).toList()
+                )
+            ).orElseGet(() -> new ProducerRecord<>(
+                topicSupplier.get(),
+                partitionSupplier.get(),
+                timestampSupplier.get(),
+                keySupplier.get(),
                 value,
-                producerState.headersSupplier.get(context)
-        );
+                headers));
     }
 
     @SuppressWarnings("unchecked")

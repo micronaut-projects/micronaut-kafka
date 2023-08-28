@@ -6,7 +6,7 @@ plugins {
 configurations.all {
     resolutionStrategy {
         force 'org.graalvm.sdk:graal-sdk:23.0.1'
-        force 'io.micronaut.platform:micronaut-platform:4.0.0-RC1'
+        force 'io.micronaut.platform:micronaut-platform:4.0.5'
     }
 }
 
@@ -30,7 +30,6 @@ dependencies {
     testImplementation mnSerde.micronaut.serde.jackson
     testImplementation mnRxjava2.micronaut.rxjava2
     testImplementation mn.micronaut.http.client
-    testImplementation mnRxjava2.micronaut.rxjava2
 
     testRuntimeOnly mnMicrometer.micronaut.micrometer.registry.statsd
     testRuntimeOnly mnTracing.micronaut.tracing.core

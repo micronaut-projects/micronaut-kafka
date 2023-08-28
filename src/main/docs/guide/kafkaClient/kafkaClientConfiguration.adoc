@@ -21,10 +21,8 @@ Any property in the link:{kafkaapi}/org/apache/kafka/clients/producer/ProducerCo
 To configure different properties for each client, you should set a `@KafkaClient` id using the annotation:
 
 .Using a Client ID
-[source,java]
-----
-@KafkaClient("product-client")
-----
+
+snippet::io.micronaut.kafka.docs.producer.config.ClientIdClient[tags="annotation"]
 
 This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `Producer`. Secondly, it allows you to apply per producer configuration in `application.yml`:
 
@@ -45,14 +43,8 @@ kafka:
 Finally, the ann:configuration.kafka.annotation.KafkaClient[] annotation itself provides a `properties` member that you can use to set producer specific properties:
 
 .Configuring Producer Properties with @KafkaClient
-[source,java]
-----
-include::{testskafka}/producer/config/ProductClient.java[tags=imports, indent=0]
 
-include::{testskafka}/producer/config/ProductClient.java[tags=clazz, indent=0]
-    ...
-}
-----
+snippet::io.micronaut.kafka.docs.producer.config.ProductClient[tags="imports, clazz"]
 
 === @KafkaClient and Serializers
 

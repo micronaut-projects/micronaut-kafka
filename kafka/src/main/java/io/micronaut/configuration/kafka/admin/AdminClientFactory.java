@@ -24,7 +24,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import jakarta.inject.Singleton;
 
 /**
- * Creates the Kakfa {@link org.apache.kafka.clients.admin.AdminClient}.
+ * Creates the Kafka {@link org.apache.kafka.clients.admin.AdminClient}.
  *
  * @author Graeme Rocher
  * @since 1.0

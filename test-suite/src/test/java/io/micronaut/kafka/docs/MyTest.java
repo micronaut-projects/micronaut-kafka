@@ -1,9 +1,14 @@
 package io.micronaut.kafka.docs;
 
-import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.context.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
@@ -11,14 +16,13 @@ import static org.awaitility.Awaitility.await;
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("It hangs forever in the CI")
 class MyTest extends AbstractKafkaTest {
+
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
         final String message = "hello";
         producer.produce(message);
         await().atMost(5, SECONDS).until(() -> message.equals(consumer.consumed));
-        MY_KAFKA.stop();
     }
 
     @Requires(property = "spec.name", value = "MyTest")
