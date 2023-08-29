@@ -40,9 +40,8 @@ public class ConsumerExecutorServiceConfig {
      * @return The executor configurations
      */
     @Singleton
-    @Bean
     @Named(TaskExecutors.MESSAGE_CONSUMER)
     ExecutorConfiguration configuration() {
-        return UserExecutorConfiguration.of(ExecutorType.FIXED, 75);
+        return UserExecutorConfiguration.of(ExecutorType.SCHEDULED, 75);
     }
 }
