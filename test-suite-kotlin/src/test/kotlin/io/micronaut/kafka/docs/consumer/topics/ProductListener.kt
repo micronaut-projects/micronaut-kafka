@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory
 @Requires(property = "spec.name", value = "TopicsProductListenerTest")
 @KafkaListener
 class ProductListener {
-    private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+    }
 
     // tag::multiTopics[]
     @Topic("fun-products", "awesome-products")

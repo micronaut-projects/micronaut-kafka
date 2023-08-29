@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.consumer.sendto
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.core.util.StringUtils
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.Test
 import java.util.Map
@@ -11,7 +12,7 @@ class WordCounterTest {
     @Test
     fun testWordCounter() {
         ApplicationContext.run(
-            Map.of<String, Any>("kafka.enabled", "true", "spec.name", "WordCounterTest")
+            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCounterTest")
         ).use { ctx ->
             val client = ctx.getBean(WordCounterClient::class.java)
             client.send("test to test for words")
