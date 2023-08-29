@@ -15,7 +15,6 @@
  */
 package io.micronaut.configuration.kafka.executor;
 
-import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.scheduling.TaskExecutors;
@@ -40,9 +39,8 @@ public class ConsumerExecutorServiceConfig {
      * @return The executor configurations
      */
     @Singleton
-    @Bean
     @Named(TaskExecutors.MESSAGE_CONSUMER)
     ExecutorConfiguration configuration() {
-        return UserExecutorConfiguration.of(ExecutorType.FIXED, 75);
+        return UserExecutorConfiguration.of(ExecutorType.SCHEDULED, 75);
     }
 }
