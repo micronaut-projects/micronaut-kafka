@@ -32,41 +32,28 @@ kafka:
 
 You should then define a ann:context.annotation.Factory[] for your streams that defines beans that return a `KStream`. For example to implement the Word Count example from the Kafka Streams documentation:
 
-
 .Kafka Streams Word Count
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=imports, indent=0]
 
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=clazz, indent=0]
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="imports, clazz, wordCountStream"]
 
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=wordCountStream, indent=4]
-
-}
-----
-
-<1> The input topic
-<2> The output topic
-<3> An instance of api:configuration.kafka.streams.ConfiguredStreamBuilder[] is injected that allows mutating the configuration
-<4> Materialize the count stream and save to a state store
+<1> An instance of api:configuration.kafka.streams.ConfiguredStreamBuilder[] is injected that allows mutating the configuration
+<2> The input topic
+<3> Materialize the count stream and save to a state store
+<4> The output topic
 
 NOTE: With Kafka streams the key and value `Serdes` (serializer/deserializer) must be classes with a zero argument constructor. If you wish to use JSON (de)serialization you can subclass api:configuration.kafka.serde.JsonObjectSerde[] to define your `Serdes`
 
 You can use the ann:configuration.kafka.annotation.KafkaClient[] annotation to send a sentence to be processed by the above stream:
 
 .Defining a Kafka Client
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountClient.java[]
-----
+
+snippet::io.micronaut.kafka.docs.streams.WordCountClient[tags="imports, clazz", indent=0]
 
 You can also define a ann:configuration.kafka.annotation.KafkaListener[] to listen for the result of the word count stream:
 
 .Defining a Kafka Listener
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountListener.java[]
-----
+
+snippet::io.micronaut.kafka.docs.streams.WordCountListener[tags="imports, clazz", indent=0]
 
 == Configuring Kafka Streams
 
@@ -109,20 +96,13 @@ The above configuration sets the `num.stream.threads` setting of the Kafka `Stre
 
 You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specifically for the above configuration using `jakarta.inject.Named`:
 
-[source,java]
-----
-@Named("my-other-stream")
-KStream<String, String> myOtherKStream(@Named("my-other-stream") ConfiguredStreamBuilder builder)  {...}
-----
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="myOtherStream", indent=0]
 
 NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
-[source,java]
-----
-include::{testskafkastreams}/wordcount/WordCountStream.java[tags=namedStream,indent=0]
-}
-----
+
+snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="namedStream", indent=0]
 
 .Configuring Kafka Streams for testing
 When writing a test without starting the actual Kafka server, you can instruct Micronaut not to start Kafka Streams. To do this create a config file suffixed with an environment name, such as `application-test.yml` and set the `kafka.streams.[STREAM-NAME].start-kafka-streams` to `false`.
