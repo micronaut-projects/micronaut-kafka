@@ -103,4 +103,21 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
         return new Properties();
     }
 
+    /**
+     * Checks if internal properties map contains given key
+     * @param key to check
+     * @return true if contains given key, false otherwise
+     */
+    public boolean containsKey(String key) {
+        return getConfig().containsKey(key);
+    }
+
+    /**
+     * Puts all given properties into internal properties map
+     * @param properties to put into internal properties map
+     */
+    public final void putAll(Map<String, String> properties) {
+        getConfig().putAll(properties);
+    }
+
 }

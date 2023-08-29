@@ -18,11 +18,13 @@ package io.micronaut.configuration.kafka;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
@@ -56,11 +58,14 @@ import org.slf4j.LoggerFactory;
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
  *
  * @author Graeme Rocher
+ * @author Pawel Szymczyk
  * @since 1.0
  */
 @Factory
 public class KafkaProducerFactory implements ProducerRegistry, TransactionalProducerRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerFactory.class);
+    private final ThreadLocal<Map<ClientKey, Producer>> transactionalClients = ThreadLocal.withInitial(() -> new HashMap<>());
+    private final AtomicInteger transactionIdSuffix = new AtomicInteger();
     private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
@@ -150,63 +155,95 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             properties.put(ProducerConfig.ACKS_CONFIG, acksValue);
         }
 
-        return getKafkaProducer(id, null, k, v, false, properties);
+        return getKafkaProducer(id, null, k, v, properties);
+    }
+
+    private <T> T getKafkaProducer(@Nullable String id, @Nullable String transactionalId, Argument<?> keyType, Argument<?> valueType, @Nullable Map<String, String> userConfig) {
+        ClientKey key = new ClientKey(
+            id,
+            keyType.getType(),
+            valueType.getType(),
+            transactionalId);
+
+        if (StringUtils.isNotEmpty(transactionalId)) {
+            return createTransactionalKafkaProducer(keyType, valueType, userConfig, key);
+        }
+
+        return createNonTransactionalKafkaProducer(keyType, valueType, userConfig, key);
+    }
+
+    private <T> T createTransactionalKafkaProducer(Argument<?> keyType, Argument<?> valueType, Map<String, String> userConfig, ClientKey key) {
+        Map<ClientKey, Producer> transactionalClients = this.transactionalClients.get();
+
+        if (transactionalClients.containsKey(key)) {
+            return (T) transactionalClients.get(key);
+        }
+
+        if (key.hasId()) {
+            createTransactionalKafkaProducer(keyType, valueType, userConfig, getDefaultKafkaProducerConfiguration(key.id), key, transactionalClients);
+        }
+
+        return createTransactionalKafkaProducer(keyType, valueType, userConfig, getDefaultKafkaProducerConfiguration(), key, transactionalClients);
+    }
+
+    private <T> T createTransactionalKafkaProducer(Argument<?> keyType, Argument<?> valueType, Map<String, String> userConfig, DefaultKafkaProducerConfiguration newConfig, ClientKey clientKey, Map<ClientKey, Producer> transactionalClients) {
+        appendSerializers(keyType, valueType, newConfig);
+        appendTransactionalConfiguration(clientKey, newConfig);
+        appendUserConfiguration(userConfig, newConfig);
+        Producer producer = beanContext.createBean(Producer.class, newConfig);
+        producer.initTransactions();
+        transactionalClients.put(clientKey, producer);
+        return (T) producer;
+    }
+
+    private void appendTransactionalConfiguration(ClientKey key, DefaultKafkaProducerConfiguration newConfig) {
+        newConfig.getConfig().putIfAbsent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, key.transactionalId + "-" + transactionIdSuffix.incrementAndGet());
+        newConfig.getConfig().putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getKafkaProducer(@Nullable String id, @Nullable String transactionalId, Argument<?> keyType, Argument<?> valueType, boolean transactional, @Nullable Map<String, String> props) {
-        ClientKey key = new ClientKey(
-                id,
-                keyType.getType(),
-                valueType.getType(),
-                transactional);
+    private <T> T createNonTransactionalKafkaProducer(Argument<?> keyType, Argument<?> valueType, Map<String, String> clientConfig, ClientKey key) {
+        return (T) clients.computeIfAbsent(key, clientKey ->
+            StringUtils.isNotEmpty(key.id) ?
+                createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration(key.id))
+                : createNonTransactionalKafkaProducer(keyType, valueType, clientConfig, getDefaultKafkaProducerConfiguration()));
+    }
 
-        return (T) clients.computeIfAbsent(key, clientKey -> {
-            Supplier<AbstractKafkaProducerConfiguration> defaultResolver = () -> beanContext.getBean(AbstractKafkaProducerConfiguration.class);
-            AbstractKafkaProducerConfiguration config;
-            boolean hasId = StringUtils.isNotEmpty(id);
-            if (hasId) {
-                config = beanContext.findBean(
-                        AbstractKafkaProducerConfiguration.class,
-                        Qualifiers.byName(id)
-                ).orElseGet(defaultResolver);
-            } else {
-                config = defaultResolver.get();
-            }
+    @SuppressWarnings("unchecked")
+    private <T> T createNonTransactionalKafkaProducer(Argument<?> keyType, Argument<?> valueType, Map<String, String> clientConfig, DefaultKafkaProducerConfiguration newConfig) {
+        appendSerializers(keyType, valueType, newConfig);
+        appendUserConfiguration(clientConfig, newConfig);
+        return (T) beanContext.createBean(Producer.class, newConfig);
+    }
 
-            DefaultKafkaProducerConfiguration newConfig = new DefaultKafkaProducerConfiguration(config);
+    @SuppressWarnings("rawtypes")
+    private DefaultKafkaProducerConfiguration getDefaultKafkaProducerConfiguration(String id) {
+        return new DefaultKafkaProducerConfiguration(beanContext.findBean(AbstractKafkaProducerConfiguration.class, Qualifiers.byName(id)).orElse(beanContext.getBean(AbstractKafkaProducerConfiguration.class)));
+    }
 
-            Properties properties = newConfig.getConfig();
-            if (!properties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> keySerializer = serdeRegistry.pickSerializer(keyType);
-                newConfig.setKeySerializer(keySerializer);
-            }
+    @SuppressWarnings("rawtypes")
+    private DefaultKafkaProducerConfiguration getDefaultKafkaProducerConfiguration() {
+        return new DefaultKafkaProducerConfiguration(beanContext.getBean(AbstractKafkaProducerConfiguration.class));
+    }
 
-            if (!properties.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> valueSerializer = serdeRegistry.pickSerializer(valueType);
-                newConfig.setValueSerializer(valueSerializer);
-            }
+    @SuppressWarnings("unchecked")
+    private void appendSerializers(Argument<?> keyType, Argument<?> valueType, DefaultKafkaProducerConfiguration newConfig) {
+        if (!newConfig.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
+            Serializer<?> keySerializer = serdeRegistry.pickSerializer(keyType);
+            newConfig.setKeySerializer(keySerializer);
+        }
 
-            if (StringUtils.isNotEmpty(transactionalId)) {
-                properties.putIfAbsent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);
-                properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-            }
+        if (!newConfig.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
+            Serializer<?> valueSerializer = serdeRegistry.pickSerializer(valueType);
+            newConfig.setValueSerializer(valueSerializer);
+        }
+    }
 
-            if (hasId) {
-                properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
-            }
-
-            if (CollectionUtils.isNotEmpty(props)) {
-                properties.putAll(props);
-            }
-
-            Producer producer = beanContext.createBean(Producer.class, newConfig);
-            if (transactional) {
-                producer.initTransactions();
-            }
-
-            return producer;
-        });
+    @SuppressWarnings("unchecked")
+    private void appendUserConfiguration(Map<String, String> userConfiguration, DefaultKafkaProducerConfiguration newConfig) {
+        if (CollectionUtils.isNotEmpty(userConfiguration)) {
+            newConfig.putAll(userConfiguration);
+        }
     }
 
     /**
@@ -214,29 +251,40 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
      */
     @PreDestroy
     protected void stop() {
-        for (Producer producer : clients.values()) {
+        stop(clients.values());
+        clients.clear();
+        stop(transactionalClients.get().values());
+        transactionalClients.get().clear();
+    }
+
+    private void stop(Collection<Producer> clients) {
+        for (Producer producer : clients) {
             try {
                 producer.close();
             } catch (Exception e) {
                 LOG.warn("Error shutting down Kafka producer: {}", e.getMessage(), e);
             }
         }
-        clients.clear();
     }
 
     @Override
     public <K, V> Producer<K, V> getProducer(String id, Argument<K> keyType, Argument<V> valueType) {
-        return getKafkaProducer(id, null, keyType, valueType, false, null);
+        return getKafkaProducer(id, null, keyType, valueType, null);
     }
 
     @Override
     public <K, V> Producer<K, V> getTransactionalProducer(String id, String transactionalId, Argument<K> keyType, Argument<V> valueType) {
-        return getKafkaProducer(id, transactionalId, keyType, valueType, true, null);
+        return getKafkaProducer(id, transactionalId, keyType, valueType, null);
     }
 
     @Override
     public void close(Producer<?, ?> producer) {
-        for (Map.Entry<ClientKey, Producer> e : clients.entrySet()) {
+        close(producer, clients.entrySet());
+        close(producer, transactionalClients.get().entrySet());
+    }
+
+    private void close(Producer<?, ?> producer, Set<Map.Entry<ClientKey, Producer>> clients) {
+        for (Map.Entry<ClientKey, Producer> e : clients) {
             if (e.getValue() == producer) {
                 clients.remove(e.getKey());
                 break;
@@ -254,13 +302,13 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         private final String id;
         private final Class<?> keyType;
         private final Class<?> valueType;
-        private final boolean transactional;
+        private final String transactionalId;
 
-        ClientKey(String id, Class<?> keyType, Class<?> valueType, boolean transactional) {
+        ClientKey(String id, Class<?> keyType, Class<?> valueType, String transactionalId) {
             this.id = id;
             this.keyType = keyType;
             this.valueType = valueType;
-            this.transactional = transactional;
+            this.transactionalId = transactionalId;
         }
 
         @Override
@@ -273,14 +321,18 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             }
             ClientKey clientKey = (ClientKey) o;
             return Objects.equals(id, clientKey.id) &&
-                    Objects.equals(keyType, clientKey.keyType) &&
-                    Objects.equals(valueType, clientKey.valueType) &&
-                    Objects.equals(transactional, clientKey.transactional);
+                Objects.equals(keyType, clientKey.keyType) &&
+                Objects.equals(valueType, clientKey.valueType) &&
+                Objects.equals(transactionalId, clientKey.transactionalId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, keyType, valueType, transactional);
+            return Objects.hash(id, keyType, valueType, transactionalId);
+        }
+
+        public boolean hasId() {
+            return StringUtils.isEmpty(id);
         }
     }
 }
