@@ -9,6 +9,8 @@ managed-kafka-compat = "3.5.1"
 managed-kafka = '3.5.1'
 
 groovy = "4.0.12"
+kotlin = "1.9.10"
+
 awaitility = '4.2.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
@@ -26,8 +28,6 @@ micronaut-rxjava2 = "2.0.1"
 micronaut-serde = "2.2.0"
 micronaut-tracing = "5.0.1"
 micronaut-test = "4.0.0"
-
-
 
 [libraries]
 # Core
@@ -56,3 +56,7 @@ micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", ver
 junit-jupiter-engine = { module = 'org.junit.jupiter:junit-jupiter-engine' }
 
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
+
+[plugins]
+kotlin-jvm = { id = 'org.jetbrains.kotlin.jvm', version.ref = 'kotlin' }
+kotlin-kapt = { id = 'org.jetbrains.kotlin.kapt', version.ref = 'kotlin' }
