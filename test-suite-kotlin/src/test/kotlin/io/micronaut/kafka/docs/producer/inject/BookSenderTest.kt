@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.producer.inject
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.core.util.StringUtils
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -9,8 +10,8 @@ internal class BookSenderTest {
     // tag::test[]
     @Test
     fun testBookSender() {
-        ApplicationContext.run(mutableMapOf<String, Any>( // <1>
-            "kafka.enabled" to "true", "spec.name" to "BookSenderTest")).use { ctx ->
+        ApplicationContext.run(mapOf( // <1>
+            "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest")).use { ctx ->
             val bookSender = ctx.getBean(BookSender::class.java) // <2>
             val book = Book("The Stand")
             bookSender.send("Stephen King", book)

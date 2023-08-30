@@ -12,7 +12,10 @@ import reactor.core.publisher.Mono
 @Requires(property = "spec.name", value = "ReactiveProductListenerTest")
 @KafkaListener
 class ProductListener {
-    private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+    }
 
     // tag::method[]
     @Topic("reactive-products")

@@ -12,7 +12,7 @@ class ConfigProductListenerTest {
     @Test
     fun testSendProduct() {
         ApplicationContext.run(
-            Map.of<String, Any>("kafka.enabled", StringUtils.TRUE, "spec.name", "ConfigProductListenerTest")
+            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "ConfigProductListenerTest")
         ).use { ctx ->
             Assertions.assertDoesNotThrow {
                 val product = Product("Blue Trainers", 5)

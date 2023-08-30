@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory
 class ProductListener {
 // end::clazz[]
 
-    private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+    companion object {
+        private val LOG = LoggerFactory.getLogger(ProductListener::class.java)
+    }
 
     // tag::method[]
     @Topic("awesome-products")

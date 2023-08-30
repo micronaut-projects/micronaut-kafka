@@ -1,15 +1,19 @@
 package io.micronaut.kafka.docs.consumer.sendto
 
-import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.annotation.KafkaKey
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import org.apache.kafka.common.IsolationLevel
 import org.slf4j.LoggerFactory
 
 @Requires(property = "spec.name", value = "WordCounterTest")
 @KafkaListener(offsetReset = OffsetReset.EARLIEST)
 class WordCountListener {
 
-    private val LOG = LoggerFactory.getLogger(WordCountListener::class.java)
+    companion object {
+        private val LOG = LoggerFactory.getLogger(WordCountListener::class.java)
+    }
 
     var wordCount: MutableMap<String, Int> = HashMap()
 

@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.consumer.sendto
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.core.util.StringUtils
 import io.micronaut.kafka.docs.Product
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.Test
@@ -12,7 +13,7 @@ class SendToProductListenerTest {
     @Test
     fun testSendProduct() {
         ApplicationContext.run(
-            Map.of<String, Any>("kafka.enabled", "true", "spec.name", "SendToProductListenerTest")
+            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "SendToProductListenerTest")
         ).use { ctx ->
             val product = Product("Blue Trainers", 5)
             val client = ctx.getBean(ProductClient::class.java)
