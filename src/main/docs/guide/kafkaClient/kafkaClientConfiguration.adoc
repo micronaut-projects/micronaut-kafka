@@ -3,7 +3,7 @@
 There are a number of ways to pass configuration properties to the link:{kafkaapi}/org/apache/kafka/clients/producer/KafkaProducer.html[KafkaProducer]. You can set default producer properties using `kafka.producers.default` in `application.yml`:
 
 .Applying Default Configuration
-[source,yaml]
+[configuration]
 ----
 kafka:
     producers:
@@ -27,7 +27,7 @@ snippet::io.micronaut.kafka.docs.producer.config.ClientIdClient[tags="annotation
 This serves 2 purposes. Firstly it sets the value of the `client.id` setting used to build the `Producer`. Secondly, it allows you to apply per producer configuration in `application.yml`:
 
 .Applying Default Configuration
-[source,yaml]
+[configuration]
 ----
 kafka:
     producers:
@@ -57,7 +57,7 @@ All common `java.lang` types (`String`, `Integer`, primitives etc.) are supporte
 You can, however, explicitly override the `Serializer` used by providing the appropriate configuration in `application.yml`:
 
 .Applying Default Configuration
-[source,yaml]
+[configuration]
 ----
 kafka:
     producers:

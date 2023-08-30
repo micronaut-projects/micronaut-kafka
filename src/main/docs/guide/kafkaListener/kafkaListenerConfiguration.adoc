@@ -30,7 +30,7 @@ For more information, see for example https://kafka.apache.org/intro#intro_consu
 There are a number of ways to pass configuration properties to the `KafkaConsumer`. You can set default consumer properties using `kafka.consumers.default` in `application.yml`:
 
 .Applying Default Configuration
-[source,yaml]
+[configuration]
 ----
 kafka:
     consumers:
@@ -45,7 +45,7 @@ The above example will set the default `session.timeout.ms` that Kafka uses to d
 You can also provide configuration specific to a consumer group. For example consider the following configuration:
 
 .Applying Consumer Group Specific config
-[source,yaml]
+[configuration]
 ----
 kafka:
     consumers:
@@ -74,7 +74,7 @@ All common `java.lang` types (`String`, `Integer`, primitives etc.) are supporte
 You can, however, explicitly override the `Deserializer` used by providing the appropriate configuration in `application.yml`:
 
 .Applying Default Configuration
-[source,yaml]
+[configuration]
 ----
 kafka:
     consumers:
