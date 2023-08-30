@@ -48,19 +48,15 @@ part of the `kafka-clients` library:
 
 The ann:configuration.kafka.annotation.KafkaClient[] annotation supports the definition of reactive return types (such as rx:Flowable[] or Reactor `Flux`) as well as Futures.
 
-The following sections cover possible method signatures and behaviour:
+Add the library https://micronaut-projects.github.io/micronaut-reactor/latest/guide/[Micronaut Reactor] or https://micronaut-projects.github.io/micronaut-rxjava3/latest/guide/[Micronaut RxJava 3] to your application's dependencies.
 
-==== Single Value and Return Type
+The following sections, which use Micronaut Reactor, cover possible method signatures and behaviour:
 
-snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=single,indents=0]
+==== Mono Value and Return Type
 
-The implementation will return a rx:Single[] that when subscribed to will subscribe to the passed rx:Single[] and send the emitted item as a `ProducerRecord` emitting the item again if successful or an error otherwise.
+snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=mono,indents=0]
 
-==== Flowable Value and Return Type
-
-snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=flowable,indents=0]
-
-The implementation will return a rx:Flowable[] that when subscribed to will subscribe to the passed rx:Flowable[] and for each emitted item will send a `ProducerRecord` emitting the item again if successful or an error otherwise.
+The implementation will return a `Mono` that when subscribed to will subscribe to the passed `Mono` and send the emitted item as a `ProducerRecord` emitting the item again if successful or an error otherwise.
 
 ==== Flux Value and Return Type
 

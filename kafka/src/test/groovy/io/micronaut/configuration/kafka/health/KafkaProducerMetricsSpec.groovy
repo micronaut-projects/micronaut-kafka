@@ -13,7 +13,6 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.DefaultHttpClientConfiguration
 import io.micronaut.http.client.HttpClient
 import io.micronaut.messaging.annotation.MessageHeader
-import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
 import reactor.core.publisher.Mono
 import spock.lang.AutoCleanup
@@ -77,7 +76,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
         RecordMetadata sendGetRecordMetadata(@KafkaKey String key, String sentence)
 
         @Topic("books-metrics")
-        Single<Book> sendReactive(@KafkaKey String key, Book book)
+        Mono<Book> sendReactive(@KafkaKey String key, Book book)
     }
 
     @EqualsAndHashCode

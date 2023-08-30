@@ -20,10 +20,10 @@ In the above case instead of sending a serialized array the client implementatio
 
 snippet::io.micronaut.kafka.docs.consumer.batch.BookClient[tags="clazz,reactive"]
 
-You can also use an unbound reactive type such as rx:Flowable[] as the source of your batch data:
+You can also use an unbound reactive type such as `Flux` as the source of your batch data:
 
-.Sending `ProducerRecord` batches from a Flowable
+.Sending `ProducerRecord` batches from a Flux
 
-snippet::io.micronaut.kafka.docs.consumer.batch.BookClient[tags="clazz,flowable"]
+snippet::io.micronaut.kafka.docs.consumer.batch.BookClient[tags="clazz,flux"]
 
 

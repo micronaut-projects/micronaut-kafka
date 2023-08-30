@@ -143,8 +143,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                         return interceptedMethod.handleResult(completableFuture);
                     }
                     case PUBLISHER -> {
-                        Flux<Object> returnFlowable = returnPublisher(context, producerState, returnType);
-                        return interceptedMethod.handleResult(returnFlowable);
+                        Flux<Object> publisher = returnPublisher(context, producerState, returnType);
+                        return interceptedMethod.handleResult(publisher);
                     }
                     case SYNCHRONOUS -> {
                         return returnSynchronous(context, producerState);
@@ -169,15 +169,15 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         Object value = producerState.valueSupplier.get(context);
         boolean isReactiveValue = value != null && Publishers.isConvertibleToPublisher(value.getClass());
         if (isReactiveValue) {
-            Flux<Object> sendFlowable = buildSendFluxForReactiveValue(context, producerState, returnTypeArgument, value);
+            Flux<Object> send = buildSendFluxForReactiveValue(context, producerState, returnTypeArgument, value);
             if (Iterable.class.isAssignableFrom(javaReturnType)) {
-                return conversionService.convert(sendFlowable.collectList().block(), returnTypeArgument).orElse(null);
+                return conversionService.convert(send.collectList().block(), returnTypeArgument).orElse(null);
             } else if (void.class.isAssignableFrom(javaReturnType)) {
                 // a maybe will return null, and not throw an exception
-                Mono<Object> maybe = sendFlowable.next();
+                Mono<Object> maybe = send.next();
                 return maybe.block();
             } else {
-                return conversionService.convert(sendFlowable.blockFirst(), returnTypeArgument).orElse(null);
+                return conversionService.convert(send.blockFirst(), returnTypeArgument).orElse(null);
             }
         } else {
             boolean transactional = producerState.transactional;
@@ -259,9 +259,9 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     private Flux<Object> returnPublisher(MethodInvocationContext<Object, Object> context, ProducerState producerState, Argument<?> returnType) {
         Object value = producerState.valueSupplier.get(context);
         boolean isReactiveValue = value != null && Publishers.isConvertibleToPublisher(value.getClass());
-        Flux<Object> returnFlowable;
+        Flux<Object> result;
         if (isReactiveValue) {
-            returnFlowable = buildSendFluxForReactiveValue(context, producerState, returnType, value);
+            result = buildSendFluxForReactiveValue(context, producerState, returnType, value);
         } else {
             if (producerState.isBatchSend) {
                 Object batchValue;
@@ -278,12 +278,12 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     bodyEmitter = Flux.just(batchValue);
                 }
 
-                returnFlowable = bodyEmitter.flatMap(o -> buildSendFlux(context, producerState, o, returnType));
+                result = bodyEmitter.flatMap(o -> buildSendFlux(context, producerState, o, returnType));
             } else {
-                returnFlowable = buildSendFlux(context, producerState, value, returnType);
+                result = buildSendFlux(context, producerState, value, returnType);
             }
         }
-        return returnFlowable;
+        return result;
     }
 
     private CompletableFuture<Object> returnCompletableFuture(MethodInvocationContext<Object, Object> context, ProducerState producerState, Argument<?> returnType) {
@@ -291,14 +291,14 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         Object value = producerState.valueSupplier.get(context);
         boolean isReactiveValue = value != null && Publishers.isConvertibleToPublisher(value.getClass());
         if (isReactiveValue) {
-            Flux sendFlowable = buildSendFluxForReactiveValue(context, producerState, returnType, value);
+            Flux send = buildSendFluxForReactiveValue(context, producerState, returnType, value);
 
             if (!Publishers.isSingle(value.getClass())) {
-                sendFlowable = sendFlowable.collectList().flux();
+                send = send.collectList().flux();
             }
 
             //noinspection SubscriberImplementation
-            sendFlowable.subscribe(new Subscriber() {
+            send.subscribe(new Subscriber() {
                 boolean completed = false;
 
                 @Override
@@ -416,7 +416,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     private Flux<Object> buildSendFluxForReactiveValue(MethodInvocationContext<Object, Object> context, ProducerState producerState, Argument<?> returnType, Object value) {
-        Flux<?> valueFlowable = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), value, Publisher.class));
+        Flux<?> valuePublisher = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), value, Publisher.class));
         Class<?> javaReturnType = returnType.getType();
 
         if (Iterable.class.isAssignableFrom(javaReturnType)) {
@@ -431,7 +431,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         }
 
         Argument<?> finalReturnType = returnType;
-        Flux<Object> sendFlowable = valueFlowable.flatMap(o -> {
+        Flux<Object> result = valuePublisher.flatMap(o -> {
             ProducerRecord record = buildProducerRecord(context, producerState, o);
             if (LOG.isTraceEnabled()) {
                 LOG.trace("@KafkaClient method [{}] Sending producer record: {}", logMethod(context), record);
@@ -442,16 +442,16 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     .onErrorMap(e -> wrapException(context, e));
         });
         if (transactional) {
-            sendFlowable = addTransactionalProcessing(producerState, sendFlowable);
+            result = addTransactionalProcessing(producerState, result);
         }
         if (producerState.maxBlock != null) {
-            sendFlowable = sendFlowable.timeout(producerState.maxBlock);
+            result = result.timeout(producerState.maxBlock);
         }
-        return sendFlowable;
+        return result;
     }
 
-    private Flux<Object> addTransactionalProcessing(ProducerState producerState, Flux<Object> sendFlowable) {
-        return sendFlowable.doOnError(throwable -> {
+    private Flux<Object> addTransactionalProcessing(ProducerState producerState, Flux<Object> publisher) {
+        return publisher.doOnError(throwable -> {
                     LOG.trace("Aborting transaction for producer: {}", producerState.transactionalId);
                     producerState.kafkaProducer.abortTransaction();
                 })

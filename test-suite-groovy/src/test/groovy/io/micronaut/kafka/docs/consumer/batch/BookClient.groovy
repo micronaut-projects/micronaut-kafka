@@ -3,8 +3,8 @@ package io.micronaut.kafka.docs.consumer.batch
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import io.reactivex.Flowable
 import org.apache.kafka.clients.producer.RecordMetadata
+import reactor.core.publisher.Flux
 
 @Requires(property = 'spec.name', value = 'BookListenerTest')
 // tag::clazz[]
@@ -24,11 +24,11 @@ interface BookClient {
 
     // tag::reactive[]
     @Topic('books')
-    Flowable<RecordMetadata> send(List<Book> books)
+    Flux<RecordMetadata> send(List<Book> books)
     // end::reactive[]
 
-    // tag::flowable[]
+    // tag::flux[]
     @Topic('books')
-    Flowable<RecordMetadata> send(Flowable<Book> books)
-    // end::flowable[]
+    Flux<RecordMetadata> send(Flux<Book> books)
+    // end::flux[]
 }

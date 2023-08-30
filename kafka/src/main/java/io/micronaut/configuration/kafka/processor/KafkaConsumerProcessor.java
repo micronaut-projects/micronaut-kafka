@@ -596,16 +596,16 @@ class KafkaConsumerProcessor
                 final BoundExecutable boundExecutable = executableBinder.bind(method, binderRegistry, consumerRecord);
                 final Object result = boundExecutable.invoke(consumerState.consumerBean);
                 if (result != null) {
-                    final Flux<?> resultFlowable;
+                    final Flux<?> publisher;
                     final boolean isBlocking;
                     if (Publishers.isConvertibleToPublisher(result)) {
-                        resultFlowable = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
+                        publisher = Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
                         isBlocking = method.hasAnnotation(Blocking.class);
                     } else {
-                        resultFlowable = Flux.just(result);
+                        publisher = Flux.just(result);
                         isBlocking = true;
                     }
-                    handleResultFlux(consumerState, method, consumerRecord, resultFlowable, isBlocking, consumerRecords);
+                    handleResultFlux(consumerState, method, consumerRecord, publisher, isBlocking, consumerRecords);
                 }
             } catch (Throwable e) {
                 if (resolveWithErrorStrategy(consumerState, consumerRecord, e)) {
@@ -828,11 +828,11 @@ class KafkaConsumerProcessor
     private void handleResultFlux(ConsumerState consumerState,
                                   ExecutableMethod<?, ?> method,
                                   ConsumerRecord<?, ?> consumerRecord,
-                                  Flux<?> resultFlowable,
+                                  Flux<?> publisher,
                                   boolean isBlocking,
                                   ConsumerRecords<?, ?> consumerRecords) {
 
-        Flux<RecordMetadata> recordMetadataProducer = resultFlowable
+        Flux<RecordMetadata> recordMetadataProducer = publisher
                 .flatMap((Function<Object, Publisher<RecordMetadata>>) value -> {
                     if (consumerState.sendToDestinationTopics != null) {
                         Object key = consumerRecord.key();
