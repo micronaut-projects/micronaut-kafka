@@ -18,7 +18,7 @@ class ProductListener {
     }
 
     @Topic("my-products") // <2>
-    fun receive(@KafkaKey brand: String?, name: String?) { // <3>
+    fun receive(@KafkaKey brand: String, name: String) { // <3>
         LOG.info("Got Product - {} by {}", name, brand)
     }
 }
