@@ -1394,8 +1394,8 @@ void testBookSender() {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Test
 fun testBookSender() {
-    ApplicationContext.run(mutableMapOf&lt;String, Any&gt;( // <b class="conum">(1)</b>
-        "kafka.enabled" to "true", "spec.name" to "BookSenderTest")).use { ctx -&gt;
+    ApplicationContext.run(mapOf( // <b class="conum">(1)</b>
+        "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest")).use { ctx -&gt;
         val bookSender = ctx.getBean(BookSender::class.java) // <b class="conum">(2)</b>
         val book = Book("The Stand")
         bookSender.send("Stephen King", book)
