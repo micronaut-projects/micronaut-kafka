@@ -6,7 +6,7 @@ To achieve this you can set the `batch` member of the ann:configuration.kafka.an
 
 .Receiving a Batch of Records
 
-snippet::io.micronaut.kafka.docs.consumer.batch.BookListener[tags="imports,clazz,method", indent=0]
+snippet::io.micronaut.kafka.docs.consumer.batch.BookListener[tags="imports,clazz,method,endclazz", indent=0]
 
 <1> The ann:configuration.kafka.annotation.KafkaListener[] annotation's `batch` member is set to `true`
 <2> The method defines that it receives a list of `Book` instances
