@@ -57,7 +57,6 @@ import static org.apache.kafka.common.utils.Time.SYSTEM;
  * @since 1.0
  */
 @Singleton
-@Requires(beans = AdminClient.class)
 @Requires(property = KafkaHealthConfigurationProperties.PREFIX + ".enabled", value = StringUtils.TRUE, defaultValue = StringUtils.TRUE)
 public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceListener {
     private static final String ID = "kafka";
