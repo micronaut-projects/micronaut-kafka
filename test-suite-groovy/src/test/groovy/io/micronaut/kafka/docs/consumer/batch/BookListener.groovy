@@ -61,4 +61,6 @@ class BookListener {
         }
     }
     // end::manual[]
+//tag::endclazz[]
 }
+//end::endclazz[]
