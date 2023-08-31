@@ -119,7 +119,7 @@ snippet::io.micronaut.kafka.docs.consumer.reactive.ProductListener[tags=method, 
 <2> A `Mono` is used to receive the message body
 <3> The `doOnSuccess` method is used to process the result
 
-Note that in this case the method returns an `Mono` this indicates to Micronaut that the `poll` loop should continue and if `enable.auto.commit` is set to `true` (the default) the offsets will be committed potentially before the `doOnSuccess` is called.
+Note that in this case the method returns a `Mono` that indicates to Micronaut the `poll` loop should continue, and if `enable.auto.commit` is set to `true` (the default) the offsets will be committed, potentially before the `doOnSuccess` is called.
 
 The idea here is that you are able to write consumers that don't block, however care must be taken in the case where an error occurs in the `doOnSuccess` method otherwise the message could be lost. You could for example re-deliver the message in case of an error.
 
