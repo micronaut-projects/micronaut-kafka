@@ -31,7 +31,7 @@ This example is fairly trivial in that it commits offsets after processing each 
 
 == Reactive Batch Processing
 
-Batch listeners also support defining reactive types (Reactor `Flux` or RxJava rx:Flowable[] or )as the method argument.
+Batch listeners also support defining reactive types (Reactor `Flux` or RxJava rx:Flowable[]) as the method argument.
 
 Add the library https://micronaut-projects.github.io/micronaut-reactor/latest/guide/[Micronaut Reactor] or https://micronaut-projects.github.io/micronaut-rxjava3/latest/guide/[Micronaut RxJava 3] to your application's dependencies.
 
