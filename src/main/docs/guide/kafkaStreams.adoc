@@ -22,7 +22,7 @@ dependency:micronaut-kafka-streams[groupId="io.micronaut.kafka"]
 The minimum configuration required is to set the Kafka bootstrap servers:
 
 .Configuring Kafka
-[source,yaml]
+[configuration]
 ----
 kafka:
     bootstrap:
@@ -60,7 +60,7 @@ snippet::io.micronaut.kafka.docs.streams.WordCountListener[tags="imports, clazz"
 .Configuring a single Stream on a Micronaut application.
 If you have a single Kafka Stream configured on your Micronaut service, then you should use the `default` key on the configuration.
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
@@ -78,7 +78,7 @@ Assuming you have 2 or more Kafka Streams definitions on a single service, you w
 
 For example in `application.yml`:
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
@@ -110,7 +110,7 @@ When writing a test without starting the actual Kafka server, you can instruct M
 
 For example in `application-test.yml`:
 
-[source,yaml]
+[configuration]
 ----
 kafka:
     streams:
