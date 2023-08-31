@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
+import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.TopicPartition
 import reactor.core.publisher.Mono
@@ -51,6 +52,36 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         }
     }
 
+    void "test custom exception handler that throws an exception"() {
+        given:"A custom exception handler that throws an exception"
+        ErrorCausingCustomExceptionHandlerConsumer myConsumer = context.getBean(ErrorCausingCustomExceptionHandlerConsumer)
+
+        when:"Two messages are produced"
+        ErrorClient myClient = context.getBean(ErrorClient)
+        myClient.sendMessage('ERROR') // This one will create the problem
+        myClient.sendMessage('OK')    // This one should be received normally
+
+        then:"The error message is received"
+        conditions.eventually {
+            myConsumer.messagesReceived.contains("ERROR")
+        }
+
+        and:"The custom exception handler receives the kafka listener exception"
+        conditions.eventually {
+            myConsumer.exceptionsReceived.any { it.message == "Consumer problem: ERROR" }
+        }
+
+        and:"The next message is received normally"
+        conditions.eventually {
+            myConsumer.messagesReceived.contains("OK")
+        }
+
+        and:"The custom exception handler does NOT receive its own exception"
+        conditions.eventually {
+            !myConsumer.exceptionsReceived.any { it.message == "Custom exception handler problem" }
+        }
+    }
+
     @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC)
     static class ErrorCausingConsumer implements KafkaListenerExceptionHandler {
@@ -89,6 +120,28 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
         @Override
         void handle(KafkaListenerException exception) {
             exceptionHandled = true
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorHandlingSpec')
+    @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, uniqueGroupId = true, properties = @Property(name = "max.poll.records", value = "1"))
+    static class ErrorCausingCustomExceptionHandlerConsumer implements KafkaListenerExceptionHandler {
+
+        List<String> messagesReceived = []
+        List<KafkaListenerException> exceptionsReceived = []
+
+        @Topic("errors")
+        void receive(String message) {
+            messagesReceived << message
+            if (message == 'ERROR') {
+                throw new RuntimeException("Consumer problem: $message")
+            }
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionsReceived << exception
+            throw new RuntimeException("Custom exception handler problem")
         }
     }
 

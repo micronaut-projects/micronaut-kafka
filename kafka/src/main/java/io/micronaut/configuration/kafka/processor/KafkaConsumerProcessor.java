@@ -817,10 +817,17 @@ class KafkaConsumerProcessor
     }
 
     private void handleException(final Object consumerBean, final KafkaListenerException kafkaListenerException) {
-        if (consumerBean instanceof KafkaListenerExceptionHandler kle) {
-            kle.handle(kafkaListenerException);
-        } else {
-            exceptionHandler.handle(kafkaListenerException);
+        try {
+            if (consumerBean instanceof KafkaListenerExceptionHandler kle) {
+                kle.handle(kafkaListenerException);
+            } else {
+                exceptionHandler.handle(kafkaListenerException);
+            }
+        } catch (Exception e) {
+            // The exception handler could not handle the consumer exception;
+            // Log both errors and continue as usual to prevent an infinite loop
+            e.addSuppressed(kafkaListenerException);
+            LOG.error("Unexpected error while handling the kafka listener exception", e);
         }
     }
 
