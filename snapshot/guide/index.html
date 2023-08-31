@@ -326,25 +326,123 @@ $ mn create-kafka-listener MessageListener
 <div class="paragraph">
 <p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Configuring Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9092</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     bootstrap:
         servers: localhost:9092</code></pre>
 </div>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.bootstrap]
+    servers="localhost:9092"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = "localhost:9092"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = "localhost:9092"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": "localhost:9092"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>The value can also be list of available servers:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Configuring Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers[0]=foo:9092
+kafka.bootstrap.servers[1]=bar:9092</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     bootstrap:
         servers:
             - foo:9092
             - bar:9092</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.bootstrap]
+    servers=[
+      "foo:9092",
+      "bar:9092"
+    ]</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = ["foo:9092", "bar:9092"]
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = ["foo:9092", "bar:9092"]
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": ["foo:9092", "bar:9092"]
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -362,8 +460,21 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 <div class="paragraph">
 <p>If your broker needs to setup SSL, it can be configured this way:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Configuring Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9092
+kafka.ssl.keystore.location=/path/to/client.keystore.p12
+kafka.ssl.keystore.password=secret
+kafka.ssl.truststore.location=/path/to/client.truststore.jks
+kafka.ssl.truststore.password=secret
+kafka.ssl.truststore.type=PKCS12
+kafka.security.protocol=ssl</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
   bootstrap:
@@ -378,6 +489,98 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
       type: PKCS12
   security:
     protocol: ssl</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.bootstrap]
+    servers="localhost:9092"
+  [kafka.ssl]
+    [kafka.ssl.keystore]
+      location="/path/to/client.keystore.p12"
+      password="secret"
+    [kafka.ssl.truststore]
+      location="/path/to/client.truststore.jks"
+      password="secret"
+      type="PKCS12"
+  [kafka.security]
+    protocol="ssl"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = "localhost:9092"
+  }
+  ssl {
+    keystore {
+      location = "/path/to/client.keystore.p12"
+      password = "secret"
+    }
+    truststore {
+      location = "/path/to/client.truststore.jks"
+      password = "secret"
+      type = "PKCS12"
+    }
+  }
+  security {
+    protocol = "ssl"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = "localhost:9092"
+    }
+    ssl {
+      keystore {
+        location = "/path/to/client.keystore.p12"
+        password = "secret"
+      }
+      truststore {
+        location = "/path/to/client.truststore.jks"
+        password = "secret"
+        type = "PKCS12"
+      }
+    }
+    security {
+      protocol = "ssl"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": "localhost:9092"
+    },
+    "ssl": {
+      "keystore": {
+        "location": "/path/to/client.keystore.p12",
+        "password": "secret"
+      },
+      "truststore": {
+        "location": "/path/to/client.truststore.jks",
+        "password": "secret",
+        "type": "PKCS12"
+      }
+    },
+    "security": {
+      "protocol": "ssl"
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -596,11 +799,51 @@ class ProductListener {
 <div class="paragraph">
 <p>If for some reason, you need to disable the creation of kafka consumers, or producers, you can through configuration:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Disabling Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.enabled=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
   enabled: false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  enabled=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  enabled = false
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    enabled = false
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "enabled": false
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -936,8 +1179,16 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="paragraph">
 <p>There are a number of ways to pass configuration properties to the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a>. You can set default producer properties using <code>kafka.producers.default</code> in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Default Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.producers.default.retries=5
+kafka.producers.default.bootstrap.servers=localhost:9096</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     producers:
@@ -945,6 +1196,64 @@ part of the <code>kafka-clients</code> library:</p>
             retries: 5
             bootstrap:
               servers: localhost:9096</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.producers]
+    [kafka.producers.default]
+      retries=5
+      [kafka.producers.default.bootstrap]
+        servers="localhost:9096"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  producers {
+    'default' {
+      retries = 5
+      bootstrap {
+        servers = "localhost:9096"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    producers {
+      default {
+        retries = 5
+        bootstrap {
+          servers = "localhost:9096"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "producers": {
+      "default": {
+        "retries": 5,
+        "bootstrap": {
+          "servers": "localhost:9096"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -977,8 +1286,17 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="paragraph">
 <p>This serves 2 purposes. Firstly it sets the value of the <code>client.id</code> setting used to build the <code>Producer</code>. Secondly, it allows you to apply per producer configuration in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Default Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.producers.product-client.retries=5
+kafka.producers.product-client.bootstrap.servers=localhost:9097
+kafka.producers.product-client-2.bootstrap.servers=localhost:9098</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     producers:
@@ -989,6 +1307,82 @@ part of the <code>kafka-clients</code> library:</p>
         product-client-2:
             bootstrap:
               servers: localhost:9098</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.producers]
+    [kafka.producers.product-client]
+      retries=5
+      [kafka.producers.product-client.bootstrap]
+        servers="localhost:9097"
+    [kafka.producers.product-client-2]
+      [kafka.producers.product-client-2.bootstrap]
+        servers="localhost:9098"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  producers {
+    productClient {
+      retries = 5
+      bootstrap {
+        servers = "localhost:9097"
+      }
+    }
+    productClient2 {
+      bootstrap {
+        servers = "localhost:9098"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    producers {
+      product-client {
+        retries = 5
+        bootstrap {
+          servers = "localhost:9097"
+        }
+      }
+      product-client-2 {
+        bootstrap {
+          servers = "localhost:9098"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "producers": {
+      "product-client": {
+        "retries": 5,
+        "bootstrap": {
+          "servers": "localhost:9097"
+        }
+      },
+      "product-client-2": {
+        "bootstrap": {
+          "servers": "localhost:9098"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -1072,14 +1466,75 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="paragraph">
 <p>You can, however, explicitly override the <code>Serializer</code> used by providing the appropriate configuration in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Default Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.producers.product-client.value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     producers:
         product-client:
             value:
                 serializer: org.apache.kafka.common.serialization.ByteArraySerializer</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.producers]
+    [kafka.producers.product-client]
+      [kafka.producers.product-client.value]
+        serializer="org.apache.kafka.common.serialization.ByteArraySerializer"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  producers {
+    productClient {
+      value {
+        serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    producers {
+      product-client {
+        value {
+          serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "producers": {
+      "product-client": {
+        "value": {
+          "serializer": "org.apache.kafka.common.serialization.ByteArraySerializer"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -1735,14 +2190,73 @@ internal class MyTest : AbstractKafkaTest() {
 <div class="paragraph">
 <p>Using the <code>@KafkaListener</code> annotation Micronaut will build a <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer</a> and start the <code>poll</code> loop by running the <code>KafkaConsumer</code> in a special <code>consumer</code> thread pool. You can configure the size of the thread pool based on the number of consumers in your application in <code>application.yml</code> as desired:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Configuring the <code>consumer</code> thread pool</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">micronaut.executors.consumer.type=fixed
+micronaut.executors.consumer.nThreads=25</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">micronaut:
     executors:
         consumer:
             type: fixed
             nThreads: 25</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[micronaut]
+  [micronaut.executors]
+    [micronaut.executors.consumer]
+      type="fixed"
+      nThreads=25</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">micronaut {
+  executors {
+    consumer {
+      type = "fixed"
+      nThreads = 25
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  micronaut {
+    executors {
+      consumer {
+        type = "fixed"
+        nThreads = 25
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "micronaut": {
+    "executors": {
+      "consumer": {
+        "type": "fixed",
+        "nThreads": 25
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -1823,8 +2337,16 @@ internal class MyTest : AbstractKafkaTest() {
 <div class="paragraph">
 <p>By default Micronaut will inspect the method signature of the method annotated with <code>@Topic</code> that will listen for <code>ConsumerRecord</code> instances and from the types infer an appropriate key and value <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/common/serialization/Deserializer.html">Deserializer</a>.</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.consumers.default.allow.auto.create.topics=true
+kafka.consumers.product.bootstrap.servers=localhost:9098</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     consumers:
@@ -1833,6 +2355,71 @@ internal class MyTest : AbstractKafkaTest() {
         product:
             bootstrap:
               servers: localhost:9098</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.consumers]
+    [kafka.consumers.default]
+      "allow.auto.create.topics"=true
+    [kafka.consumers.product]
+      [kafka.consumers.product.bootstrap]
+        servers="localhost:9098"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  consumers {
+    'default' {
+      allow.auto.create.topics = true
+    }
+    product {
+      bootstrap {
+        servers = "localhost:9098"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    consumers {
+      default {
+        "allow.auto.create.topics" = true
+      }
+      product {
+        bootstrap {
+          servers = "localhost:9098"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "consumers": {
+      "default": {
+        "allow.auto.create.topics": true
+      },
+      "product": {
+        "bootstrap": {
+          "servers": "localhost:9098"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -2358,8 +2945,15 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 <div class="paragraph">
 <p>There are a number of ways to pass configuration properties to the <code>KafkaConsumer</code>. You can set default consumer properties using <code>kafka.consumers.default</code> in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Default Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.consumers.default.session.timeout.ms=30000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     consumers:
@@ -2369,14 +2963,82 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
                     ms: 30000</code></pre>
 </div>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.consumers]
+    [kafka.consumers.default]
+      [kafka.consumers.default.session]
+        [kafka.consumers.default.session.timeout]
+          ms=30000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  consumers {
+    'default' {
+      session {
+        timeout {
+          ms = 30000
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    consumers {
+      default {
+        session {
+          timeout {
+            ms = 30000
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "consumers": {
+      "default": {
+        "session": {
+          "timeout": {
+            "ms": 30000
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>The above example will set the default <code>session.timeout.ms</code> that Kafka uses to decide whether a consumer is alive or not and applies it to all created <code>KafkaConsumer</code> instances.</p>
 </div>
 <div class="paragraph">
 <p>You can also provide configuration specific to a consumer group. For example consider the following configuration:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Consumer Group Specific config</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.consumers.myGroup.session.timeout.ms=30000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     consumers:
@@ -2384,6 +3046,67 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
             session:
                 timeout:
                     ms: 30000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.consumers]
+    [kafka.consumers.myGroup]
+      [kafka.consumers.myGroup.session]
+        [kafka.consumers.myGroup.session.timeout]
+          ms=30000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  consumers {
+    myGroup {
+      session {
+        timeout {
+          ms = 30000
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    consumers {
+      myGroup {
+        session {
+          timeout {
+            ms = 30000
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "consumers": {
+      "myGroup": {
+        "session": {
+          "timeout": {
+            "ms": 30000
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -2482,14 +3205,75 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="paragraph">
 <p>You can, however, explicitly override the <code>Deserializer</code> used by providing the appropriate configuration in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Applying Default Configuration</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.consumers.myGroup.value.deserializer=org.apache.kafka.common.serialization.ByteArrayDeserializer</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     consumers:
         myGroup:
             value:
                 deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.consumers]
+    [kafka.consumers.myGroup]
+      [kafka.consumers.myGroup.value]
+        deserializer="org.apache.kafka.common.serialization.ByteArrayDeserializer"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  consumers {
+    myGroup {
+      value {
+        deserializer = "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    consumers {
+      myGroup {
+        value {
+          deserializer = "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "consumers": {
+      "myGroup": {
+        "value": {
+          "deserializer": "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -4326,12 +5110,59 @@ class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
 <div class="paragraph">
 <p>The minimum configuration required is to set the Kafka bootstrap servers:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
 <div class="title">Configuring Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9092</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     bootstrap:
         servers: localhost:9092</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.bootstrap]
+    servers="localhost:9092"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = "localhost:9092"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = "localhost:9092"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": "localhost:9092"
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -4680,13 +5511,72 @@ class WordCountListener {
 <div class="title">Configuring a single Stream on a Micronaut application.</div>
 <p>If you have a single Kafka Stream configured on your Micronaut service, then you should use the <code>default</code> key on the configuration.</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.processing.guarantee=exactly_once
+kafka.streams.default.auto.offset.reset=earliest</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     streams:
        default:
           processing.guarantee: "exactly_once"
           auto.offset.reset: "earliest"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.streams]
+    [kafka.streams.default]
+      "processing.guarantee"="exactly_once"
+      "auto.offset.reset"="earliest"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    'default' {
+      processing.guarantee = "exactly_once"
+      auto.offset.reset = "earliest"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      default {
+        "processing.guarantee" = "exactly_once"
+        "auto.offset.reset" = "earliest"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "default": {
+        "processing.guarantee": "exactly_once",
+        "auto.offset.reset": "earliest"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -4701,7 +5591,15 @@ Assuming you have 2 or more Kafka Streams definitions on a single service, you w
 <div class="paragraph">
 <p>For example in <code>application.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.num.stream.threads=1
+kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     streams:
@@ -4713,6 +5611,92 @@ Assuming you have 2 or more Kafka Streams definitions on a single service, you w
           num:
             stream:
               threads: 10</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.streams]
+    [kafka.streams.default]
+      [kafka.streams.default.num]
+        [kafka.streams.default.num.stream]
+          threads=1
+    [kafka.streams.my-other-stream]
+      [kafka.streams.my-other-stream.num]
+        [kafka.streams.my-other-stream.num.stream]
+          threads=10</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    'default' {
+      num {
+        stream {
+          threads = 1
+        }
+      }
+    }
+    myOtherStream {
+      num {
+        stream {
+          threads = 10
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      default {
+        num {
+          stream {
+            threads = 1
+          }
+        }
+      }
+      my-other-stream {
+        num {
+          stream {
+            threads = 10
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "default": {
+        "num": {
+          "stream": {
+            "threads": 1
+          }
+        }
+      },
+      "my-other-stream": {
+        "num": {
+          "stream": {
+            "threads": 10
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -4791,12 +5775,66 @@ fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {<
 <div class="paragraph">
 <p>For example in <code>application-test.yml</code>:</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.start-kafka-streams=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     streams:
         default:
             start-kafka-streams: false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.streams]
+    [kafka.streams.default]
+      start-kafka-streams=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    'default' {
+      startKafkaStreams = false
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      default {
+        start-kafka-streams = false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "default": {
+        "start-kafka-streams": false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -5068,12 +6106,66 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="paragraph">
 <p>If you wish to disable the Kafka streams health check while still using the <code>management</code> dependency you can set the property <code>kafka.health.streams.enabled</code> to <code>false</code> in your application configuration.</p>
 </div>
-<div class="listingblock">
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.health.streams.enabled=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     health:
         streams:
             enabled: false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.health]
+    [kafka.health.streams]
+      enabled=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  health {
+    streams {
+      enabled = false
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    health {
+      streams {
+        enabled = false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "health": {
+      "streams": {
+        "enabled": false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 
