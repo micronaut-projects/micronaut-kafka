@@ -19,8 +19,8 @@ public class ProductListener {
     // tag::method[]
     @Topic("reactive-products")
     public Mono<Product> receive(@KafkaKey String brand,  // <1>
-                                 Mono<Product> productFlowable) { // <2>
-        return productFlowable.doOnSuccess((product) ->
+                                 Mono<Product> productPublisher) { // <2>
+        return productPublisher.doOnSuccess((product) ->
             LOG.info("Got Product - {} by {}", product.name(), brand) // <3>
         );
     }
@@ -29,8 +29,8 @@ public class ProductListener {
     // tag::blocking[]
     @Blocking
     @Topic("reactive-products")
-    public Mono<Product> receiveBlocking(@KafkaKey String brand, Mono<Product> productFlowable) {
-        return productFlowable.doOnSuccess((product) ->
+    public Mono<Product> receiveBlocking(@KafkaKey String brand, Mono<Product> productPublisher) {
+        return productPublisher.doOnSuccess((product) ->
             LOG.info("Got Product - {} by {}", product.name(), brand)
         );
     }

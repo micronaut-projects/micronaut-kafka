@@ -4,8 +4,6 @@ import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
 import io.micronaut.context.annotation.Requires
 import io.micronaut.messaging.annotation.SendTo
 import io.micronaut.serde.annotation.Serdeable
-import io.reactivex.Flowable
-import io.reactivex.Single
 import org.apache.kafka.clients.producer.RecordMetadata
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -79,7 +77,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         quantityListener.quantities.clear()
 
         when:
-        client.sendProductForFlowable("Apple", new Product(name: "Apple", quantity: 5))
+        client.sendProductForPublisher("Apple", new Product(name: "Apple", quantity: 5))
 
         then:
         conditions.eventually {
@@ -140,7 +138,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
         RecordMetadata sendProductBlocking(@KafkaKey String name, Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_FLOWABLE)
-        RecordMetadata sendProductForFlowable(@KafkaKey String name, Product product)
+        RecordMetadata sendProductForPublisher(@KafkaKey String name, Product product)
 
         @Topic(KafkaSendToSpec.TOPIC_FLUX)
         RecordMetadata sendProductForFlux(@KafkaKey String name, Product product)
@@ -163,7 +161,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
         @Topic(KafkaSendToSpec.TOPIC_SINGLE)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Single<Integer> receiveSingle(Single<Product> product) {
+        Mono<Integer> receiveSingle(Mono<Product> product) {
             product.map({ Product p ->
                 products << p
                 p.quantity
@@ -172,7 +170,7 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
         @Topic(KafkaSendToSpec.TOPIC_FLOWABLE)
         @SendTo(KafkaSendToSpec.TOPIC_QUANTITY)
-        Flowable<Integer> receiveFlowable(Flowable<Product> product) {
+        Flux<Integer> receivePublisher(Flux<Product> product) {
             product.map{ Product p ->
                 products << p
                 return p.quantity

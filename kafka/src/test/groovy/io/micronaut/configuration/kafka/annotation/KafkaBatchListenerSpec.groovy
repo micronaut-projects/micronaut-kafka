@@ -8,7 +8,6 @@ import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.messaging.annotation.SendTo
 import io.micronaut.serde.annotation.Serdeable
-import io.reactivex.Flowable
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import reactor.core.publisher.Flux
 import spock.lang.Retry
@@ -24,11 +23,9 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
     public static final String BOOK_CONSUMER_RECORD_LIST_TOPIC = 'KafkaBatchListenerSpec-consumer-records'
     public static final String BOOKS_HEADERS_TOPIC = 'KafkaBatchListenerSpec-books-headers'
     public static final String BOOKS_FLUX_TOPIC = 'KafkaBatchListenerSpec-books-flux'
-    public static final String BOOKS_FLOWABLE_TOPIC = 'KafkaBatchListenerSpec-books-flowable'
     public static final String BOOKS_FORWARD_LIST_TOPIC = 'KafkaBatchListenerSpec-books-forward-list'
     public static final String BOOKS_FORWARD_ARRAY_TOPIC = 'KafkaBatchListenerSpec-books-forward-array'
     public static final String BOOKS_FORWARD_FLUX_TOPIC = 'KafkaBatchListenerSpec-books-forward-flux'
-    public static final String BOOKS_FORWARD_FLOWABLE_TOPIC = 'KafkaBatchListenerSpec-books-forward-flowable'
     public static final String BOOKS_ARRAY_TOPIC = 'KafkaBatchListenerSpec-books-array'
     public static final String TITLES_TOPIC = 'KafkaBatchListenerSpec-titles'
 
@@ -155,24 +152,6 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    void "test send and forward batch flowable"() {
-        given:
-        MyBatchClient myBatchClient = context.getBean(MyBatchClient)
-        BookListener bookListener = context.getBean(BookListener)
-        bookListener.books?.clear()
-
-        when:
-        Flowable<Book> results = myBatchClient.sendAndForwardFlowable(Flowable.fromIterable([new Book(title: "The Flow"), new Book(title: "The Shining")]))
-        results.toList().blockingGet()
-
-        then:
-        conditions.eventually {
-            bookListener.books.size() == 2
-            bookListener.books.contains(new Book(title: "The Flow"))
-            bookListener.books.contains(new Book(title: "The Shining"))
-        }
-    }
-
     void "test send batch flux"() {
         given:
         MyBatchClient myBatchClient = context.getBean(MyBatchClient)
@@ -186,23 +165,6 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         conditions.eventually {
             bookListener.books.size() == 2
             bookListener.books.contains(new Book(title: "The Flux"))
-            bookListener.books.contains(new Book(title: "The Shining"))
-        }
-    }
-
-    void "test send batch flowable"() {
-        given:
-        MyBatchClient myBatchClient = context.getBean(MyBatchClient)
-        BookListener bookListener = context.getBean(BookListener)
-        bookListener.books?.clear()
-
-        when:
-        myBatchClient.sendBooksFlowable(Flowable.fromIterable([new Book(title: "The Flowable"), new Book(title: "The Shining")]))
-
-        then:
-        conditions.eventually {
-            bookListener.books.size() == 2
-            bookListener.books.contains(new Book(title: "The Flowable"))
             bookListener.books.contains(new Book(title: "The Shining"))
         }
     }
@@ -249,14 +211,8 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
         @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_FLUX_TOPIC)
         Flux<Book> sendAndForwardFlux(Flux<Book> books)
 
-        @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_FLOWABLE_TOPIC)
-        Flowable<Book> sendAndForwardFlowable(Flowable<Book> books)
-
         @Topic(KafkaBatchListenerSpec.BOOKS_FLUX_TOPIC)
         void sendBooksFlux(Flux<Book> books)
-
-        @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
-        void sendBooksFlowable(Flowable<Book> books)
 
         @Topic(KafkaBatchListenerSpec.BOOK_CONSUMER_RECORD_LIST_TOPIC)
         void sendToReceiveAsConsumerRecord(@KafkaKey String key, @MessageBody Book book)
@@ -308,21 +264,9 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
             return books.map { Book book -> book.title }
         }
 
-        @Topic(KafkaBatchListenerSpec.BOOKS_FORWARD_FLOWABLE_TOPIC)
-        @SendTo(KafkaBatchListenerSpec.TITLES_TOPIC)
-        Flowable<String> receiveAndSendFlowable(Flowable<Book> books) {
-            this.books.addAll books.toList().blockingGet()
-            return books.map { Book book -> book.title }
-        }
-
         @Topic(KafkaBatchListenerSpec.BOOKS_FLUX_TOPIC)
         void receiveFlux(Flux<Book> books) {
             this.books.addAll books.collectList().block()
-        }
-
-        @Topic(KafkaBatchListenerSpec.BOOKS_FLOWABLE_TOPIC)
-        void receiveFlowable(Flowable<Book> books) {
-            this.books.addAll books.toList().blockingGet()
         }
 
         @Topic(KafkaBatchListenerSpec.BOOK_CONSUMER_RECORD_LIST_TOPIC)

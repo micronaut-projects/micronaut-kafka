@@ -21,7 +21,6 @@ import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.serde.annotation.Serdeable
-import io.reactivex.Single
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -92,7 +91,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
     void "test POJO consumer"() {
         when:
         MyClient myClient = context.getBean(MyClient)
-        Book book = myClient.sendReactive("Stephen King", new Book(title: "The Stand")).blockingGet()
+        Book book = myClient.sendReactive("Stephen King", new Book(title: "The Stand")).block()
 
         PojoConsumer myConsumer = context.getBean(PojoConsumer)
 
@@ -229,7 +228,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         RecordMetadata sendGetRecordMetadata(@KafkaKey String key, String sentence)
 
         @Topic("books")
-        Single<Book> sendReactive(@KafkaKey String key, Book book)
+        Mono<Book> sendReactive(@KafkaKey String key, Book book)
 
         @Topic("books")
         void sendBook(@KafkaKey String key, @Nullable @MessageBody Book book)

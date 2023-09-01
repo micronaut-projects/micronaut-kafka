@@ -19,7 +19,6 @@ micronautBuild {
     importMicronautCatalog("micronaut-cache")
     importMicronautCatalog("micronaut-micrometer")
     importMicronautCatalog("micronaut-reactor")
-    importMicronautCatalog("micronaut-rxjava2")
     importMicronautCatalog("micronaut-serde")
     importMicronautCatalog("micronaut-tracing")
 }
