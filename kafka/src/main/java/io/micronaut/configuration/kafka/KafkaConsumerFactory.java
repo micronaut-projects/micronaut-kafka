@@ -16,25 +16,13 @@
 package io.micronaut.configuration.kafka;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
-import io.micronaut.configuration.kafka.serde.JsonObjectSerde;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
-import io.micronaut.core.annotation.TypeHint;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.RangeAssignor;
-import org.apache.kafka.clients.consumer.RoundRobinAssignor;
-import org.apache.kafka.clients.consumer.StickyAssignor;
-import org.apache.kafka.clients.producer.RoundRobinPartitioner;
-import org.apache.kafka.common.security.authenticator.AbstractLogin;
-import org.apache.kafka.common.security.authenticator.DefaultLogin;
-import org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler;
-import org.apache.kafka.common.security.authenticator.SaslServerCallbackHandler;
-import org.apache.kafka.common.security.plain.PlainLoginModule;
-import org.apache.kafka.common.serialization.*;
+import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -46,46 +34,6 @@ import java.util.Properties;
  * @since 1.0
  */
 @Factory
-@TypeHint({
-        CooperativeStickyAssignor.class,
-        // serializers
-        ShortSerializer.class,
-        DoubleSerializer.class,
-        LongSerializer.class,
-        BytesSerializer.class,
-        ByteArraySerializer.class,
-        IntegerSerializer.class,
-        ByteBufferSerializer.class,
-        StringSerializer.class,
-        FloatSerializer.class,
-        // serdes
-        JsonObjectSerde.class,
-        // deserializers
-        ShortDeserializer.class,
-        DoubleDeserializer.class,
-        LongDeserializer.class,
-        BytesDeserializer.class,
-        ByteArrayDeserializer.class,
-        IntegerDeserializer.class,
-        ByteBufferDeserializer.class,
-        StringDeserializer.class,
-        FloatDeserializer.class,
-
-        // partitioners
-        RoundRobinPartitioner.class,
-        // assigners
-        RangeAssignor.class,
-        RoundRobinAssignor.class,
-        StickyAssignor.class,
-
-        // authentication
-        DefaultLogin.class,
-        SaslServerCallbackHandler.class,
-        PlainLoginModule.class,
-        SaslClientCallbackHandler.class,
-        AbstractLogin.DefaultLoginCallbackHandler.class
-
-})
 public class KafkaConsumerFactory {
 
     /**
