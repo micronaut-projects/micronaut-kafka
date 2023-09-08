@@ -38,6 +38,10 @@ class ConsumerRegistrySpec extends AbstractKafkaContainerSpec {
         then:
         consumerIds.contains 'bicycle-client'
 
+        and:
+        consumerIds.contains 'bike-client'
+        consumerIds.count { it.startsWith('bike-client-') } == 2
+
         when:
         Set<String> subscription = registry.getConsumerSubscription('bicycle-client')
 
@@ -82,5 +86,26 @@ class ConsumerRegistrySpec extends AbstractKafkaContainerSpec {
         void receive(@MessageBody String model) {
             bicycles << model
         }
+    }
+
+    @Requires(property = 'spec.name', value = 'ConsumerRegistrySpec')
+    @KafkaListener(clientId = 'bike-client')
+    static class BikeListener1 {
+        @Topic('bikes')
+        void receive(@MessageBody String model) { }
+    }
+
+    @Requires(property = 'spec.name', value = 'ConsumerRegistrySpec')
+    @KafkaListener(clientId = 'bike-client')
+    static class BikeListener2 {
+        @Topic('bikes')
+        void receive(@MessageBody String model) { }
+    }
+
+    @Requires(property = 'spec.name', value = 'ConsumerRegistrySpec')
+    @KafkaListener(clientId = 'bike-client')
+    static class BikeListener3 {
+        @Topic('bikes')
+        void receive(@MessageBody String model) { }
     }
 }
