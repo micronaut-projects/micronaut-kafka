@@ -422,7 +422,7 @@ class KafkaConsumerProcessor
         for (int i = 0; i < consumerThreads; i++) {
             final String finalClientId;
             if (clientId != null) {
-                if (consumerThreads > 1) {
+                if (consumerThreads > 1 || consumers.containsKey(clientId)) {
                     finalClientId = clientId + '-' + clientIdGenerator.incrementAndGet();
                 } else {
                     finalClientId = clientId;
