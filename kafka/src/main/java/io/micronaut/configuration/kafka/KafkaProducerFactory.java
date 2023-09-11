@@ -150,7 +150,12 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             properties.put(ProducerConfig.ACKS_CONFIG, acksValue);
         }
 
-        return getKafkaProducer(id, null, k, v, false, properties);
+        final String transactionalId = annotationMetadata.stringValue(KafkaClient.class, "transactionalId")
+            .filter(StringUtils::isNotEmpty)
+            .orElse(null);
+        final boolean transactional = transactionalId != null;
+
+        return getKafkaProducer(id, transactionalId, k, v, transactional, properties);
     }
 
     @SuppressWarnings("unchecked")
