@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 @Factory
 public class KafkaProducerFactory implements ProducerRegistry, TransactionalProducerRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerFactory.class);
+    private static final String TRANSACTIONAL_ID = "transactionalId";
     private final Map<ClientKey, Producer> clients = new ConcurrentHashMap<>();
     private final BeanContext beanContext;
     private final SerdeRegistry serdeRegistry;
@@ -150,7 +151,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             properties.put(ProducerConfig.ACKS_CONFIG, acksValue);
         }
 
-        final String transactionalId = annotationMetadata.stringValue(KafkaClient.class, "transactionalId")
+        final String transactionalId = annotationMetadata.stringValue(KafkaClient.class, TRANSACTIONAL_ID)
             .filter(StringUtils::isNotEmpty)
             .orElse(null);
         final boolean transactional = transactionalId != null;
