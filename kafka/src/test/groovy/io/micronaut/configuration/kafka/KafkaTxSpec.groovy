@@ -8,6 +8,8 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.type.Argument
 import io.micronaut.messaging.annotation.SendTo
+import jakarta.inject.Singleton
+import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.IntegerSerializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -108,6 +110,30 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
         conditions.eventually {
             idempotenceNumbersCollector.numbers.size() == 30
         }
+    }
+
+    void "should inject a transactional producer"() {
+        given:
+        Producer<String, String> producer = context.getBean(MyService).transactionalProducer
+
+        when:
+        producer.beginTransaction()
+        producer.abortTransaction()
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "should inject a non-transactional producer"() {
+        given:
+        Producer<String, String> producer = context.getBean(MyService).nonTransactionalProducer
+
+        when:
+        producer.beginTransaction()
+
+        then:
+        IllegalStateException e = thrown()
+        e.message == 'Transactional method invoked on a non-transactional producer.'
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
@@ -225,5 +251,18 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     static interface StringProducer {
         @Topic("tx-strings")
         void send(String strings)
+    }
+
+    @Singleton
+    @Requires(property = 'spec.name', value = 'KafkaTxSpec')
+    static class MyService {
+        final Producer<String, String> transactionalProducer
+        final Producer<String, String> nonTransactionalProducer
+        MyService(
+                @KafkaClient(transactionalId = "tx-string-producer") Producer<String, String> transactionalProducer,
+                @KafkaClient Producer<String, String> nonTransactionalProducer) {
+            this.transactionalProducer = transactionalProducer
+            this.nonTransactionalProducer = nonTransactionalProducer
+        }
     }
 }
