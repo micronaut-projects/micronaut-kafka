@@ -100,7 +100,7 @@ final class ConsumerState {
             ? errorStrategyAnnotation.getRequiredValue(ErrorStrategyValue.class)
             : ErrorStrategyValue.NONE;
 
-        if (isRetryErrorStrategy(errorStrategy)) {
+        if (errorStrategy.isRetry()) {
             Duration retryDelay = errorStrategyAnnotation.get("retryDelay", Duration.class)
                 .orElse(Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS));
             this.errorStrategyRetryDelay = retryDelay.isNegative() || retryDelay.isZero() ? null : retryDelay;
@@ -208,9 +208,5 @@ final class ConsumerState {
             _pausedTopicPartitions = new HashSet<>();
         }
         _pausedTopicPartitions.addAll(validPauseRequests);
-    }
-
-    private static boolean isRetryErrorStrategy(ErrorStrategyValue currentErrorStrategy) {
-        return currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR || currentErrorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR;
     }
 }

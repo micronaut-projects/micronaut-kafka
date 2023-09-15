@@ -646,7 +646,7 @@ class KafkaConsumerProcessor
 
         ErrorStrategyValue currentErrorStrategy = consumerState.errorStrategy;
 
-        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
+        if (currentErrorStrategy.isRetry() && consumerState.errorStrategyExceptions.length > 0 && Arrays.stream(consumerState.errorStrategyExceptions).noneMatch(error -> error.equals(e.getClass()))) {
             if (consumerState.partitionRetries != null) {
                 consumerState.partitionRetries.remove(consumerRecord.partition());
             }
@@ -654,7 +654,7 @@ class KafkaConsumerProcessor
             currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
         }
 
-        if (isRetryErrorStrategy(currentErrorStrategy) && consumerState.errorStrategyRetryCount != 0) {
+        if (currentErrorStrategy.isRetry() && consumerState.errorStrategyRetryCount != 0) {
             if (consumerState.partitionRetries == null) {
                 consumerState.partitionRetries = new HashMap<>();
             }
@@ -675,7 +675,7 @@ class KafkaConsumerProcessor
                 TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), partition);
                 consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
 
-                Duration retryDelay = computeRetryDelay(currentErrorStrategy, consumerState.errorStrategyRetryDelay, retryState.currentRetryCount);
+                Duration retryDelay = currentErrorStrategy.computeRetryDelay(consumerState.errorStrategyRetryDelay, retryState.currentRetryCount);
                 if (retryDelay != null) {
                     // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
                     Set<TopicPartition> paused = Collections.singleton(topicPartition);
@@ -693,20 +693,6 @@ class KafkaConsumerProcessor
         handleException(consumerState, consumerRecord, e);
 
         return currentErrorStrategy != ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
-    }
-
-    private static boolean isRetryErrorStrategy(ErrorStrategyValue currentErrorStrategy) {
-        return currentErrorStrategy == ErrorStrategyValue.RETRY_ON_ERROR || currentErrorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR;
-    }
-
-    private Duration computeRetryDelay(ErrorStrategyValue errorStrategy, Duration fixedRetryDelay, long retryAttempts) {
-        if (errorStrategy == ErrorStrategyValue.RETRY_ON_ERROR) {
-            return fixedRetryDelay;
-        } else if (errorStrategy == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
-            return fixedRetryDelay.multipliedBy(1L << (retryAttempts - 1));
-        } else {
-            return Duration.ZERO;
-        }
     }
 
     private boolean processConsumerRecordsAsBatch(final ConsumerState consumerState,
