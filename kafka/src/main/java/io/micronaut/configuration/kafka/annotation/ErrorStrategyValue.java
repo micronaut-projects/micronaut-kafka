@@ -77,9 +77,10 @@ public enum ErrorStrategyValue {
         if (!isRetry()) {
             return Duration.ZERO;
         }
+        final Duration delay = fixedRetryDelay != null ? fixedRetryDelay : Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS);
         if (this == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
-            return fixedRetryDelay.multipliedBy(1L << (retryAttempts - 1));
+            return delay.multipliedBy(1L << (retryAttempts - 1));
         }
-        return fixedRetryDelay;
+        return delay;
     }
 }
