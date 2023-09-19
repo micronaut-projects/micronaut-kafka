@@ -11,6 +11,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.delay
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
@@ -18,10 +19,14 @@ import java.util.concurrent.TimeUnit
 internal class MyTest : AbstractKafkaTest() {
 
     @Test
-    fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
+    fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer, suspendConsumer: SuspendConsumer) {
         val message = "hello"
         producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
+        await().atMost(5, TimeUnit.SECONDS)
+            .until {
+                consumer.consumed == message &&
+                        suspendConsumer.consumed == message
+            }
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -41,4 +46,17 @@ internal class MyTest : AbstractKafkaTest() {
             consumed = message
         }
     }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaListener(groupId = "suspend-group",offsetReset = OffsetReset.EARLIEST)
+    class SuspendConsumer {
+        var consumed: String? = null
+
+        @Topic("my-topic")
+        suspend fun consume(message: String) {
+            consumed = message
+            delay(10)
+        }
+    }
+
 }

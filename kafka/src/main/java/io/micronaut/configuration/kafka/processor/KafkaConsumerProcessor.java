@@ -296,7 +296,9 @@ class KafkaConsumerProcessor
     }
 
     @Override
-    public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
+    public void process(BeanDefinition<?> beanDefinitionParam, ExecutableMethod<?, ?> methodParam) {
+        BeanDefinition<?> beanDefinition = beanContext.getBeanDefinition(beanDefinitionParam.getBeanType());
+        ExecutableMethod<?, ?> method = beanDefinition.findMethod(methodParam.getName(), methodParam.getArgumentTypes()).get();
         List<AnnotationValue<Topic>> topicAnnotations = method.getDeclaredAnnotationValuesByType(Topic.class);
         final AnnotationValue<KafkaListener> consumerAnnotation = method.getAnnotation(KafkaListener.class);
         if (CollectionUtils.isEmpty(topicAnnotations)) {
@@ -526,6 +528,11 @@ class KafkaConsumerProcessor
 
                     if (consumerRecords == null || consumerRecords.count() <= 0) {
                         continue; // No consumer records to process
+                    }
+
+                    if (method.isSuspend()) {
+                        Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
+                        boundArguments.put(lastArgument, null);
                     }
 
                     if (isBatch) {
@@ -1021,12 +1028,20 @@ class KafkaConsumerProcessor
 
     private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
+            .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
+            .findFirst()
+            .orElseGet(() -> Arrays.stream(method.getArguments())
+                .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class) && !isLastArgumentOfSuspendedMethod(arg, method))
                 .findFirst()
-                .orElseGet(() -> Arrays.stream(method.getArguments())
-                        .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
-                        .findFirst()
-                        .orElse(null));
+                .orElse(null));
+    }
+
+    private static boolean isLastArgumentOfSuspendedMethod(Argument<?> argument, ExecutableMethod<?, ?> method) {
+        if (!method.isSuspend()) {
+            return false;
+        }
+        Argument<?> lastArgumentValue = method.getArguments()[method.getArguments().length - 1];
+        return argument.equals(lastArgumentValue);
     }
 
     private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration) {
