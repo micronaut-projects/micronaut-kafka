@@ -80,7 +80,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -95,6 +94,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * <p>A {@link ExecutableMethodProcessor} that will process all beans annotated with {@link KafkaListener}
@@ -110,6 +110,8 @@ class KafkaConsumerProcessor
         implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
+    private static final ByteArrayDeserializer DEFAULT_KEY_DESERIALIZER = new ByteArrayDeserializer();
+    private static final StringDeserializer DEFAULT_VALUE_DESERIALIZER = new StringDeserializer();
 
     private final ExecutorService executorService;
     private final ApplicationConfiguration applicationConfiguration;
@@ -303,28 +305,8 @@ class KafkaConsumerProcessor
     @Override
     @PreDestroy
     public void close() {
-        for (ConsumerState consumerState : consumers.values()) {
-            consumerState.kafkaConsumer.wakeup();
-        }
-        for (ConsumerState consumerState : consumers.values()) {
-            if (consumerState.isPolling()) {
-                final Instant start = Instant.now();
-                Instant silentTime = start;
-                do {
-                    if (LOG.isTraceEnabled()) {
-                        final Instant now = Instant.now();
-                        if (now.isAfter(silentTime)) {
-                            LOG.trace("Consumer {} is not closed yet (waiting {})", consumerState.info.clientId, Duration.between(start, now));
-                            // Inhibit TRACE messages for a while to avoid polluting the logs
-                            silentTime = now.plusSeconds(5);
-                        }
-                    }
-                } while (consumerState.isPolling());
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Consumer {} is closed", consumerState.info.clientId);
-            }
-        }
+        consumers.values().forEach(ConsumerState::wakeUp);
+        consumers.values().forEach(ConsumerState::close);
         consumers.clear();
     }
 
@@ -417,11 +399,11 @@ class KafkaConsumerProcessor
         return properties;
     }
 
-    private void debugDeserializationConfiguration(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
-                                                   final Properties properties) {
+    private void debugDeserializationConfiguration(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration) {
         if (!LOG.isDebugEnabled()) {
             return;
         }
+        final Properties properties = consumerConfiguration.getConfig();
         final String logMethod = logMethod(method);
         final String keyDeserializerClass = consumerConfiguration.getKeyDeserializer()
             .map(Object::toString)
@@ -462,7 +444,7 @@ class KafkaConsumerProcessor
                 //noinspection unchecked
                 ca.setKafkaConsumer(kafkaConsumer);
             }
-            setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
+            topicAnnotations.forEach(a -> setupConsumerSubscription(method, a, consumerBean, kafkaConsumer));
             kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
             final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, method);
             final ConsumerState consumerState = new ConsumerState(this, consumerInfo, kafkaConsumer, consumerBean);
@@ -471,55 +453,50 @@ class KafkaConsumerProcessor
         }
     }
 
-    private static void setupConsumerSubscription(final ExecutableMethod<?, ?> method, final List<AnnotationValue<Topic>> topicAnnotations,
-                                                  final Object consumerBean, final Consumer<?, ?> kafkaConsumer) {
-        for (final AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
+    private static void setupConsumerSubscription(ExecutableMethod<?, ?> method, AnnotationValue<Topic> topicAnnotation, Object consumerBean, Consumer<?, ?> kafkaConsumer) {
+        final String[] topicNames = topicAnnotation.stringValues();
+        final String[] patterns = topicAnnotation.stringValues("patterns");
+        final boolean hasTopics = ArrayUtils.isNotEmpty(topicNames);
+        final boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
+        final String logMethod = LOG.isInfoEnabled() ? logMethod(method) : null;
 
-            final String[] topicNames = topicAnnotation.stringValues();
-            final String[] patterns = topicAnnotation.stringValues("patterns");
-            final boolean hasTopics = ArrayUtils.isNotEmpty(topicNames);
-            final boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
+        if (!hasTopics && !hasPatterns) {
+            throw new MessagingSystemException("Either a topic or a topic must be specified for method: " + method);
+        }
 
-            if (!hasTopics && !hasPatterns) {
-                throw new MessagingSystemException("Either a topic or a topic must be specified for method: " + method);
-            }
+        final Optional<ConsumerRebalanceListener> listener = getConsumerRebalanceListener(consumerBean, kafkaConsumer);
 
-            if (hasTopics) {
-                final List<String> topics = Arrays.asList(topicNames);
-                if (consumerBean instanceof ConsumerSeekAware csa) {
-                    kafkaConsumer.subscribe(topics, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
-                } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
-                    kafkaConsumer.subscribe(topics, crl);
-                } else {
-                    kafkaConsumer.subscribe(topics);
-                }
+        if (hasTopics) {
+            final List<String> topics = Arrays.asList(topicNames);
+            listener.ifPresentOrElse(
+                l -> kafkaConsumer.subscribe(topics, l),
+                () -> kafkaConsumer.subscribe(topics));
+            LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod, topics);
+        }
 
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod(method), topics);
-                }
-            }
-
-            if (hasPatterns) {
+        if (hasPatterns) {
+            try {
                 for (final String pattern : patterns) {
-                    final Pattern compiledPattern;
-                    try {
-                        compiledPattern = Pattern.compile(pattern);
-                    } catch (Exception e) {
-                        throw new MessagingSystemException("Invalid topic pattern [" + pattern + "] for method [" + method + "]: " + e.getMessage(), e);
-                    }
-                    if (consumerBean instanceof ConsumerSeekAware csa) {
-                        kafkaConsumer.subscribe(compiledPattern, new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
-                    } else if (consumerBean instanceof ConsumerRebalanceListener crl) {
-                        kafkaConsumer.subscribe(compiledPattern, crl);
-                    } else {
-                        kafkaConsumer.subscribe(compiledPattern);
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", logMethod(method), pattern);
-                    }
+                    final Pattern compiledPattern = Pattern.compile(pattern);
+                    listener.ifPresentOrElse(
+                        l -> kafkaConsumer.subscribe(compiledPattern, l),
+                        () -> kafkaConsumer.subscribe(compiledPattern));
+                    LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", logMethod, pattern);
                 }
+            } catch (PatternSyntaxException e) {
+                throw new MessagingSystemException("Invalid topic pattern [" + e.getPattern() + "] for method [" + method + "]: " + e.getMessage(), e);
             }
         }
+    }
+
+    private static Optional<ConsumerRebalanceListener> getConsumerRebalanceListener(Object consumerBean, Consumer<?, ?> kafkaConsumer) {
+        if (consumerBean instanceof ConsumerSeekAware csa) {
+            return Optional.of(new ConsumerSeekAwareAdapter(KafkaSeeker.newInstance(kafkaConsumer), csa));
+        }
+        if (consumerBean instanceof ConsumerRebalanceListener crl) {
+            return Optional.of(crl);
+        }
+        return Optional.empty();
     }
 
     private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
@@ -532,56 +509,51 @@ class KafkaConsumerProcessor
                         .orElse(null));
     }
 
+    private static Argument<?> findBodyArgument(boolean batch, ExecutableMethod<?, ?> method) {
+        final Argument<?> tempBodyArg = findBodyArgument(method);
+        return batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
+    }
+
+    private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> config) {
+        final boolean batch = method.isTrue(KafkaListener.class, "batch");
+        final Argument<?> bodyArgument = findBodyArgument(batch, method);
+        configureKeyDeserializer(bodyArgument, method, config);
+        configureValueDeserializer(bodyArgument, config);
+        debugDeserializationConfiguration(method, config);
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration) {
-        final Properties properties = consumerConfiguration.getConfig();
-        // figure out the Key deserializer
-        boolean batch = method.isTrue(KafkaListener.class, "batch");
-
-        Argument<?> tempBodyArg = findBodyArgument(method);
-
-        final Argument<?> bodyArgument = batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
-
-        if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && consumerConfiguration.getKeyDeserializer().isEmpty()) {
-            final Optional<Argument<?>> keyArgument = Arrays.stream(method.getArguments())
-                    .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
-                    .findFirst();
-            if (keyArgument.isPresent()) {
-                consumerConfiguration.setKeyDeserializer(serdeRegistry.pickDeserializer(keyArgument.get()));
-            } else {
-                //noinspection SingleStatementInBlock
-                if (bodyArgument != null && ConsumerRecord.class.isAssignableFrom(bodyArgument.getType())) {
-                    final Optional<Argument<?>> keyType = bodyArgument.getTypeVariable("K");
-                    if (keyType.isPresent()) {
-                        consumerConfiguration.setKeyDeserializer(serdeRegistry.pickDeserializer(keyType.get()));
-                    } else {
-                        consumerConfiguration.setKeyDeserializer(new ByteArrayDeserializer());
-                    }
-                } else {
-                    consumerConfiguration.setKeyDeserializer(new ByteArrayDeserializer());
-                }
-            }
+    private void configureKeyDeserializer(Argument<?> bodyArgument, ExecutableMethod<?, ?> method, DefaultKafkaConsumerConfiguration config) {
+        if (!config.getConfig().containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && config.getKeyDeserializer().isEmpty()) {
+            // figure out the Key deserializer
+            Arrays.stream(method.getArguments())
+                .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
+                .findFirst()
+                .or(() -> Optional.ofNullable(bodyArgument)
+                    .filter(KafkaConsumerProcessor::isConsumerRecord)
+                    .flatMap(b -> b.getTypeVariable("K")))
+                .map(serdeRegistry::pickDeserializer)
+                .ifPresentOrElse(config::setKeyDeserializer,
+                    () -> config.setKeyDeserializer(DEFAULT_KEY_DESERIALIZER));
         }
+    }
 
-        // figure out the Value deserializer
-        if (!properties.containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && consumerConfiguration.getValueDeserializer().isEmpty()) {
-            if (bodyArgument == null) {
-                //noinspection SingleStatementInBlock
-                consumerConfiguration.setValueDeserializer(new StringDeserializer());
-            } else {
-                if (ConsumerRecord.class.isAssignableFrom(bodyArgument.getType())) {
-                    final Optional<Argument<?>> valueType = bodyArgument.getTypeVariable("V");
-                    if (valueType.isPresent()) {
-                        consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(valueType.get()));
-                    } else {
-                        consumerConfiguration.setValueDeserializer(new StringDeserializer());
-                    }
-                } else {
-                    consumerConfiguration.setValueDeserializer(serdeRegistry.pickDeserializer(bodyArgument));
-                }
-            }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void configureValueDeserializer(Argument<?> bodyArgument, DefaultKafkaConsumerConfiguration config) {
+        if (!config.getConfig().containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && config.getValueDeserializer().isEmpty()) {
+            // figure out the Value deserializer
+            final Optional<Argument<?>> body = Optional.ofNullable(bodyArgument);
+            body.filter(KafkaConsumerProcessor::isConsumerRecord)
+                .flatMap(b -> b.getTypeVariable("V"))
+                .or(() -> body)
+                .map(serdeRegistry::pickDeserializer)
+                .ifPresentOrElse(config::setValueDeserializer,
+                    () -> config.setValueDeserializer(DEFAULT_VALUE_DESERIALIZER));
         }
-        debugDeserializationConfiguration(method, consumerConfiguration, properties);
+    }
+
+    private static boolean isConsumerRecord(@NonNull Argument<?> body) {
+        return ConsumerRecord.class.isAssignableFrom(body.getType());
     }
 
     private static Argument<?> getComponentType(final Argument<?> argument) {

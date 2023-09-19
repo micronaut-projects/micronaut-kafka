@@ -46,6 +46,7 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -122,8 +123,26 @@ final class ConsumerState {
         return pauseRequests.containsAll(topicPartitions) && pausedTopicPartitions.containsAll(topicPartitions);
     }
 
-    boolean isPolling() {
-        return closedState == ConsumerCloseState.POLLING;
+    void wakeUp() {
+        kafkaConsumer.wakeup();
+    }
+
+    void close() {
+        if (closedState == ConsumerCloseState.POLLING) {
+            final Instant start = Instant.now();
+            Instant silentTime = start;
+            do {
+                if (LOG.isTraceEnabled()) {
+                    final Instant now = Instant.now();
+                    if (now.isAfter(silentTime)) {
+                        LOG.trace("Consumer {} is not closed yet (waiting {})", info.clientId, Duration.between(start, now));
+                        // Inhibit TRACE messages for a while to avoid polluting the logs
+                        silentTime = now.plusSeconds(5);
+                    }
+                }
+            } while (closedState == ConsumerCloseState.POLLING);
+        }
+        LOG.debug("Consumer {} is closed", info.clientId);
     }
 
     void threadPollLoop() {
