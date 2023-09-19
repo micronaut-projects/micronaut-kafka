@@ -41,7 +41,6 @@ import java.util.Optional;
  * Internal consumer info.
  */
 @Internal
-@SuppressWarnings("unchecked")
 final class ConsumerInfo {
     final String clientId;
     @Nullable final String groupId;
@@ -70,6 +69,7 @@ final class ConsumerInfo {
     final boolean returnsOneKafkaMessage;
     final boolean returnsManyKafkaMessages;
 
+    @SuppressWarnings("unchecked")
     ConsumerInfo(
         String clientId,
         String groupId,
@@ -81,12 +81,12 @@ final class ConsumerInfo {
         this.groupId = groupId;
         this.shouldRedeliver = kafkaListener.isTrue("redelivery");
         this.offsetStrategy = offsetStrategy;
-        final Optional<AnnotationValue<ErrorStrategy>> errorStrategy = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class);
-        this.errorStrategy = errorStrategy.map(a -> a.getRequiredValue(ErrorStrategyValue.class)).orElse(ErrorStrategyValue.NONE);
-        this.retryDelay = errorStrategy.flatMap(a -> a.get("retryDelay", Duration.class)).filter(d -> !d.isZero() && !d.isNegative()).orElse(null);
-        this.retryCount = errorStrategy.map(a -> a.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT)).orElse(0);
-        this.shouldHandleAllExceptions = errorStrategy.flatMap(a -> a.booleanValue("handleAllExceptions")).orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);
-        this.exceptionTypes = Arrays.stream((Class<? extends Throwable>[]) errorStrategy.map(a -> a.classValues("exceptionTypes")).orElse(ReflectionUtils.EMPTY_CLASS_ARRAY)).toList();
+        final Optional<AnnotationValue<ErrorStrategy>> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class);
+        this.errorStrategy = errorStrategyAnnotation.map(a -> a.getRequiredValue(ErrorStrategyValue.class)).orElse(ErrorStrategyValue.NONE); // NOSONAR
+        this.retryDelay = errorStrategyAnnotation.flatMap(a -> a.get("retryDelay", Duration.class)).filter(d -> !d.isZero() && !d.isNegative()).orElse(null);
+        this.retryCount = errorStrategyAnnotation.map(a -> a.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT)).orElse(0);
+        this.shouldHandleAllExceptions = errorStrategyAnnotation.flatMap(a -> a.booleanValue("handleAllExceptions")).orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);
+        this.exceptionTypes = Arrays.stream((Class<? extends Throwable>[]) errorStrategyAnnotation.map(a -> a.classValues("exceptionTypes")).orElse(ReflectionUtils.EMPTY_CLASS_ARRAY)).toList();
         this.producerClientId = kafkaListener.stringValue("producerClientId").orElse(null);
         this.producerTransactionalId = kafkaListener.stringValue("producerTransactionalId").filter(StringUtils::isNotEmpty).orElse(null);
         this.isTransactional = producerTransactionalId != null;

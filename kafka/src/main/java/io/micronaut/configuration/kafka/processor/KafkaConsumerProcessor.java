@@ -93,7 +93,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -115,6 +114,7 @@ class KafkaConsumerProcessor
     private final ExecutorService executorService;
     private final ApplicationConfiguration applicationConfiguration;
     private final BeanContext beanContext;
+    @SuppressWarnings("rawtypes")
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
     private final Map<String, ConsumerState> consumers = new ConcurrentHashMap<>();
 
@@ -146,6 +146,7 @@ class KafkaConsumerProcessor
      * @param startedEventPublisher         The KafkaConsumerStartedPollingEvent publisher
      * @param subscribedEventPublisher      The KafkaConsumerSubscribedEvent publisher
      */
+    @SuppressWarnings("rawtypes")
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
             ApplicationConfiguration applicationConfiguration,
@@ -200,9 +201,11 @@ class KafkaConsumerProcessor
 
     @NonNull
     @Override
+    @SuppressWarnings("unchecked")
     public <K, V> Consumer<K, V> getConsumer(@NonNull String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Consumer consumer = getConsumerState(id).getKafkaConsumer();
+        @SuppressWarnings("rawtypes")
+        final Consumer consumer = getConsumerState(id).kafkaConsumer;
         if (consumer == null) {
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }
@@ -213,7 +216,7 @@ class KafkaConsumerProcessor
     @Override
     public Set<String> getConsumerSubscription(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Set<String> subscriptions = getConsumerState(id).getSubscriptions();
+        final Set<String> subscriptions = getConsumerState(id).subscriptions;
         if (subscriptions == null || subscriptions.isEmpty()) {
             throw new IllegalArgumentException("No consumer subscription found for ID: " + id);
         }
@@ -224,7 +227,7 @@ class KafkaConsumerProcessor
     @Override
     public Set<TopicPartition> getConsumerAssignment(@NonNull final String id) {
         ArgumentUtils.requireNonNull("id", id);
-        final Set<TopicPartition> assignment = getConsumerState(id).getAssignments();
+        final Set<TopicPartition> assignment = getConsumerState(id).assignments;
         if (assignment == null || assignment.isEmpty()) {
             throw new IllegalArgumentException("No consumer assignment found for ID: " + id);
         }
@@ -239,7 +242,7 @@ class KafkaConsumerProcessor
 
     @Override
     public boolean isPaused(@NonNull String id) {
-        return isPaused(id, getConsumerState(id).getAssignments());
+        return isPaused(id, getConsumerState(id).assignments);
     }
 
     @Override
@@ -301,7 +304,7 @@ class KafkaConsumerProcessor
     @PreDestroy
     public void close() {
         for (ConsumerState consumerState : consumers.values()) {
-            consumerState.getKafkaConsumer().wakeup();
+            consumerState.kafkaConsumer.wakeup();
         }
         for (ConsumerState consumerState : consumers.values()) {
             if (consumerState.isPolling()) {
@@ -311,7 +314,7 @@ class KafkaConsumerProcessor
                     if (LOG.isTraceEnabled()) {
                         final Instant now = Instant.now();
                         if (now.isAfter(silentTime)) {
-                            LOG.trace("Consumer {} is not closed yet (waiting {})", consumerState.getClientId(), Duration.between(start, now));
+                            LOG.trace("Consumer {} is not closed yet (waiting {})", consumerState.info.clientId, Duration.between(start, now));
                             // Inhibit TRACE messages for a while to avoid polluting the logs
                             silentTime = now.plusSeconds(5);
                         }
@@ -319,7 +322,7 @@ class KafkaConsumerProcessor
                 } while (consumerState.isPolling());
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Consumer {} is closed", consumerState.getClientId());
+                LOG.debug("Consumer {} is closed", consumerState.info.clientId);
             }
         }
         consumers.clear();
@@ -344,8 +347,8 @@ class KafkaConsumerProcessor
         }
     }
 
-    ScheduledFuture<?> scheduleTask(Duration delay, Runnable command) {
-        return taskScheduler.schedule(delay, command);
+    void scheduleTask(Duration delay, Runnable command) {
+        taskScheduler.schedule(delay, command);
     }
 
     <K, V> Producer<K, V> getProducer(String id, Class<K> keyType, Class<V> valueType) {
@@ -357,12 +360,13 @@ class KafkaConsumerProcessor
     }
 
     void handleProducerFencedException(Producer<?, ?> producer, ProducerFencedException e) {
-        LOG.error("Failed accessing the producer: " + producer, e);
+        LOG.error("Failed accessing the producer: {}", producer, e);
         transactionalProducerRegistry.close(producer);
     }
 
+    @SuppressWarnings("unchecked")
     <T> Flux<T> convertPublisher(T result) {
-        return Flux.from(Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
+        return Flux.from((Publisher<T>) Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
     }
 
     <T, R> BoundExecutable<T, R> bind(ExecutableMethod<T, R> method, Map<Argument<?>, Object> boundArguments, ConsumerRecord<?, ?> consumerRecord) {
@@ -375,6 +379,7 @@ class KafkaConsumerProcessor
         return batchBinder.bind(method, batchBinderRegistry, consumerRecords);
     }
 
+    @SuppressWarnings("rawtypes")
     private Properties createConsumerProperties(final AnnotationValue<KafkaListener> consumerAnnotation,
                                                 final DefaultKafkaConsumerConfiguration consumerConfiguration,
                                                 final String clientId,
@@ -418,20 +423,17 @@ class KafkaConsumerProcessor
             return;
         }
         final String logMethod = logMethod(method);
-        final Optional keyDeserializer = consumerConfiguration.getKeyDeserializer();
-        if (keyDeserializer.isPresent()) {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializer.get(), logMethod);
-        } else {
-            LOG.debug("Using key deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG), logMethod);
-        }
-        final Optional valueDeserializer = consumerConfiguration.getValueDeserializer();
-        if (valueDeserializer.isPresent()) {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializer.get(), logMethod);
-        } else {
-            LOG.debug("Using value deserializer [{}] for Kafka listener: {}", properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG), logMethod);
-        }
+        final String keyDeserializerClass = consumerConfiguration.getKeyDeserializer()
+            .map(Object::toString)
+            .orElseGet(() -> properties.getProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG));
+        final String valueDeserializerClass = consumerConfiguration.getValueDeserializer()
+            .map(Object::toString)
+            .orElseGet(() -> properties.getProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG));
+        LOG.debug("Using key deserializer [{}] for Kafka listener: {}", keyDeserializerClass, logMethod);
+        LOG.debug("Using value deserializer [{}] for Kafka listener: {}", valueDeserializerClass, logMethod);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void submitConsumerThreads(final ExecutableMethod<?, ?> method,
                                        final String clientId,
                                        final String groupId,
@@ -530,6 +532,7 @@ class KafkaConsumerProcessor
                         .orElse(null));
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration consumerConfiguration) {
         final Properties properties = consumerConfiguration.getConfig();
         // figure out the Key deserializer
@@ -539,7 +542,7 @@ class KafkaConsumerProcessor
 
         final Argument<?> bodyArgument = batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
 
-        if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getKeyDeserializer().isPresent()) {
+        if (!properties.containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && consumerConfiguration.getKeyDeserializer().isEmpty()) {
             final Optional<Argument<?>> keyArgument = Arrays.stream(method.getArguments())
                     .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
                     .findFirst();
@@ -561,7 +564,7 @@ class KafkaConsumerProcessor
         }
 
         // figure out the Value deserializer
-        if (!properties.containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && !consumerConfiguration.getValueDeserializer().isPresent()) {
+        if (!properties.containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && consumerConfiguration.getValueDeserializer().isEmpty()) {
             if (bodyArgument == null) {
                 //noinspection SingleStatementInBlock
                 consumerConfiguration.setValueDeserializer(new StringDeserializer());
@@ -581,7 +584,7 @@ class KafkaConsumerProcessor
         debugDeserializationConfiguration(method, consumerConfiguration, properties);
     }
 
-    private static Argument getComponentType(final Argument<?> argument) {
+    private static Argument<?> getComponentType(final Argument<?> argument) {
         final Class<?> argumentType = argument.getType();
         return argumentType.isArray()
                 ? Argument.of(argumentType.getComponentType())
