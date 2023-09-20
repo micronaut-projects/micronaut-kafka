@@ -5,7 +5,7 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.graalvm.sdk:graal-sdk:23.0.1'
+        force 'org.graalvm.sdk:graal-sdk:23.1.0'
         force 'io.micronaut.platform:micronaut-platform:4.1.0'
     }
 }
