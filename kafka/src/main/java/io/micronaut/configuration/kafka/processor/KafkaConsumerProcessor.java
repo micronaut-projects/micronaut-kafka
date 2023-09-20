@@ -314,7 +314,7 @@ class KafkaConsumerProcessor
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationBean(groupId)
                 .orElse(defaultConsumerConfiguration);
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             groupId = groupId + "_" + UUID.randomUUID();
@@ -351,6 +351,12 @@ class KafkaConsumerProcessor
             }
         }
         consumers.clear();
+    }
+
+    private Optional<AbstractKafkaConsumerConfiguration> getConsumerConfigurationBean(String groupId) {
+        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
+            .or(() -> NameUtils.isValidHyphenatedPropertyName(groupId) ? Optional.empty() :
+                beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(NameUtils.hyphenate(groupId))));
     }
 
     private Properties createConsumerProperties(final AnnotationValue<KafkaListener> consumerAnnotation,
