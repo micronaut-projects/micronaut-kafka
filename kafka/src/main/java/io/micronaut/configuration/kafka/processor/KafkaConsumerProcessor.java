@@ -353,6 +353,7 @@ class KafkaConsumerProcessor
         consumers.clear();
     }
 
+    @SuppressWarnings("rawtypes")
     private Optional<AbstractKafkaConsumerConfiguration> getConsumerConfigurationBean(String groupId) {
         return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
             .or(() -> NameUtils.isValidHyphenatedPropertyName(groupId) ? Optional.empty() :
