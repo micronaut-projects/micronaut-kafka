@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
@@ -52,6 +51,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.function.Predicate.not;
 
 /**
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
@@ -169,20 +170,11 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 transactional);
 
         return (T) clients.computeIfAbsent(key, clientKey -> {
-            Supplier<AbstractKafkaProducerConfiguration> defaultResolver = () -> beanContext.getBean(AbstractKafkaProducerConfiguration.class);
+            final Optional<String> clientId = Optional.ofNullable(id).filter(StringUtils::isNotEmpty);
             AbstractKafkaProducerConfiguration config;
-            boolean hasId = StringUtils.isNotEmpty(id);
-            if (hasId) {
-                config = beanContext.findBean(
-                        AbstractKafkaProducerConfiguration.class,
-                        Qualifiers.byName(id)
-                ).or(() -> NameUtils.isValidHyphenatedPropertyName(id) ? Optional.empty() : beanContext.findBean(
-                        AbstractKafkaProducerConfiguration.class,
-                        Qualifiers.byName(NameUtils.hyphenate(id)))
-                ).orElseGet(defaultResolver);
-            } else {
-                config = defaultResolver.get();
-            }
+            config = clientId.flatMap(this::findConfigBean)
+                .or(() -> clientId.filter(not(NameUtils::isValidHyphenatedPropertyName)).map(NameUtils::hyphenate).flatMap(this::findConfigBean))
+                .orElseGet(() -> beanContext.getBean(AbstractKafkaProducerConfiguration.class));
 
             DefaultKafkaProducerConfiguration newConfig = new DefaultKafkaProducerConfiguration(config);
 
@@ -202,9 +194,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
             }
 
-            if (hasId) {
-                properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, id);
-            }
+            clientId.ifPresent(x -> properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, x));
 
             if (CollectionUtils.isNotEmpty(props)) {
                 properties.putAll(props);
@@ -252,6 +242,11 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 break;
             }
         }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaProducerConfiguration> findConfigBean(String name) {
+        return beanContext.findBean(AbstractKafkaProducerConfiguration.class, Qualifiers.byName(name));
     }
 
     /**
