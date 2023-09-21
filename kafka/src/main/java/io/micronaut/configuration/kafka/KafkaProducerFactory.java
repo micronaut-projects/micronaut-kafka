@@ -36,6 +36,7 @@ import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
@@ -175,6 +176,9 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 config = beanContext.findBean(
                         AbstractKafkaProducerConfiguration.class,
                         Qualifiers.byName(id)
+                ).or(() -> NameUtils.isValidHyphenatedPropertyName(id) ? Optional.empty() : beanContext.findBean(
+                        AbstractKafkaProducerConfiguration.class,
+                        Qualifiers.byName(NameUtils.hyphenate(id)))
                 ).orElseGet(defaultResolver);
             } else {
                 config = defaultResolver.get();

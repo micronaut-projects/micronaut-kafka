@@ -37,6 +37,7 @@ import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
+import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.StringUtils;
@@ -653,12 +654,10 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
             AbstractKafkaProducerConfiguration configuration;
             if (clientId != null) {
-                Optional<KafkaProducerConfiguration> namedConfig = beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId));
-                if (namedConfig.isPresent()) {
-                    configuration = namedConfig.get();
-                } else {
-                    configuration = beanContext.getBean(AbstractKafkaProducerConfiguration.class);
-                }
+                configuration = beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId))
+                    .or(() -> NameUtils.isValidHyphenatedPropertyName(clientId) ? Optional.empty() : beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(NameUtils.hyphenate(clientId))))
+                    .map(AbstractKafkaProducerConfiguration.class::cast)
+                    .orElseGet(() -> beanContext.getBean(AbstractKafkaProducerConfiguration.class));
             } else {
                 configuration = beanContext.getBean(AbstractKafkaProducerConfiguration.class);
             }
