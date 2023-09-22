@@ -17,9 +17,24 @@ package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.core.annotation.Internal;
 
+/**
+ * Consumer close state.
+ */
 @Internal
 enum ConsumerCloseState {
+
+    /**
+     * Not started.
+     */
     NOT_STARTED,
+
+    /**
+     * Polling.
+     */
     POLLING,
+
+    /**
+     * Closed.
+     */
     CLOSED
 }

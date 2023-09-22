@@ -61,6 +61,7 @@ public enum ErrorStrategyValue {
     /**
      *
      * @return Whether this is a retry error strategy.
+     * @since 5.2
      */
     public boolean isRetry() {
         return this == RETRY_ON_ERROR || this == RETRY_EXPONENTIALLY_ON_ERROR;
@@ -72,6 +73,7 @@ public enum ErrorStrategyValue {
      * @param fixedRetryDelay The fixed retry delay.
      * @param retryAttempts The number of retries so far.
      * @return The amount of time to wait before trying again.
+     * @since 5.2
      */
     public Duration computeRetryDelay(Duration fixedRetryDelay, long retryAttempts) {
         if (!isRetry()) {
