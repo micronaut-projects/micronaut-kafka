@@ -1,0 +1,32 @@
+package io.micronaut.kafka.docs.admin
+
+import io.micronaut.configuration.kafka.admin.KafkaNewTopics
+import io.micronaut.context.annotation.Property
+import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import jakarta.inject.Inject
+import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
+
+@MicronautTest
+@Property(name = "spec.name", value = "MyTopicFactoryTest")
+class MyTopicFactoryTest extends Specification {
+
+    @Inject
+    KafkaNewTopics newTopics
+
+    void "test new topics"() {
+        expect:
+        new PollingConditions(timeout: 5).eventually {
+            areNewTopicsDone(newTopics)
+            final result = newTopics.getResult().orElseThrow()
+            result.numPartitions("my-new-topic-1").get() == 1
+            result.numPartitions("my-new-topic-2").get() == 2
+        }
+    }
+
+    // tag::result[]
+    boolean areNewTopicsDone(KafkaNewTopics newTopics) {
+        newTopics.result.map { it.all().isDone() }.orElse(false)
+    }
+    // end::result[]
+}

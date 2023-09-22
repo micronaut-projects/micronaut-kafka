@@ -1,0 +1,14 @@
+
+You can automatically add topics to the broker when your application starts. To do so, you can add a link:{kafkaapi}/org/apache/kafka/clients/admin/NewTopic[`NewTopic`] bean for each topic you want to create. `NewTopic` instances let you specify the name, the number of partitions, the replication factor, the replicas assignments and the configuration properties you want to associate with the new topic. Additionally, you can add one link:{kafkaapi}/org/apache/kafka/clients/admin/CreateTopicsOptions[`CreateTopicsOptions`] bean that will be used when the new topics are created.
+
+.Creating New Kafka Topics with Options
+
+snippet::io.micronaut.kafka.docs.admin.MyTopicFactory[tags = 'imports,clazz']
+
+NOTE: Creating topics is not a transactional operation, so it may succeed for some topics while fail for others. This operation also executes asynchronously, so it may take several seconds until all the brokers become aware that the topics have been created.
+
+If you ever need to check if the operation has completed, you can `@Inject` or retrieve the api:io.micronaut.configuration.kafka.admin.KafkaNewTopics[] bean from the application context and then retrieve the link:{kafkaapi}/org/apache/kafka/clients/admin/CreateTopicsResult[operation result] that Kafka returned when the topics were created.
+
+.Checking if Topic Creation is Done
+
+snippet::io.micronaut.kafka.docs.admin.MyTopicFactoryTest[tags = 'result']
