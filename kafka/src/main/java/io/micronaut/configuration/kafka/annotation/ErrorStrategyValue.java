@@ -15,6 +15,8 @@
  */
 package io.micronaut.configuration.kafka.annotation;
 
+import io.micronaut.core.annotation.Nullable;
+
 import java.time.Duration;
 
 /**
@@ -75,7 +77,7 @@ public enum ErrorStrategyValue {
      * @return The amount of time to wait before trying again.
      * @since 5.2
      */
-    public Duration computeRetryDelay(Duration fixedRetryDelay, long retryAttempts) {
+    public Duration computeRetryDelay(@Nullable Duration fixedRetryDelay, long retryAttempts) {
         if (!isRetry()) {
             return Duration.ZERO;
         }

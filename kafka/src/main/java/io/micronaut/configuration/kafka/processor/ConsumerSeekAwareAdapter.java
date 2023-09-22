@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.ConsumerSeekAware;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 
@@ -30,12 +31,12 @@ record ConsumerSeekAwareAdapter(@NonNull KafkaSeeker seeker, @NonNull ConsumerSe
     implements ConsumerRebalanceListener {
 
     @Override
-    public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+    public void onPartitionsRevoked(@Nullable Collection<TopicPartition> partitions) {
         bean.onPartitionsRevoked(partitions != null ? partitions : Collections.emptyList());
     }
 
     @Override
-    public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+    public void onPartitionsAssigned(@Nullable Collection<TopicPartition> partitions) {
         bean.onPartitionsAssigned(partitions != null ? partitions : Collections.emptyList(), seeker);
     }
 }
