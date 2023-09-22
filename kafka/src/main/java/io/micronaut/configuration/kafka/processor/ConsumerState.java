@@ -93,7 +93,7 @@ final class ConsumerState {
         this.closedState = ConsumerCloseState.NOT_STARTED;
     }
 
-    synchronized void pause() {
+    void pause() {
         pause(assignments);
     }
 
@@ -123,11 +123,11 @@ final class ConsumerState {
         return pauseRequests.containsAll(topicPartitions) && pausedTopicPartitions.containsAll(topicPartitions);
     }
 
-    synchronized void wakeUp() {
+    void wakeUp() {
         kafkaConsumer.wakeup();
     }
 
-    synchronized void close() {
+    void close() {
         if (closedState == ConsumerCloseState.POLLING) {
             final Instant start = Instant.now();
             Instant silentTime = start;
@@ -145,7 +145,7 @@ final class ConsumerState {
         LOG.debug("Consumer {} is closed", info.clientId);
     }
 
-    synchronized void threadPollLoop() {
+    void threadPollLoop() {
         try (kafkaConsumer) {
             //noinspection InfiniteLoopStatement
             while (true) { //NOSONAR
