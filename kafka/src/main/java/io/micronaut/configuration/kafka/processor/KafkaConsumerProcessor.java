@@ -64,6 +64,7 @@ import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
+import io.micronaut.inject.DelegatingExecutableMethod;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.Acknowledgement;
@@ -296,9 +297,7 @@ class KafkaConsumerProcessor
     }
 
     @Override
-    public void process(BeanDefinition<?> beanDefinitionParam, ExecutableMethod<?, ?> methodParam) {
-        BeanDefinition<?> beanDefinition = beanContext.getBeanDefinition(beanDefinitionParam.getBeanType());
-        ExecutableMethod<?, ?> method = beanDefinition.findMethod(methodParam.getName(), methodParam.getArgumentTypes()).get();
+    public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
         List<AnnotationValue<Topic>> topicAnnotations = method.getDeclaredAnnotationValuesByType(Topic.class);
         final AnnotationValue<KafkaListener> consumerAnnotation = method.getAnnotation(KafkaListener.class);
         if (CollectionUtils.isEmpty(topicAnnotations)) {
@@ -530,7 +529,7 @@ class KafkaConsumerProcessor
                         continue; // No consumer records to process
                     }
 
-                    if (method.isSuspend()) {
+                    if (isSuspend(method)) {
                         Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
                         boundArguments.put(lastArgument, null);
                     }
@@ -568,6 +567,14 @@ class KafkaConsumerProcessor
         } catch (WakeupException e) {
             consumerState.closedState = ConsumerCloseState.CLOSED;
         }
+    }
+
+    private static boolean isSuspend(ExecutableMethod<?, ?> method) {
+        // Temporary workaround for: https://github.com/micronaut-projects/micronaut-core/pull/9910
+        if (method instanceof DelegatingExecutableMethod m) {
+            return m.getTarget().isSuspend();
+        }
+        return method.isSuspend();
     }
 
     private boolean processConsumerRecords(final ConsumerState consumerState,
@@ -1037,7 +1044,7 @@ class KafkaConsumerProcessor
     }
 
     private static boolean isLastArgumentOfSuspendedMethod(Argument<?> argument, ExecutableMethod<?, ?> method) {
-        if (!method.isSuspend()) {
+        if (!isSuspend(method)) {
             return false;
         }
         Argument<?> lastArgumentValue = method.getArguments()[method.getArguments().length - 1];
