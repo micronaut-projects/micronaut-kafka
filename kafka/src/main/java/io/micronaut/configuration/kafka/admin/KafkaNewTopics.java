@@ -56,7 +56,7 @@ public class KafkaNewTopics {
      * @param options Optional {@link CreateTopicsOptions}.
      * @param topics  Optional list of {@link NewTopic} beans.
      */
-    KafkaNewTopics(
+    public KafkaNewTopics(
         @NonNull ApplicationContext context,
         @Nullable CreateTopicsOptions options,
         @Nullable List<NewTopic> topics
