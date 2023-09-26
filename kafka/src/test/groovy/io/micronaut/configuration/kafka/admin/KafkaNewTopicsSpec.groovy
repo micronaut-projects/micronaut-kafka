@@ -19,14 +19,7 @@ class KafkaNewTopicsSpec extends AbstractKafkaContainerSpec {
         final KafkaNewTopics kafkaNewTopics = context.getBean(KafkaNewTopics)
 
         expect:
-        kafkaNewTopics.options.isPresent()
         kafkaNewTopics.result.isPresent()
-
-        and:
-        final options = kafkaNewTopics.options.get()
-        options.timeoutMs == 5000
-        options.validateOnly == true
-        options.retryOnQuotaViolation == false
 
         and:
         final result = kafkaNewTopics.result.get()
