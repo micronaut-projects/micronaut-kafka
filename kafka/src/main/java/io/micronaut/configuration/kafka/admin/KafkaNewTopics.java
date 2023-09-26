@@ -62,9 +62,11 @@ public class KafkaNewTopics {
         @Nullable List<NewTopic> topics
     ) {
         this.options = options != null ? options : new CreateTopicsOption();
-        this.result = Optional.ofNullable(topics).filter(not(List::isEmpty))
-            .map(t -> createNewTopics(context, t))
-            .orElse(null);
+        if (CollectionUtils.isNotEmpty(topics)) {
+            this.result = createNewTopics(context, topics);
+        } else {
+            this.result = null;
+        }
     }
 
     /**
