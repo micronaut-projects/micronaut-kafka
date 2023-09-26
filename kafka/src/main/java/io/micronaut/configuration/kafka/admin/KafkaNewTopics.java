@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.function.Predicate.not;
-
 /**
  * Creates Kafka topics via {@link AdminClient}.
  *
