@@ -654,10 +654,10 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
             AbstractKafkaProducerConfiguration configuration;
             if (clientId != null) {
-                configuration = beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId))
-                    .or(() -> NameUtils.isValidHyphenatedPropertyName(clientId) ? Optional.empty() : beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(NameUtils.hyphenate(clientId))))
+                configuration = findConfigBean(clientId)
+                    .or(() -> findHyphenatedConfigBean(clientId))
                     .map(AbstractKafkaProducerConfiguration.class::cast)
-                    .orElseGet(() -> beanContext.getBean(AbstractKafkaProducerConfiguration.class));
+                    .orElseGet(this::getDefaultConfigBean);
             } else {
                 configuration = beanContext.getBean(AbstractKafkaProducerConfiguration.class);
             }
@@ -752,6 +752,24 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
                     transactional, transactionalId, maxBlock, isBatchSend, bodyArgument);
         });
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<KafkaProducerConfiguration> findConfigBean(String clientId) {
+        return beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<KafkaProducerConfiguration> findHyphenatedConfigBean(String clientId) {
+        if (NameUtils.isValidHyphenatedPropertyName(clientId)) {
+            return Optional.empty();
+        }
+        return findConfigBean(NameUtils.hyphenate(clientId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private AbstractKafkaProducerConfiguration getDefaultConfigBean() {
+        return beanContext.getBean(AbstractKafkaProducerConfiguration.class);
     }
 
     private static String logMethod(ExecutableMethod<?, ?> method) {
