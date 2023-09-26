@@ -61,18 +61,10 @@ public class KafkaNewTopics {
         @Nullable CreateTopicsOptions options,
         @Nullable List<NewTopic> topics
     ) {
-        this.options = options;
+        this.options = options != null ? options : new CreateTopicsOption();
         this.result = Optional.ofNullable(topics).filter(not(List::isEmpty))
             .map(t -> createNewTopics(context, t))
             .orElse(null);
-    }
-
-    /**
-     * @return An optional {@link CreateTopicsOptions} that was used if new topics were created.
-     */
-    @Experimental
-    public Optional<CreateTopicsOptions> getOptions() {
-        return Optional.ofNullable(options);
     }
 
     /**
@@ -86,6 +78,6 @@ public class KafkaNewTopics {
     private CreateTopicsResult createNewTopics(@NonNull ApplicationContext context, @NonNull List<NewTopic> topics) {
         LOG.info("Creating new topics: {}", topics);
         final AdminClient adminClient = context.getBean(AdminClient.class);
-        return adminClient.createTopics(topics, getOptions().orElseGet(CreateTopicsOptions::new));
+        return adminClient.createTopics(topics, options);
     }
 }
