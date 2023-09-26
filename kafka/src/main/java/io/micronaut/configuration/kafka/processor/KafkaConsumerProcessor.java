@@ -314,8 +314,7 @@ class KafkaConsumerProcessor
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationBean(groupId)
-                .orElse(defaultConsumerConfiguration);
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(groupId);
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             groupId = groupId + "_" + UUID.randomUUID();
         }
@@ -354,10 +353,23 @@ class KafkaConsumerProcessor
     }
 
     @SuppressWarnings("rawtypes")
-    private Optional<AbstractKafkaConsumerConfiguration> getConsumerConfigurationBean(String groupId) {
-        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
-            .or(() -> NameUtils.isValidHyphenatedPropertyName(groupId) ? Optional.empty() :
-                beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(NameUtils.hyphenate(groupId))));
+    private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String groupId) {
+        return findConfigurationBean(groupId)
+            .or(() -> findHyphenatedConsumerConfigurationBean(groupId))
+            .orElse(defaultConsumerConfiguration);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaConsumerConfiguration> findConfigurationBean(String groupId) {
+        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaConsumerConfiguration> findHyphenatedConsumerConfigurationBean(String groupId) {
+        if (NameUtils.isValidHyphenatedPropertyName(groupId)) {
+            return Optional.empty();
+        }
+        return findConfigurationBean(NameUtils.hyphenate(groupId));
     }
 
     private Properties createConsumerProperties(final AnnotationValue<KafkaListener> consumerAnnotation,
