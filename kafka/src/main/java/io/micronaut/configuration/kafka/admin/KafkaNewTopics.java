@@ -21,6 +21,7 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.Experimental;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.core.util.CollectionUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsOptions;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -61,7 +62,7 @@ public class KafkaNewTopics {
         @Nullable CreateTopicsOptions options,
         @Nullable List<NewTopic> topics
     ) {
-        this.options = options != null ? options : new CreateTopicsOption();
+        this.options = options != null ? options : new CreateTopicsOptions();
         if (CollectionUtils.isNotEmpty(topics)) {
             this.result = createNewTopics(context, topics);
         } else {
