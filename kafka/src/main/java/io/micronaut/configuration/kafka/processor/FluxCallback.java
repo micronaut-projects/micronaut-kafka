@@ -20,6 +20,12 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import reactor.core.publisher.FluxSink;
 
+/**
+ * Internal {@link FluxSink} adapter for {@link Callback}.
+ *
+ * @author Guillermo Calvo
+ * @since 5.2
+ */
 @Internal
 final class FluxCallback implements Callback {
 

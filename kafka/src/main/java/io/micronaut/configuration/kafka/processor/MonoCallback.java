@@ -20,6 +20,12 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import reactor.core.publisher.MonoSink;
 
+/**
+ * Internal {@link MonoSink} adapter for {@link Callback}.
+ *
+ * @author Guillermo Calvo
+ * @since 5.2
+ */
 @Internal
 final class MonoCallback implements Callback {
 

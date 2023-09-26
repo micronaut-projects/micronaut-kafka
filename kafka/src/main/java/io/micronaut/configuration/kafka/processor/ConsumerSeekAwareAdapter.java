@@ -26,6 +26,14 @@ import org.apache.kafka.common.TopicPartition;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Internal adapter for {@link ConsumerSeekAware}.
+ *
+ * @param seeker The {@link KafkaSeeker} to use.
+ * @param bean The {@link ConsumerSeekAware} to invoke
+ * @author Guillermo Calvo
+ * @since 5.2
+ */
 @Internal
 record ConsumerSeekAwareAdapter(@NonNull KafkaSeeker seeker, @NonNull ConsumerSeekAware bean)
     implements ConsumerRebalanceListener {

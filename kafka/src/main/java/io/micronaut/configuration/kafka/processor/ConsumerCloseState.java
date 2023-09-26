@@ -19,6 +19,9 @@ import io.micronaut.core.annotation.Internal;
 
 /**
  * Consumer close state.
+ *
+ * @author Guillermo Calvo
+ * @since 5.2
  */
 @Internal
 enum ConsumerCloseState {

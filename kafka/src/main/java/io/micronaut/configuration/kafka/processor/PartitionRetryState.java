@@ -19,6 +19,9 @@ import io.micronaut.core.annotation.Internal;
 
 /**
  * Topic retry status.
+ *
+ * @author Guillermo Calvo
+ * @since 5.2
  */
 @Internal
 final class PartitionRetryState {

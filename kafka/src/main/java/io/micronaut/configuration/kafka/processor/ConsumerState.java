@@ -53,6 +53,7 @@ import java.util.*;
  * The internal state of the consumer.
  *
  * @author Denis Stepanov
+ * @since 5.2
  */
 @Internal
 final class ConsumerState {

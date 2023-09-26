@@ -39,6 +39,9 @@ import java.util.Optional;
 
 /**
  * Internal consumer info.
+ *
+ * @author Guillermo Calvo
+ * @since 5.2
  */
 @Internal
 final class ConsumerInfo {
