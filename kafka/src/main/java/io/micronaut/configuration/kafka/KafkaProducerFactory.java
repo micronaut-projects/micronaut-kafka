@@ -52,8 +52,6 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.function.Predicate.not;
-
 /**
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
  *
@@ -171,10 +169,9 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
 
         return (T) clients.computeIfAbsent(key, clientKey -> {
             final Optional<String> clientId = Optional.ofNullable(id).filter(StringUtils::isNotEmpty);
-            AbstractKafkaProducerConfiguration config;
-            config = clientId.flatMap(this::findConfigBean)
-                .or(() -> clientId.filter(not(NameUtils::isValidHyphenatedPropertyName)).map(NameUtils::hyphenate).flatMap(this::findConfigBean))
-                .orElseGet(() -> beanContext.getBean(AbstractKafkaProducerConfiguration.class));
+            AbstractKafkaProducerConfiguration config = clientId.flatMap(this::findConfigBean)
+                .or(() -> clientId.flatMap(this::findHyphenatedConfigBean))
+                .orElseGet(this::getDefaultConfigBean);
 
             DefaultKafkaProducerConfiguration newConfig = new DefaultKafkaProducerConfiguration(config);
 
@@ -247,6 +244,19 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     @SuppressWarnings("rawtypes")
     private Optional<AbstractKafkaProducerConfiguration> findConfigBean(String name) {
         return beanContext.findBean(AbstractKafkaProducerConfiguration.class, Qualifiers.byName(name));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaProducerConfiguration> findHyphenatedConfigBean(String clientId) {
+        if (NameUtils.isValidHyphenatedPropertyName(clientId)) {
+            return Optional.empty();
+        }
+        return findConfigBean(NameUtils.hyphenate(clientId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private AbstractKafkaProducerConfiguration getDefaultConfigBean() {
+       return beanContext.getBean(AbstractKafkaProducerConfiguration.class);
     }
 
     /**
