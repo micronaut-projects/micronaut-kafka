@@ -25,15 +25,10 @@ import reactor.core.publisher.FluxSink;
  *
  * @author Guillermo Calvo
  * @since 5.2
+ * @param emitter The {@link FluxSink} to invoke.
  */
 @Internal
-final class FluxCallback implements Callback {
-
-    private final FluxSink<RecordMetadata> emitter;
-
-    FluxCallback(FluxSink<RecordMetadata> emitter) {
-        this.emitter = emitter;
-    }
+record FluxCallback(FluxSink<RecordMetadata> emitter) implements Callback {
 
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {

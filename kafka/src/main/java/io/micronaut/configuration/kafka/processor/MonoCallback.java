@@ -25,15 +25,10 @@ import reactor.core.publisher.MonoSink;
  *
  * @author Guillermo Calvo
  * @since 5.2
+ * @param emitter The {@link MonoSink} to invoke.
  */
 @Internal
-final class MonoCallback implements Callback {
-
-    private final MonoSink<RecordMetadata> emitter;
-
-    MonoCallback(MonoSink<RecordMetadata> emitter) {
-        this.emitter = emitter;
-    }
+record MonoCallback(MonoSink<RecordMetadata> emitter) implements Callback {
 
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {
