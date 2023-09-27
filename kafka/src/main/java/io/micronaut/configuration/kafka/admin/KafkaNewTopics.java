@@ -15,13 +15,11 @@
  */
 package io.micronaut.configuration.kafka.admin;
 
-import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.Experimental;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.core.util.CollectionUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsOptions;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -30,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Creates Kafka topics via {@link AdminClient}.
@@ -40,45 +37,34 @@ import java.util.Optional;
  */
 @Context
 @Requires(bean = AdminClient.class)
+@Requires(bean = NewTopic.class)
 public class KafkaNewTopics {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaNewTopics.class);
 
-    @Nullable
-    private final CreateTopicsOptions options;
-
-    @Nullable
+    @NonNull
     private final CreateTopicsResult result;
 
     /**
-     * @param context The application context.
+     * @param adminClient The Kafka admin client.
      * @param options Optional {@link CreateTopicsOptions}.
-     * @param topics  Optional list of {@link NewTopic} beans.
+     * @param topics  The list of {@link NewTopic} beans to create.
      */
     public KafkaNewTopics(
-        @NonNull ApplicationContext context,
+        @NonNull AdminClient adminClient,
         @Nullable CreateTopicsOptions options,
-        @Nullable List<NewTopic> topics
+        @NonNull List<NewTopic> topics
     ) {
-        this.options = options != null ? options : new CreateTopicsOptions();
-        if (CollectionUtils.isNotEmpty(topics)) {
-            this.result = createNewTopics(context, topics);
-        } else {
-            this.result = null;
-        }
+        LOG.info("Creating new topics: {}", topics);
+        this.result = adminClient.createTopics(topics, options != null ? options : new CreateTopicsOptions());
     }
 
     /**
-     * @return An optional {@link CreateTopicsResult} if new topics were created.
+     * @return The {@link CreateTopicsResult}.
      */
     @Experimental
-    public Optional<CreateTopicsResult> getResult() {
-        return Optional.ofNullable(result);
-    }
-
-    private CreateTopicsResult createNewTopics(@NonNull ApplicationContext context, @NonNull List<NewTopic> topics) {
-        LOG.info("Creating new topics: {}", topics);
-        final AdminClient adminClient = context.getBean(AdminClient.class);
-        return adminClient.createTopics(topics, options);
+    @NonNull
+    public CreateTopicsResult getResult() {
+        return result;
     }
 }

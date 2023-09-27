@@ -18,15 +18,14 @@ class MyTopicFactoryTest extends Specification {
         expect:
         new PollingConditions(timeout: 5).eventually {
             areNewTopicsDone(newTopics)
-            final result = newTopics.getResult().orElseThrow()
-            result.numPartitions("my-new-topic-1").get() == 1
-            result.numPartitions("my-new-topic-2").get() == 2
+            newTopics.getResult().numPartitions("my-new-topic-1").get() == 1
+            newTopics.getResult().numPartitions("my-new-topic-2").get() == 2
         }
     }
 
     // tag::result[]
     boolean areNewTopicsDone(KafkaNewTopics newTopics) {
-        newTopics.result.map { it.all().isDone() }.orElse(false)
+        newTopics.result.all().done
     }
     // end::result[]
 }

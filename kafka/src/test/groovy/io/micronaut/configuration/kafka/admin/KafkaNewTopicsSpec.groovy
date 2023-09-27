@@ -19,16 +19,12 @@ class KafkaNewTopicsSpec extends AbstractKafkaContainerSpec {
         final KafkaNewTopics kafkaNewTopics = context.getBean(KafkaNewTopics)
 
         expect:
-        kafkaNewTopics.result.isPresent()
-
-        and:
-        final result = kafkaNewTopics.result.get()
         new PollingConditions(timeout: 10).eventually {
-            result.all().done == true
+            kafkaNewTopics.result.all().done == true
         }
-        result.numPartitions(TOPIC_1).get() == 1
-        result.numPartitions(TOPIC_2).get() == 2
-        result.values()[TOPIC_3].completedExceptionally == true
+        kafkaNewTopics.result.numPartitions(TOPIC_1).get() == 1
+        kafkaNewTopics.result.numPartitions(TOPIC_2).get() == 2
+        kafkaNewTopics.result.values()[TOPIC_3].completedExceptionally == true
     }
 
     @Requires(property = 'spec.name', value = 'KafkaNewTopicsSpec')
