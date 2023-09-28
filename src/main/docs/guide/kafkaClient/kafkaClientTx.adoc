@@ -12,3 +12,5 @@ try {
     producer.abortTransaction();
 }
 ----
+
+NOTE: `@KafkaClient` beans are by default singleton. When using multiple threads, you must either synchronize access to the individual instance or declare the bean as `@Prototype`. Additionally, you can use link:https://docs.micronaut.io/latest/guide/#_using_random_properties[random properties] to your advantage so that each instance of your producer gets a different transactional ID.
