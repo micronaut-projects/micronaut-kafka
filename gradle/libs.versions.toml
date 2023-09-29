@@ -8,7 +8,7 @@ micronaut-gradle-plugin = "4.1.1"
 managed-kafka-compat = "3.5.1"
 managed-kafka = '3.5.1'
 
-groovy = "4.0.12"
+groovy = "4.0.15"
 kotlin = "1.9.10"
 
 awaitility = '4.2.0'
