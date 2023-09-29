@@ -25,7 +25,7 @@ micronaut-micrometer = "5.0.1"
 micronaut-reactor = "3.0.2"
 micronaut-serde = "2.2.5"
 micronaut-tracing = "5.0.2"
-micronaut-test = "4.0.0"
+micronaut-test = "4.0.2"
 
 [libraries]
 # Core
