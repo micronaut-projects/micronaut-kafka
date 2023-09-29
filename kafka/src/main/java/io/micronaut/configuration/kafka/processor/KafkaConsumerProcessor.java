@@ -291,8 +291,7 @@ class KafkaConsumerProcessor
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId))
-                .orElse(defaultConsumerConfiguration);
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(groupId);
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             groupId = groupId + "_" + UUID.randomUUID();
         }
@@ -359,6 +358,26 @@ class KafkaConsumerProcessor
     <T, R> BoundExecutable<T, R> bindAsBatch(ExecutableMethod<T, R> method, Map<Argument<?>, Object> boundArguments, ConsumerRecords<?, ?> consumerRecords) {
         final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
         return batchBinder.bind(method, batchBinderRegistry, consumerRecords);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String groupId) {
+        return findConfigurationBean(groupId)
+            .or(() -> findHyphenatedConsumerConfigurationBean(groupId))
+            .orElse(defaultConsumerConfiguration);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaConsumerConfiguration> findConfigurationBean(String groupId) {
+        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<AbstractKafkaConsumerConfiguration> findHyphenatedConsumerConfigurationBean(String groupId) {
+        if (NameUtils.isValidHyphenatedPropertyName(groupId)) {
+            return Optional.empty();
+        }
+        return findConfigurationBean(NameUtils.hyphenate(groupId));
     }
 
     @SuppressWarnings("rawtypes")
