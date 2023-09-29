@@ -109,38 +109,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration">&#128279;</a>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.key-deserializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.value-deserializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-</tbody>
-</table>
-<div style="page-break-after: always;"></div>
 <a id="io.micronaut.configuration.kafka.config.KafkaHealthConfigurationProperties" href="#io.micronaut.configuration.kafka.config.KafkaHealthConfigurationProperties">&#128279;</a>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html">KafkaHealthConfigurationProperties</a></caption>
+<caption class="title">Table 3. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html">KafkaHealthConfigurationProperties</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -168,6 +139,35 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.restricted</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn&#8217;t have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn&#8217;t require any additional permissions.. Default value false</p></td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<a id="io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration">&#128279;</a>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaConsumerConfiguration.html">KafkaConsumerConfiguration</a></caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.key-deserializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.consumers.*.value-deserializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Deserializer</p></td>
+<td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
 </table>
