@@ -37,6 +37,7 @@ import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
+import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.StringUtils;
@@ -653,12 +654,10 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
             AbstractKafkaProducerConfiguration configuration;
             if (clientId != null) {
-                Optional<KafkaProducerConfiguration> namedConfig = beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId));
-                if (namedConfig.isPresent()) {
-                    configuration = namedConfig.get();
-                } else {
-                    configuration = beanContext.getBean(AbstractKafkaProducerConfiguration.class);
-                }
+                configuration = findConfigBean(clientId)
+                    .or(() -> findHyphenatedConfigBean(clientId))
+                    .map(AbstractKafkaProducerConfiguration.class::cast)
+                    .orElseGet(this::getDefaultConfigBean);
             } else {
                 configuration = beanContext.getBean(AbstractKafkaProducerConfiguration.class);
             }
@@ -753,6 +752,24 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
                     transactional, transactionalId, maxBlock, isBatchSend, bodyArgument);
         });
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<KafkaProducerConfiguration> findConfigBean(String clientId) {
+        return beanContext.findBean(KafkaProducerConfiguration.class, Qualifiers.byName(clientId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Optional<KafkaProducerConfiguration> findHyphenatedConfigBean(String clientId) {
+        if (NameUtils.isValidHyphenatedPropertyName(clientId)) {
+            return Optional.empty();
+        }
+        return findConfigBean(NameUtils.hyphenate(clientId));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private AbstractKafkaProducerConfiguration getDefaultConfigBean() {
+        return beanContext.getBean(AbstractKafkaProducerConfiguration.class);
     }
 
     private static String logMethod(ExecutableMethod<?, ?> method) {
