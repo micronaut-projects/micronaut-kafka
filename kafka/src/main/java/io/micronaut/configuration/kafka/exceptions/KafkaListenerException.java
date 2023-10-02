@@ -15,9 +15,11 @@
  */
 package io.micronaut.configuration.kafka.exceptions;
 
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.messaging.exceptions.MessageListenerException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import java.util.Optional;
 
 /**
@@ -29,9 +31,10 @@ import java.util.Optional;
 @SuppressWarnings("WeakerAccess")
 public class KafkaListenerException extends MessageListenerException {
 
-    private final Object listener;
-    private final Consumer<?, ?> kafkaConsumer;
-    private final ConsumerRecord<?, ?> consumerRecord;
+    private final transient Object listener;
+    private final transient Consumer<?, ?> kafkaConsumer;
+    private final transient ConsumerRecords<?, ?> consumerRecords;
+    private final transient ConsumerRecord<?, ?> consumerRecord;
 
     /**
      * Creates a new exception.
@@ -42,10 +45,7 @@ public class KafkaListenerException extends MessageListenerException {
      * @param consumerRecord The consumer record
      */
     public KafkaListenerException(String message, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
-        super(message);
-        this.listener = listener;
-        this.kafkaConsumer = kafkaConsumer;
-        this.consumerRecord = consumerRecord;
+        this(message, null, listener, kafkaConsumer, consumerRecord);
     }
 
     /**
@@ -58,12 +58,9 @@ public class KafkaListenerException extends MessageListenerException {
      * @param consumerRecord The consumer record
      */
     public KafkaListenerException(String message, Throwable cause, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
-        super(message, cause);
-        this.listener = listener;
-        this.kafkaConsumer = kafkaConsumer;
-        this.consumerRecord = consumerRecord;
+        this(message, cause, listener, kafkaConsumer, null, consumerRecord);
     }
-    
+
     /**
      * Creates a new exception.
      *
@@ -73,9 +70,31 @@ public class KafkaListenerException extends MessageListenerException {
      * @param consumerRecord The consumer record
      */
     public KafkaListenerException(Throwable cause, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
-        super(cause.getMessage(), cause);
+        this(cause.getMessage(), cause, listener, kafkaConsumer, consumerRecord);
+    }
+
+    /**
+     * Creates a new exception.
+     *
+     * @param message The message
+     * @param cause The cause
+     * @param listener The listener
+     * @param kafkaConsumer The consumer
+     * @param consumerRecords The batch of consumer records
+     * @param consumerRecord The consumer record
+     */
+    public KafkaListenerException(
+        String message,
+        Throwable cause,
+        Object listener,
+        Consumer<?, ?> kafkaConsumer,
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord
+    ) {
+        super(message, cause);
         this.listener = listener;
         this.kafkaConsumer = kafkaConsumer;
+        this.consumerRecords = consumerRecords;
         this.consumerRecord = consumerRecord;
     }
 
@@ -89,6 +108,7 @@ public class KafkaListenerException extends MessageListenerException {
     /**
      * @return The consumer that produced the error
      */
+    @SuppressWarnings("java:S1452") // Remove usage of generic wildcard type
     public Consumer<?, ?> getKafkaConsumer() {
         return kafkaConsumer;
     }
@@ -96,7 +116,17 @@ public class KafkaListenerException extends MessageListenerException {
     /**
      * @return The consumer record that was being processed that caused the error
      */
+    @SuppressWarnings("java:S1452") // Remove usage of generic wildcard type
     public Optional<ConsumerRecord<?, ?>> getConsumerRecord() {
         return Optional.ofNullable(consumerRecord);
+    }
+
+    /**
+     * @return The batch of consumer records that was being processed that caused the error
+     * @since 5.3
+     */
+    @SuppressWarnings("java:S1452") // Remove usage of generic wildcard type
+    public Optional<ConsumerRecords<?, ?>> getConsumerRecords() {
+        return Optional.ofNullable(consumerRecords);
     }
 }

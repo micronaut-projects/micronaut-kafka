@@ -79,9 +79,9 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         and: "The retry error strategy was honored"
         myConsumer.exceptions.size() == 2
         myConsumer.exceptions[0].message.startsWith('Error deserializing key/value')
-        (myConsumer.exceptions[0].cause as RecordDeserializationException).offset == 3
+        (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 3
         myConsumer.exceptions[1].message.startsWith('Error deserializing key/value')
-        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset == 3
+        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 3
     }
 
     void "test batch mode with 'retry exp' error strategy"() {
@@ -145,7 +145,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         List<?> received = []
         List<KafkaListenerException> exceptions = []
 
-        String concatenate(List<?> messages) {
+        static String concatenate(List<?> messages) {
             return messages.stream().map(Object::toString).collect(Collectors.joining('/'))
         }
     }
@@ -178,7 +178,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         List<Long> times = []
 
         @Topic(BATCH_MODE_RETRY)
-        void handleBatch(List<String> messages) {
+        void receiveBatch(List<String> messages) {
             received << concatenate(messages)
             times << System.currentTimeMillis()
             if (count.getAndIncrement() == 0) {
@@ -198,7 +198,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static class RetryDeserConsumer extends AbstractConsumer implements KafkaListenerExceptionHandler {
 
         @Topic(BATCH_MODE_RETRY_DESER)
-        void handleBatch(List<Integer> numbers) {
+        void receiveBatch(List<Integer> numbers) {
             received << concatenate(numbers)
         }
 
@@ -220,7 +220,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         List<Long> times = []
 
         @Topic(BATCH_MODE_RETRY_EXP)
-        void handleBatch(List<String> messages) {
+        void receiveBatch(List<String> messages) {
             received << concatenate(messages)
             times << System.currentTimeMillis()
             if (count.getAndIncrement() < 4) {

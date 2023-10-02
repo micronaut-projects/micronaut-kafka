@@ -15,17 +15,12 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
-import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.KafkaMessage;
-import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
-import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
-import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.Callback;
@@ -34,7 +29,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
-import org.apache.kafka.common.errors.RecordDeserializationException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.reactivestreams.Publisher;
@@ -56,28 +50,27 @@ import java.util.*;
  * @since 5.2
  */
 @Internal
-final class ConsumerState {
+abstract class ConsumerState {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
+    protected static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
 
+    protected final KafkaConsumerProcessor kafkaConsumerProcessor;
+    protected final Object consumerBean;
+    @Nullable
+    protected final Map<TopicPartition, PartitionRetryState> topicPartitionRetries;
+    protected final Map<Argument<?>, Object> boundArguments;
+    protected boolean failed;
     final ConsumerInfo info;
     final Consumer<?, ?> kafkaConsumer;
     final Set<String> subscriptions;
     Set<TopicPartition> assignments;
-
-    private final KafkaConsumerProcessor kafkaConsumerProcessor;
-    private final Object consumerBean;
     private Set<TopicPartition> pausedTopicPartitions;
     private Set<TopicPartition> pauseRequests;
-    @Nullable
-    private Map<Integer, PartitionRetryState> partitionRetries;
     private boolean autoPaused;
-    private final Map<Argument<?>, Object> boundArguments;
     private boolean pollingStarted;
-    private boolean failed;
     private volatile ConsumerCloseState closedState;
 
-    ConsumerState(
+    protected ConsumerState(
         KafkaConsumerProcessor kafkaConsumerProcessor,
         ConsumerInfo info,
         Consumer<?, ?> consumer,
@@ -92,7 +85,15 @@ final class ConsumerState {
         this.boundArguments = new HashMap<>(2);
         Optional.ofNullable(info.consumerArg).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
         this.closedState = ConsumerCloseState.NOT_STARTED;
+        this.topicPartitionRetries = this.info.errorStrategy.isRetry() ? new HashMap<>() : null;
     }
+
+    protected abstract ConsumerRecords<?, ?> pollRecords(@Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
+
+    protected abstract void processRecords(ConsumerRecords<?, ?> consumerRecords, Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
+
+    @Nullable
+    protected abstract Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets();
 
     void pause() {
         pause(assignments);
@@ -171,7 +172,7 @@ final class ConsumerState {
             }
             throw e;
         } catch (Exception e) {
-            handleException(e, null);
+            handleException(e, null, null);
         }
     }
 
@@ -189,7 +190,17 @@ final class ConsumerState {
 
     private void pollAndProcessRecords() {
         failed = true;
-        final ConsumerRecords<?, ?> consumerRecords = pollRecords();
+        // We need to retrieve current offsets in case we need to retry the current record or batch
+        final Map<TopicPartition, OffsetAndMetadata> currentOffsets = getCurrentOffsets();
+        // Poll records
+        pauseTopicPartitions();
+        final ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
+        closedState = ConsumerCloseState.POLLING;
+        if (!pollingStarted) {
+            pollingStarted = true;
+            kafkaConsumerProcessor.publishStartedPollingEvent(kafkaConsumer);
+        }
+        resumeTopicPartitions();
         if (consumerRecords == null || consumerRecords.isEmpty()) {
             return; // No consumer records to process
         }
@@ -198,11 +209,7 @@ final class ConsumerState {
             Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
             boundArguments.put(lastArgument, null);
         }
-        if (info.isBatch) {
-            processAsBatch(consumerRecords);
-        } else {
-            processIndividually(consumerRecords);
-        }
+        processRecords(consumerRecords, currentOffsets);
         if (failed) {
             return;
         }
@@ -210,23 +217,11 @@ final class ConsumerState {
             try {
                 kafkaConsumer.commitSync();
             } catch (CommitFailedException e) {
-                handleException(e, null);
+                handleException(e, consumerRecords, null);
             }
         } else if (info.offsetStrategy == OffsetStrategy.ASYNC) {
             kafkaConsumer.commitAsync(resolveCommitCallback());
         }
-    }
-
-    private ConsumerRecords<?, ?> pollRecords() {
-        pauseTopicPartitions();
-        final ConsumerRecords<?, ?> consumerRecords = poll();
-        closedState = ConsumerCloseState.POLLING;
-        if (!pollingStarted) {
-            pollingStarted = true;
-            kafkaConsumerProcessor.publishStartedPollingEvent(kafkaConsumer);
-        }
-        resumeTopicPartitions();
-        return consumerRecords;
     }
 
     private synchronized void pauseTopicPartitions() {
@@ -265,133 +260,15 @@ final class ConsumerState {
         }
     }
 
-    private ConsumerRecords<?, ?> poll() {
-        // Deserialization errors can happen while polling
-
-        // In batch mode, propagate any errors
-        if (info.isBatch) {
-            return kafkaConsumer.poll(info.pollTimeout);
-        }
-
-        // Otherwise, try to honor the configured error strategy
-        try {
-            return kafkaConsumer.poll(info.pollTimeout);
-        } catch (RecordDeserializationException ex) {
-            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod, ex);
-            final TopicPartition tp = ex.topicPartition();
-            // By default, seek past the record to continue consumption
-            kafkaConsumer.seek(tp, ex.offset() + 1);
-            // The error strategy and the exception handler can still decide what to do about this record
-            resolveWithErrorStrategy(new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null), ex);
-            // By now, it's been decided whether this record should be retried and the exception may have been handled
-            return null;
-        }
-    }
-
-    private void processAsBatch(final ConsumerRecords<?, ?> consumerRecords) {
-        final Object methodResult = kafkaConsumerProcessor.bindAsBatch(info.method, boundArguments, consumerRecords).invoke(consumerBean);
-        normalizeResult(methodResult).ifPresent(result -> {
-            final Flux<?> resultFlux = toFlux(result);
-            final Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
-            final java.util.function.Consumer<Object> consumeNext = o -> {
-                if (iterator.hasNext()) {
-                    final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-                    handleResultFlux(consumerRecord, Flux.just(o), true, consumerRecords);
-                }
-            };
-            if (Publishers.isConvertibleToPublisher(result) && !info.isBlocking) {
-                resultFlux.subscribe(consumeNext);
-            } else {
-                Optional.ofNullable(resultFlux.collectList().block()).stream().flatMap(List::stream).forEach(consumeNext);
-            }
-        });
-        failed = false;
-    }
-
-    @Nullable
-    private static Optional<Object> normalizeResult(@Nullable Object result) {
-        return Optional.ofNullable(result).map(x -> x.getClass().isArray() ? Arrays.asList((Object[]) x) : x);
-    }
-
-    private Flux<?> toFlux(Object result) {
-        if (result instanceof Iterable<?> iterable) {
-            return Flux.fromIterable(iterable);
-        }
-        if (Publishers.isConvertibleToPublisher(result)) {
-            return kafkaConsumerProcessor.convertPublisher(result);
-        }
-        return Flux.just(result);
-    }
-
-    private void processIndividually(final ConsumerRecords<?, ?> consumerRecords) {
-        final Map<TopicPartition, OffsetAndMetadata> currentOffsets = info.trackPartitions ? new HashMap<>() : null;
-        final Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
-        while (iterator.hasNext()) {
-            final ConsumerRecord<?, ?> consumerRecord = iterator.next();
-
-            LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod, consumerRecord);
-
-            if (info.trackPartitions) {
-                final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
-                final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
-                currentOffsets.put(topicPartition, offsetAndMetadata);
-            }
-
-            final KafkaSeekOperations seek = Optional.ofNullable(info.seekArg).map(x -> KafkaSeekOperations.newInstance()).orElse(null);
-            Optional.ofNullable(info.seekArg).ifPresent(argument -> boundArguments.put(argument, seek));
-            Optional.ofNullable(info.ackArg).ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
-
-            try {
-                process(consumerRecord, consumerRecords);
-            } catch (Exception e) {
-                if (resolveWithErrorStrategy(consumerRecord, e)) {
-                    resetTheFollowingPartitions(consumerRecord, iterator);
-                    failed = true;
-                    return;
-                }
-            }
-
-            if (info.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
-                commitSync(consumerRecord, currentOffsets);
-            } else if (info.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-                kafkaConsumer.commitAsync(currentOffsets, resolveCommitCallback());
-            }
-
-            if (seek != null) {
-                // Performs seek operations that were deferred by the user
-                final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
-                seek.forEach(seeker::perform);
-            }
-        }
-        failed = false;
-    }
-
-    private void process(ConsumerRecord<?, ?> consumerRecord, ConsumerRecords<?, ?> consumerRecords) {
-        final Object result = kafkaConsumerProcessor.bind(info.method, boundArguments, consumerRecord).invoke(consumerBean);
-        if (result != null) {
-            final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
-            final Flux<?> publisher = isPublisher ? kafkaConsumerProcessor.convertPublisher(result) : Flux.just(result);
-            handleResultFlux(consumerRecord, publisher, isPublisher || info.isBlocking, consumerRecords);
-        }
-    }
-
-    private void commitSync(ConsumerRecord<?, ?> consumerRecord, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
-        try {
-            kafkaConsumer.commitSync(currentOffsets);
-        } catch (CommitFailedException e) {
-            handleException(e, consumerRecord);
-        }
-    }
-
-    private void handleResultFlux(
+    protected void handleResultFlux(
+        ConsumerRecords<?, ?> consumerRecords,
         ConsumerRecord<?, ?> consumerRecord,
         Flux<?> publisher,
-        boolean isBlocking,
-        ConsumerRecords<?, ?> consumerRecords
+        boolean isBlocking
     ) {
         final Flux<RecordMetadata> recordMetadataProducer = publisher
             .flatMap(value -> sendToDestination(value, consumerRecord, consumerRecords))
-            .onErrorResume(error -> handleSendToError(error, consumerRecord));
+            .onErrorResume(error -> handleSendToError(error, consumerRecords, consumerRecord));
 
         if (isBlocking) {
             List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
@@ -504,15 +381,15 @@ final class ConsumerState {
         }
     }
 
-    private Publisher<RecordMetadata> handleSendToError(Throwable error, ConsumerRecord<?, ?> consumerRecord) {
-        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), error, consumerRecord);
+    private Publisher<RecordMetadata> handleSendToError(Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
 
         if (!info.shouldRedeliver) {
             return Flux.empty();
         }
 
         return redeliver(consumerRecord)
-            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), ex, consumerRecord));
+            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), ex, consumerRecords, consumerRecord));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -538,59 +415,26 @@ final class ConsumerState {
         return Mono.create(emitter -> kafkaProducer.send(producerRecord, new MonoCallback(emitter)));
     }
 
-    private boolean resolveWithErrorStrategy(ConsumerRecord<?, ?> consumerRecord, Throwable e) {
-
-        ErrorStrategyValue currentErrorStrategy = info.errorStrategy;
-
-        if (currentErrorStrategy.isRetry() && !info.exceptionTypes.isEmpty() &&
-            info.exceptionTypes.stream().noneMatch(error -> error.equals(e.getClass()))) {
-            if (partitionRetries != null) {
-                partitionRetries.remove(consumerRecord.partition());
-            }
-            // Skip the failing record
-            currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+    protected void delayRetry(int currentRetryCount, Set<TopicPartition> partitions) {
+        // Decide how long should we wait to retry this batch again
+        final Duration retryDelay = info.errorStrategy.computeRetryDelay(info.retryDelay,
+            currentRetryCount);
+        if (retryDelay != null) {
+            pause(partitions);
+            kafkaConsumerProcessor.scheduleTask(retryDelay, () -> resume(partitions));
         }
-
-        if (currentErrorStrategy.isRetry() && info.retryCount != 0) {
-
-            final PartitionRetryState retryState = getPartitionRetryState(consumerRecord);
-
-            if (info.retryCount >= retryState.currentRetryCount) {
-                if (info.shouldHandleAllExceptions) {
-                    handleException(e, consumerRecord);
-                }
-
-                final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
-                kafkaConsumer.seek(topicPartition, consumerRecord.offset());
-
-                final Duration retryDelay = currentErrorStrategy.computeRetryDelay(info.retryDelay, retryState.currentRetryCount);
-                if (retryDelay != null) {
-                    // in the stop on error strategy, pause the consumer and resume after the retryDelay duration
-                    final Set<TopicPartition> paused = Collections.singleton(topicPartition);
-                    pause(paused);
-                    kafkaConsumerProcessor.scheduleTask(retryDelay, () -> resume(paused));
-                }
-                return true;
-            } else {
-                partitionRetries.remove(consumerRecord.partition());
-                // Skip the failing record
-                currentErrorStrategy = ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
-            }
-        }
-
-        handleException(e, consumerRecord);
-
-        return currentErrorStrategy != ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
     }
 
-    private PartitionRetryState getPartitionRetryState(ConsumerRecord<?, ?> consumerRecord) {
-        final PartitionRetryState retryState;
-        if (partitionRetries == null) {
-            partitionRetries = new HashMap<>();
-        }
-        retryState = partitionRetries.computeIfAbsent(consumerRecord.partition(), x -> new PartitionRetryState());
-        if (retryState.currentRetryOffset != consumerRecord.offset()) {
-            retryState.currentRetryOffset = consumerRecord.offset();
+    protected boolean shouldRetryException(Throwable e) {
+        return info.exceptionTypes.isEmpty() ||
+            info.exceptionTypes.stream().anyMatch(e.getClass()::equals);
+    }
+
+    protected PartitionRetryState getPartitionRetryState(TopicPartition tp, long currentOffset) {
+        final PartitionRetryState retryState = topicPartitionRetries
+            .computeIfAbsent(tp, x -> new PartitionRetryState());
+        if (retryState.currentRetryOffset != currentOffset) {
+            retryState.currentRetryOffset = currentOffset;
             retryState.currentRetryCount = 1;
         } else {
             retryState.currentRetryCount++;
@@ -598,30 +442,14 @@ final class ConsumerState {
         return retryState;
     }
 
-    private void resetTheFollowingPartitions(
-        ConsumerRecord<?, ?> errorConsumerRecord,
-        Iterator<? extends ConsumerRecord<?, ?>> iterator
-    ) {
-        Set<Integer> processedPartition = new HashSet<>();
-        processedPartition.add(errorConsumerRecord.partition());
-        while (iterator.hasNext()) {
-            ConsumerRecord<?, ?> consumerRecord = iterator.next();
-            if (!processedPartition.add(consumerRecord.partition())) {
-                continue;
-            }
-            TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
-            kafkaConsumer.seek(topicPartition, consumerRecord.offset());
-        }
+    protected void handleException(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord) {
+        handleException(e.getMessage(), e, consumerRecords, consumerRecord);
     }
 
-    private void handleException(Throwable e, ConsumerRecord<?, ?> consumerRecord) {
+    private void handleException(String message, Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
         kafkaConsumerProcessor.handleException(consumerBean,
-            new KafkaListenerException(e, consumerBean, kafkaConsumer, consumerRecord));
-    }
-
-    private void handleException(String message, Throwable e, ConsumerRecord<?, ?> consumerRecord) {
-        kafkaConsumerProcessor.handleException(consumerBean,
-            new KafkaListenerException(message, e, consumerBean, kafkaConsumer, consumerRecord));
+            new KafkaListenerException(message, e, consumerBean, kafkaConsumer, consumerRecords, consumerRecord));
     }
 
     private OffsetCommitCallback resolveCommitCallback() {

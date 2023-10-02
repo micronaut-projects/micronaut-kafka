@@ -45,9 +45,6 @@ import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
-import io.micronaut.core.bind.BoundExecutable;
-import io.micronaut.core.bind.DefaultExecutableBinder;
-import io.micronaut.core.bind.ExecutableBinder;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
@@ -350,14 +347,12 @@ class KafkaConsumerProcessor
         return Flux.from((Publisher<T>) Publishers.convertPublisher(beanContext.getConversionService(), result, Publisher.class));
     }
 
-    <T, R> BoundExecutable<T, R> bind(ExecutableMethod<T, R> method, Map<Argument<?>, Object> boundArguments, ConsumerRecord<?, ?> consumerRecord) {
-        final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
-        return executableBinder.bind(method, binderRegistry, consumerRecord);
+    ConsumerRecordBinderRegistry getBinderRegistry() {
+        return binderRegistry;
     }
 
-    <T, R> BoundExecutable<T, R> bindAsBatch(ExecutableMethod<T, R> method, Map<Argument<?>, Object> boundArguments, ConsumerRecords<?, ?> consumerRecords) {
-        final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
-        return batchBinder.bind(method, batchBinderRegistry, consumerRecords);
+    BatchConsumerRecordsBinderRegistry getBatchBinderRegistry() {
+        return batchBinderRegistry;
     }
 
     @SuppressWarnings("rawtypes")
@@ -466,7 +461,9 @@ class KafkaConsumerProcessor
             topicAnnotations.forEach(a -> setupConsumerSubscription(method, a, consumerBean, kafkaConsumer));
             kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
             final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, method);
-            final ConsumerState consumerState = new ConsumerState(this, consumerInfo, kafkaConsumer, consumerBean);
+            final ConsumerState consumerState = consumerInfo.isBatch ?
+                new ConsumerStateBatch(this, consumerInfo, kafkaConsumer, consumerBean) :
+                new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);
             consumers.put(finalClientId, consumerState);
             executorService.submit(consumerState::threadPollLoop);
         }
