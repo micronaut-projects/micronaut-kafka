@@ -14,4 +14,4 @@ interface WordCountClient {
     @Topic("streams-plaintext-input")
     fun publishSentence(sentence: String?)
 }
-// tag::clazz[]
+// end::clazz[]

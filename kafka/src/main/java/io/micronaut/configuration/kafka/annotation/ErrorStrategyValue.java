@@ -15,6 +15,10 @@
  */
 package io.micronaut.configuration.kafka.annotation;
 
+import io.micronaut.core.annotation.Nullable;
+
+import java.time.Duration;
+
 /**
  * Defines the type of error handling strategy that micronaut-kafka will perform in case
  * of error. The default exception handler or any custom exception handler will be performed
@@ -54,5 +58,33 @@ public enum ErrorStrategyValue {
      * See https://github.com/micronaut-projects/micronaut-kafka/issues/372
      */
     @Deprecated
-    NONE
+    NONE;
+
+    /**
+     *
+     * @return Whether this is a retry error strategy.
+     * @since 5.2
+     */
+    public boolean isRetry() {
+        return this == RETRY_ON_ERROR || this == RETRY_EXPONENTIALLY_ON_ERROR;
+    }
+
+    /**
+     * Compute retry delay given a fixed delay and the number of attempts.
+     *
+     * @param fixedRetryDelay The fixed retry delay.
+     * @param retryAttempts The number of retries so far.
+     * @return The amount of time to wait before trying again.
+     * @since 5.2
+     */
+    public Duration computeRetryDelay(@Nullable Duration fixedRetryDelay, long retryAttempts) {
+        if (!isRetry()) {
+            return Duration.ZERO;
+        }
+        final Duration delay = fixedRetryDelay != null ? fixedRetryDelay : Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS);
+        if (this == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
+            return delay.multipliedBy(1L << (retryAttempts - 1));
+        }
+        return delay;
+    }
 }

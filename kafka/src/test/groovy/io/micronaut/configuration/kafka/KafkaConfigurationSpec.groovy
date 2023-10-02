@@ -1,10 +1,13 @@
 package io.micronaut.configuration.kafka
 
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
 import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
 import io.micronaut.context.exceptions.NoSuchBeanException
@@ -14,6 +17,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.IntegerDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import spock.lang.AutoCleanup
@@ -162,6 +166,35 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    void "test consumer with camel-case group id"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                'spec.name': 'KafkaConfigurationSpec',
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.consumers.my-kebab-group.' + ConsumerConfig.GROUP_ID_CONFIG): "my-kebab-group",
+                ('kafka.consumers.my-kebab-group.' + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): IntegerDeserializer.name,
+                ('kafka.consumers.my-kebab-group.' + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+
+        when:
+        MyConsumer consumer = applicationContext.getBean(MyConsumer)
+
+        then:
+        consumer != null
+
+        when:
+        KafkaConsumer kafkaConsumer = consumer.kafkaConsumer
+
+        then:
+        kafkaConsumer != null
+        kafkaConsumer.groupId.orElse(null) == 'MY_KEBAB_GROUP'
+        kafkaConsumer.keyDeserializer instanceof IntegerDeserializer
+        kafkaConsumer.valueDeserializer instanceof StringDeserializer
+
+        cleanup:
+        applicationContext.close()
     }
 
     void "test configure list fields default properties"() {
@@ -319,6 +352,12 @@ class KafkaConfigurationSpec extends Specification {
         thrown(NoSuchBeanException)
     }
 
+    @Requires(property = 'spec.name', value = 'KafkaConfigurationSpec')
+    @KafkaListener(groupId = "MY_KEBAB_GROUP", autoStartup = false)
+    static class MyConsumer implements ConsumerAware<String, String> {
+        Consumer<String, String> kafkaConsumer
+        @Topic("foo") void consume(String foo) { }
+    }
 }
 
 class FakeYamlPropertySource extends MapPropertySource {

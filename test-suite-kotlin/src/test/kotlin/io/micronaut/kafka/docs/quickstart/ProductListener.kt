@@ -22,3 +22,4 @@ class ProductListener {
         LOG.info("Got Product - {} by {}", name, brand)
     }
 }
+// end::clazz[]
