@@ -16,3 +16,4 @@ interface ProductClient {
 
     fun sendProduct(@Topic topic: String, @KafkaKey brand: String, name: String) // <4>
 }
+// end::clazz[]
