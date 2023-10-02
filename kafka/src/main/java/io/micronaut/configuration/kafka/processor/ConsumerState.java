@@ -284,6 +284,11 @@ final class ConsumerState {
     }
 
     private void processAsBatch(final ConsumerRecords<?, ?> consumerRecords) {
+        // Bind Acknowledgement argument
+        if (info.ackArg != null) {
+            final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getBatchOffsets(consumerRecords);
+            boundArguments.put(info.ackArg, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+        }
         final Object methodResult = kafkaConsumerProcessor.bindAsBatch(info.method, boundArguments, consumerRecords).invoke(consumerBean);
         normalizeResult(methodResult).ifPresent(result -> {
             final Flux<?> resultFlux = toFlux(result);
@@ -301,6 +306,16 @@ final class ConsumerState {
             }
         });
         failed = false;
+    }
+
+    private Map<TopicPartition, OffsetAndMetadata> getBatchOffsets(ConsumerRecords<?, ?> consumerRecords) {
+        Map<TopicPartition, OffsetAndMetadata> batchOffsets = new HashMap<>();
+        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+            final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
+            batchOffsets.put(topicPartition, offsetAndMetadata);
+        }
+        return batchOffsets;
     }
 
     @Nullable
