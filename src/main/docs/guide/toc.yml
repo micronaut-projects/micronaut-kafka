@@ -29,6 +29,7 @@ kafkaApplications:
   kafkaHealth: Kafka Health Checks
   kafkaMetrics: Kafka Metrics
   kafkaTracing: Kafka Distributed Tracing
+  kafkaNewTopics: Creating New Topics
   kafkaDisabled: Disabling Micronaut-Kafka
 kafkaStreams:
   title: Kafka Streams
