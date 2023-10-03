@@ -1869,6 +1869,33 @@ fun testBookSender() {
 <div class="paragraph">
 <p>Transaction processing can be enabled by defining <code>transactionalId</code> on <code>@KafkaClient</code>, which will initialize the producer for transactional usage and wrap any send operation with a transaction demarcation.</p>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="title">Transactional Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
+public interface TransactionalClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Transactional Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
+interface TransactionalClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Transactional Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
+interface TransactionalClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="title">Alternative Kafka producer transactional code</div>
 <div class="content">
@@ -1881,6 +1908,50 @@ try {
     producer.abortTransaction();
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>@KafkaClient</code> beans are by default singleton. When using multiple threads, you must either synchronize access to the individual instance or declare the bean as <code>@Prototype</code>. Additionally, you can use <a href="https://docs.micronaut.io/latest/guide/#_using_random_properties">random properties</a> to your advantage so that each instance of your producer gets a different transactional ID.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Random transactional ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Prototype
+@KafkaClient(id = "my-client", transactionalId = "my-tx-id-${random.uuid}")
+public interface RandomTransactionalIdClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Random transactional ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Prototype
+@KafkaClient(id = "my-client", transactionalId = 'my-tx-id-${random.uuid}')
+interface RandomTransactionalIdClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Random transactional ID</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Prototype
+@KafkaClient(id = "my-client", transactionalId = "my-tx-id-\${random.uuid}")
+interface RandomTransactionalIdClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 
 <h2 id="kafkaDockerized"><a class="anchor" href="#kafkaDockerized"></a>5.6 Running Kafka while testing and developing</h2>
