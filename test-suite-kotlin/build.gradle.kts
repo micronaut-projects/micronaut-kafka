@@ -8,4 +8,5 @@ dependencies {
     kaptTest(platform(mn.micronaut.core.bom))
     kaptTest(mn.micronaut.inject.java)
     testImplementation(mnTest.micronaut.test.junit5)
+    testImplementation(libs.kotlinx.coroutines)
 }

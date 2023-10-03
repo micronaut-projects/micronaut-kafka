@@ -523,7 +523,8 @@ class KafkaConsumerProcessor
                 .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
                 .findFirst()
                 .orElseGet(() -> Arrays.stream(method.getArguments())
-                        .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class))
+                        .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class)
+                            && !isLastArgumentOfSuspendedMethod(arg, method))
                         .findFirst()
                         .orElse(null));
     }
@@ -531,6 +532,14 @@ class KafkaConsumerProcessor
     private static Argument<?> findBodyArgument(boolean batch, ExecutableMethod<?, ?> method) {
         final Argument<?> tempBodyArg = findBodyArgument(method);
         return batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
+    }
+
+    private static boolean isLastArgumentOfSuspendedMethod(Argument<?> argument, ExecutableMethod<?, ?> method) {
+        if (!method.isSuspend()) {
+            return false;
+        }
+        Argument<?> lastArgumentValue = method.getArguments()[method.getArguments().length - 1];
+        return argument.equals(lastArgumentValue);
     }
 
     private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> config) {

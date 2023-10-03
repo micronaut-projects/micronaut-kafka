@@ -193,6 +193,11 @@ final class ConsumerState {
         if (consumerRecords == null || consumerRecords.isEmpty()) {
             return; // No consumer records to process
         }
+        // Support Kotlin coroutines
+        if (info.method.isSuspend()) {
+            Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
+            boundArguments.put(lastArgument, null);
+        }
         if (info.isBatch) {
             processAsBatch(consumerRecords);
         } else {
