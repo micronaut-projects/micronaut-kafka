@@ -37,8 +37,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         then: "The batch that threw the exception was skipped and the next batch was processed"
         conditions.eventually {
-            myConsumer.received == ['One/Two', 'Three/Four'] ||
-                    myConsumer.received == ['One', 'Two/Three', 'Four']
+            concatenate(myConsumer.received) == 'One/Two/Three/Four'
         }
     }
 
@@ -144,10 +143,6 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         AtomicInteger count = new AtomicInteger(0)
         List<?> received = []
         List<KafkaListenerException> exceptions = []
-
-        static String concatenate(List<?> messages) {
-            return messages.stream().map(Object::toString).collect(Collectors.joining('/'))
-        }
     }
 
     @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
@@ -249,5 +244,9 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         void handle(KafkaListenerException exception) {
             exceptions << exception
         }
+    }
+
+    static String concatenate(List<?> messages) {
+        return messages.stream().map(Object::toString).collect(Collectors.joining('/'))
     }
 }
