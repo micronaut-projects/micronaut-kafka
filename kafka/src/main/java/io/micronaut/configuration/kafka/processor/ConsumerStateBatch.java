@@ -100,9 +100,7 @@ final class ConsumerStateBatch extends ConsumerState {
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
             final boolean isBlocking = info.isBlocking || !isPublisher;
             // Flux of tuples (consumer record / result)
-            final Flux<? extends Tuple2<? extends ConsumerRecord<?, ?>, ?>> resultRecordFlux;
-            // Flux of consumer records
-            final Flux<ConsumerRecord<?, ?>> recordFlux = Flux.fromIterable(consumerRecords);
+            final Flux<? extends Tuple2<?, ? extends ConsumerRecord<?, ?>>> resultRecordFlux;
             // Flux of results
             final Flux<?> resultFlux;
             if (result instanceof Iterable<?> iterable) {
@@ -112,9 +110,9 @@ final class ConsumerStateBatch extends ConsumerState {
             } else {
                 resultFlux = Flux.just(result);
             }
-            // Zip consumer record flux with result flux
-            resultRecordFlux = recordFlux.zipWith(resultFlux)
-                .doOnNext(x -> handleResultFlux(consumerRecords, x.getT1(), Flux.just(x.getT2()), isBlocking));
+            // Zip result flux with consumer records
+            resultRecordFlux = resultFlux.zipWithIterable(consumerRecords)
+                .doOnNext(x -> handleResultFlux(consumerRecords, x.getT2(), Flux.just(x.getT1()), isBlocking));
             // Block on the zipped flux or subscribe if non-blocking
             if (isBlocking) {
                 resultRecordFlux.blockLast();
