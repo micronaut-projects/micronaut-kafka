@@ -145,7 +145,9 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>7.3</strong><span>Kafka Distributed Tracing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDisabled"><a href="#kafkaDisabled"><strong>7.4</strong><span>Disabling Micronaut-Kafka</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaNewTopics"><a href="#kafkaNewTopics"><strong>7.4</strong><span>Creating New Topics</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDisabled"><a href="#kafkaDisabled"><strong>7.5</strong><span>Disabling Micronaut-Kafka</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
         
@@ -5008,7 +5010,152 @@ By default, the details visible above are only shown to authenticated users. See
 <p>Distributed tracing is supported via the <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide">Micronaut Tracing</a> module <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka">using Open Telemetry</a>.</p>
 </div>
 
-<h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>7.4 Disabling Micronaut-Kafka</h2>
+<h2 id="kafkaNewTopics"><a class="anchor" href="#kafkaNewTopics"></a>7.4 Creating New Topics</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaNewTopics.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>You can automatically add topics to the broker when your application starts. To do so, add a bean of type a <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/admin/NewTopic"><code>NewTopic</code></a> for each topic you want to create. <code>NewTopic</code> instances let you specify the name, the number of partitions, the replication factor, the replicas assignments and the configuration properties you want to associate with the new topic. Additionally, you can add a bean of type <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/admin/CreateTopicsOptions"><code>CreateTopicsOptions</code></a> that will be used when the new topics are created.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating New Kafka Topics with Options</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.CreateTopicsOptions;
+import org.apache.kafka.clients.admin.NewTopic;
+
+@Requires(bean = AdminClient.class)
+@Factory
+public class MyTopicFactory {
+
+    @Bean
+    CreateTopicsOptions options() {
+        return new CreateTopicsOptions().timeoutMs(5000).validateOnly(true).retryOnQuotaViolation(false);
+    }
+
+    @Bean
+    NewTopic topic1() {
+        return new NewTopic("my-new-topic-1", 1, (short) 1);
+    }
+
+    @Bean
+    NewTopic topic2() {
+        return new NewTopic("my-new-topic-2", 2, (short) 1);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating New Kafka Topics with Options</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.context.annotation.Bean
+import io.micronaut.context.annotation.Factory
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.CreateTopicsOptions
+import org.apache.kafka.clients.admin.NewTopic
+
+@Requires(bean = AdminClient)
+@Factory
+class MyTopicFactory {
+
+    @Bean
+    CreateTopicsOptions options() {
+        new CreateTopicsOptions().timeoutMs(5000).validateOnly(true).retryOnQuotaViolation(false)
+    }
+
+    @Bean
+    NewTopic topic1() {
+        new NewTopic("my-new-topic-1", 1, (short) 1)
+    }
+
+    @Bean
+    NewTopic topic2() {
+        new NewTopic("my-new-topic-2", 2, (short) 1)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating New Kafka Topics with Options</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.context.annotation.Bean
+import io.micronaut.context.annotation.Factory
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.CreateTopicsOptions
+import org.apache.kafka.clients.admin.NewTopic
+
+@Requires(bean = AdminClient::class)
+@Factory
+class MyTopicFactory {
+
+    @Bean
+    fun options(): CreateTopicsOptions {
+        return CreateTopicsOptions().timeoutMs(5000).validateOnly(true).retryOnQuotaViolation(false)
+    }
+
+    @Bean
+    fun topic1(): NewTopic {
+        return NewTopic("my-new-topic-1", 1, 1)
+    }
+
+    @Bean
+    fun topic2(): NewTopic {
+        return NewTopic("my-new-topic-2", 2, 1)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Creating topics is not a transactional operation, so it may succeed for some topics while fail for others. This operation also executes asynchronously, so it may take several seconds until all the brokers become aware that the topics have been created.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you ever need to check if the operation has completed, you can <code>@Inject</code> or retrieve the <a href="../api/io/micronaut/configuration/kafka/admin/KafkaNewTopics.html">KafkaNewTopics</a> bean from the application context and then retrieve the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/admin/CreateTopicsResult">operation result</a> that Kafka returned when the topics were created.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Checking if Topic Creation is Done</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">    boolean areNewTopicsDone(KafkaNewTopics newTopics) {
+        return newTopics.getResult().all().isDone();
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Checking if Topic Creation is Done</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    boolean areNewTopicsDone(KafkaNewTopics newTopics) {
+        newTopics.result.all().done
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Checking if Topic Creation is Done</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    fun areNewTopicsDone(newTopics: KafkaNewTopics): Boolean {
+        return newTopics.result.all().isDone
+    }</code></pre>
+</div>
+</div>
+
+<h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>7.5 Disabling Micronaut-Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaApplications/kafkaDisabled.adoc"'>
