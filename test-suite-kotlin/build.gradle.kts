@@ -10,3 +10,9 @@ dependencies {
     testImplementation(mnTest.micronaut.test.junit5)
     testImplementation(libs.kotlinx.coroutines)
 }
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
