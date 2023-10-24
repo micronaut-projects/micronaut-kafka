@@ -117,3 +117,13 @@ kafka:
         default:
             start-kafka-streams: false
 ----
+
+You may want to customize how long you wait for Kafka Streams to shut down between tests, with `kafka.streams-close-seconds`.
+
+For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down each stream:
+
+[configuration]
+----
+kafka:
+    streams-close-seconds: 10
+----
