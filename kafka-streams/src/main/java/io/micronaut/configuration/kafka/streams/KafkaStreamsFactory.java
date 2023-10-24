@@ -22,6 +22,7 @@ import io.micronaut.context.annotation.EachBean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Secondary;
+import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
@@ -62,6 +63,9 @@ public class KafkaStreamsFactory implements Closeable {
     private final Map<KafkaStreams, ConfiguredStreamBuilder> streams = new ConcurrentHashMap<>();
 
     private final ApplicationEventPublisher eventPublisher;
+
+    @Value("${kafka.streams-close-seconds:3}")
+    private int closeWaitSeconds;
 
     /**
      * Default constructor.
@@ -159,7 +163,7 @@ public class KafkaStreamsFactory implements Closeable {
     public void close() {
         for (KafkaStreams stream : streams.keySet()) {
             try {
-                stream.close(Duration.ofSeconds(3));
+                stream.close(Duration.ofSeconds(closeWaitSeconds));
             } catch (Exception e) {
                 // ignore
             }
