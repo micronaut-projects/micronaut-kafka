@@ -59,6 +59,11 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
     @Override
     public <T> Optional<ArgumentBinder<T, ConsumerRecords<?, ?>>> findArgumentBinder(Argument<T> argument) {
         Class<T> argType = argument.getType();
+
+        if (ConsumerRecords.class.equals(argType)) {
+            return Optional.of((context, consumerRecords) -> () -> (Optional<T>) Optional.of(consumerRecords));
+        }
+
         if (Iterable.class.isAssignableFrom(argType) || argType.isArray() || Publishers.isConvertibleToPublisher(argType)) {
             Argument<?> batchType = argument.getFirstTypeVariable().orElse(Argument.OBJECT_ARGUMENT);
             List bound = new ArrayList();
@@ -74,7 +79,6 @@ public class BatchConsumerRecordsBinderRegistry implements ArgumentBinderRegistr
                         if (result.isPresentAndSatisfied()) {
                             bound.add(result.get());
                         }
-
                     });
                 }
                 return () -> {
