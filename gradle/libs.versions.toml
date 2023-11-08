@@ -27,7 +27,7 @@ micronaut-serde = "2.2.5"
 micronaut-tracing = "6.1.0"
 micronaut-test = "4.0.2"
 
-coroutines = "1.7.2"
+coroutines = "1.7.3"
 
 [libraries]
 # Core
