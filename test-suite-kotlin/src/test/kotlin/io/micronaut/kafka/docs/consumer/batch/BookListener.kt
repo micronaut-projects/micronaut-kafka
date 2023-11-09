@@ -4,10 +4,6 @@ package io.micronaut.kafka.docs.consumer.batch
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.OffsetAndMetadata
-import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory.getLogger
 import reactor.core.publisher.Flux
 import java.util.*
@@ -39,29 +35,6 @@ class BookListener {
         }
     }
     // end::reactive[]
-
-    // tag::manual[]
-    @Topic("all-the-books")
-    fun receive(records: List<ConsumerRecord<String?, Book?>>, kafkaConsumer: Consumer<*, *>) { // <1>
-        for (i in records.indices) {
-            val record = records[i] // <2>
-
-            // process the book
-            val book = record.value()
-
-            // commit offsets
-            val topic = record.topic()
-            val partition = record.partition()
-            val offset = record.offset() // <3>
-            kafkaConsumer.commitSync(
-                Collections.singletonMap( // <4>
-                    TopicPartition(topic, partition),
-                    OffsetAndMetadata(offset + 1, "my metadata")
-                )
-            )
-        }
-    }
-    // end::manual[]
 //tag::endclazz[]
 }
 //end::endclazz[]
