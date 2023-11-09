@@ -15,12 +15,14 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
+import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
+import java.util.HashMap;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -78,6 +80,11 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
+            // Bind Acknowledgement argument
+            if (info.ackArg != null) {
+                final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(consumerRecords);
+                boundArguments.put(info.ackArg, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+            }
             final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
             final Object result = batchBinder.bind(info.method, kafkaConsumerProcessor.getBatchBinderRegistry(), consumerRecords).invoke(consumerBean);
             handleResult(normalizeResult(result), consumerRecords);
@@ -85,6 +92,16 @@ final class ConsumerStateBatch extends ConsumerState {
         } catch (Exception e) {
             failed = resolveWithErrorStrategy(consumerRecords, currentOffsets, e);
         }
+    }
+
+    private Map<TopicPartition, OffsetAndMetadata> getAckOffsets(ConsumerRecords<?, ?> consumerRecords) {
+        Map<TopicPartition, OffsetAndMetadata> ackOffsets = new HashMap<>();
+        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+            final TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
+            ackOffsets.put(topicPartition, offsetAndMetadata);
+        }
+        return ackOffsets;
     }
 
     @Nullable
