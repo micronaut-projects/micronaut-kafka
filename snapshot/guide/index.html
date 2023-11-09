@@ -3430,7 +3430,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <p>There are a couple of ways that can be achieved.</p>
 </div>
 <div class="paragraph">
-<p>The simplest way is to define an argument of type <a href="../api/io/micronaut/configuration/kafka/Acknowledgement.html">Acknowledgement</a> and call the <code>ack()</code> method to commit offsets synchronously:</p>
+<p>The simplest way is to define an argument of type <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html">Acknowledge</a> and call the <code>ack()</code> method to commit offsets synchronously:</p>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with <code>ack()</code></div>
@@ -3482,7 +3482,7 @@ class ProductListener {
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The listener method specifies a parameter of type <a href="../api/io/micronaut/configuration/kafka/Acknowledgement.html">Acknowledgement</a></td>
+<td>The listener method specifies a parameter of type <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.Acknowledge.html">Acknowledge</a></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
@@ -4154,14 +4154,9 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import reactor.core.publisher.Flux;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -4185,10 +4180,6 @@ public void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.OffsetAndMetadata
-import org.apache.kafka.common.TopicPartition
 import reactor.core.publisher.Flux
 
 @KafkaListener(batch = true) // <b class="conum">(1)</b>
@@ -4211,10 +4202,6 @@ void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.OffsetAndMetadata
-import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory.getLogger
 import reactor.core.publisher.Flux
 import java.util.*
@@ -4255,16 +4242,78 @@ fun receiveList(books: List&lt;Book&gt;) { // <b class="conum">(2)</b>
 <h2 id="_manually_committing_offsets_with_batch">Manually Committing Offsets with Batch</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>As with one by one message processing, if you set the <code>OffsetStrategy</code> to <a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#DISABLED">DISABLED</a> it becomes your responsibility to commit offsets.</p>
+</div>
+<div class="paragraph">
+<p>If you want to commit the entire batch of offsets at once during the course of processing, then the simplest approach is to add an argument of type <a href="{apimicronaut}messaging/Acknowledgement.html">Acknowledgement</a> and call the <code>ack()</code> method to commit the batch of offsets synchronously:</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing a Batch of Offsets Manually with ack()</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+public void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+
+    //process the books
+
+    acknowledgement.ack(); // <b class="conum">(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing a Batch of Offsets Manually with ack()</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+
+    //process the books
+
+    acknowledgement.ack() // <b class="conum">(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing a Batch of Offsets Manually with ack()</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+fun receive(books: List&lt;Book?&gt;?, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
+
+    //process the books
+
+    acknowledgement.ack() // <b class="conum">(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Committing offsets automatically is disabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The listener method specifies a parameter of type <a href="{apimicronaut}messaging/Acknowledgement.html">Acknowledgement</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>ack()</code> method is called once the records have been processed</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
 <p>You can also take more control of committing offsets when doing batch processing by specifying a method that receives the offsets in addition to the batch:</p>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("all-the-books")
-public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
 
     for (int i = 0; i &lt; records.size(); i++) {
-        ConsumerRecord&lt;String, Book&gt; record = records.get(i); // <b class="conum">(2)</b>
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i); // <b class="conum">(3)</b>
 
         // process the book
         Book book = record.value();
@@ -4272,11 +4321,11 @@ public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Cons
         // commit offsets
         String topic = record.topic();
         int partition = record.partition();
-        long offset = record.offset(); // <b class="conum">(3)</b>
+        long offset = record.offset(); // <b class="conum">(4)</b>
 
-        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(4)</b>
-                new TopicPartition(topic, partition),
-                new OffsetAndMetadata(offset + 1, "my metadata")
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(5)</b>
+            new TopicPartition(topic, partition),
+            new OffsetAndMetadata(offset + 1, "my metadata")
         ));
 
     }
@@ -4286,11 +4335,12 @@ public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Cons
 <div class="listingblock multi-language-sample">
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("all-the-books")
-void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
 
     for (int i = 0; i &lt; records.size(); i++) {
-        ConsumerRecord&lt;String, Book&gt; record = records.get(i) // <b class="conum">(2)</b>
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i) // <b class="conum">(3)</b>
 
         // process the book
         Book book = record.value()
@@ -4298,13 +4348,12 @@ void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer ka
         // commit offsets
         String topic = record.topic()
         int partition = record.partition()
-        long offset = record.offset() // <b class="conum">(3)</b>
+        long offset = record.offset() // <b class="conum">(4)</b>
 
-        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(4)</b>
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(5)</b>
                 new TopicPartition(topic, partition),
                 new OffsetAndMetadata(offset + 1, "my metadata")
         ))
-
     }
 }</code></pre>
 </div>
@@ -4312,10 +4361,11 @@ void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer ka
 <div class="listingblock multi-language-sample">
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("all-the-books")
-fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(2)</b>
     for (i in records.indices) {
-        val record = records[i] // <b class="conum">(2)</b>
+        val record = records[i] // <b class="conum">(3)</b>
 
         // process the book
         val book = record.value()
@@ -4323,9 +4373,9 @@ fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaCons
         // commit offsets
         val topic = record.topic()
         val partition = record.partition()
-        val offset = record.offset() // <b class="conum">(3)</b>
+        val offset = record.offset() // <b class="conum">(4)</b>
         kafkaConsumer.commitSync(
-            Collections.singletonMap( // <b class="conum">(4)</b>
+            Collections.singletonMap( // <b class="conum">(5)</b>
                 TopicPartition(topic, partition),
                 OffsetAndMetadata(offset + 1, "my metadata")
             )
@@ -4338,18 +4388,22 @@ fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaCons
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The method receives the batch of books as a list of consumer records</td>
+<td>Committing offsets automatically is disabled</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Each record is processed</td>
+<td>The method receives the batch of books as a list of consumer records</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The offset, partition and topic is read for the record</td>
+<td>Each record is processed</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The offset, partition and topic is read for the record</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>Offsets are committed</td>
 </tr>
 </table>
