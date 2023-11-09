@@ -85,9 +85,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
+<a id="io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties" href="#io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties">&#128279;</a>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
+<caption class="title">Table 2. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -102,14 +102,14 @@
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.skip-record-on-deserialization-failure</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to skip record on deserialization failure. Default value true</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.commit-record-on-deserialization-failure</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to commit record on deserialization failure. Default value false</p></td>
 </tr>
 </tbody>
 </table>
@@ -143,9 +143,9 @@
 </tbody>
 </table>
 <div style="page-break-after: always;"></div>
-<a id="io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties" href="#io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties">&#128279;</a>
+<a id="io.micronaut.configuration.kafka.config.KafkaProducerConfiguration" href="#io.micronaut.configuration.kafka.config.KafkaProducerConfiguration">&#128279;</a>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></caption>
+<caption class="title">Table 4. Configuration Properties for <a href="../api/io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html">KafkaProducerConfiguration</a></caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -160,14 +160,14 @@
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.skip-record-on-deserialization-failure</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to skip record on deserialization failure. Default value true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.key-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.default-listener-exception-handler.commit-record-on-deserialization-failure</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to commit record on deserialization failure. Default value false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.producers.*.value-serializer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.apache.kafka.common.serialization.Serializer</p></td>
+<td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
 </table>
