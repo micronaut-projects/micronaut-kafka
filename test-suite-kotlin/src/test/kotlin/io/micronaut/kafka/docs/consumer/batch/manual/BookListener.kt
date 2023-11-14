@@ -9,6 +9,7 @@ import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.consumer.batch.Book
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 
@@ -41,5 +42,33 @@ internal class BookListener {
         }
     }
     // end::method[]
+
+    // end::method[]
+
+    // end::method[]
+    // tag::consumerRecords[]
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <1>
+    @Topic("all-the-books")
+    fun receiveConsumerRecords(consumerRecords: ConsumerRecords<String?, Book?>, kafkaConsumer: Consumer<*, *>) { // <2>
+        for (partition in consumerRecords.partitions()) { // <3>
+            var offset = Long.MIN_VALUE
+            // process partition records
+            for (record in consumerRecords.records(partition)) { // <4>
+                // process the book
+                val book = record.value()
+                // keep last offset
+                offset = record.offset() // <5>
+            }
+
+            // commit partition offset
+            kafkaConsumer.commitSync(
+                Collections.singletonMap( // <6>
+                    partition,
+                    OffsetAndMetadata(offset + 1, "my metadata")
+                )
+            )
+        }
+    }
+    // end::consumerRecords[]
 }
 
