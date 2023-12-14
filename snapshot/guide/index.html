@@ -60,7 +60,9 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>9</strong><span>Repository</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -157,7 +159,9 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>8.3</strong><span>Handling Uncaught Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>9</strong><span>Repository</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+        
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
         
         </div>
     </div>
@@ -290,6 +294,18 @@
 $ mn create-kafka-listener MessageListener
 | Rendered template Listener.java to destination src/main/java/my/kafka/app/MessageListener.java</pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+See the guide for <a href="https://guides.micronaut.io/latest/micronaut-kafka.html">Kafka and the Micronaut Framework - Event-driven Applications</a> to learn more.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -2476,6 +2492,18 @@ kafka.consumers.product.bootstrap.servers=localhost:9098</code></pre>
 </div>
 <div class="paragraph">
 <p>Any property in the <a href="https://kafka.apache.org/27/javadoc/\/org/apache/kafka/clients/consumer/ConsumerConfig.html">ConsumerConfig</a> class can be set for all <code>@KafkaListener</code> beans based on the . The above example will enable the consumer to create a topic if it doesn&#8217;t exist for the <code>default</code> (<code>@KafkaListener</code>) client and set a custom bootstrap server for the <code>product</code> client (<code>@KafkaListener(value = "product")</code>)</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+See the guide for <a href="https://guides.micronaut.io/latest/testing-micronaut-kafka-listener-using-testcontainers.html">Testing Kafka Listener using Testcontainers with the Micronaut Framework</a> to learn more.
+</td>
+</tr>
+</table>
 </div>
 
 <h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
@@ -6558,7 +6586,23 @@ public class MyStreamsUncaughtExceptionHandler
 </div>
 </div>
 
-<h1 id="repository"><a class="anchor" href="#repository"></a>9 Repository</h1>
+<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>9 Guides</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/kafkaGuides.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>See the following list of guides to learn more about working with Kafka in the Micronaut Framework:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://guides.micronaut.io/latest/tag-kafka.html" class="bare">https://guides.micronaut.io/latest/tag-kafka.html</a></p>
+</div>
+
+<h1 id="repository"><a class="anchor" href="#repository"></a>10 Repository</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/master/src/main/docs/guide/repository.adoc"'>
