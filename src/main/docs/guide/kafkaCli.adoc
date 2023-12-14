@@ -27,3 +27,5 @@ $ mn create-kafka-producer MessageProducer
 $ mn create-kafka-listener MessageListener
 | Rendered template Listener.java to destination src/main/java/my/kafka/app/MessageListener.java
 ----
+
+TIP: See the guide for https://guides.micronaut.io/latest/micronaut-kafka.html[Kafka and the Micronaut Framework - Event-driven Applications] to learn more.

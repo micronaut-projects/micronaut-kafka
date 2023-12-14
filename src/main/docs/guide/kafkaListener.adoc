@@ -49,3 +49,5 @@ kafka:
 ----
 
 Any property in the link:{kafkaapi}\/org/apache/kafka/clients/consumer/ConsumerConfig.html[ConsumerConfig] class can be set for all `@KafkaListener` beans based on the . The above example will enable the consumer to create a topic if it doesn't exist for the `default` (`@KafkaListener`) client and set a custom bootstrap server for the `product` client (`@KafkaListener(value = "product")`)
+
+TIP: See the guide for https://guides.micronaut.io/latest/testing-micronaut-kafka-listener-using-testcontainers.html[Testing Kafka Listener using Testcontainers with the Micronaut Framework] to learn more.
