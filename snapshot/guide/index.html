@@ -4442,6 +4442,122 @@ fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaCons
 </div>
 </div>
 <div class="sect1">
+<h2 id="_receiving_a_consumerrecords">Receiving a ConsumerRecords</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When batching you can receive the entire <code>ConsumerRecords</code> object being listened for. In this case you should specify appropriate generic types for the key and value of the <code>ConsumerRecords</code> so that Micronaut can pick the correct deserializer for each.</p>
+</div>
+<div class="paragraph">
+<p>This is useful when the need is to process or commit the records by partition, as the <code>ConsumerRecords</code> object already groups records by partition:</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Commit only once for each partition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+public void receiveConsumerRecords(ConsumerRecords&lt;String, Book&gt; consumerRecords, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+    for (TopicPartition partition : consumerRecords.partitions()) { // <b class="conum">(3)</b>
+        long offset = Long.MIN_VALUE;
+        // process partition records
+        for (ConsumerRecord&lt;String, Book&gt; record : consumerRecords.records(partition)) { // <b class="conum">(4)</b>
+            // process the book
+            Book book = record.value();
+            // keep last offset
+            offset = record.offset(); // <b class="conum">(5)</b>
+        }
+
+        // commit partition offset
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(6)</b>
+            partition,
+            new OffsetAndMetadata(offset + 1, "my metadata")
+        ));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Commit only once for each partition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+void receiveConsumerRecords(ConsumerRecords&lt;String, Book&gt; consumerRecords, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+    for (TopicPartition partition : consumerRecords.partitions()) { // <b class="conum">(3)</b>
+        long offset = Long.MIN_VALUE;
+        // process partition records
+        for (ConsumerRecord&lt;String, Book&gt; record : consumerRecords.records(partition)) { // <b class="conum">(4)</b>
+            // process the book
+            Book book = record.value();
+            // keep last offset
+            offset = record.offset(); // <b class="conum">(5)</b>
+        }
+
+        // commit partition offset
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(6)</b>
+                partition,
+                new OffsetAndMetadata(offset + 1, "my metadata")
+        ));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Commit only once for each partition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+fun receiveConsumerRecords(consumerRecords: ConsumerRecords&lt;String?, Book?&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(2)</b>
+    for (partition in consumerRecords.partitions()) { // <b class="conum">(3)</b>
+        var offset = Long.MIN_VALUE
+        // process partition records
+        for (record in consumerRecords.records(partition)) { // <b class="conum">(4)</b>
+            // process the book
+            val book = record.value()
+            // keep last offset
+            offset = record.offset() // <b class="conum">(5)</b>
+        }
+
+        // commit partition offset
+        kafkaConsumer.commitSync(
+            Collections.singletonMap( // <b class="conum">(6)</b>
+                partition,
+                OffsetAndMetadata(offset + 1, "my metadata")
+            )
+        )
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Committing offsets automatically is disabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The method receives the batch of books as a <code>ConsumerRecords</code> holder object</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Each partition is iterated over</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Each record for the partition is processed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The last read offset for the partition is stored</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The offset is committed once for each partition</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_reactive_batch_processing">Reactive Batch Processing</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -5046,11 +5162,6 @@ By default, the details visible above are only shown to authenticated users. See
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.enabled</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the Kafka health check is enabled. Default value true.</p></td>
@@ -5059,6 +5170,11 @@ By default, the details visible above are only shown to authenticated users. See
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.restricted</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn&#8217;t have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn&#8217;t require any additional permissions.. Default value false</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
 </tr>
 </tbody>
 </table>
