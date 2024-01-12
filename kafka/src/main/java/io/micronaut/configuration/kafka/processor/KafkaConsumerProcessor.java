@@ -517,7 +517,7 @@ class KafkaConsumerProcessor
 
     private static Argument<?> findBodyArgument(ExecutableMethod<?, ?> method) {
         return Arrays.stream(method.getArguments())
-                .filter(arg -> arg.getType() == ConsumerRecord.class || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
+                .filter(arg -> isConsumerRecord(arg) || arg.getAnnotationMetadata().hasAnnotation(MessageBody.class))
                 .findFirst()
                 .orElseGet(() -> Arrays.stream(method.getArguments())
                         .filter(arg -> !arg.getAnnotationMetadata().hasStereotype(Bindable.class)
@@ -528,7 +528,12 @@ class KafkaConsumerProcessor
 
     private static Argument<?> findBodyArgument(boolean batch, ExecutableMethod<?, ?> method) {
         final Argument<?> tempBodyArg = findBodyArgument(method);
-        return batch && tempBodyArg != null ? getComponentType(tempBodyArg) : tempBodyArg;
+
+        if (batch && tempBodyArg != null) {
+            return isConsumerRecord(tempBodyArg) ? tempBodyArg : getComponentType(tempBodyArg);
+        }
+
+        return tempBodyArg;
     }
 
     private static boolean isLastArgumentOfSuspendedMethod(Argument<?> argument, ExecutableMethod<?, ?> method) {
@@ -578,11 +583,13 @@ class KafkaConsumerProcessor
     }
 
     private static boolean isConsumerRecord(@NonNull Argument<?> body) {
-        return ConsumerRecord.class.isAssignableFrom(body.getType());
+        return ConsumerRecord.class.isAssignableFrom(body.getType()) ||
+            ConsumerRecords.class.isAssignableFrom(body.getType());
     }
 
     private static Argument<?> getComponentType(final Argument<?> argument) {
         final Class<?> argumentType = argument.getType();
+
         return argumentType.isArray()
                 ? Argument.of(argumentType.getComponentType())
                 : argument.getFirstTypeVariable().orElse(argument);

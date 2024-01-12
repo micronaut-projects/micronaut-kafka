@@ -42,6 +42,23 @@ snippet::io.micronaut.kafka.docs.consumer.batch.manual.BookListener[tags=method,
 
 This example is fairly trivial in that it commits offsets after processing each record in a batch, but you can for example commit after processing every 10, or every 100 or whatever makes sense for your application.
 
+== Receiving a ConsumerRecords
+
+When batching you can receive the entire `ConsumerRecords` object being listened for. In this case you should specify appropriate generic types for the key and value of the `ConsumerRecords` so that Micronaut can pick the correct deserializer for each.
+
+This is useful when the need is to process or commit the records by partition, as the `ConsumerRecords` object already groups records by partition:
+
+.Commit only once for each partition
+
+snippet::io.micronaut.kafka.docs.consumer.batch.manual.BookListener[tags=consumerRecords, indent=0]
+
+<1> Committing offsets automatically is disabled
+<2> The method receives the batch of books as a `ConsumerRecords` holder object
+<3> Each partition is iterated over
+<4> Each record for the partition is processed
+<5> The last read offset for the partition is stored
+<6> The offset is committed once for each partition
+
 == Reactive Batch Processing
 
 Batch listeners also support defining reactive types (Reactor `Flux` or RxJava rx:Flowable[]) as the method argument.
