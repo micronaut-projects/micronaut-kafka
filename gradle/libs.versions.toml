@@ -9,7 +9,7 @@ managed-kafka-compat = "3.6.0"
 managed-kafka = '3.6.1'
 
 groovy = "4.0.15"
-kotlin = "1.9.20"
+kotlin = "1.9.22"
 
 awaitility = '4.2.0'
 opentracing-kafka-client = '0.1.15'
