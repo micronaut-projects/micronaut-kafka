@@ -23,7 +23,7 @@ micronaut-cache = "4.1.1"
 micronaut-logging = "1.1.2"
 micronaut-micrometer = "5.1.2"
 micronaut-reactor = "3.2.1"
-micronaut-serde = "2.3.3"
+micronaut-serde = "2.7.0"
 micronaut-tracing = "6.1.0"
 micronaut-test = "4.0.2"
 
