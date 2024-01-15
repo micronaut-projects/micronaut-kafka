@@ -81,9 +81,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="annotations">@Singleton
-@Requires(property="kafka.health.enabled",
-          value="true",
-          defaultValue="true")
+@Requires(bean=<a href="../config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration.class</a>) @Requires(property="kafka.health.enabled",value="true",defaultValue="true")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">KafkaHealthIndicator</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements io.micronaut.management.health.indicator.HealthIndicator, <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/ClusterResourceListener.html" title="class or interface in org.apache.kafka.common" class="external-link">ClusterResourceListener</a></span></div>
