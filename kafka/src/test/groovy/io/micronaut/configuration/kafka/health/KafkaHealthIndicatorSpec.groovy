@@ -1,6 +1,7 @@
 package io.micronaut.configuration.kafka.health
 
 import io.micronaut.configuration.kafka.AbstractKafkaSpec
+import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.management.health.indicator.HealthResult
@@ -68,6 +69,27 @@ class KafkaHealthIndicatorSpec extends AbstractKafkaSpec {
 
         where:
         configvalue << [false, "false", "no", ""]
+    }
+
+    void "test kafka health indicator - disabled when no kafka configuration provided"() {
+        given:
+        ApplicationContext applicationContext = ApplicationContext.run(configuration +
+                ["test-resources.containers.kafka.enabled": false])
+
+        when:
+        Optional<KafkaDefaultConfiguration> config = applicationContext.findBean(KafkaDefaultConfiguration)
+
+        then:
+        config.isEmpty()
+
+        when:
+        Optional<KafkaHealthIndicator> healthIndicator = applicationContext.findBean(KafkaHealthIndicator)
+
+        then:
+        healthIndicator.isEmpty()
+
+        cleanup:
+        applicationContext.close()
     }
 
     @Unroll
