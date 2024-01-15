@@ -10,7 +10,7 @@ configurations.all {
 }
 
 micronaut {
-    version = '4.0.0-M2'
+    version = '4.2.3'
     testResources {
         enabled = true
         additionalModules.add(KAFKA)
