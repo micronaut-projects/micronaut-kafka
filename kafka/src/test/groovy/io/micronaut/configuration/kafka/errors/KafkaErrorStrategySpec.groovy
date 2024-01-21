@@ -88,6 +88,24 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.exceptionCount.get() == 2
     }
 
+    void "test when the error strategy is 'retry on error' and there are serialization errors, some messages should be skipped"() {
+        when:"A record cannot be deserialized"
+        ConditionalDeserializationErrorClient myClient = context.getBean(ConditionalDeserializationErrorClient)
+        myClient.sendText("Not an integer and should be immediately skipped")
+        myClient.sendText("Not an integer and should be retried")
+        myClient.sendNumber(123)
+
+        ConditionallyRetryOnErrorDeserializationErrorConsumer myConsumer = context.getBean(ConditionallyRetryOnErrorDeserializationErrorConsumer)
+
+        then:"The message that threw the exception is eventually left behind"
+        conditions.eventually {
+            myConsumer.number == 123
+        }
+        and:"the first message was only tried once and the latter was retried"
+        myConsumer.skippedMessagesCount.get() == 1
+        myConsumer.exceptionCount.get() == 3
+    }
+
     void "test when the error strategy is 'retry on error' and retry failed, the finished messages should be complete except the failed message"() {
         when:"A client sends a lot of messages to a same topic"
         RetryErrorMultiplePartitionsClient myClient = context.getBean(RetryErrorMultiplePartitionsClient)
@@ -362,6 +380,33 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(
+            offsetReset = EARLIEST,
+            value="errors-conditionally-retry-deserialization-error",
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, handleAllExceptions = true)
+    )
+    static class ConditionallyRetryOnErrorDeserializationErrorConsumer implements KafkaListenerExceptionHandler {
+        int number = 0
+        AtomicInteger exceptionCount = new AtomicInteger(0)
+        AtomicInteger skippedMessagesCount = new AtomicInteger(0)
+
+        @Topic("conditional-deserialization-errors-retry")
+        void handleMessage(int number) {
+            this.number = number
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptionCount.getAndIncrement()
+            var record = exception.consumerRecord.get()
+            if (record.offset() == 0) {
+                exception.kafkaConsumer.seek(new TopicPartition(record.topic(), record.partition()), record.offset() + 1)
+                skippedMessagesCount.getAndIncrement()
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
         offsetReset = EARLIEST,
         threads = 2,
         errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR),
@@ -468,6 +513,16 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         void sendText(String text)
 
         @Topic("deserialization-errors-retry")
+        void sendNumber(int number)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface ConditionalDeserializationErrorClient {
+        @Topic("conditional-deserialization-errors-retry")
+        void sendText(String text)
+
+        @Topic("conditional-deserialization-errors-retry")
         void sendNumber(int number)
     }
 
