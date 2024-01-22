@@ -69,7 +69,19 @@ kafka:
           auto.offset.reset: "earliest"
 ----
 
-The above configuration example sets the `processing.guarantee` and `auto.offset.reset` setting of the `default` Stream.
+The above configuration example sets the `processing.guarantee` and `auto.offset.reset` setting of the `default` Stream. Most of the configuration properties pass directly through to the `KafkaStreams` instance being initialized.
+
+In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down (this is mostly useful during testing), with `close-timeout`.
+
+For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down the default stream:
+
+[configuration]
+----
+kafka:
+    streams:
+        default:
+            close-timeout: 10s
+----
 
 .Configuring multiple Stream definitions on the same Micronaut Service.
 You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
@@ -98,7 +110,7 @@ You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[
 
 snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="myOtherStream", indent=0]
 
-NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
+NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
 
@@ -116,14 +128,4 @@ kafka:
     streams:
         default:
             start-kafka-streams: false
-----
-
-You may want to customize how long you wait for Kafka Streams to shut down between tests, with `kafka.streams-close-seconds`.
-
-For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down each stream:
-
-[configuration]
-----
-kafka:
-    streams-close-seconds: 10
 ----
