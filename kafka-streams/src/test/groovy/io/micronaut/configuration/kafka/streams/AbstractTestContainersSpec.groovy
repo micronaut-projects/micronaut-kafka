@@ -1,6 +1,7 @@
 package io.micronaut.configuration.kafka.streams
 
 import groovy.util.logging.Slf4j
+import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsConfig
 import spock.lang.Shared
 
@@ -36,35 +37,37 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
                                     'kafka.streams.start-kafka-streams-off.application.id': startKafkaStreamsOffApplicationId]
     }
 
-    def cleanupSpec() {
+    void stopContext() {
         def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
-        kafkaStreamsFactory.getStreams().forEach((kafkaStream, configuredStreamBuilder) -> {
-            kafkaStream.close()
-            kafkaStream.cleanUp()
-            purgeLocalStreamsState(configuredStreamBuilder.configuration)
-        })
         try {
-            embeddedServer.stop()
-            log.warn("Stopped containers!")
+          embeddedServer.stop()
+          log.warn("Stopped containers!")
         } catch (Exception ignore) {
             log.error("Could not stop containers")
         }
+        log.warn("Closing leftover streams")
+        kafkaStreamsFactory.getStreams().keySet().stream().filter(k -> !k.state().hasCompletedShutdown()).forEach(KafkaStreams::close)
+        log.warn("Purging stream state")
+        kafkaStreamsFactory.getStreams().keySet().forEach(kafkaStream -> purgeLocalStreamsState(kafkaStream.applicationConfigs))
+        log.warn("Cleaning up streams")
+        kafkaStreamsFactory.getStreams().keySet().forEach(KafkaStreams::cleanUp)
     }
 
-    static def purgeLocalStreamsState(final streamsConfiguration) throws IOException {
-        final String tmpDir = System.getProperty("java.io.tmpdir");
-        final String path = streamsConfiguration.getProperty(StreamsConfig.STATE_DIR_CONFIG);
+    static def purgeLocalStreamsState(final StreamsConfig streamsConfiguration) throws IOException {
+        final String tmpDir = System.getProperty("java.io.tmpdir")
+        final String path = streamsConfiguration.getString(StreamsConfig.STATE_DIR_CONFIG)
         if (path != null) {
             def p = Paths.get(path)
-            final File node = p.normalize().toFile();
+            final File node = p.normalize().toFile()
             // Only purge state when it's under java.io.tmpdir.  This is a safety net to prevent accidentally
             // deleting important local directory trees.
-            if (node.getAbsolutePath().startsWith(tmpDir)) {
+            if (node.getAbsolutePath().startsWith(tmpDir) && node.exists()) {
+                    log.warn("Purging tmp dir {}", node.getAbsolutePath())
                     try {
                         Files.walk(p)
                                 .sorted(Comparator.reverseOrder())
                                 .map(Path::toFile)
-                                .forEach(File::delete);
+                                .forEach(File::delete)
                     } catch (AccessDeniedException e) {
                         // ignore failure, disk read-only
                     }

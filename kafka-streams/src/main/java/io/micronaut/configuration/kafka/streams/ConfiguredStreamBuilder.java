@@ -15,9 +15,11 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.naming.Named;
 import org.apache.kafka.streams.StreamsBuilder;
 
-import io.micronaut.core.annotation.NonNull;
+import java.time.Duration;
 import java.util.Properties;
 
 /**
@@ -26,17 +28,36 @@ import java.util.Properties;
  * @author graemerocher
  * @since 1.0
  */
-public class ConfiguredStreamBuilder extends StreamsBuilder {
+public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
 
     private final Properties configuration = new Properties();
+
+    private final String streamName;
+
+    private final Duration closeTimeout;
 
     /**
      * Default constructor.
      *
      * @param configuration The configuration
+     * @deprecated Use {@link #ConfiguredStreamBuilder(Properties, String, Duration)}
      */
+    @Deprecated(since = "5.4.0")
     public ConfiguredStreamBuilder(Properties configuration) {
+        this(configuration, AbstractKafkaStreamsConfiguration.DEFAULT_NAME, AbstractKafkaStreamsConfiguration.DEFAULT_CLOSE_TIMEOUT);
+    }
+
+    /**
+     * Default constructor.
+     *
+     * @param configuration The configuration
+     * @param streamName The logical name of the stream
+     * @param closeTimeout The time to wait for the stream to shut down
+     */
+    public ConfiguredStreamBuilder(Properties configuration, String streamName, Duration closeTimeout) {
         this.configuration.putAll(configuration);
+        this.streamName = streamName;
+        this.closeTimeout = closeTimeout;
     }
 
     /**
@@ -46,5 +67,24 @@ public class ConfiguredStreamBuilder extends StreamsBuilder {
      */
     public @NonNull Properties getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * The logical name of the stream.
+     *
+     * @return the logical name of the stream
+     */
+    @Override
+    public @NonNull String getName() {
+        return this.streamName;
+    }
+
+    /**
+     * The timeout to use when closing the stream.
+     *
+     * @return the timeout to use when closing the stream
+     */
+    public @NonNull Duration getCloseTimeout() {
+        return closeTimeout;
     }
 }
