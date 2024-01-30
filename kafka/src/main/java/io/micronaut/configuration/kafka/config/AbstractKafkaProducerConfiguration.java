@@ -40,6 +40,7 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
 
     private Serializer<K> keySerializer;
     private Serializer<V> valueSerializer;
+    private String executor;
 
     /**
      * Constructs a new instance.
@@ -88,5 +89,21 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
             valueSerializer.configure(Utils.propsToMap(getConfig()), false);
         }
         this.valueSerializer = valueSerializer;
+    }
+
+    /**
+     * @return The default executor to use to enable non-blocking producers.
+     */
+    public Optional<String> getExecutor() {
+        return Optional.ofNullable(executor);
+    }
+
+    /**
+     * Sets the default executor to use to enable non-blocking producers.
+     *
+     * @param executor The executor name
+     */
+    public void setExecutor(String executor) {
+        this.executor = executor;
     }
 }

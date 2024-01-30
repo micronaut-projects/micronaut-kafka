@@ -71,7 +71,7 @@ At compile time Micronaut will produce an implementation of the above interface.
 
 snippet::io.micronaut.kafka.docs.quickstart.QuickstartTest[tags=quickstart, indent=0]
 
-Note that since the `sendProduct` method returns `void` this means the method will send the `ProducerRecord` and block until the response is received. You can return a `Future` or rs:Publisher[] to support non-blocking message delivery.
+Note that since the `sendProduct` method returns `void` this means the method will send the `ProducerRecord` and block until the response is received. You can specify an executor and return a `Future` or rs:Publisher[] to support non-blocking message delivery.
 
 == Creating a Kafka Consumer with @KafkaListener
 

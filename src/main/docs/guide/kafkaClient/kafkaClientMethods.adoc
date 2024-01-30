@@ -48,9 +48,32 @@ part of the `kafka-clients` library:
 
 The ann:configuration.kafka.annotation.KafkaClient[] annotation supports the definition of reactive return types (such as rx:Flowable[] or Reactor `Flux`) as well as Futures.
 
+NOTE: The KafkaProducer used internally to implement ann:configuration.kafka.annotation.KafkaClient[] support is inherently blocking, even though some of its methods describe themselves as "asynchronous". Configuring an executor (as shown in the following examples) is required in order to guarantee that a returned reactive type or Future will not block the calling thread.
+
 Add the library https://micronaut-projects.github.io/micronaut-reactor/latest/guide/[Micronaut Reactor] or https://micronaut-projects.github.io/micronaut-rxjava3/latest/guide/[Micronaut RxJava 3] to your application's dependencies.
 
-The following sections, which use Micronaut Reactor, cover possible method signatures and behaviour:
+The following sections, which use Micronaut Reactor, cover advised configuration and possible method signatures and behaviour:
+
+==== Configuring An Executor
+As the `send` method of `KafkaProducer` can block the calling thread, it is recommended that you specify an executor to be used when returning either reactive types or `CompletableFuture`. This will ensure that the `send` logic is executed on a separate thread from that of the caller, and avoid undesirable conditions such as blocking of the Micronaut server's event loop.
+
+The executor to be used may be specified via configuration properties as in the following example:
+[configuration]
+----
+kafka:
+    producers:
+        default:
+            executor: blocking
+    producers:
+        my-named-producer:
+            executor: io
+----
+
+Alternatively, the executor may be specified via the `executor` property of the ann:configuration.kafka.annotation.KafkaClient[] annotation:
+
+snippet::io.micronaut.kafka.docs.producer.methods.BookClient[tags=clazz,indents=0]
+
+Note that an `executor` specified in the annotation will take precedent over that specified in the application configuration properties.
 
 ==== Mono Value and Return Type
 
