@@ -371,7 +371,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         return sendResult;
     }
 
-    private Mono<RecordMetadata> producerSend(Producer<?, ?> producer, ProducerRecord record, ExecutorService executorService) {
+    private Mono<RecordMetadata> producerSend(Producer<?, ?> producer, ProducerRecord record) {
         return Mono.create(emitter -> {
             LOG.trace("Sending record {} with producer {}", record, producer);
             producer.send(record, (metadata, exception) -> {
