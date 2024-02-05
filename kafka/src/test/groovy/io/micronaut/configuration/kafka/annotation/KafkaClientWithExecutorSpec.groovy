@@ -27,22 +27,15 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
     @AutoCleanup
     private ApplicationContext ctx
 
-    void setup() {
+    void "test reactive send message with executor set via default config props does not block the calling thread when Kafka is not available"() {
+        given: "the default executor is specified"
         ctx = ApplicationContext.run(
                 getConfiguration() +
                         ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
-                         'kafka.producers.default.executor': TaskExecutors.BLOCKING,
-                         'kafka.producers.scorsese.executor': TaskExecutors.IO])
-
-    }
-
-    void "test reactive send message with executor set via default config props  does not block the calling thread when Kafka is not available"() {
-        given:
+                         'kafka.producers.default.executor': TaskExecutors.BLOCKING])
         MyDefaultExecutorClient client = ctx.getBean(MyDefaultExecutorClient)
-        PollingConditions conditions = new PollingConditions()
-        conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<Mono<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -56,19 +49,19 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                     })
         }).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     void "test reactive send message with executor set via named config props does not block the calling thread when Kafka is not available"() {
-        given:
+        given: "the executor is specified via named producer config"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
+                         'kafka.producers.scorsese.executor': TaskExecutors.IO])
         MyNamedExecutorClient client = ctx.getBean(MyNamedExecutorClient)
-        PollingConditions conditions = new PollingConditions()
-        conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<Mono<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -82,19 +75,20 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                     })
         }).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     void "test reactive send message with executor set via annotation does not block the calling thread when Kafka is not available"() {
-        given:
+        given: "the executor is specified via annotation"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort()])
         MyAnnotatedExecutorClient client = ctx.getBean(MyAnnotatedExecutorClient)
         PollingConditions conditions = new PollingConditions()
         conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<Mono<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -108,19 +102,19 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                     })
         }).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     void "test future send message with executor set via default config props does not block the calling thread when Kafka is not available"() {
-        given:
+        given: "the default executor is specified"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
+                         'kafka.producers.default.executor': TaskExecutors.BLOCKING])
         MyDefaultExecutorClient client = ctx.getBean(MyDefaultExecutorClient)
-        PollingConditions conditions = new PollingConditions()
-        conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<CompletableFuture<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -132,19 +126,19 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
             }}).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     void "test future send message with executor set via named config props does not block the calling thread when Kafka is not available"() {
-        given:
+        given: "the executor is specified via named producer config"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
+                         'kafka.producers.scorsese.executor': TaskExecutors.IO])
         MyNamedExecutorClient client = ctx.getBean(MyNamedExecutorClient)
-        PollingConditions conditions = new PollingConditions()
-        conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<CompletableFuture<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -156,19 +150,18 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
             }}).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     void "test future send message with executor set via annotation does not block the calling thread when Kafka is not available"() {
-        given:
+        given: "the executor is specified via annotation"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort()])
         MyAnnotatedExecutorClient client = ctx.getBean(MyAnnotatedExecutorClient)
-        PollingConditions conditions = new PollingConditions()
-        conditions.initialDelay = 1
 
-        when:
+        when: "client operations are invoked while Kafka is unavailable"
         AtomicInteger failureCount = new AtomicInteger(0)
         List<CompletableFuture<String>> sendOps = new ArrayList<>()
         for (int x=0; x<3; x++) {
@@ -180,10 +173,8 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
             }}).toList()
 
-        then:
-        conditions.eventually {
-            failureCount.get() < 3
-        }
+        then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
+        failureCount.get() == 0
     }
 
     @Requires(property = 'spec.name', value = 'KafkaClientWithExecutorSpec')
