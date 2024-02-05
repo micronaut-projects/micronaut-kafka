@@ -410,7 +410,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 LOG.trace("Committing transaction for producer: {}", producerState.transactionalId);
                 kafkaProducer.beginTransaction();
             }
-            Mono<Object> result = producerSend(kafkaProducer, record, producerState.executorService)
+            Mono<Object> result = producerSend(kafkaProducer, record)
                     .map(metadata -> convertResult(metadata, returnType, value, producerState.bodyArgument))
                     .onErrorMap(e -> wrapException(context, e));
             if (transactional) {
@@ -442,7 +442,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 LOG.trace("@KafkaClient method [{}] Sending producer record: {}", logMethod(context), record);
             }
 
-            return producerSend(kafkaProducer, record, producerState.executorService)
+            return producerSend(kafkaProducer, record)
                     .map(metadata -> convertResult(metadata, finalReturnType, o, producerState.bodyArgument))
                     .onErrorMap(e -> wrapException(context, e));
         });
