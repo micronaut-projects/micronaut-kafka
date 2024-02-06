@@ -144,7 +144,7 @@ final class ConsumerStateBatch extends ConsumerState {
         Map<TopicPartition, OffsetAndMetadata> currentOffsets, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
-            if (shouldRetryException(e) && info.retryCount > 0) {
+            if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
                 // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(partitions, currentOffsets);
                 if (info.retryCount >= currentRetryCount) {

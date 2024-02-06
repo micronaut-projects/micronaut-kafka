@@ -9,7 +9,13 @@ Setting the error strategy allows you to resume at the next offset or to seek th
 
 You can choose one of the error strategies:
 
-- `RETRY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by `retryDelay` and retry count by `retryCount`
+- `RETRY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by `retryDelay` and retry count by `retryCount`.
+
+- `RETRY_EXPONENTIALLY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The exponentially growing time breaks between consumption attempts is computed using the `n * 2^(k - 1)` formula where the initial delay `n` is `retryDelay` and the number of retries is `retryCount`.
+
+- `RETRY_CONDITIONALLY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The retry behaviour can be overridden. Possible retry delay can be defined by `retryDelay` and retry count by `retryCount`.
+
+- `RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR` - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The retry behaviour can be overridden. The exponentially growing time breaks between consumption attempts is computed using the `n * 2^(k - 1)` formula where the initial delay `n` is `retryDelay` and the number of retries is `retryCount`.
 
 - `RESUME_AT_NEXT_RECORD` - This strategy will ignore the current error and will resume at the next offset, in this case it's recommended to have a custom exception handler that moves the failed message into an error queue.
 
@@ -33,7 +39,21 @@ It's possible to define only exceptions from which the retry will occur.
 
 snippet::io.micronaut.kafka.docs.consumer.errors.ExceptionProductListener[tags = annotation, indent = 0]
 
-NOTE: Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
+NOTE: Specify exception to retry apply only for `RETRY_ON_ERROR` and `RETRY_EXPONENTIALLY_ON_ERROR` error strategies.
+
+==== Conditional retries
+
+It is possible to conditionally retry a message based on the exception thrown when the error strategy is `RETRY_CONDITIONALLY_ON_ERROR` or `RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR`.
+
+.Specifying conditional retry behaviour on the listener
+
+snippet::io.micronaut.kafka.docs.consumer.errors.ConditionalRetryListener[tags = annotation, indent = 0]
+
+When a ann:configuration.kafka.annotation.KafkaListener[] does not implement ann:configuration.kafka.retry.ConditionalRetryBehaviourHandler[], the ann:configuration.kafka.exceptions.DefaultConditionalRetryBehaviourHandler[] will be used and all messages that failed processing will be retried.
+
+If you wish to apply the same conditional retry strategy for all of your ann:configuration.kafka.annotation.KafkaListener[] you can define a bean that implements `ConditionalRetryBehaviourHandler` and use Micronaut's <<replaces, Bean Replacement>> feature to replace the default bean: `@Replaces(DefaultConditionalRetryBehaviourHandler.class)`.
+
+NOTE: Conditional retry behaviour only applies to `RETRY_CONDITIONALLY_ON_ERROR` and `RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR` error strategies.
 
 === Exception handlers
 

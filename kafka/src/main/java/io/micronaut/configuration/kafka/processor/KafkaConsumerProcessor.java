@@ -34,6 +34,7 @@ import io.micronaut.configuration.kafka.event.KafkaConsumerStartedPollingEvent;
 import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
+import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
@@ -127,6 +128,7 @@ class KafkaConsumerProcessor
     private final AtomicInteger clientIdGenerator = new AtomicInteger(10);
     private final ApplicationEventPublisher<KafkaConsumerStartedPollingEvent> kafkaConsumerStartedPollingEventPublisher;
     private final ApplicationEventPublisher<KafkaConsumerSubscribedEvent> kafkaConsumerSubscribedEventPublisher;
+    private final ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler;
 
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
@@ -159,7 +161,8 @@ class KafkaConsumerProcessor
             @Named(TaskExecutors.SCHEDULED) ExecutorService schedulerService,
             TransactionalProducerRegistry transactionalProducerRegistry,
             ApplicationEventPublisher<KafkaConsumerStartedPollingEvent> startedEventPublisher,
-            ApplicationEventPublisher<KafkaConsumerSubscribedEvent> subscribedEventPublisher) {
+            ApplicationEventPublisher<KafkaConsumerSubscribedEvent> subscribedEventPublisher,
+            ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
         this.beanContext = beanContext;
@@ -173,6 +176,7 @@ class KafkaConsumerProcessor
         this.transactionalProducerRegistry = transactionalProducerRegistry;
         this.kafkaConsumerStartedPollingEventPublisher = startedEventPublisher;
         this.kafkaConsumerSubscribedEventPublisher = subscribedEventPublisher;
+        this.conditionalRetryBehaviourHandler = conditionalRetryBehaviourHandler;
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -323,6 +327,25 @@ class KafkaConsumerProcessor
             e.addSuppressed(kafkaListenerException);
             LOG.error("Unexpected error while handling the kafka listener exception", e);
         }
+    }
+
+    boolean shouldRetryMessage(Object consumerBean, KafkaListenerException kafkaListenerException) {
+        final ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler;
+        if (consumerBean instanceof ConditionalRetryBehaviourHandler kle) {
+            conditionalRetryBehaviourHandler = kle;
+        } else {
+            conditionalRetryBehaviourHandler = this.conditionalRetryBehaviourHandler;
+        }
+
+        try {
+            return conditionalRetryBehaviourHandler.conditionalRetryBehaviour(kafkaListenerException) == ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.RETRY;
+        } catch (Exception e) {
+            // The behaviour exception handler could not handle the consumer exception
+            // Log both errors and continue as usual to prevent an infinite loop
+            e.addSuppressed(kafkaListenerException);
+            LOG.error("Unexpected error while determining how to handle the kafka listener exception", e);
+        }
+        return false;
     }
 
     void scheduleTask(Duration delay, Runnable command) {

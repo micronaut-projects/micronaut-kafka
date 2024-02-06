@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.annotation;
 
+import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
 import io.micronaut.core.annotation.Nullable;
 
 import java.time.Duration;
@@ -49,6 +50,23 @@ public enum ErrorStrategyValue {
     RESUME_AT_NEXT_RECORD,
 
     /**
+     * This strategy will stop consuming subsequent records in the case of an error and will
+     * attempt to re-consume or skip the current according to the behaviour defined by the
+     * {@link ConditionalRetryBehaviourHandler}.
+     */
+    RETRY_CONDITIONALLY_ON_ERROR,
+
+    /**
+     * This strategy will stop consuming subsequent records in the case of an error and will
+     * attempt to re-consume or skip the current according to the behaviour defined by the
+     * {@link ConditionalRetryBehaviourHandler}.
+     * In the case of a retry, it will attempt to re-consume the current record with exponentially
+     * growing time breaks between consumption attempts. Breaks' duration is computed based on
+     * the n * 2^(k - 1) formula, where n is the initial delay, and k is the number of retries.
+     */
+    RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR,
+
+    /**
      * This error strategy will skip over all records from the current offset in
      * the current poll when the consumer encounters an error.
      *
@@ -66,7 +84,15 @@ public enum ErrorStrategyValue {
      * @since 5.2
      */
     public boolean isRetry() {
-        return this == RETRY_ON_ERROR || this == RETRY_EXPONENTIALLY_ON_ERROR;
+        return this == RETRY_ON_ERROR ||
+            this == RETRY_EXPONENTIALLY_ON_ERROR ||
+            this == RETRY_CONDITIONALLY_ON_ERROR ||
+            this == RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR;
+    }
+
+    public boolean isConditionalRetry() {
+        return this == RETRY_CONDITIONALLY_ON_ERROR ||
+            this == RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR;
     }
 
     /**
@@ -82,7 +108,7 @@ public enum ErrorStrategyValue {
             return Duration.ZERO;
         }
         final Duration delay = fixedRetryDelay != null ? fixedRetryDelay : Duration.ofSeconds(ErrorStrategy.DEFAULT_DELAY_IN_SECONDS);
-        if (this == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR) {
+        if (this == ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR || this == ErrorStrategyValue.RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR) {
             return delay.multipliedBy(1L << (retryAttempts - 1));
         }
         return delay;

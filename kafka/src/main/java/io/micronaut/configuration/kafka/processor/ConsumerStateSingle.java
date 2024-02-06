@@ -128,18 +128,16 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-            if (shouldRetryException(e) && info.retryCount > 0) {
+            if (shouldRetryException(e, consumerRecords, consumerRecord) && info.retryCount > 0) {
                 // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(consumerRecord);
                 if (info.retryCount >= currentRetryCount) {
-                    // Move back to the previous position
-                    kafkaConsumer.seek(topicPartition, consumerRecord.offset());
-
-                    // We will retry this batch again next time unless the exception handler chooses not to
+                    // We will retry this batch again next time
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, consumerRecord);
                     }
-
+                    // Move back to the previous position
+                    kafkaConsumer.seek(topicPartition, consumerRecord.offset());
                     // Decide how long should we wait to retry this batch again
                     delayRetry(currentRetryCount, Collections.singleton(topicPartition));
                     return true;

@@ -55,7 +55,8 @@ public @interface ErrorStrategy {
     boolean DEFAULT_HANDLE_ALL_EXCEPTIONS = false;
 
     /**
-     * The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
+     * RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
      * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
      * @return the delay by which to wait for the next retry
@@ -63,7 +64,8 @@ public @interface ErrorStrategy {
     String retryDelay() default DEFAULT_DELAY_IN_SECONDS + "s";
 
     /**
-     * The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+     * The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+     * RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
      * {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      *
      * <p>{@code retryCount} takes precedence over {@code retryCountValue} if they are both set.
@@ -104,7 +106,9 @@ public @interface ErrorStrategy {
     ErrorStrategyValue value() default ErrorStrategyValue.NONE;
 
     /**
-     * The types of exceptions to retry, used with RETRY_ON_ERROR, see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     * The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+     * see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
+     * Not compatible with RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR.
      *
      * @return the list of exceptions types
      * @since 4.5.0
