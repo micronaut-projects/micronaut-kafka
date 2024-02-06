@@ -15,7 +15,7 @@ dependencies {
     testImplementation mnSerde.micronaut.serde.jackson
     testImplementation mnReactor.micronaut.reactor
     testImplementation mnSerde.micronaut.serde.jackson
-    testImplementation libs.testcontainers.kafka
+    testImplementation(mnTestResources.testcontainers.kafka)
     testImplementation libs.awaitility
 
     testRuntimeOnly(libs.junit.jupiter.engine)
