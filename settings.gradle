@@ -20,6 +20,7 @@ micronautBuild {
     importMicronautCatalog("micronaut-micrometer")
     importMicronautCatalog("micronaut-reactor")
     importMicronautCatalog("micronaut-serde")
+    importMicronautCatalog("micronaut-test-resources")
     importMicronautCatalog("micronaut-tracing")
 }
 
