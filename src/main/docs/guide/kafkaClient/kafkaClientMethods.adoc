@@ -64,7 +64,6 @@ kafka:
     producers:
         default:
             executor: blocking
-    producers:
         my-named-producer:
             executor: io
 ----
