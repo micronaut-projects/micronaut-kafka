@@ -96,6 +96,42 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.skipped == ["Two"]
     }
 
+    void "test when the error strategy is 'retry conditionally on error' messages can be conditionally skipped when errors occur and no exceptions match"() {
+        when:"A consumer throws an exception"
+        ConditionallyRetryResultsInSkipWhenNoExceptionsMatchedErrorClient myClient = context.getBean(ConditionallyRetryResultsInSkipWhenNoExceptionsMatchedErrorClient)
+        myClient.sendMessage("One")
+        myClient.sendMessage("Two")
+        myClient.sendMessage("Three")
+
+        ConditionallyRetryOnErrorSkipRespectedWhenNoExceptionTypesMatchedErrorCausingConsumer myConsumer = context.getBean(ConditionallyRetryOnErrorSkipRespectedWhenNoExceptionTypesMatchedErrorCausingConsumer)
+
+        then:"The second message was skipped"
+        conditions.eventually {
+            myConsumer.received == ["One", "One", "Two", "Three"]
+            myConsumer.successful == ["Three"]
+            myConsumer.count.get() == 4
+            myConsumer.skipped == ["Two"]
+        }
+    }
+
+    void "test when the error strategy is 'retry conditionally on error' conditionally skipped messages are overridden when errors occur and exceptions match"() {
+        when:"A consumer throws an exception"
+        ConditionallyRetryOnErrorSkipIsOverriddenWithRetryWhenExceptionsMatchErrorClient myClient = context.getBean(ConditionallyRetryOnErrorSkipIsOverriddenWithRetryWhenExceptionsMatchErrorClient)
+        myClient.sendMessage("One")
+        myClient.sendMessage("Two")
+        myClient.sendMessage("Three")
+
+        ConditionallyRetryOnErrorSkipOverriddenWhenExceptionTypesMatchedErrorCausingConsumer myConsumer = context.getBean(ConditionallyRetryOnErrorSkipOverriddenWhenExceptionTypesMatchedErrorCausingConsumer)
+
+        then:"The second message was supposed to be skipped but was retried due to the exception type"
+        conditions.eventually {
+            myConsumer.received == ["One", "One", "Two", "Two", "Three"]
+            myConsumer.successful == ["Three"]
+            myConsumer.count.get() == 5
+            myConsumer.skipped == ["Two", "Two"]
+        }
+    }
+
     void "test when the error strategy is 'retry on error' and there are serialization errors"() {
         when:"A record cannot be deserialized"
         DeserializationErrorClient myClient = context.getBean(DeserializationErrorClient)
@@ -358,6 +394,78 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         @Override
         ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
             if (exception.consumerRecord.get().value() == "Two") {
+                skipped << (String) exception.consumerRecord.get().value()
+                return ConditionalRetryBehaviour.SKIP
+            } else {
+                return ConditionalRetryBehaviour.RETRY
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            offsetStrategy = SYNC,
+            errorStrategy = @ErrorStrategy(value = RETRY_CONDITIONALLY_ON_ERROR, retryDelay = "50ms", exceptionTypes = [IllegalArgumentException.class])
+    )
+    static class ConditionallyRetryOnErrorSkipRespectedWhenNoExceptionTypesMatchedErrorCausingConsumer implements ConditionalRetryBehaviourHandler {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<Long> times = []
+        List<String> skipped = []
+        List<String> successful = []
+
+        @Topic("errors-conditional-retry-skip-when-no-exceptions-matched")
+        void handleMessage(String message) {
+            received << message
+            times << System.currentTimeMillis()
+            if (count.getAndIncrement() < 3) {
+                throw new RuntimeException("Won't handle the first message and the first attempt of the second")
+            }
+            successful << message
+        }
+
+        @Override
+        ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+            if (exception.consumerRecord.get().value() == "Two") {
+                skipped << (String) exception.consumerRecord.get().value()
+                return ConditionalRetryBehaviour.SKIP
+            } else {
+                return ConditionalRetryBehaviour.RETRY
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            offsetStrategy = SYNC,
+            errorStrategy = @ErrorStrategy(value = RETRY_CONDITIONALLY_ON_ERROR, retryDelay = "50ms", exceptionTypes = [IllegalArgumentException.class])
+    )
+    static class ConditionallyRetryOnErrorSkipOverriddenWhenExceptionTypesMatchedErrorCausingConsumer implements ConditionalRetryBehaviourHandler {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<Long> times = []
+        List<String> skipped = []
+        List<String> successful = []
+
+        @Topic("errors-conditional-retry-skip-overriden-when-exceptions-matched")
+        void handleMessage(String message) {
+            received << message
+            times << System.currentTimeMillis()
+            count.getAndIncrement();
+            if (message == "One") {
+                throw new RuntimeException("Won't handle the first message")
+            }
+            if (message == "Two") {
+                throw new IllegalArgumentException("Won't handle the second message")
+            }
+            successful << message
+        }
+
+        @Override
+        ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+            if (exception.getCause() instanceof IllegalArgumentException) {
                 skipped << (String) exception.consumerRecord.get().value()
                 return ConditionalRetryBehaviour.SKIP
             } else {
@@ -669,6 +777,20 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface ConditionallyRetryErrorClient {
         @Topic("errors-conditional-retry")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface ConditionallyRetryResultsInSkipWhenNoExceptionsMatchedErrorClient {
+        @Topic("errors-conditional-retry-skip-when-no-exceptions-matched")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface ConditionallyRetryOnErrorSkipIsOverriddenWithRetryWhenExceptionsMatchErrorClient {
+        @Topic("errors-conditional-retry-skip-overriden-when-exceptions-matched")
         void sendMessage(String message)
     }
 

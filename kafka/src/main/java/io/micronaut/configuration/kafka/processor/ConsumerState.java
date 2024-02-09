@@ -427,7 +427,8 @@ abstract class ConsumerState {
 
     protected boolean shouldRetryException(Throwable e, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
         if (info.errorStrategy.isConditionalRetry()) {
-            return kafkaConsumerProcessor.shouldRetryMessage(consumerBean, wrapExceptionInKafkaListenerException(e.getMessage(), e, consumerRecords, consumerRecord));
+            return kafkaConsumerProcessor.shouldRetryMessage(consumerBean, wrapExceptionInKafkaListenerException(e.getMessage(), e, consumerRecords, consumerRecord)) ||
+                info.exceptionTypes.stream().anyMatch(e.getClass()::equals);
         }
 
         return info.exceptionTypes.isEmpty() ||

@@ -108,7 +108,8 @@ public @interface ErrorStrategy {
     /**
      * The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
      * see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
-     * Not compatible with RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR.
+     * When used with RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR,
+     * the skip behaviour will be overridden if the thrown exception is one of these types.
      *
      * @return the list of exceptions types
      * @since 4.5.0
