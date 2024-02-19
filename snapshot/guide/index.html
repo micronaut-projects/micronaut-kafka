@@ -4894,7 +4894,16 @@ class WordCounter {
 <div class="ulist">
 <ul>
 <li>
-<p><code>RETRY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code></p>
+<p><code>RETRY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code>.</p>
+</li>
+<li>
+<p><code>RETRY_EXPONENTIALLY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The exponentially growing time breaks between consumption attempts is computed using the <code>n * 2^(k - 1)</code> formula where the initial delay <code>n</code> is <code>retryDelay</code> and the number of retries is <code>retryCount</code>.</p>
+</li>
+<li>
+<p><code>RETRY_CONDITIONALLY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The retry behaviour can be overridden. Possible retry delay can be defined by <code>retryDelay</code> and retry count by <code>retryCount</code>.</p>
+</li>
+<li>
+<p><code>RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</code> - This strategy will stop consuming subsequent records in the case of an error and by default will attempt to re-consume the current record once. The retry behaviour can be overridden. The exponentially growing time breaks between consumption attempts is computed using the <code>n * 2^(k - 1)</code> formula where the initial delay <code>n</code> is <code>retryDelay</code> and the number of retries is <code>retryCount</code>.</p>
 </li>
 <li>
 <p><code>RESUME_AT_NEXT_RECORD</code> - This strategy will ignore the current error and will resume at the next offset, in this case it&#8217;s recommended to have a custom exception handler that moves the failed message into an error queue.</p>
@@ -5021,7 +5030,90 @@ The error strategies apply only for non-batch messages processing.
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Specify exception to retry apply only for RETRY_ON_ERROR error strategy.
+Specify exception to retry apply only for <code>RETRY_ON_ERROR</code> and <code>RETRY_EXPONENTIALLY_ON_ERROR</code> error strategies.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_conditional_retries">Conditional retries</h4>
+<div class="paragraph">
+<p>It is possible to conditionally retry a message based on the exception thrown when the error strategy is <code>RETRY_CONDITIONALLY_ON_ERROR</code> or <code>RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</code>.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying conditional retry behaviour on the listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(
+    value = "myGroup",
+    errorStrategy = @ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
+    )
+)
+public class ConditionalRetryListener implements ConditionalRetryBehaviourHandler {
+
+    @Override
+    public ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+        return shouldRetry(exception) ? ConditionalRetryBehaviour.RETRY : ConditionalRetryBehaviour.SKIP;
+    }
+
+    // ...</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying conditional retry behaviour on the listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'myGroup',
+    errorStrategy = @ErrorStrategy(
+            value = ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
+    )
+)
+class ConditionalRetryListener implements ConditionalRetryBehaviourHandler {
+    @Override
+    ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+        return shouldRetry(exception) ? ConditionalRetryBehaviour.RETRY : ConditionalRetryBehaviour.SKIP
+    }
+
+    // ...</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying conditional retry behaviour on the listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
+    value = "myGroup",
+    errorStrategy = ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
+    )
+)
+class ConditionalRetryListener :
+    ConditionalRetryBehaviourHandler {
+    override fun conditionalRetryBehaviour(exception: KafkaListenerException): ConditionalRetryBehaviour {
+        return if (shouldRetry(exception)) {
+            ConditionalRetryBehaviour.RETRY
+        } else {
+            ConditionalRetryBehaviour.SKIP
+        }
+    }
+
+    // ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When a <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> does not implement <a href="../api/io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html">@ConditionalRetryBehaviourHandler</a>, the <a href="../api/io/micronaut/configuration/kafka/exceptions/DefaultConditionalRetryBehaviourHandler.html">@DefaultConditionalRetryBehaviourHandler</a> will be used and all messages that failed processing will be retried.</p>
+</div>
+<div class="paragraph">
+<p>If you wish to apply the same conditional retry strategy for all of your <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> you can define a bean that implements <code>ConditionalRetryBehaviourHandler</code> and use Micronaut&#8217;s <a href="#replaces">Bean Replacement</a> feature to replace the default bean: <code>@Replaces(DefaultConditionalRetryBehaviourHandler.class)</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</code> and <code>RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</code> error strategies.
 </td>
 </tr>
 </table>

@@ -12,6 +12,7 @@ io.micronaut.configuration.kafka.health
 io.micronaut.configuration.kafka.metrics
 io.micronaut.configuration.kafka.metrics.builder
 io.micronaut.configuration.kafka.reactor
+io.micronaut.configuration.kafka.retry
 io.micronaut.configuration.kafka.seek
 io.micronaut.configuration.kafka.serde
 io.micronaut.configuration.kafka.streams

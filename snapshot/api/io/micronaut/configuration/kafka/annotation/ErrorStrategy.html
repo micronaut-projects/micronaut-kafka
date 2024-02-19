@@ -98,7 +98,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&gt;[]</code></div>
 <div class="col-second even-row-color"><code><a href="#exceptionTypes()" class="member-name-link">exceptionTypes</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code>boolean</code></div>
 <div class="col-second odd-row-color"><code><a href="#handleAllExceptions()" class="member-name-link">handleAllExceptions</a></code></div>
@@ -109,7 +110,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>int</code></div>
 <div class="col-second even-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
@@ -121,7 +123,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
@@ -225,7 +228,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="retryDelay()">
 <h3>retryDelay</h3>
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">retryDelay</span></div>
-<div class="block">The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
@@ -241,7 +245,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="retryCount()">
 <h3>retryCount</h3>
 <div class="member-signature"><span class="return-type">int</span>&nbsp;<span class="element-name">retryCount</span></div>
-<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.
 
  <p><code>retryCount</code> takes precedence over <code>retryCountValue</code> if they are both set.</div>
@@ -325,7 +330,10 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="exceptionTypes()">
 <h3>exceptionTypes</h3>
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&gt;[]</span>&nbsp;<span class="element-name">exceptionTypes</span></div>
-<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.
+ When used with RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR,
+ the skip behaviour will be overridden if the thrown exception is one of these types.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the list of exceptions types</dd>

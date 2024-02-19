@@ -124,6 +124,18 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">This strategy will ignore the current error and will resume at the next offset.</div>
 </div>
+<div class="col-first even-row-color"><code><a href="#RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#RETRY_CONDITIONALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_ON_ERROR</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#RETRY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_EXPONENTIALLY_ON_ERROR</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
@@ -156,16 +168,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Compute retry delay given a fixed delay and the number of attempts.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRetry()" class="member-name-link">isRetry</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isConditionalRetry()" class="member-name-link">isConditionalRetry</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRetry()" class="member-name-link">isRetry</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a>[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a>[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
 </div>
@@ -212,6 +227,27 @@ the order they are declared.</div>
 <h3>RESUME_AT_NEXT_RECORD</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></span>&nbsp;<span class="element-name">RESUME_AT_NEXT_RECORD</span></div>
 <div class="block">This strategy will ignore the current error and will resume at the next offset.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RETRY_CONDITIONALLY_ON_ERROR">
+<h3>RETRY_CONDITIONALLY_ON_ERROR</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></span>&nbsp;<span class="element-name">RETRY_CONDITIONALLY_ON_ERROR</span></div>
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR">
+<h3>RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></span>&nbsp;<span class="element-name">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</span></div>
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.
+ In the case of a retry, it will attempt to re-consume the current record with exponentially
+ growing time breaks between consumption attempts. Breaks' duration is computed based on
+ the n * 2^(k - 1) formula, where n is the initial delay, and k is the number of retries.</div>
 </section>
 </li>
 <li>
@@ -278,6 +314,12 @@ not permitted.)</div>
 <dt>Since:</dt>
 <dd>5.2</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isConditionalRetry()">
+<h3>isConditionalRetry</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isConditionalRetry</span>()</div>
 </section>
 </li>
 <li>

@@ -307,6 +307,23 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Compute retry delay given a fixed delay and the number of attempts.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html#conditionalRetryBehaviour(io.micronaut.configuration.kafka.exceptions.KafkaListenerException)" class="member-name-link">conditionalRetryBehaviour(KafkaListenerException)</a> - Method in interface io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler</a></dt>
+<dd>
+<div class="block">Returns the seek behaviour for the given exception.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/DefaultConditionalRetryBehaviourHandler.html#conditionalRetryBehaviour(io.micronaut.configuration.kafka.exceptions.KafkaListenerException)" class="member-name-link">conditionalRetryBehaviour(KafkaListenerException)</a> - Method in class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/DefaultConditionalRetryBehaviourHandler.html" title="class in io.micronaut.configuration.kafka.retry">DefaultConditionalRetryBehaviourHandler</a></dt>
+<dd>
+<div class="block">Retries the record by default.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler</a> - Interface in <a href="io/micronaut/configuration/kafka/retry/package-summary.html">io.micronaut.configuration.kafka.retry</a></dt>
+<dd>
+<div class="block">Interface that can be implemented to provide conditional retry behaviour for a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>KafkaConsumer</code></a>
+ when a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/ConsumerRecord.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>ConsumerRecord</code></a> fails to be processed and the error strategy is set to conditionally retry.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a> - Enum Class in <a href="io/micronaut/configuration/kafka/retry/package-summary.html">io.micronaut.configuration.kafka.retry</a></dt>
+<dd>
+<div class="block">The conditional retry behaviours.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#configure(java.util.Map)" class="member-name-link">configure(Map&lt;String, ?&gt;)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#configure(java.util.Map,boolean)" class="member-name-link">configure(Map&lt;String, ?&gt;, boolean)</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
@@ -429,6 +446,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The default value for <code>skipRecordOnDeserializationFailure</code>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/DefaultConditionalRetryBehaviourHandler.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.retry">DefaultConditionalRetryBehaviourHandler</a> - Class in <a href="io/micronaut/configuration/kafka/retry/package-summary.html">io.micronaut.configuration.kafka.retry</a></dt>
+<dd>
+<div class="block">The default ConditionalRetryBehaviourHandler used when a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>KafkaConsumer</code></a>
+ fails to process a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/ConsumerRecord.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>ConsumerRecord</code></a> and the error strategy is set to conditionally retry.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/DefaultConditionalRetryBehaviourHandler.html#%3Cinit%3E()" class="member-name-link">DefaultConditionalRetryBehaviourHandler()</a> - Constructor for class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/DefaultConditionalRetryBehaviourHandler.html" title="class in io.micronaut.configuration.kafka.retry">DefaultConditionalRetryBehaviourHandler</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaConsumerConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" title="type parameter in DefaultKafkaConsumerConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/config/DefaultKafkaConsumerConfiguration.html" title="type parameter in DefaultKafkaConsumerConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/config/package-summary.html">io.micronaut.configuration.kafka.config</a></dt>
 <dd>
 <div class="block">Default Kafka consumer configuration that comes into play if no other config is specified.</div>
@@ -552,7 +576,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#exceptionTypes()" class="member-name-link">exceptionTypes()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
-<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR, see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+<div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
@@ -810,6 +835,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/reactor/package-summary.html">io.micronaut.configuration.kafka.reactor</a> - package io.micronaut.configuration.kafka.reactor</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/package-summary.html">io.micronaut.configuration.kafka.retry</a> - package io.micronaut.configuration.kafka.retry</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a> - package io.micronaut.configuration.kafka.seek</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/package-summary.html">io.micronaut.configuration.kafka.serde</a> - package io.micronaut.configuration.kafka.serde</dt>
@@ -831,6 +858,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#isConditionalRetry()" class="member-name-link">isConditionalRetry()</a> - Method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isEnabled()" class="member-name-link">isEnabled()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
@@ -1413,6 +1442,20 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">This strategy will ignore the current error and will resume at the next offset.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#RETRY" class="member-name-link">RETRY</a> - Enum constant in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_CONDITIONALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_ON_ERROR</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+ attempt to re-consume or skip the current according to the behaviour defined by the
+ <a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_EXPONENTIALLY_ON_ERROR</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
@@ -1426,7 +1469,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryCount()" class="member-name-link">retryCount()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
-<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryCountValue()" class="member-name-link">retryCountValue()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
@@ -1436,7 +1480,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryDelay()" class="member-name-link">retryDelay()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
-<div class="block">The delay used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
+<div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
+ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
  <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </dd>
 </dl>
@@ -1554,6 +1599,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the default value serializer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#SKIP" class="member-name-link">SKIP</a> - Enum constant in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#stop()" class="member-name-link">stop()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
 <dd>
 <div class="block">Shuts down any existing clients.</div>
@@ -1675,6 +1722,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -1697,6 +1748,11 @@ the order they are declared.</div>
 <dt><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#values()" class="member-name-link">values()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html" title="enum class in io.micronaut.configuration.kafka.metrics.builder">MeterType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
