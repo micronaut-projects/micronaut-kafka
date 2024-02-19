@@ -8,6 +8,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
+import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import org.apache.kafka.common.errors.RecordDeserializationException
@@ -22,8 +23,11 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     static final String BATCH_MODE_RESUME = "batch-mode-resume"
     static final String BATCH_MODE_RETRY = "batch-mode-retry"
+    static final String BATCH_MODE_RETRY_CONDITIONALLY = "batch-mode-retry-conditionally"
     static final String BATCH_MODE_RETRY_EXP = "batch-mode-retry-exp"
+    static final String BATCH_MODE_RETRY_CONDITIONALLY_EXP = "batch-mode-retry-conditionally-exp"
     static final String BATCH_MODE_RETRY_DESER = "batch-mode-retry-deser"
+    static final String BATCH_MODE_RETRY_CONDITIONALLY_DESER = "batch-mode-retry-conditionally-deser"
     static final String BATCH_MODE_RETRY_HANDLE_ALL = "batch-mode-retry-handle-all"
 
     void "test batch mode with 'resume' error strategy"() {
@@ -59,6 +63,27 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.times[1] - myConsumer.times[0] >= 500
     }
 
+    void "test batch mode with 'retry conditionally' error strategy"() {
+        when: "A consumer throws an exception"
+        MyClient myClient = context.getBean(MyClient)
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY, ['One', 'Two'])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY, ['Three', 'Four'])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY, ['Five', 'Six'])
+
+        RetryConditionallyConsumer myConsumer = context.getBean(RetryConditionallyConsumer)
+        context.getBean(ConsumerRegistry).resume(BATCH_MODE_RETRY_CONDITIONALLY)
+
+        then: "The batch that threw the exception was re-consumed except for the one we want to skip"
+        conditions.eventually {
+            myConsumer.received == ['One/Two', 'One/Two', 'Three/Four', 'Five/Six']
+            myConsumer.successful == ['One/Two', 'Five/Six']
+            myConsumer.skipped == ['Three/Four']
+        }
+
+        and: "The retry was delivered at least 50ms afterwards"
+        myConsumer.times[1] - myConsumer.times[0] >= 500
+    }
+
     void "test batch mode with 'retry' error strategy when there are serialization errors"() {
         when: "A record cannot be deserialized"
         MyClient myClient = context.getBean(MyClient)
@@ -83,6 +108,35 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 3
     }
 
+    void "test batch mode with 'retry conditionally' error strategy when there are serialization errors"() {
+        when: "A record cannot be deserialized"
+        MyClient myClient = context.getBean(MyClient)
+        myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_CONDITIONALLY_DESER, [111, 222])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY_DESER, ['Not an integer and should be retried'])
+        myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_CONDITIONALLY_DESER, [333])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY_DESER, ['Not an integer and should be skipped'])
+        myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_CONDITIONALLY_DESER, [444, 555])
+
+        RetryConditionallyDeserConsumer myConsumer = context.getBean(RetryConditionallyDeserConsumer)
+        context.getBean(ConsumerRegistry).resume(BATCH_MODE_RETRY_CONDITIONALLY_DESER)
+
+        then: "The messages that threw the exception was eventually left behind and the one we wanted to skip was skipped"
+        conditions.eventually {
+            myConsumer.received == ['111/222', '333', '444/555']
+            myConsumer.successful == ['111/222', '333', '444/555']
+            myConsumer.skippedOffsets == [4L]
+        }
+
+        and: "The retry error strategy was honored"
+        myConsumer.exceptions.size() == 3
+        myConsumer.exceptions[0].message.startsWith('Error deserializing key/value')
+        (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 2
+        myConsumer.exceptions[1].message.startsWith('Error deserializing key/value')
+        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 2
+        myConsumer.exceptions[2].message.startsWith('Error deserializing key/value')
+        (myConsumer.exceptions[2].cause as RecordDeserializationException).offset() == 4
+    }
+
     void "test batch mode with 'retry exp' error strategy"() {
         when: "A consumer throws an exception"
         MyClient myClient = context.getBean(MyClient)
@@ -95,6 +149,29 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         then: "Batch is consumed eventually"
         conditions.eventually {
             myConsumer.received == ['One/Two', 'One/Two', 'One/Two', 'One/Two', 'Three/Four']
+        }
+
+        and: "Batch was retried with exponential breaks between deliveries"
+        myConsumer.times[1] - myConsumer.times[0] >= 50
+        myConsumer.times[2] - myConsumer.times[1] >= 100
+        myConsumer.times[3] - myConsumer.times[2] >= 200
+    }
+
+    void "test batch mode with 'retry conditionally exp' error strategy"() {
+        when: "A consumer throws an exception"
+        MyClient myClient = context.getBean(MyClient)
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY_EXP, ['One', 'Two'])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY_EXP, ['Three', 'Four'])
+        myClient.sendBatch(BATCH_MODE_RETRY_CONDITIONALLY_EXP, ['Five', 'Six'])
+
+        RetryConditionallyExpConsumer myConsumer = context.getBean(RetryConditionallyExpConsumer)
+        context.getBean(ConsumerRegistry).resume(BATCH_MODE_RETRY_CONDITIONALLY_EXP)
+
+        then: "The first batch is retried until it is skipped, the second is skipped immediately, and the third batch is consumed eventually"
+        conditions.eventually {
+            myConsumer.received == ['One/Two', 'One/Two', 'One/Two', 'One/Two', 'Three/Four', 'Five/Six']
+            myConsumer.successful == ['Five/Six']
+            myConsumer.skipped == ['Three/Four']
         }
 
         and: "Batch was retried with exponential breaks between deliveries"
@@ -143,6 +220,9 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         AtomicInteger count = new AtomicInteger(0)
         List<?> received = []
         List<KafkaListenerException> exceptions = []
+        List<String> successful = []
+        List<String> skipped = []
+        List<Long> skippedOffsets = []
     }
 
     @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
@@ -184,6 +264,42 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
     @KafkaListener(
+            clientId = BATCH_MODE_RETRY_CONDITIONALLY,
+            batch = true,
+            autoStartup = false,
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_CONDITIONALLY_ON_ERROR, retryDelay = '500ms'),
+            properties = @Property(name = 'max.poll.records', value = '2'))
+    static class RetryConditionallyConsumer extends AbstractConsumer implements ConditionalRetryBehaviourHandler {
+        List<Long> times = []
+
+        @Topic(BATCH_MODE_RETRY_CONDITIONALLY)
+        void receiveBatch(List<String> messages) {
+            received << concatenate(messages)
+            times << System.currentTimeMillis()
+            def current = count.getAndIncrement()
+            if (current == 0 || current == 2) {
+                throw new RuntimeException("Won't handle first attempt of first and third batches")
+            }
+            successful << concatenate(messages)
+        }
+
+        @Override
+        ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+            def message = exception.getConsumerRecords().get().asList().stream()
+                    .map(it -> it.value())
+                    .collect(Collectors.joining("/"))
+            if (message == "Three/Four") {
+                skipped << message
+                return ConditionalRetryBehaviour.SKIP
+            } else {
+                return ConditionalRetryBehaviour.RETRY
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
+    @KafkaListener(
             clientId = BATCH_MODE_RETRY_DESER,
             batch = true,
             autoStartup = false,
@@ -205,6 +321,38 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
     @KafkaListener(
+            clientId = BATCH_MODE_RETRY_CONDITIONALLY_DESER,
+            batch = true,
+            autoStartup = false,
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_CONDITIONALLY_ON_ERROR, handleAllExceptions = true),
+            properties = @Property(name = 'max.poll.records', value = '2'))
+    static class RetryConditionallyDeserConsumer extends AbstractConsumer implements KafkaListenerExceptionHandler, ConditionalRetryBehaviourHandler {
+
+        @Topic(BATCH_MODE_RETRY_CONDITIONALLY_DESER)
+        void receiveBatch(List<Integer> numbers) {
+            received << concatenate(numbers)
+            successful << concatenate(numbers)
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            exceptions << exception
+        }
+
+        @Override
+        ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+            if(exception.getMessage() == "Error deserializing key/value for partition batch-mode-retry-conditionally-deser-0 at offset 4. If needed, please seek past the record to continue consumption.") {
+                skippedOffsets << 4L
+                return ConditionalRetryBehaviour.SKIP
+            } else {
+                return ConditionalRetryBehaviour.RETRY
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
+    @KafkaListener(
             clientId = BATCH_MODE_RETRY_EXP,
             batch = true,
             autoStartup = false,
@@ -220,6 +368,42 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
             times << System.currentTimeMillis()
             if (count.getAndIncrement() < 4) {
                 throw new RuntimeException("Won't handle first three delivery attempts")
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaBatchErrorStrategySpec')
+    @KafkaListener(
+            clientId = BATCH_MODE_RETRY_CONDITIONALLY_EXP,
+            batch = true,
+            autoStartup = false,
+            offsetReset = EARLIEST,
+            errorStrategy = @ErrorStrategy(value = RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR, retryCount = 3, retryDelay = '50ms'),
+            properties = @Property(name = 'max.poll.records', value = '2'))
+    static class RetryConditionallyExpConsumer extends AbstractConsumer implements ConditionalRetryBehaviourHandler {
+        List<Long> times = []
+
+        @Topic(BATCH_MODE_RETRY_CONDITIONALLY_EXP)
+        void receiveBatch(List<String> messages) {
+            received << concatenate(messages)
+            times << System.currentTimeMillis()
+            def current = count.getAndIncrement()
+            if (current < 5) {
+                throw new RuntimeException("Won't handle first batch and fail on the first attempt of the second batch")
+            }
+            successful << concatenate(messages)
+        }
+
+        @Override
+        ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+            def message = exception.getConsumerRecords().get().asList().stream()
+                    .map(it -> it.value())
+                    .collect(Collectors.joining("/"))
+            if (message == "Three/Four") {
+                skipped << message
+                return ConditionalRetryBehaviour.SKIP
+            } else {
+                return ConditionalRetryBehaviour.RETRY
             }
         }
     }

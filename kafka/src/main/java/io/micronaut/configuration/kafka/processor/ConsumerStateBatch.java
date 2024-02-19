@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2024 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ final class ConsumerStateBatch extends ConsumerState {
         Map<TopicPartition, OffsetAndMetadata> currentOffsets, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
-            if (shouldRetryException(e) && info.retryCount > 0) {
+            if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
                 // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(partitions, currentOffsets);
                 if (info.retryCount >= currentRetryCount) {

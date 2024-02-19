@@ -80,3 +80,13 @@ In this case, to fix the issues, we need to:
 - Add an space after `if` in line 34
 
 The plugin also adds a new tab in the bottom of the IDE to run Checkstyle and show errors and warnings. We recommend that you run the report and fix all issues before submitting a pull request.
+
+## File headers
+
+All files should contain the license header which can be added automatically by running:
+
+```
+./gradlew spotlessApply
+```
+
+The copyright year should be updated manually when editing existing files.

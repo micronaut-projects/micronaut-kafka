@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2024 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -425,7 +425,12 @@ abstract class ConsumerState {
         }
     }
 
-    protected boolean shouldRetryException(Throwable e) {
+    protected boolean shouldRetryException(Throwable e, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+        if (info.errorStrategy.isConditionalRetry()) {
+            return kafkaConsumerProcessor.shouldRetryMessage(consumerBean, wrapExceptionInKafkaListenerException(e.getMessage(), e, consumerRecords, consumerRecord)) ||
+                info.exceptionTypes.stream().anyMatch(e.getClass()::equals);
+        }
+
         return info.exceptionTypes.isEmpty() ||
             info.exceptionTypes.stream().anyMatch(e.getClass()::equals);
     }
@@ -449,7 +454,11 @@ abstract class ConsumerState {
 
     private void handleException(String message, Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
         kafkaConsumerProcessor.handleException(consumerBean,
-            new KafkaListenerException(message, e, consumerBean, kafkaConsumer, consumerRecords, consumerRecord));
+            wrapExceptionInKafkaListenerException(message, e, consumerRecords, consumerRecord));
+    }
+
+    private KafkaListenerException wrapExceptionInKafkaListenerException(String message, Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
+        return new KafkaListenerException(message, e, consumerBean, kafkaConsumer, consumerRecords, consumerRecord);
     }
 
     private OffsetCommitCallback resolveCommitCallback() {

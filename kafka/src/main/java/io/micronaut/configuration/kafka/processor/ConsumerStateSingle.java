@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2024 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,11 +128,10 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-            if (shouldRetryException(e) && info.retryCount > 0) {
+            if (shouldRetryException(e, consumerRecords, consumerRecord) && info.retryCount > 0) {
                 // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(consumerRecord);
                 if (info.retryCount >= currentRetryCount) {
-
                     // We will retry this batch again next time
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, consumerRecord);
