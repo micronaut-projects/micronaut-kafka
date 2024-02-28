@@ -715,7 +715,7 @@ client.sendProduct("Nike", "Blue Trainers")</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can return a <code>Future</code> or <a href="https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
+<p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can specify an executor and return either a <code>CompletableFuture</code> or <a href="https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
 </div>
 </div>
 </div>
@@ -1052,11 +1052,130 @@ part of the <code>kafka-clients</code> library:</p>
 <div class="paragraph">
 <p>The <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation supports the definition of reactive return types (such as <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html">Flowable</a> or Reactor <code>Flux</code>) as well as Futures.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The KafkaProducer used internally to implement <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> support is inherently blocking, even though some of its methods describe themselves as "asynchronous". Configuring an executor (as shown in the following examples) is required in order to guarantee that a returned reactive type or Future will not block the calling thread.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Add the library <a href="https://micronaut-projects.github.io/micronaut-reactor/latest/guide/">Micronaut Reactor</a> or <a href="https://micronaut-projects.github.io/micronaut-rxjava3/latest/guide/">Micronaut RxJava 3</a> to your application&#8217;s dependencies.</p>
 </div>
 <div class="paragraph">
-<p>The following sections, which use Micronaut Reactor, cover possible method signatures and behaviour:</p>
+<p>The following sections, which use Micronaut Reactor, cover advised configuration and possible method signatures and behaviour:</p>
+</div>
+<div class="sect3">
+<h4 id="_configuring_an_executor">Configuring An Executor</h4>
+<div class="paragraph">
+<p>As the <code>send</code> method of <code>KafkaProducer</code> can block the calling thread, it is recommended that you specify an executor to be used when returning either reactive types or <code>CompletableFuture</code>. This will ensure that the <code>send</code> logic is executed on a separate thread from that of the caller, and avoid undesirable conditions such as blocking of the Micronaut server&#8217;s event loop.</p>
+</div>
+<div class="paragraph">
+<p>The executor to be used may be specified via configuration properties as in the following example:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.producers.default.executor=blocking
+kafka.producers.my-named-producer.executor=io</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    producers:
+        default:
+            executor: blocking
+        my-named-producer:
+            executor: io</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.producers]
+    [kafka.producers.default]
+      executor="blocking"
+    [kafka.producers.my-named-producer]
+      executor="io"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  producers {
+    'default' {
+      executor = "blocking"
+    }
+    myNamedProducer {
+      executor = "io"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    producers {
+      default {
+        executor = "blocking"
+      }
+      my-named-producer {
+        executor = "io"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "producers": {
+      "default": {
+        "executor": "blocking"
+      },
+      "my-named-producer": {
+        "executor": "io"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Alternatively, the executor may be specified via the <code>executor</code> property of the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> annotation:</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient(value = "product-client", executor = TaskExecutors.BLOCKING)
+public interface BookClient {</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy"></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin"></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that an <code>executor</code> specified in the annotation will take precedent over that specified in the application configuration properties.</p>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_mono_value_and_return_type">Mono Value and Return Type</h4>
@@ -5254,6 +5373,11 @@ By default, the details visible above are only shown to authenticated users. See
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.enabled</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the Kafka health check is enabled. Default value true.</p></td>
@@ -5262,11 +5386,6 @@ By default, the details visible above are only shown to authenticated users. See
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.restricted</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn&#8217;t have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn&#8217;t require any additional permissions.. Default value false</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
 </tr>
 </tbody>
 </table>

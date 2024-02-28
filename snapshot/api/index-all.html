@@ -579,6 +579,10 @@ loadScripts(document, 'script');</script>
 <div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
  see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html#executor()" class="member-name-link">executor()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaClient</a></dt>
+<dd>
+<div class="block">The executor to use to enable non-blocking producer methods.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
 <dl class="index">
@@ -644,6 +648,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Obtain a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Deserializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link"><code>Deserializer</code></a> for the given type.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html#getExecutor()" class="member-name-link">getExecutor()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.html#getHeaders()" class="member-name-link">getHeaders()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.html" title="class in io.micronaut.configuration.kafka">KafkaMessage</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html#getHealthTimeout()" class="member-name-link">getHealthTimeout()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration</a></dt>
@@ -1562,6 +1568,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setEnabled(boolean)" class="member-name-link">setEnabled(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>
 <div class="block">Whether the Kafka health check is enabled.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html#setExecutor(java.lang.String)" class="member-name-link">setExecutor(String)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaProducerConfiguration</a></dt>
+<dd>
+<div class="block">Sets the default executor to use to enable non-blocking producers.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html#setHealthTimeout(java.time.Duration)" class="member-name-link">setHealthTimeout(Duration)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration</a></dt>
 <dd>
