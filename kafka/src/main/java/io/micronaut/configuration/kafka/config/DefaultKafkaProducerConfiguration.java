@@ -65,6 +65,7 @@ public class DefaultKafkaProducerConfiguration<K, V> extends AbstractKafkaProduc
 
             defaultProducerConfig.getKeySerializer().ifPresent(this::setKeySerializer);
             defaultProducerConfig.getValueSerializer().ifPresent(this::setValueSerializer);
+            defaultProducerConfig.getExecutor().ifPresent(this::setExecutor);
         }
     }
 }

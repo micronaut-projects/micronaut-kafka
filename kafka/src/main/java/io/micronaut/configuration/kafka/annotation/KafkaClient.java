@@ -102,6 +102,13 @@ public @interface KafkaClient {
     int acks() default Acknowledge.DEFAULT;
 
     /**
+     * The executor to use to enable non-blocking producer methods.
+     *
+     * @return The name of the executor to use
+     */
+    String executor() default "";
+
+    /**
      * Constants for the {@code ack} setting for the client, which impacts message delivery durability.
      *
      * @see org.apache.kafka.clients.producer.ProducerConfig#ACKS_CONFIG

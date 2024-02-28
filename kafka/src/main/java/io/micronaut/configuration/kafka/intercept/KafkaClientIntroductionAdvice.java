@@ -19,12 +19,7 @@ import io.micronaut.aop.InterceptedMethod;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
-import io.micronaut.configuration.kafka.annotation.KafkaClient;
-import io.micronaut.configuration.kafka.annotation.KafkaKey;
-import io.micronaut.configuration.kafka.annotation.KafkaPartition;
-import io.micronaut.configuration.kafka.annotation.KafkaPartitionKey;
-import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
-import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration;
@@ -65,21 +60,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -140,11 +128,20 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 }
                 switch (interceptedMethod.resultType()) {
                     case COMPLETION_STAGE -> {
-                        CompletableFuture<Object> completableFuture = returnCompletableFuture(context, producerState, returnType);
+                        CompletableFuture<Object> completableFuture;
+                        if (producerState.executorService != null) {
+                            var delayedReturnType = returnType;
+                            completableFuture = CompletableFuture.supplyAsync(() -> returnCompletableFuture(context, producerState, delayedReturnType), producerState.executorService).thenCompose(o -> o);
+                        } else {
+                            completableFuture = returnCompletableFuture(context, producerState, returnType);
+                        }
                         return interceptedMethod.handleResult(completableFuture);
                     }
                     case PUBLISHER -> {
                         Flux<Object> publisher = returnPublisher(context, producerState, returnType);
+                        if (producerState.executorService != null) {
+                            publisher = publisher.subscribeOn(Schedulers.fromExecutorService(producerState.executorService));
+                        }
                         return interceptedMethod.handleResult(publisher);
                     }
                     case SYNCHRONOUS -> {
@@ -288,7 +285,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     private CompletableFuture<Object> returnCompletableFuture(MethodInvocationContext<Object, Object> context, ProducerState producerState, Argument<?> returnType) {
-        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+        CompletableFuture<Object> sendResult = new CompletableFuture<>();
         Object value = producerState.valueSupplier.get(context);
         boolean isReactiveValue = value != null && Publishers.isConvertibleToPublisher(value.getClass());
         if (isReactiveValue) {
@@ -309,20 +306,20 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
                 @Override
                 public void onNext(Object o) {
-                    completableFuture.complete(o);
+                    sendResult.complete(o);
                     completed = true;
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    completableFuture.completeExceptionally(wrapException(context, t));
+                    sendResult.completeExceptionally(wrapException(context, t));
                 }
 
                 @Override
                 public void onComplete() {
                     if (!completed) {
                         // empty publisher
-                        completableFuture.complete(null);
+                        sendResult.complete(null);
                     }
                 }
             });
@@ -340,22 +337,25 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     LOG.trace("Beginning transaction for producer: {}", producerState.transactionalId);
                     kafkaProducer.beginTransaction();
                 }
+
+                LOG.trace("Sending record {} with producer {}", record, kafkaProducer);
                 kafkaProducer.send(record, (metadata, exception) -> {
                     if (exception != null) {
-                        completableFuture.completeExceptionally(wrapException(context, exception));
+                        sendResult.completeExceptionally(wrapException(context, exception));
                     } else {
                         if (returnType.equalsType(Argument.VOID_OBJECT)) {
-                            completableFuture.complete(null);
+                            sendResult.complete(null);
                         } else {
                             Optional<?> converted = conversionService.convert(metadata, returnType);
                             if (converted.isPresent()) {
-                                completableFuture.complete(converted.get());
+                                sendResult.complete(converted.get());
                             } else if (returnType.getType() == producerState.bodyArgument.getType()) {
-                                completableFuture.complete(value);
+                                sendResult.complete(value);
                             }
                         }
                     }
                 });
+
                 if (transactional) {
                     LOG.trace("Committing transaction for producer: {}", producerState.transactionalId);
                     kafkaProducer.commitTransaction();
@@ -368,17 +368,21 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 throw e;
             }
         }
-        return completableFuture;
+        return sendResult;
     }
 
     private Mono<RecordMetadata> producerSend(Producer<?, ?> producer, ProducerRecord record) {
-        return Mono.create(emitter -> producer.send(record, (metadata, exception) -> {
-            if (exception != null) {
-                emitter.error(exception);
-            } else {
-                emitter.success(metadata);
-            }
-        }));
+        return Mono.create(emitter -> {
+            LOG.trace("Sending record {} with producer {}", record, producer);
+            producer.send(record, (metadata, exception) -> {
+
+                if (exception != null) {
+                    emitter.error(exception);
+                } else {
+                    emitter.success(metadata);
+                }
+            });
+        });
     }
 
     @Override
@@ -749,8 +753,13 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             };
             BiFunction<MethodInvocationContext<?, ?>, Producer, Integer> finalPartitionFromProducerFn = partitionFromProducerFn;
             ContextSupplier<Integer> partitionSupplier = ctx -> finalPartitionFromProducerFn.apply(ctx, producer);
+
+            String executor = context.stringValue(KafkaClient.class, "executor").orElseGet(() -> newConfiguration.getExecutor().orElse(""));
+
+            ExecutorService executorService = beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null);
+
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
-                    transactional, transactionalId, maxBlock, isBatchSend, bodyArgument);
+                    transactional, transactionalId, maxBlock, isBatchSend, bodyArgument, executorService);
         });
     }
 
@@ -776,47 +785,20 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         return method.getDeclaringType().getSimpleName() + "#" + method.getName();
     }
 
-    private static final class ProducerState {
+    private record ProducerState(Producer<?, ?> kafkaProducer,
+                                              ContextSupplier<Object> keySupplier,
+                                              ContextSupplier<String> topicSupplier,
+                                              ContextSupplier<Object> valueSupplier,
+                                              ContextSupplier<Long> timestampSupplier,
+                                              ContextSupplier<Integer> partitionSupplier,
+                                              ContextSupplier<Collection<Header>> headersSupplier,
+                                              boolean transactional,
+                                              @Nullable String transactionalId,
+                                              @Nullable Duration maxBlock,
+                                              boolean isBatchSend,
+                                              @Nullable Argument<?> bodyArgument,
+                                              @Nullable ExecutorService executorService) {
 
-        private final Producer<?, ?> kafkaProducer;
-        private final ContextSupplier<Object> keySupplier;
-        private final ContextSupplier<String> topicSupplier;
-        private final ContextSupplier<Object> valueSupplier;
-        private final ContextSupplier<Long> timestampSupplier;
-        private final ContextSupplier<Integer> partitionSupplier;
-        private final ContextSupplier<Collection<Header>> headersSupplier;
-        private final boolean transactional;
-        private final String transactionalId;
-        @Nullable
-        private final Duration maxBlock;
-        private final boolean isBatchSend;
-        private final Argument<?> bodyArgument;
-
-        private ProducerState(Producer<?, ?> kafkaProducer,
-                              ContextSupplier<Object> keySupplier,
-                              ContextSupplier<String> topicSupplier,
-                              ContextSupplier<Object> valueSupplier,
-                              ContextSupplier<Long> timestampSupplier,
-                              ContextSupplier<Integer> partitionSupplier,
-                              ContextSupplier<Collection<Header>> headersSupplier,
-                              boolean transactional,
-                              @Nullable String transactionalId,
-                              @Nullable Duration maxBlock,
-                              boolean isBatchSend,
-                              @Nullable Argument<?> bodyArgument) {
-            this.kafkaProducer = kafkaProducer;
-            this.keySupplier = keySupplier;
-            this.topicSupplier = topicSupplier;
-            this.valueSupplier = valueSupplier;
-            this.timestampSupplier = timestampSupplier;
-            this.partitionSupplier = partitionSupplier;
-            this.headersSupplier = headersSupplier;
-            this.transactional = transactional;
-            this.transactionalId = transactionalId;
-            this.maxBlock = maxBlock;
-            this.isBatchSend = isBatchSend;
-            this.bodyArgument = bodyArgument;
-        }
     }
 
     private interface ContextSupplier<T> extends Function<MethodInvocationContext<?, ?>, T> {
