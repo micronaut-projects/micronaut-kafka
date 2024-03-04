@@ -26,8 +26,6 @@ micronaut-tracing = "6.2.0"
 micronaut-test = "4.0.2"
 micronaut-test-resources="2.3.2"
 
-coroutines = "1.8.0"
-
 [libraries]
 # Core
 micronaut-core = { module = 'io.micronaut:micronaut-core-bom', version.ref = 'micronaut' }
@@ -52,7 +50,6 @@ micronaut-test-resources = { module = "io.micronaut.testresources:micronaut-test
 micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", version.ref = "micronaut-tracing" }
 
 junit-jupiter-engine = { module = 'org.junit.jupiter:junit-jupiter-engine' }
-kotlinx-coroutines = { module = 'org.jetbrains.kotlinx:kotlinx-coroutines-core', version.ref = "coroutines"}
 
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
 
