@@ -267,8 +267,7 @@ abstract class ConsumerState {
         boolean isBlocking
     ) {
         final Flux<RecordMetadata> recordMetadataProducer = publisher
-            .flatMap(value -> sendToDestination(value, consumerRecord, consumerRecords))
-            .onErrorResume(error -> handleSendToError(error, consumerRecords, consumerRecord));
+            .flatMap(value -> sendToDestination(value, consumerRecord, consumerRecords));
 
         if (isBlocking) {
             List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
@@ -298,7 +297,8 @@ abstract class ConsumerState {
                 value.getClass()
             );
         }
-        return Flux.create(emitter -> sendToDestination(emitter, kafkaProducer, key, value, consumerRecord, consumerRecords));
+        Flux<RecordMetadata> result = Flux.create(emitter -> sendToDestination(emitter, kafkaProducer, key, value, consumerRecord, consumerRecords));
+        return result.onErrorResume(error -> handleSendToError(error, consumerRecords, consumerRecord));
     }
 
     private void sendToDestination(FluxSink<RecordMetadata> emitter, Producer<?, ?> kafkaProducer, Object key, Object value, ConsumerRecord<?, ?> consumerRecord, ConsumerRecords<?, ?> consumerRecords) {
