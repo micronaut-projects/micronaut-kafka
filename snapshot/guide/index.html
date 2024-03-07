@@ -5044,6 +5044,18 @@ The error strategies apply only for non-batch messages processing.
 </tr>
 </table>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When using retry error strategies in combination with reactive consumer methods, it is necessary to add the <code>@Blocking</code> annotation to the reactive consumer method.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>You can also make the number of retries configurable by using <code>retryCountValue</code>:</p>
 </div>
