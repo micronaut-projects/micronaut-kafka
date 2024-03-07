@@ -2,7 +2,7 @@
 micronaut = "4.3.9"
 micronaut-platform = "4.1.2"
 micronaut-docs = "2.0.0"
-micronaut-gradle-plugin = "4.3.3"
+micronaut-gradle-plugin = "4.3.4"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka-compat = "3.7.0"
@@ -15,7 +15,7 @@ awaitility = '4.2.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
-zipkin-brave-kafka-clients = '6.0.0'
+zipkin-brave-kafka-clients = '6.0.2'
 
 micronaut-cache = "4.2.2"
 micronaut-logging = "1.1.2"
@@ -24,7 +24,7 @@ micronaut-reactor = "3.2.1"
 micronaut-serde = "2.8.1"
 micronaut-tracing = "6.4.1"
 micronaut-test = "4.0.2"
-micronaut-test-resources="2.3.3"
+micronaut-test-resources="2.4.0"
 
 [libraries]
 # Core

@@ -23,6 +23,8 @@ You can choose one of the error strategies:
 
 NOTE: The error strategies apply only for non-batch messages processing.
 
+NOTE: When using retry error strategies in combination with reactive consumer methods, it is necessary to add the `@Blocking` annotation to the reactive consumer method.
+
 You can also make the number of retries configurable by using `retryCountValue`:
 
 .Dynamically Configuring Retries
