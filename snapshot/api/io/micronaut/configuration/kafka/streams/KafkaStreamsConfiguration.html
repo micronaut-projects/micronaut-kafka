@@ -82,11 +82,12 @@ loadScripts(document, 'script');</script>
 </dl>
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code>io.micronaut.core.util.Toggleable</code></dd>
+<dd><code>io.micronaut.core.naming.Named</code>, <code>io.micronaut.core.util.Toggleable</code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="annotations">@EachProperty(value="kafka.streams",
               primary="default")
+@ConfigurationProperties("kafka.streams")
 @Requires(beans=<a href="../config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration.class</a>)
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">KafkaStreamsConfiguration&lt;K,<wbr>V&gt;</span>
 <span class="extends-implements">extends <a href="AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a>&lt;K,<wbr>V&gt;</span></div>
@@ -109,6 +110,9 @@ loadScripts(document, 'script');</script>
 <div class="block">The default streams configuration.</div>
 </div>
 </div>
+<div class="inherited-list">
+<h3 id="fields-inherited-from-class-io.micronaut.configuration.kafka.streams.AbstractKafkaStreamsConfiguration">Fields inherited from class&nbsp;io.micronaut.configuration.kafka.streams.<a href="AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></h3>
+<code><a href="AbstractKafkaStreamsConfiguration.html#DEFAULT_CLOSE_TIMEOUT">DEFAULT_CLOSE_TIMEOUT</a>, <a href="AbstractKafkaStreamsConfiguration.html#DEFAULT_NAME">DEFAULT_NAME</a></code></div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration">Fields inherited from class&nbsp;io.micronaut.configuration.kafka.config.<a href="../config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></h3>
 <code><a href="../config/AbstractKafkaConfiguration.html#DEFAULT_BOOTSTRAP_SERVERS">DEFAULT_BOOTSTRAP_SERVERS</a>, <a href="../config/AbstractKafkaConfiguration.html#DEFAULT_KAFKA_PORT">DEFAULT_KAFKA_PORT</a>, <a href="../config/AbstractKafkaConfiguration.html#EMBEDDED_TOPICS">EMBEDDED_TOPICS</a>, <a href="../config/AbstractKafkaConfiguration.html#TOPICS">TOPICS</a></code></div>
@@ -138,7 +142,7 @@ loadScripts(document, 'script');</script>
 <h2>Method Summary</h2>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.micronaut.configuration.kafka.streams.AbstractKafkaStreamsConfiguration">Methods inherited from class&nbsp;io.micronaut.configuration.kafka.streams.<a href="AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></h3>
-<code><a href="AbstractKafkaStreamsConfiguration.html#init(io.micronaut.runtime.ApplicationConfiguration,io.micronaut.context.env.Environment,java.util.Properties)">init</a></code></div>
+<code><a href="AbstractKafkaStreamsConfiguration.html#getCloseTimeout()">getCloseTimeout</a>, <a href="AbstractKafkaStreamsConfiguration.html#getName()">getName</a>, <a href="AbstractKafkaStreamsConfiguration.html#init(io.micronaut.runtime.ApplicationConfiguration,io.micronaut.context.env.Environment,java.util.Properties)">init</a>, <a href="AbstractKafkaStreamsConfiguration.html#setCloseTimeout(java.time.Duration)">setCloseTimeout</a>, <a href="AbstractKafkaStreamsConfiguration.html#setName(java.lang.String)">setName</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration">Methods inherited from class&nbsp;io.micronaut.configuration.kafka.config.<a href="../config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></h3>
 <code><a href="../config/AbstractKafkaConfiguration.html#getConfig()">getConfig</a>, <a href="../config/AbstractKafkaConfiguration.html#toKafkaProperties(io.micronaut.context.env.Environment,java.util.Map)">toKafkaProperties</a></code></div>

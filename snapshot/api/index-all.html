@@ -334,6 +334,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#%3Cinit%3E(java.util.Properties)" class="member-name-link">ConfiguredStreamBuilder(Properties)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
 <dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">Use <a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#%3Cinit%3E(java.util.Properties,java.lang.String,java.time.Duration)"><code>ConfiguredStreamBuilder(Properties, String, Duration)</code></a></div>
+</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#%3Cinit%3E(java.util.Properties,java.lang.String,java.time.Duration)" class="member-name-link">ConfiguredStreamBuilder(Properties, String, Duration)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
+<dd>
 <div class="block">Default constructor.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/ConsumerAware.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerAware</a>&lt;<a href="io/micronaut/configuration/kafka/ConsumerAware.html" title="type parameter in ConsumerAware">K</a>,<wbr><a href="io/micronaut/configuration/kafka/ConsumerAware.html" title="type parameter in ConsumerAware">V</a>&gt; - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
@@ -410,6 +416,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The default bootstrap server address.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#DEFAULT_CLOSE_TIMEOUT" class="member-name-link">DEFAULT_CLOSE_TIMEOUT</a> - Static variable in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#DEFAULT_COMMIT_RECORD_ON_DESERIALIZATION_FAILURE" class="member-name-link">DEFAULT_COMMIT_RECORD_ON_DESERIALIZATION_FAILURE</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
 <dd>
 <div class="block">The default value for <code>commitRecordOnDeserializationFailure</code>.</div>
@@ -434,6 +442,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The default kafka port.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#DEFAULT_NAME" class="member-name-link">DEFAULT_NAME</a> - Static variable in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#DEFAULT_RESTRICTED" class="member-name-link">DEFAULT_RESTRICTED</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>
 <div class="block">The default restricted value.</div>
@@ -504,7 +514,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/DefaultKafkaStreamsConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.streams">DefaultKafkaStreamsConfiguration</a>&lt;<a href="io/micronaut/configuration/kafka/streams/DefaultKafkaStreamsConfiguration.html" title="type parameter in DefaultKafkaStreamsConfiguration">K</a>,<wbr><a href="io/micronaut/configuration/kafka/streams/DefaultKafkaStreamsConfiguration.html" title="type parameter in DefaultKafkaStreamsConfiguration">V</a>&gt; - Class in <a href="io/micronaut/configuration/kafka/streams/package-summary.html">io.micronaut.configuration.kafka.streams</a></dt>
 <dd>
-<div class="block">The default streams configuration is non other is present.</div>
+<div class="block">The default streams configuration if no other is present.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/DefaultKafkaStreamsConfiguration.html#%3Cinit%3E(io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration,io.micronaut.runtime.ApplicationConfiguration,io.micronaut.context.env.Environment)" class="member-name-link">DefaultKafkaStreamsConfiguration(KafkaDefaultConfiguration, ApplicationConfiguration, Environment)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/DefaultKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">DefaultKafkaStreamsConfiguration</a></dt>
 <dd>
@@ -613,6 +623,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.html#getBody()" class="member-name-link">getBody()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.html" title="class in io.micronaut.configuration.kafka">KafkaMessage</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#getCloseTimeout()" class="member-name-link">getCloseTimeout()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>
+<div class="block">The time to wait for the stream to shut down.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#getCloseTimeout()" class="member-name-link">getCloseTimeout()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
+<dd>
+<div class="block">The timeout to use when closing the stream.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#getClusterReplicationFactor(org.apache.kafka.clients.admin.Config)" class="member-name-link">getClusterReplicationFactor(Config)</a> - Static method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>
 <div class="block">Retrieve the cluster "offsets.topic.replication.factor" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
@@ -693,6 +711,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Retrieve the cluster "min.insync.replicas" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
  "offsets.topic.replication.factor" or "default.replication.factor" if required, in order to
  support Confluent Cloud hosted Kafka.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#getName()" class="member-name-link">getName()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>
+<div class="block">The logical name of the stream.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#getName()" class="member-name-link">getName()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
+<dd>
+<div class="block">The logical name of the stream.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.html#getPartition()" class="member-name-link">getPartition()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.html" title="class in io.micronaut.configuration.kafka">KafkaMessage</a></dt>
 <dd>&nbsp;</dd>
@@ -1557,6 +1583,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The session timeout for a consumer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#setCloseTimeout(java.time.Duration)" class="member-name-link">setCloseTimeout(Duration)</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#setCommitRecordOnDeserializationFailure(boolean)" class="member-name-link">setCommitRecordOnDeserializationFailure(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
 <dd>
 <div class="block">Whether to commit record on deserialization failure.</div>
@@ -1589,6 +1617,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the key serializer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#setName(java.lang.String)" class="member-name-link">setName(String)</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setRestricted(boolean)" class="member-name-link">setRestricted(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>
 <div class="block">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster.</div>

@@ -6207,7 +6207,75 @@ kafka.streams.default.auto.offset.reset=earliest</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The above configuration example sets the <code>processing.guarantee</code> and <code>auto.offset.reset</code> setting of the <code>default</code> Stream.</p>
+<p>The above configuration example sets the <code>processing.guarantee</code> and <code>auto.offset.reset</code> setting of the <code>default</code> Stream. Most of the configuration properties pass directly through to the <code>KafkaStreams</code> instance being initialized.</p>
+</div>
+<div class="paragraph">
+<p>In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down (this is mostly useful during testing), with <code>close-timeout</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down the default stream:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.close-timeout=10s</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        default:
+            close-timeout: 10s</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.streams]
+    [kafka.streams.default]
+      close-timeout="10s"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    'default' {
+      closeTimeout = "10s"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      default {
+        close-timeout = "10s"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "default": {
+        "close-timeout": "10s"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
 </div>
 <div class="paragraph">
 <div class="title">Configuring multiple Stream definitions on the same Micronaut Service.</div>
@@ -6366,7 +6434,7 @@ fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc.It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
 </td>
 </tr>
 </table>
