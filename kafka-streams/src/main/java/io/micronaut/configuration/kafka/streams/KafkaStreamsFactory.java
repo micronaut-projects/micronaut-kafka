@@ -17,11 +17,7 @@ package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
-import io.micronaut.context.annotation.Context;
-import io.micronaut.context.annotation.EachBean;
-import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Parameter;
-import io.micronaut.context.annotation.Secondary;
+import io.micronaut.context.annotation.*;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
@@ -36,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -80,7 +75,7 @@ public class KafkaStreamsFactory implements Closeable {
      */
     @EachBean(AbstractKafkaStreamsConfiguration.class)
     ConfiguredStreamBuilder streamsBuilder(AbstractKafkaStreamsConfiguration<?, ?> configuration) {
-        return new ConfiguredStreamBuilder(configuration.getConfig());
+        return new ConfiguredStreamBuilder(configuration.getConfig(), configuration.getName(), configuration.getCloseTimeout());
     }
 
     /**
@@ -157,13 +152,19 @@ public class KafkaStreamsFactory implements Closeable {
     @Override
     @PreDestroy
     public void close() {
-        for (KafkaStreams stream : streams.keySet()) {
+        streams.forEach((stream, builder) -> {
             try {
-                stream.close(Duration.ofSeconds(3));
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Shutting down kafka stream {} ", builder.getName());
+                }
+                boolean success = stream.close(builder.getCloseTimeout());
+                if (!success) {
+                    LOG.warn("Timeout was exceeded while attempting to close kafka stream {}", builder.getName());
+                }
             } catch (Exception e) {
                 // ignore
             }
-        }
+        });
     }
 
     /**

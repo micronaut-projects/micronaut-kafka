@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
+import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.EachProperty;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Requires;
@@ -34,6 +35,7 @@ import static io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration
  * @param <V> The generic value type
  */
 @EachProperty(value = PREFIX, primary = "default")
+@ConfigurationProperties(PREFIX)
 @Requires(beans = KafkaDefaultConfiguration.class)
 public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfiguration<K, V> {
 
@@ -56,9 +58,9 @@ public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfigu
             ApplicationConfiguration applicationConfiguration,
             Environment environment) {
         super(defaultConfiguration);
+        setName(streamName);
         Properties config = getConfig();
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(streamName, true);
-
         Properties properties = environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new);
         config.putAll(toKafkaProperties(environment, properties));
         init(applicationConfiguration, environment, config);

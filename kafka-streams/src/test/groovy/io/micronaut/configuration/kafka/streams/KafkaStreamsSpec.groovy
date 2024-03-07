@@ -11,6 +11,8 @@ import org.apache.kafka.clients.admin.Admin
 import org.apache.kafka.clients.admin.TopicListing
 import org.apache.kafka.streams.KafkaStreams
 
+import java.time.Duration
+
 import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_OFF_STORE
 import static io.micronaut.configuration.kafka.streams.optimization.OptimizationStream.OPTIMIZATION_ON_STORE
 import static io.micronaut.configuration.kafka.streams.wordcount.WordCountStream.WORD_COUNT_STORE
@@ -33,6 +35,16 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         then:
         stream.applicationConfigs.originals()['application.id'] == myStreamApplicationId
         stream.applicationConfigs.originals()['generic.config'] == "hello"
+    }
+
+    void "test default close configuration"() {
+
+        when:
+        def factory = context.getBean(KafkaStreamsFactory)
+        def builder = factory.getStreams().values().stream().filter(v -> v.name == 'my-stream').findAny().orElseThrow()
+
+        then:
+        builder.getCloseTimeout() == AbstractKafkaStreamsConfiguration.DEFAULT_CLOSE_TIMEOUT
     }
 
     void "test kafka stream application"() {

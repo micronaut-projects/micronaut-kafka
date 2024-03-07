@@ -18,11 +18,14 @@ package io.micronaut.configuration.kafka.streams;
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.env.Environment;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.naming.Named;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.runtime.ApplicationConfiguration;
 import org.apache.kafka.streams.StreamsConfig;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Properties;
 
 /**
@@ -33,7 +36,15 @@ import java.util.Properties;
  * @param <K> The key deserializer type
  * @param <V> The value deserializer type
  */
-public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfiguration<K, V> {
+public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfiguration<K, V> implements Named {
+
+    public static final String DEFAULT_NAME = "default";
+
+    public static final Duration DEFAULT_CLOSE_TIMEOUT = Duration.ofSeconds(3);
+
+    private String name = DEFAULT_NAME;
+
+    private Duration closeTimeout = DEFAULT_CLOSE_TIMEOUT;
 
     /**
      * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.
@@ -66,5 +77,40 @@ public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfig
                 }
             }
         }
+    }
+
+    /**
+     * The time to wait for the stream to shut down. Default value is 3s.
+     *
+     * @return the time to wait for the stream to shut down.
+     */
+    public Duration getCloseTimeout() {
+        return closeTimeout;
+    }
+
+    /**
+     *
+     * @param closeTimeout the time to wait for the stream to shut down
+     */
+    public void setCloseTimeout(Duration closeTimeout) {
+        this.closeTimeout = closeTimeout;
+    }
+
+    /**
+     * The logical name of the stream.
+     *
+     * @return the logical name of the stream
+     */
+    @Override
+    public @NonNull String getName() {
+        return this.name;
+    }
+
+    /**
+     *
+     * @param name the logical name of the stream
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }
