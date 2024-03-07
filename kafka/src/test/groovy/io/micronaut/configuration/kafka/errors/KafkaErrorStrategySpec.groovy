@@ -11,10 +11,12 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
+import io.micronaut.core.annotation.Blocking
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import reactor.core.publisher.Mono
 import spock.lang.Unroll
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -255,6 +257,28 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myClient.sendMessage("Three")
 
         RetryHandleAllErrorCausingConsumer myConsumer = context.getBean(RetryHandleAllErrorCausingConsumer)
+
+        then: "Messages are consumed eventually"
+        conditions.eventually {
+            myConsumer.received == ["One", "Two", "Two", "Three", "Three", "Three"]
+            myConsumer.count.get() == 6
+        }
+        and: "messages were retried and all exceptions were handled"
+        myConsumer.errors.size() == 4
+        myConsumer.errors[0].message == "Two #2"
+        myConsumer.errors[1].message == "Three #4"
+        myConsumer.errors[2].message == "Three #5"
+        myConsumer.errors[3].message == "Three #6"
+    }
+
+    void "test reactive consumer when error strategy is 'retry on error' and 'handle all exceptions' is true"() {
+        when: "A reactive consumer signals an error"
+        RetryReactiveHandleAllErrorClient myClient = context.getBean(RetryReactiveHandleAllErrorClient)
+        myClient.sendMessage("One")
+        myClient.sendMessage("Two")
+        myClient.sendMessage("Three")
+
+        RetryReactiveHandleAllErrorCausingConsumer myConsumer = context.getBean(RetryReactiveHandleAllErrorCausingConsumer)
 
         then: "Messages are consumed eventually"
         conditions.eventually {
@@ -577,6 +601,33 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+            offsetReset = EARLIEST,
+            offsetStrategy = SYNC,
+            errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 2, handleAllExceptions = true)
+    )
+    static class RetryReactiveHandleAllErrorCausingConsumer implements KafkaListenerExceptionHandler {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+        List<KafkaListenerException> errors = []
+
+        @Blocking
+        @Topic("errors-retry-reactive-handle-all-exceptions")
+        Mono<Boolean> handleMessage(String message) {
+            received << message
+            if (count.getAndIncrement() == 1 || message == 'Three') {
+                return Mono.error(new RuntimeException("${message} #${count}"))
+            }
+            return Mono.just(Boolean.TRUE)
+        }
+
+        @Override
+        void handle(KafkaListenerException exception) {
+            errors << exception
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, errorStrategy = @ErrorStrategy(value = NONE))
     static class PollNextErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
@@ -849,6 +900,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface RetryHandleAllErrorClient {
         @Topic("errors-retry-handle-all-exceptions")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface RetryReactiveHandleAllErrorClient {
+        @Topic("errors-retry-reactive-handle-all-exceptions")
         void sendMessage(String message)
     }
 
