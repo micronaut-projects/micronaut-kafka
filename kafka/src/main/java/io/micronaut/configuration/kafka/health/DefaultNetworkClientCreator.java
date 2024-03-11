@@ -110,10 +110,11 @@ public class DefaultNetworkClientCreator implements NetworkClientCreator {
 
     private Metadata metadata(ClusterResourceListener... listeners) {
         final long refreshBackoff = config.getLong(RETRY_BACKOFF_MS_CONFIG);
+        final long refreshBackoffMax = config.getLong(RETRY_BACKOFF_MAX_MS_CONFIG);
         final long metadataExpire = config.getLong(METADATA_MAX_AGE_CONFIG);
         final List<String> urls = config.getList(BOOTSTRAP_SERVERS_CONFIG);
         final String clientDnsLookup = config.getString(CLIENT_DNS_LOOKUP_CONFIG);
-        final Metadata metadata = new Metadata(refreshBackoff, metadataExpire, logContext, clusterListeners(listeners));
+        final Metadata metadata = new Metadata(refreshBackoff, refreshBackoffMax, metadataExpire, logContext, clusterListeners(listeners));
         metadata.bootstrap(parseAndValidateAddresses(urls, clientDnsLookup));
         return metadata;
     }
