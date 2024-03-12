@@ -36,6 +36,8 @@ import spock.lang.Stepwise
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
+//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
+// as client id - consider refactoring
 @Stepwise
 class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
@@ -310,7 +312,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         Consumer onCreated(BeanCreatedEvent<Consumer> event) {
             if (event.bean instanceof KafkaConsumer) {
                 final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.clientId.startsWith("kafka-consumer-with-configurable-number-of-threads")) {
+                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-configurable-number-of-threads")) {
                     kafkaConsumers << consumer
                 }
             }
@@ -332,7 +334,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         Consumer onCreated(BeanCreatedEvent<Consumer> event) {
             if (event.bean instanceof KafkaConsumer) {
                 final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.clientId.startsWith("kafka-consumer-with-fixed-number-of-threads")) {
+                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-fixed-number-of-threads")) {
                     kafkaConsumers << consumer
                 }
             }
@@ -354,7 +356,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
         Consumer onCreated(BeanCreatedEvent<Consumer> event) {
             if (event.bean instanceof KafkaConsumer) {
                 final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.clientId.startsWith("kafka-consumer-with-both-thread-settings-set")) {
+                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-both-thread-settings-set")) {
                     kafkaConsumers << consumer
                 }
             }

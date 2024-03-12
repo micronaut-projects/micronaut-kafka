@@ -28,6 +28,8 @@ import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
 
+//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
+// as group id and deserializers - consider refactoring
 class KafkaConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext applicationContext
@@ -75,8 +77,8 @@ class KafkaConfigurationSpec extends Specification {
 
         then: "the new consumer's deserializers have the configured encoding"
         consumer != null
-        (consumer.keyDeserializer as StringDeserializer).encoding == StandardCharsets.US_ASCII.name()
-        (consumer.valueDeserializer as StringDeserializer).encoding == StandardCharsets.ISO_8859_1.name()
+        (consumer.delegate.deserializers.keyDeserializer as StringDeserializer).encoding == StandardCharsets.US_ASCII.name()
+        (consumer.delegate.deserializers.valueDeserializer as StringDeserializer).encoding == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         consumer.close()
@@ -189,9 +191,9 @@ class KafkaConfigurationSpec extends Specification {
 
         then:
         kafkaConsumer != null
-        kafkaConsumer.groupId.orElse(null) == 'MY_KEBAB_GROUP'
-        kafkaConsumer.keyDeserializer instanceof IntegerDeserializer
-        kafkaConsumer.valueDeserializer instanceof StringDeserializer
+        kafkaConsumer.delegate.groupId.orElse(null) == 'MY_KEBAB_GROUP'
+        kafkaConsumer.delegate.deserializers.keyDeserializer instanceof IntegerDeserializer
+        kafkaConsumer.delegate.deserializers.valueDeserializer instanceof StringDeserializer
 
         cleanup:
         applicationContext.close()
