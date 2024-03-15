@@ -5,10 +5,10 @@ import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.configuration.kafka.retry.DefaultConditionalRetryBehaviourHandler
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler
+import io.micronaut.configuration.kafka.retry.DefaultConditionalRetryBehaviourHandler
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.Blocking
@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
-import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_EXPONENTIALLY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -333,27 +333,6 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
         and:"the retry of the first message is delivered at least 5000ms afterwards"
         myConsumer.times[1] - myConsumer.times[0] >= 5_000
-    }
-
-    /**
-     * @deprecated This test is deprecated as the poll next strategy is default to ensure backwards
-     * compatibility with existing (broken) functionality that people may have workarounds for with
-     * custom error handlers.
-     */
-    @Deprecated
-    void "test an exception that is thrown is not committed with default error strategy"() {
-        when:"A consumer throws an exception"
-        PollNextErrorClient myClient = context.getBean(PollNextErrorClient)
-        myClient.sendMessage("One")
-        myClient.sendMessage("Two")
-
-        PollNextErrorCausingConsumer myConsumer = context.getBean(PollNextErrorCausingConsumer)
-
-        then:"The message is re-delivered and eventually handled"
-        conditions.eventually {
-            myConsumer.received.size() == 2
-            myConsumer.count.get() == 3
-        }
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
