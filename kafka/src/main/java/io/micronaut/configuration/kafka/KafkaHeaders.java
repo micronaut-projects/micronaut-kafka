@@ -19,13 +19,19 @@ import io.micronaut.core.convert.ArgumentConversionContext;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.messaging.MessageHeaders;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A {@link MessageHeaders} implementation for Kafka.
@@ -37,16 +43,6 @@ public class KafkaHeaders implements MessageHeaders {
 
     private final Headers headers;
     private final ConversionService conversionService;
-
-    /**
-     * Constructs a new instance for the given headers.
-     *
-     * @param headers The kafka headers
-     */
-    @Deprecated
-    public KafkaHeaders(Headers headers) {
-        this(headers, ConversionService.SHARED);
-    }
 
     /**
      * Constructs a new instance for the given headers.

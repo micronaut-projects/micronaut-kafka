@@ -37,4 +37,5 @@ kafkaStreams:
   kafkaStreamHealth: Kafka Stream Health Checks
   kafkaStreamExceptions: Handling Uncaught Exceptions
 kafkaGuides: Guides
+breaks: Breaking Changes
 repository: Repository

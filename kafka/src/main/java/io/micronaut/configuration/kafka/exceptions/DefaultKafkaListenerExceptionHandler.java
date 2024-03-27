@@ -16,9 +16,8 @@
 package io.micronaut.configuration.kafka.exceptions;
 
 import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfiguration;
-import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties;
 import io.micronaut.context.annotation.Primary;
-import jakarta.inject.Inject;
+import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -28,7 +27,6 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.micronaut.core.annotation.NonNull;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -55,18 +53,9 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
      *
      * @param config The default Kafka listener exception handler configuration
      */
-    @Inject
     public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
         skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
         commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
-    }
-
-    /**
-     * @deprecated Use {@link DefaultKafkaListenerExceptionHandler#DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)}
-     */
-    @Deprecated(since = "5.1.0", forRemoval = true)
-    public DefaultKafkaListenerExceptionHandler() {
-        this(new DefaultKafkaListenerExceptionHandlerConfigurationProperties());
     }
 
     @Override

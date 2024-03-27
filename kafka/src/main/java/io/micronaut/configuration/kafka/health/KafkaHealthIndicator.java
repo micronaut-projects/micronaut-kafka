@@ -27,7 +27,6 @@ import io.micronaut.core.util.SupplierUtil;
 import io.micronaut.health.HealthStatus;
 import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.NetworkClient;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -44,7 +43,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.apache.kafka.clients.NetworkClientUtils.awaitReady;
@@ -84,7 +87,6 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
      * @param networkClientCreator Functional interface to create a {@link NetworkClient}.
      * @param kafkaHealthConfiguration Kafka Health indicator configuration
      */
-    @Inject
     public KafkaHealthIndicator(BeanContext beanContext,
                                 KafkaDefaultConfiguration defaultConfiguration,
                                 NetworkClientCreator networkClientCreator,
@@ -93,22 +95,6 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
         this.defaultConfiguration = defaultConfiguration;
         this.networkClientSupplier = SupplierUtil.memoized(() -> networkClientCreator.create(this));
         this.kafkaHealthConfiguration = kafkaHealthConfiguration;
-    }
-
-    /**
-     * Constructs a new Kafka health indicator for the given arguments.
-     *
-     * @param adminClient          The admin client
-     * @param defaultConfiguration The default configuration
-     * @deprecated Use {@link KafkaHealthIndicator(BeanContext, KafkaDefaultConfiguration, NetworkClientCreator, KafkaHealthConfiguration)} instead.
-     */
-    @Deprecated(forRemoval = true)
-    public KafkaHealthIndicator(AdminClient adminClient,
-                                KafkaDefaultConfiguration defaultConfiguration) {
-        this.adminClientSupplier = () -> adminClient;
-        this.defaultConfiguration = defaultConfiguration;
-        this.networkClientSupplier = SupplierUtil.memoized(() -> new DefaultNetworkClientCreator(defaultConfiguration).create(this));
-        this.kafkaHealthConfiguration = new KafkaHealthConfigurationProperties();
     }
 
     @Override
