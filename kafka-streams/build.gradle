@@ -5,7 +5,7 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'io.micronaut.platform:micronaut-platform:4.3.7'
+        force 'io.micronaut.platform:micronaut-platform:4.3.8'
     }
 }
 
