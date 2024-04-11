@@ -1,0 +1,27 @@
+[
+  {
+    "type": "io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder",
+    "member": "Constructor io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder(java.util.Properties)",
+    "reason": "Removed deprecated code for Micronaut Framework 5."
+  },
+  {
+    "type": "io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry",
+    "member": "Constructor io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry(io.micronaut.configuration.kafka.bind.ConsumerRecordBinder[])",
+    "reason": "Removed deprecated code for Micronaut Framework 5."
+  },
+  {
+    "type": "io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler",
+    "member": "Constructor io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler()",
+    "reason": "Removed deprecated code for Micronaut Framework 5."
+  },
+  {
+    "type": "io.micronaut.configuration.kafka.health.KafkaHealthIndicator",
+    "member": "Constructor io.micronaut.configuration.kafka.health.KafkaHealthIndicator(org.apache.kafka.clients.admin.AdminClient,io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration)",
+    "reason": "Removed deprecated code for Micronaut Framework 5."
+  },
+  {
+    "type": "io.micronaut.configuration.kafka.KafkaHeaders",
+    "member": "Constructor io.micronaut.configuration.kafka.KafkaHeaders(org.apache.kafka.common.header.Headers)",
+    "reason": "Removed deprecated code for Micronaut Framework 5."
+  }
+]

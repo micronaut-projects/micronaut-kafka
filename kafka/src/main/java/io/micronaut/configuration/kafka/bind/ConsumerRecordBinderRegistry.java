@@ -21,7 +21,6 @@ import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArrayUtils;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -47,21 +46,9 @@ public class ConsumerRecordBinderRegistry implements ArgumentBinderRegistry<Cons
     /**
      * Creates the registry for the given binders.
      *
-     * @param binders The binders
-     * @deprecated Use conversion service constructor instead.
-     */
-    @Deprecated
-    public ConsumerRecordBinderRegistry(ConsumerRecordBinder<?>... binders) {
-        this(ConversionService.SHARED, binders);
-    }
-
-    /**
-     * Creates the registry for the given binders.
-     *
      * @param conversionService The conversion service
      * @param binders The binders
      */
-    @Inject
     public ConsumerRecordBinderRegistry(ConversionService conversionService, ConsumerRecordBinder<?>... binders) {
         if (ArrayUtils.isNotEmpty(binders)) {
             for (ConsumerRecordBinder<?> binder : binders) {

@@ -40,17 +40,6 @@ public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
      * Default constructor.
      *
      * @param configuration The configuration
-     * @deprecated Use {@link #ConfiguredStreamBuilder(Properties, String, Duration)}
-     */
-    @Deprecated(since = "5.4.0")
-    public ConfiguredStreamBuilder(Properties configuration) {
-        this(configuration, AbstractKafkaStreamsConfiguration.DEFAULT_NAME, AbstractKafkaStreamsConfiguration.DEFAULT_CLOSE_TIMEOUT);
-    }
-
-    /**
-     * Default constructor.
-     *
-     * @param configuration The configuration
      * @param streamName The logical name of the stream
      * @param closeTimeout The time to wait for the stream to shut down
      */

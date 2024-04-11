@@ -1,0 +1,21 @@
+This section documents breaking changes between Micronaut Kafka versions:
+
+=== Micronaut Kafka 6.0.0
+
+- The Singleton constructor `io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry(ConsumerRecordBinder<?>)` deprecated previously has been removed.
+`ConsumerRecordBinderRegistry(ConversionService, ConsumerRecordBinder<?>)` is used instead.
+
+- The Singleton constructor `io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerExceptionHandler()` deprecated previously has been removed.
+`DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration)` is used instead.
+
+- The Singleton constructor `io.micronaut.configuration.kafka.health.KafkaHealthIndicator(AdminClient,
+KafkaDefaultConfiguration)` deprecated previously has been removed.
+`KafkaHealthIndicator(BeanContext, KafkaDefaultConfiguration, NetworkClientCreator, KafkaHealthConfiguration)` is used instead.
+
+- The constructor `io.micronaut.configuration.kafka.KafkaHeaders(Headers)` deprecated previously has been removed.
+Use `KafkaHeaders(Headers, ConversionService)` instead.
+
+- The constructor `io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder(Properties)` deprecated previously has been removed.
+Use `ConfiguredStreamBuilder(Properties, String, Duration)` instead.
+
+
