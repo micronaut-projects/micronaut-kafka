@@ -5,12 +5,15 @@ io.micronaut.configuration.kafka.bind
 io.micronaut.configuration.kafka.bind.batch
 io.micronaut.configuration.kafka.config
 io.micronaut.configuration.kafka.convert
+io.micronaut.configuration.kafka.event
 io.micronaut.configuration.kafka.exceptions
 io.micronaut.configuration.kafka.executor
 io.micronaut.configuration.kafka.health
 io.micronaut.configuration.kafka.metrics
 io.micronaut.configuration.kafka.metrics.builder
 io.micronaut.configuration.kafka.reactor
+io.micronaut.configuration.kafka.retry
+io.micronaut.configuration.kafka.seek
 io.micronaut.configuration.kafka.serde
 io.micronaut.configuration.kafka.streams
 io.micronaut.configuration.kafka.streams.event
