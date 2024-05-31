@@ -586,14 +586,15 @@ class KafkaConsumerProcessor
     }
 
     private void resetTheFollowingPartitions(ConsumerRecord<?, ?> errorConsumerRecord, ConsumerState consumerState, Iterator<? extends ConsumerRecord<?, ?>> iterator) {
-        Set<Integer> processedPartition = new HashSet<>();
-        processedPartition.add(errorConsumerRecord.partition());
+        Set<TopicPartition> processedPartition = new HashSet<>();
+        TopicPartition topicPartition = new TopicPartition(errorConsumerRecord.topic(), errorConsumerRecord.partition());
+        processedPartition.add(topicPartition);
         while (iterator.hasNext()) {
             ConsumerRecord<?, ?> consumerRecord = iterator.next();
-            if (!processedPartition.add(consumerRecord.partition())) {
+            topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+            if (!processedPartition.add(topicPartition)) {
                 continue;
             }
-            TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
             consumerState.kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         }
     }
