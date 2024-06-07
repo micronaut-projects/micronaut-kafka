@@ -11,7 +11,8 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * A {@link io.micronaut.context.scope.CustomScope} that creates a new bean for every consumed batch/message
+ * A {@link io.micronaut.context.scope.CustomScope} that creates a new bean for every consumer thread when performing
+ * polling
  */
 @ScopedProxy
 @Documented
