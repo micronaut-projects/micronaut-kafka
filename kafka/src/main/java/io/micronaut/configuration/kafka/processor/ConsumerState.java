@@ -209,6 +209,10 @@ abstract class ConsumerState {
             Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
             boundArguments.put(lastArgument, null);
         }
+
+        // TODO right around this point is when we would want to update the bean associated with the current consumer + thread that is polling
+        //  it needs to be updated prior to or right when processRecords is ran
+
         processRecords(consumerRecords, currentOffsets);
         if (failed) {
             return;
