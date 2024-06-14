@@ -21,7 +21,7 @@ import io.micronaut.runtime.context.scope.ThreadLocal;
  * Extension of {@link ThreadLocal} that recreates / refreshed the bean for every consumer poll cycle,
  * similar to {@link  io.micronaut.runtime.http.scope.RequestScope} but for consumers
  * @author Haiden Rothwell
- * @since 5.4.0
+ * @since 5.5.0
  */
 @ThreadLocal
 public @interface PollScope {

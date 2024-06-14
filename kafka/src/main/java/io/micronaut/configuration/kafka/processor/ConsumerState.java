@@ -70,9 +70,6 @@ abstract class ConsumerState {
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
 
-    // TODO not sure if this is going to work right, but the thread that this consumer should be executing on (I think)
-    Thread currentThread;
-
     protected ConsumerState(
         KafkaConsumerProcessor kafkaConsumerProcessor,
         ConsumerInfo info,
@@ -152,7 +149,6 @@ abstract class ConsumerState {
 
     void threadPollLoop() {
         try (kafkaConsumer) {
-            this.currentThread = Thread.currentThread();
             //noinspection InfiniteLoopStatement
             while (true) { //NOSONAR
                 refreshAssignmentsPollAndProcessRecords();
