@@ -214,8 +214,7 @@ abstract class ConsumerState {
             boundArguments.put(lastArgument, null);
         }
 
-        // TODO right around this point is when we would want to update the bean associated with the current consumer + thread that is polling
-        //  it needs to be updated prior to or right when processRecords is ran
+        kafkaConsumerProcessor.refreshPollScopeBeans();
 
         processRecords(consumerRecords, currentOffsets);
         if (failed) {
