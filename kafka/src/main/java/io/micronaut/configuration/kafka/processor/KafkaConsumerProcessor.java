@@ -35,12 +35,15 @@ import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
+import io.micronaut.configuration.kafka.scope.PollScope;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.BeanRegistration;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
+import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.NonNull;
@@ -376,6 +379,18 @@ class KafkaConsumerProcessor
 
     BatchConsumerRecordsBinderRegistry getBatchBinderRegistry() {
         return batchBinderRegistry;
+    }
+
+
+    /**
+     * TODO Will this be thread safe and only get the beans for the consumer/consumer state we are calling it from?
+     *  what if one listener is subscribed to multiple topics? how does that work? really any method annotated with @Topic should have it's own
+     *  bean and have just that one refreshed? Or if there are multiple records for topics fetched, it calls to process all of them individually and waits
+     *  for all to finish before polling any topics again? In that case this would be fine?
+     */
+    public void refreshPollScopeBeans() {
+        Collection<BeanRegistration<Object>> beans = beanContext.getBeanRegistrations(Object.class, Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, PollScope.class));
+        beans.forEach(beanContext::refreshBean);
     }
 
     @SuppressWarnings("rawtypes")
