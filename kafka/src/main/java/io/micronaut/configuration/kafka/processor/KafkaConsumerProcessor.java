@@ -40,11 +40,9 @@ import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanRegistration;
-import io.micronaut.context.Qualifier;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
-import io.micronaut.core.annotation.AnnotationClassValue;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.core.annotation.Internal;
@@ -82,7 +80,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
-import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -384,6 +381,18 @@ class KafkaConsumerProcessor
         return batchBinderRegistry;
     }
 
+
+    /**
+     * TODO Will this be thread safe and only get the beans for the consumer/consumer state we are calling it from?
+     *  what if one listener is subscribed to multiple topics? how does that work? really any method annotated with @Topic should have it's own
+     *  bean and have just that one refreshed? Or if there are multiple records for topics fetched, it calls to process all of them individually and waits
+     *  for all to finish before polling any topics again? In that case this would be fine?
+     */
+    public void refreshPollScopeBeans() {
+        Collection<BeanRegistration<Object>> beans = beanContext.getBeanRegistrations(Object.class, Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, PollScope.class));
+        beans.forEach(beanContext::refreshBean);
+    }
+
     @SuppressWarnings("rawtypes")
     private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String groupId) {
         return findConfigurationBean(groupId)
@@ -626,11 +635,5 @@ class KafkaConsumerProcessor
 
     private static String logMethod(ExecutableMethod<?, ?> method) {
         return method.getDeclaringType().getSimpleName() + "#" + method.getName();
-    }
-
-    // TODO maybe this works? Will this be thread safe and only get the beans for the consumer/consumer state we are calling it from?
-    public void refreshPollScopeBeans(){
-        Collection<BeanRegistration<Object>> beans = beanContext.getBeanRegistrations(Object.class, Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, PollScope.class));
-        beans.forEach(beanContext::refreshBean);
     }
 }

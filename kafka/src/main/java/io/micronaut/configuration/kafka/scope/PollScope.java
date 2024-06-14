@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 package io.micronaut.configuration.kafka.scope;
-
 import io.micronaut.runtime.context.scope.ThreadLocal;
-
 /**
- * Extension of {@link ThreadLocal} that recreates / refreshed the bean for every consumer poll cycle,
- * similar to {@link  io.micronaut.runtime.http.scope.RequestScope} but for consumers
+ * Extension of {@link io.micronaut.runtime.context.scope.ThreadLocal} that recreates / refreshed the bean for every consumer poll cycle, similar to {@link  io.micronaut.runtime.http.scope.RequestScope} but for consumers.
  * @author Haiden Rothwell
  * @since 5.5.0
  */
