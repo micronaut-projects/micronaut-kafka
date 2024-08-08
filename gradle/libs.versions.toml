@@ -10,7 +10,7 @@ managed-kafka = '3.7.0'
 
 groovy = "4.0.15"
 
-awaitility = '4.2.1'
+awaitility = '4.2.2'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 
