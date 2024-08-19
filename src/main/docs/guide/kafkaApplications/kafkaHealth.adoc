@@ -1,4 +1,4 @@
-In addition to `http-server-netty`, if the `management` dependency is added, then Micronaut's <<healthEndpoint, Health Endpoint>> can be used to expose the health status of the Kafka consumer application.
+In addition to `http-server-netty`, if the `management` dependency is added, then Micronaut's link:https://docs.micronaut.io/latest/guide/#healthEndpoint[Health Endpoint] can be used to expose the health status of the Kafka consumer application.
 
 For example if Kafka is not available the `/health` endpoint will return:
 
@@ -18,7 +18,7 @@ For example if Kafka is not available the `/health` endpoint will return:
 }
 ----
 
-NOTE: By default, the details visible above are only shown to authenticated users. See the <<healthEndpoint, Health Endpoint>> documentation for how to configure that setting.
+NOTE: By default, the details visible above are only shown to authenticated users. See the link:https://docs.micronaut.io/latest/guide/#healthEndpoint[Health Endpoint] documentation for how to configure that setting.
 
 The following options are available to configure the Kafka Health indicator:
 
