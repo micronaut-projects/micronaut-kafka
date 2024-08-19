@@ -23,7 +23,7 @@ micronaut-reactor = "3.3.0"
 micronaut-serde = "2.9.0"
 micronaut-tracing = "6.6.0"
 micronaut-test = "4.0.2"
-micronaut-test-resources="2.5.2"
+micronaut-test-resources="2.5.4"
 
 [libraries]
 # Core
