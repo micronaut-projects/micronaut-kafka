@@ -1,4 +1,4 @@
-In addition to `http-server-netty`, if the `management` dependency is added, then Micronaut's <<healthEndpoint, Health Endpoint>> can be used to expose the health status of the Kafka streams application.
+In addition to `http-server-netty`, if the `management` dependency is added, then Micronaut's link:https://docs.micronaut.io/latest/guide/#healthEndpoint[Health Endpoint] can be used to expose the health status of the Kafka streams application.
 
 For example stream health at the `/health` endpoint will return:
 
@@ -32,7 +32,7 @@ For example stream health at the `/health` endpoint will return:
 }
 ----
 
-NOTE: By default, the details visible above are only shown to authenticated users. See the <<healthEndpoint, Health Endpoint>> documentation for how to configure that setting.
+NOTE: By default, the details visible above are only shown to authenticated users. See the link:https://docs.micronaut.io/latest/guide/#healthEndpoint[Health Endpoint] documentation for how to configure that setting.
 
 If you wish to disable the Kafka streams health check while still using the `management` dependency you can set the property `kafka.health.streams.enabled` to `false` in your application configuration.
 

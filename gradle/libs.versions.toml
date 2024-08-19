@@ -1,11 +1,11 @@
 [versions]
-micronaut = "4.5.3"
+micronaut = "4.6.1"
 micronaut-platform = "4.1.2"
 micronaut-docs = "2.0.0"
 micronaut-gradle-plugin = "4.3.6"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
-managed-kafka-compat = "3.7.0"
+managed-kafka-compat = "3.8.0"
 managed-kafka = '3.7.0'
 
 groovy = "4.0.15"
@@ -19,9 +19,9 @@ zipkin-brave-kafka-clients = '6.0.3'
 micronaut-cache = "4.3.0"
 micronaut-logging = "1.1.2"
 micronaut-micrometer = "5.8.0"
-micronaut-reactor = "3.3.0"
-micronaut-serde = "2.9.0"
-micronaut-tracing = "6.6.0"
+micronaut-reactor = "3.5.0"
+micronaut-serde = "2.11.0"
+micronaut-tracing = "6.8.0"
 micronaut-test = "4.0.2"
 micronaut-test-resources="2.5.2"
 
