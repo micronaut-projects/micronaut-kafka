@@ -5385,6 +5385,11 @@ By default, the details visible above are only shown to authenticated users. See
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.enabled</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the Kafka health check is enabled. Default value true.</p></td>
@@ -5393,11 +5398,6 @@ By default, the details visible above are only shown to authenticated users. See
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health.restricted</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, the health check requires cluster-wide permissions in order to get information about the nodes in the Kafka cluster. If your application doesn&#8217;t have admin privileges (for example, this might happen in multi-tenant scenarios), you can switch to a "restricted" version of the health check which only validates basic connectivity but doesn&#8217;t require any additional permissions.. Default value false</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kafka.health-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">java.time.Duration</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The health check timeout.</p></td>
 </tr>
 </tbody>
 </table>
