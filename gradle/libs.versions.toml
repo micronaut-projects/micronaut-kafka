@@ -16,7 +16,7 @@ opentracing-mock = '0.33.0'
 
 zipkin-brave-kafka-clients = '6.0.3'
 
-micronaut-cache = "4.3.0"
+micronaut-cache = "5.0.0"
 micronaut-logging = "1.4.0"
 micronaut-micrometer = "5.8.0"
 micronaut-reactor = "3.5.0"
