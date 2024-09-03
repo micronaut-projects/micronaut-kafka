@@ -29,6 +29,7 @@ import io.micronaut.management.health.indicator.HealthIndicator;
 import io.micronaut.management.health.indicator.HealthResult;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.apache.kafka.clients.LeastLoadedNode;
 import org.apache.kafka.clients.NetworkClient;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.Config;
@@ -225,9 +226,9 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
 
     private HealthResult waitForLeastLoadedNode(NetworkClient networkClient) {
         final long requestTimeoutMs = defaultConfiguration.getHealthTimeout().toMillis();
-        final Node node = networkClient.leastLoadedNode(SYSTEM.milliseconds());
+        final LeastLoadedNode node = networkClient.leastLoadedNode(SYSTEM.milliseconds());
         try {
-            return result(awaitReady(networkClient, node, SYSTEM, requestTimeoutMs), null).build();
+            return result(awaitReady(networkClient, node.node(), SYSTEM, requestTimeoutMs), null).build();
         } catch (IOException e) {
             return failure(e, Collections.emptyMap());
         }
