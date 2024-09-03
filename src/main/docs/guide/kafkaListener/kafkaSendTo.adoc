@@ -7,7 +7,7 @@ The key of the original `ConsumerRecord` will be used as the key when forwarding
 snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=method, indent=0]
 
 
-<1> The topic subscribed to is `awesome-products`
+<1> The topic subscribed to is `sendto-products`
 <2> The topic to send the result to is `product-quantities`
 <3> The return value is used to indicate the value to forward
 
@@ -17,7 +17,7 @@ You can also do the same using Reactive programming:
 
 snippet::io.micronaut.kafka.docs.consumer.sendto.ProductListener[tags=reactive, indent=0]
 
-<1> The topic subscribed to is `awesome-products`
+<1> The topic subscribed to is `sendto-products`
 <2> The topic to send the result to is `product-quantities`
 <3> The return is mapped from the single to the value of the quantity
 
