@@ -209,6 +209,9 @@ abstract class ConsumerState {
             Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
             boundArguments.put(lastArgument, null);
         }
+
+        kafkaConsumerProcessor.refreshPollScopeBeans();
+
         processRecords(consumerRecords, currentOffsets);
         if (failed) {
             return;
