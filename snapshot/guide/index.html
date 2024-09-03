@@ -2725,6 +2725,18 @@ See the guide for <a href="https://guides.micronaut.io/latest/testing-micronaut-
 <div class="paragraph">
 <p>Care needs to be taken when using <a href="../api/io/micronaut/configuration/kafka/annotation/Topic.html">@Topic</a> at the class level because every public method of the class annotated with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> will become a Kafka consumer, which may be undesirable.</p>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can make the topic name configurable using a placeholder: <code>@Topic("${my.topic.name:myTopic}")</code>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>You can specify multiple topics to listen for:</p>
 </div>
