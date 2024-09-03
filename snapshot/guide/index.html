@@ -342,7 +342,7 @@ See the guide for <a href="https://guides.micronaut.io/latest/micronaut-kafka.ht
 <h2 id="_configuring_kafka">Configuring Kafka</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code>:</p>
+<p>The minimum requirement to configure Kafka is set the value of the <code>kafka.bootstrap.servers</code> property in <code>application.yml</code> or <code>bootstrap.yml</code> :</p>
 </div>
 <div class="openblock">
 <div class="title">Configuring Kafka</div>
@@ -476,7 +476,7 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 </table>
 </div>
 <div class="paragraph">
-<p>If your broker needs to setup SSL, it can be configured this way:</p>
+<p>You may also add any Apache Kafka configuration options directly under the kafka node. These configurations will apply to consumers, producers and streams:</p>
 </div>
 <div class="openblock">
 <div class="title">Configuring Kafka</div>
@@ -484,9 +484,80 @@ You can also set the environment variable <code>KAFKA_BOOTSTRAP_SERVERS</code> t
 <div class="listingblock multi-language-sample">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9092
+kafka.reconnect.backoff.ms=30000
+kafka.retry.backoff.ms=32000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  bootstrap:
+    servers: localhost:9092
+  reconnect.backoff.ms: 30000
+  retry.backoff.ms: 32000</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  "reconnect.backoff.ms"=30000
+  "retry.backoff.ms"=32000
+  [kafka.bootstrap]
+    servers="localhost:9092"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = "localhost:9092"
+  }
+  reconnect.backoff.ms = 30000
+  retry.backoff.ms = 32000
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = "localhost:9092"
+    }
+    "reconnect.backoff.ms" = 30000
+    "retry.backoff.ms" = 32000
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": "localhost:9092"
+    },
+    "reconnect.backoff.ms": 30000,
+    "retry.backoff.ms": 32000
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If your broker needs to setup SSL, it can be configured this way:</p>
+</div>
+<div class="openblock">
+<div class="title">Configuring Kafka</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9093
 kafka.ssl.keystore.location=/path/to/client.keystore.p12
 kafka.ssl.keystore.password=secret
-kafka.ssl.truststore.location=/path/to/client.truststore.jks
+kafka.ssl.keystore.type=PKCS12
+kafka.ssl.truststore.location=/path/to/client.truststore.p12
 kafka.ssl.truststore.password=secret
 kafka.ssl.truststore.type=PKCS12
 kafka.security.protocol=ssl</code></pre>
@@ -496,13 +567,14 @@ kafka.security.protocol=ssl</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
   bootstrap:
-    servers: localhost:9092
+    servers: localhost:9093
   ssl:
     keystore:
       location: /path/to/client.keystore.p12
       password: secret
+      type: PKCS12
     truststore:
-      location: /path/to/client.truststore.jks
+      location: /path/to/client.truststore.p12
       password: secret
       type: PKCS12
   security:
@@ -513,13 +585,14 @@ kafka.security.protocol=ssl</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
   [kafka.bootstrap]
-    servers="localhost:9092"
+    servers="localhost:9093"
   [kafka.ssl]
     [kafka.ssl.keystore]
       location="/path/to/client.keystore.p12"
       password="secret"
+      type="PKCS12"
     [kafka.ssl.truststore]
-      location="/path/to/client.truststore.jks"
+      location="/path/to/client.truststore.p12"
       password="secret"
       type="PKCS12"
   [kafka.security]
@@ -530,15 +603,16 @@ kafka.security.protocol=ssl</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
   bootstrap {
-    servers = "localhost:9092"
+    servers = "localhost:9093"
   }
   ssl {
     keystore {
       location = "/path/to/client.keystore.p12"
       password = "secret"
+      type = "PKCS12"
     }
     truststore {
-      location = "/path/to/client.truststore.jks"
+      location = "/path/to/client.truststore.p12"
       password = "secret"
       type = "PKCS12"
     }
@@ -554,15 +628,16 @@ kafka.security.protocol=ssl</code></pre>
 <pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
   kafka {
     bootstrap {
-      servers = "localhost:9092"
+      servers = "localhost:9093"
     }
     ssl {
       keystore {
         location = "/path/to/client.keystore.p12"
         password = "secret"
+        type = "PKCS12"
       }
       truststore {
-        location = "/path/to/client.truststore.jks"
+        location = "/path/to/client.truststore.p12"
         password = "secret"
         type = "PKCS12"
       }
@@ -579,15 +654,16 @@ kafka.security.protocol=ssl</code></pre>
 <pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
   "kafka": {
     "bootstrap": {
-      "servers": "localhost:9092"
+      "servers": "localhost:9093"
     },
     "ssl": {
       "keystore": {
         "location": "/path/to/client.keystore.p12",
-        "password": "secret"
+        "password": "secret",
+        "type": "PKCS12"
       },
       "truststore": {
-        "location": "/path/to/client.truststore.jks",
+        "location": "/path/to/client.truststore.p12",
         "password": "secret",
         "type": "PKCS12"
       }
