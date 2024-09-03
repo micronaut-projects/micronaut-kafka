@@ -8,6 +8,8 @@ The ann:configuration.kafka.annotation.Topic[] annotation can be used at the met
 
 Care needs to be taken when using ann:configuration.kafka.annotation.Topic[] at the class level because every public method of the class annotated with ann:configuration.kafka.annotation.KafkaListener[] will become a Kafka consumer, which may be undesirable.
 
+TIP: You can make the topic name configurable using a placeholder: `@Topic("${my.topic.name:myTopic}")`
+
 You can specify multiple topics to listen for:
 
 .Specifying Multiple Topics
