@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.streams.health;
 
+import io.micronaut.core.annotation.Internal;
 import io.micronaut.serde.annotation.SerdeImport;
 import org.apache.kafka.streams.processor.TaskId;
 
@@ -22,6 +23,7 @@ import org.apache.kafka.streams.processor.TaskId;
 /**
  * Additional Serdes for Kafka streams health types returned as part of the {@link io.micronaut.management.health.indicator.HealthResult}.
  */
+@Internal
 @SerdeImport(TaskId.class)
-public class KafkaStreamHealthSerdes {
+class KafkaStreamHealthSerdes {
 }
