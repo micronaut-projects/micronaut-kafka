@@ -20,6 +20,7 @@ micronaut {
 dependencies {
     api projects.micronautKafka
     api libs.managed.kafka.streams
+    compileOnly mnSerde.micronaut.serde.api
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
     testImplementation mnSerde.micronaut.serde.jackson
