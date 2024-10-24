@@ -21,6 +21,7 @@ import jakarta.inject.Singleton;
 import jdk.jfr.Experimental;
 import org.apache.kafka.clients.ApiVersions;
 import org.apache.kafka.clients.Metadata;
+import org.apache.kafka.clients.MetadataRecoveryStrategy;
 import org.apache.kafka.clients.NetworkClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.common.ClusterResourceListener;
@@ -88,10 +89,24 @@ public class DefaultNetworkClientCreator implements NetworkClientCreator {
             metrics = metrics();
             channelBuilder = createChannelBuilder(config, SYSTEM, logContext);
             selector = selector(metrics, channelBuilder);
-            return new NetworkClient(selector, metadata(listeners), clientId, 1,
-                reconnectBackoff, reconnectBackoffMax, socketSendBuffer, socketReceiveBuffer,
-                (int) HOURS.toMillis(1), connectionSetupTimeout, connectionSetupTimeoutMax,
-                SYSTEM, true, new ApiVersions(), logContext);
+            return new NetworkClient(
+                selector,
+                metadata(listeners),
+                clientId,
+                1,
+                reconnectBackoff,
+                reconnectBackoffMax,
+                socketSendBuffer,
+                socketReceiveBuffer,
+                (int) HOURS.toMillis(1),
+                connectionSetupTimeout,
+                connectionSetupTimeoutMax,
+                SYSTEM,
+                true,
+                new ApiVersions(),
+                logContext,
+                MetadataRecoveryStrategy.NONE
+            );
         } catch (Throwable e) {
             closeQuietly(metrics, "Metrics");
             closeQuietly(selector, "Selector");

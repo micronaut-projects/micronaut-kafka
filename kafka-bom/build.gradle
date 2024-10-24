@@ -5,4 +5,8 @@ plugins {
 micronautBom {
     // exclude example projects
     extraExcludedProjects.add("tasks-sasl-plaintext")
+    suppressions {
+        acceptedLibraryRegressions.add("kafka")
+        acceptedVersionRegressions.add("kafka-compat")
+    }
 }

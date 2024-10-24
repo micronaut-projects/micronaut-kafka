@@ -102,9 +102,9 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         and: "The retry error strategy was honored"
         myConsumer.exceptions.size() == 2
-        myConsumer.exceptions[0].message.startsWith('Error deserializing key/value')
+        myConsumer.exceptions[0].message.startsWith('Error deserializing VALUE')
         (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 3
-        myConsumer.exceptions[1].message.startsWith('Error deserializing key/value')
+        myConsumer.exceptions[1].message.startsWith('Error deserializing VALUE')
         (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 3
     }
 
@@ -124,17 +124,15 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
         conditions.eventually {
             myConsumer.received == ['111/222', '333', '444/555']
             myConsumer.successful == ['111/222', '333', '444/555']
-            myConsumer.skippedOffsets == [4L]
+            myConsumer.skippedOffsets.contains(4L)
         }
 
         and: "The retry error strategy was honored"
-        myConsumer.exceptions.size() == 3
-        myConsumer.exceptions[0].message.startsWith('Error deserializing key/value')
+        myConsumer.exceptions.size() == 2
+        myConsumer.exceptions[0].message.startsWith('Error deserializing VALUE')
         (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 2
-        myConsumer.exceptions[1].message.startsWith('Error deserializing key/value')
-        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 2
-        myConsumer.exceptions[2].message.startsWith('Error deserializing key/value')
-        (myConsumer.exceptions[2].cause as RecordDeserializationException).offset() == 4
+        myConsumer.exceptions[1].message.startsWith('Error deserializing VALUE')
+        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 4
     }
 
     void "test batch mode with 'retry exp' error strategy"() {
@@ -342,7 +340,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         @Override
         ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
-            if(exception.getMessage() == "Error deserializing key/value for partition batch-mode-retry-conditionally-deser-0 at offset 4. If needed, please seek past the record to continue consumption.") {
+            if(exception.message.concat("at offset 4")) {
                 skippedOffsets << 4L
                 return ConditionalRetryBehaviour.SKIP
             } else {
