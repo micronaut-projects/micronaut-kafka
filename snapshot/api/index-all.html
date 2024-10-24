@@ -536,6 +536,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Adds a <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>KafkaSeekOperation</code></a> to the list.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html#deserialize(io.micronaut.serde.Decoder,io.micronaut.serde.Deserializer.DecoderContext,io.micronaut.core.type.Argument)" class="member-name-link">deserialize(Decoder, Deserializer.DecoderContext, Argument&lt;? super TaskId&gt;)</a> - Method in class io.micronaut.configuration.kafka.streams.health.serde.<a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a></dt>
+<dd>
+<div class="block">Deserializes a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/processor/TaskId.html" title="class or interface in org.apache.kafka.streams.processor" class="external-link"><code>TaskId</code></a> from its string representation.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserialize(java.lang.String,byte%5B%5D)" class="member-name-link">deserialize(String, byte[])</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#deserializer()" class="member-name-link">deserializer()</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
@@ -882,6 +886,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/micronaut/configuration/kafka/streams/event/package-summary.html">io.micronaut.configuration.kafka.streams.event</a> - package io.micronaut.configuration.kafka.streams.event</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/health/package-summary.html">io.micronaut.configuration.kafka.streams.health</a> - package io.micronaut.configuration.kafka.streams.health</dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/health/serde/package-summary.html">io.micronaut.configuration.kafka.streams.health.serde</a> - package io.micronaut.configuration.kafka.streams.health.serde</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/metrics/package-summary.html">io.micronaut.configuration.kafka.streams.metrics</a> - package io.micronaut.configuration.kafka.streams.metrics</dt>
 <dd>&nbsp;</dd>
@@ -1575,6 +1581,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">A registry of Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serde.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link"><code>Serde</code></a> instances.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html#serialize(io.micronaut.serde.Encoder,io.micronaut.serde.Serializer.EncoderContext,io.micronaut.core.type.Argument,org.apache.kafka.streams.processor.TaskId)" class="member-name-link">serialize(Encoder, Serializer.EncoderContext, Argument&lt;? extends TaskId&gt;, TaskId)</a> - Method in class io.micronaut.configuration.kafka.streams.health.serde.<a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a></dt>
+<dd>
+<div class="block">Serializes a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/processor/TaskId.html" title="class or interface in org.apache.kafka.streams.processor" class="external-link"><code>TaskId</code></a> into its string representation.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#serialize(java.lang.String,T)" class="member-name-link">serialize(String, T)</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#serializer()" class="member-name-link">serializer()</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
@@ -1660,6 +1670,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Builder method for setting function to get tags.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a> - Class in <a href="io/micronaut/configuration/kafka/streams/health/serde/package-summary.html">io.micronaut.configuration.kafka.streams.health.serde</a></dt>
+<dd>
+<div class="block">A custom <code>Serde</code> implementation for serializing and deserializing
+ <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/processor/TaskId.html" title="class or interface in org.apache.kafka.streams.processor" class="external-link"><code>TaskId</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html#%3Cinit%3E()" class="member-name-link">TaskIdSerde()</a> - Constructor for class io.micronaut.configuration.kafka.streams.health.serde.<a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#threads()" class="member-name-link">threads()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>
 <div class="block">Statically configure the number of threads of a Kafka consumer.</div>

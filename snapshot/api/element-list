@@ -18,5 +18,6 @@ io.micronaut.configuration.kafka.serde
 io.micronaut.configuration.kafka.streams
 io.micronaut.configuration.kafka.streams.event
 io.micronaut.configuration.kafka.streams.health
+io.micronaut.configuration.kafka.streams.health.serde
 io.micronaut.configuration.kafka.streams.metrics
 io.micronaut.configuration.kafka.tracing.brave
