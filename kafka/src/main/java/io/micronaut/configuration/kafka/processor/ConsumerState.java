@@ -183,8 +183,19 @@ abstract class ConsumerState {
             assignments = Collections.unmodifiableSet(newAssignments);
         }
         if (autoPaused) {
+            artificialWaitToAllowResumeToBeCalledInThisGap();
             pause(assignments);
             kafkaConsumer.pause(assignments);
+        }
+    }
+
+    private void artificialWaitToAllowResumeToBeCalledInThisGap() {
+        if (!assignments.isEmpty() && isPaused(assignments)) {
+            try {
+                Thread.sleep(5_000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
