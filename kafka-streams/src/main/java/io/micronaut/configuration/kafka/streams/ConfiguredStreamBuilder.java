@@ -15,12 +15,15 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
+import io.micronaut.context.exceptions.DisabledBeanException;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.naming.Named;
 import org.apache.kafka.streams.StreamsBuilder;
 
 import java.time.Duration;
 import java.util.Properties;
+
+import static io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration.ENABLED_PROPERTY;
 
 /**
  * Extended version of {@link StreamsBuilder} that can be configured.
@@ -55,6 +58,9 @@ public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
      * @param closeTimeout The time to wait for the stream to shut down
      */
     public ConfiguredStreamBuilder(Properties configuration, String streamName, Duration closeTimeout) {
+        if (configuration.getProperty(ENABLED_PROPERTY, Boolean.TRUE.toString()).equals(Boolean.FALSE.toString())) {
+            throw new DisabledBeanException("Kafka Streams " + streamName + " is disabled");
+        }
         this.configuration.putAll(configuration);
         this.streamName = streamName;
         this.closeTimeout = closeTimeout;

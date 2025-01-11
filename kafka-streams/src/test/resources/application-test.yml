@@ -39,3 +39,7 @@ kafka:
       client.id: ${random.uuid}
       application-id: micronaut-kafka-streams-${random.uuid}
       group.id: ${random.uuid}
+    turned-off-streams:
+      enabled: false
+      client.id: ${random.uuid}
+      application-id: micronaut-kafka-streams-${random.uuid}

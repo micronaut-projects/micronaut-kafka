@@ -109,4 +109,12 @@ class KafkaStreamsSpec extends AbstractTestContainersSpec {
         then:
         builder.executed
     }
+
+    void "test kafka streams disabled"() {
+        when:
+        def factory = context.getBean(KafkaStreamsFactory)
+
+        then:
+        factory.getStreams().values().stream().filter(v -> v.name == 'turned-off-streams').findAny().isEmpty()
+    }
 }
