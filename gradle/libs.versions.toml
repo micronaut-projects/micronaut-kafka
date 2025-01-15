@@ -17,7 +17,7 @@ zipkin-brave-kafka-clients = '6.0.3'
 
 micronaut-cache = "5.1.0"
 micronaut-logging = "1.4.0"
-micronaut-micrometer = "5.9.1"
+micronaut-micrometer = "5.9.3"
 micronaut-reactor = "3.6.0"
 micronaut-serde = "2.13.0"
 micronaut-tracing = "6.9.0"
