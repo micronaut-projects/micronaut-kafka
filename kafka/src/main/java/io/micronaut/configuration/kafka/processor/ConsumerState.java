@@ -182,9 +182,11 @@ abstract class ConsumerState {
             LOG.info("Consumer [{}] assignments changed: {} -> {}", info.clientId, assignments, newAssignments);
             assignments = Collections.unmodifiableSet(newAssignments);
         }
-        if (autoPaused) {
-            pause(assignments);
-            kafkaConsumer.pause(assignments);
+        synchronized (this) {
+            if (autoPaused) {
+                pause(assignments);
+                kafkaConsumer.pause(assignments);
+            }
         }
     }
 

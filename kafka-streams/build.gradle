@@ -5,12 +5,12 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'io.micronaut.platform:micronaut-platform:4.6.3'
+        force 'io.micronaut.platform:micronaut-platform:4.7.4'
     }
 }
 
 micronaut {
-    version = '4.6.3'
+    version = '4.7.4'
     testResources {
         enabled = true
         additionalModules.add(KAFKA)
