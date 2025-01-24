@@ -315,7 +315,7 @@ class KafkaConsumerProcessor
     @PreDestroy
     public void close() {
         kafkaConsumerGroupManager.getRegisteredClientIdsForDeletion().forEach(clientId -> {
-            LOG.trace("Already closed consumer client : {}", clientId);
+            LOG.info("Already closed consumer client : {}", clientId);
             consumers.remove(clientId);
         });
         consumers.values().forEach(ConsumerState::wakeUp);

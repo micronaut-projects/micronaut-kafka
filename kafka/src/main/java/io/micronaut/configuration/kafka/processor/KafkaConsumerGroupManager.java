@@ -74,27 +74,27 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
      */
     @Override
     public void onApplicationEvent(ApplicationShutdownEvent event) {
-        LOG.trace("Application shutdown initiated. Preparing to delete registered Kafka unique consumer groups.");
+        LOG.info("Application shutdown initiated. Preparing to delete registered Kafka unique consumer groups.");
         List<String> uniqueGroupIdsDeleteOnShutdown = registerConsumerForGroupDeletion.values()
             .stream()
             .filter(consumerState -> consumerState.kafkaConsumer.groupMetadata() != null)
             .map(consumerState -> consumerState.kafkaConsumer.groupMetadata().groupId())
             .toList();
         if (!uniqueGroupIdsDeleteOnShutdown.isEmpty()) {
-            LOG.trace("Closing {} consumers and attempting to delete the following consumer groups: {}",
+            LOG.info("Closing {} consumers and attempting to delete the following consumer groups: {}",
                 uniqueGroupIdsDeleteOnShutdown.size(), uniqueGroupIdsDeleteOnShutdown);
             closeConsumers();
             adminClient.deleteConsumerGroups(uniqueGroupIdsDeleteOnShutdown)
                 .all().whenComplete((voidResult, throwable) -> {
                     if (throwable == null) {
-                        LOG.trace("Successfully deleted the following consumer groups: {}", uniqueGroupIdsDeleteOnShutdown);
+                        LOG.info("Successfully deleted the following consumer groups: {}", uniqueGroupIdsDeleteOnShutdown);
                     } else {
-                        LOG.error("Failed to delete the following consumer groups: {}. Error: {}",
+                        LOG.warn("Failed to delete the following consumer groups: {}. Error: {}",
                             uniqueGroupIdsDeleteOnShutdown, throwable.getMessage(), throwable);
                     }
                 });
         } else {
-            LOG.trace("No unique consumer groups are registered for deletion.");
+            LOG.info("No unique consumer groups are registered for deletion.");
         }
     }
 
@@ -102,11 +102,11 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
      * Closes all consumers and clears the list of consumers pending group deletion.
      */
     private void closeConsumers() {
-        LOG.trace("Closing all registered Kafka consumers who has unique group id.");
+        LOG.info("Closing all registered Kafka consumers who has unique group id.");
         registerConsumerForGroupDeletion.values().forEach(ConsumerState::wakeUp);
         registerConsumerForGroupDeletion.values().forEach(ConsumerState::close);
         registerConsumerForGroupDeletion.clear();
-        LOG.trace("All registered Kafka consumers who have unique group IDs have been successfully closed.");
+        LOG.info("All registered Kafka consumers who have unique group IDs have been successfully closed.");
     }
 
     /**
@@ -118,7 +118,7 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
     void registerConsumerForGroupDeletion(String clientId, ConsumerState consumerState) {
         if (clientId != null && !clientId.isEmpty() && consumerState != null) {
             registerConsumerForGroupDeletion.put(clientId, consumerState);
-            LOG.trace("Registered consumer with client ID '{}' for group deletion on shutdown.",
+            LOG.info("Registered consumer with client ID '{}' for group deletion on shutdown.",
                 clientId);
         } else {
             LOG.warn("Failed to register consumer. Either client ID is null/empty or consumer state is null.");
