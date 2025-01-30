@@ -504,6 +504,7 @@ class KafkaConsumerProcessor
             consumers.put(finalClientId, consumerState);
             if (uniqueGroupIdDeleteOnShutdown) {
                 kafkaConsumerGroupManager.registerConsumerForGroupDeletion(finalClientId, consumerState);
+                kafkaConsumerGroupManager.registerConsumerGroupIdForDeletion(groupId);
             }
             executorService.submit(consumerState::threadPollLoop);
         }

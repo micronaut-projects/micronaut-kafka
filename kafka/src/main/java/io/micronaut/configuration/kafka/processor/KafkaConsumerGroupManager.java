@@ -23,6 +23,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,11 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
         new ConcurrentHashMap<>();
 
     /**
+     * List of unique consumer group IDs that are scheduled for deletion on shutdown.
+     */
+    private final List<String> uniqueGroupIdsDeleteOnShutdown = new ArrayList<>();
+
+    /**
      * Constructs a KafkaConsumerGroupManager with the provided {@link AdminClient}.
      *
      * @param adminClient The Kafka {@link AdminClient} used for managing consumer groups.
@@ -75,11 +81,6 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
     @Override
     public void onApplicationEvent(ApplicationShutdownEvent event) {
         LOG.info("Application shutdown initiated. Preparing to delete registered Kafka unique consumer groups.");
-        List<String> uniqueGroupIdsDeleteOnShutdown = registerConsumerForGroupDeletion.values()
-            .stream()
-            .filter(consumerState -> consumerState.kafkaConsumer.groupMetadata() != null)
-            .map(consumerState -> consumerState.kafkaConsumer.groupMetadata().groupId())
-            .toList();
         if (!uniqueGroupIdsDeleteOnShutdown.isEmpty()) {
             LOG.info("Closing {} consumers and attempting to delete the following consumer groups: {}",
                 uniqueGroupIdsDeleteOnShutdown.size(), uniqueGroupIdsDeleteOnShutdown);
@@ -122,6 +123,20 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
                 clientId);
         } else {
             LOG.warn("Failed to register consumer. Either client ID is null/empty or consumer state is null.");
+        }
+    }
+
+    /**
+     * Registers a consumer group ID to be deleted upon application shutdown.
+     *
+     * @param groupId The Kafka consumer group ID to be scheduled for deletion.
+     */
+    public void registerConsumerGroupIdForDeletion(String groupId) {
+        if (groupId != null && !groupId.isEmpty()) {
+            uniqueGroupIdsDeleteOnShutdown.add(groupId);
+            LOG.info("Registered consumer group ID for deletion: {}", groupId);
+        } else {
+            LOG.warn("Attempted to register a null or empty consumer group ID for deletion");
         }
     }
 
