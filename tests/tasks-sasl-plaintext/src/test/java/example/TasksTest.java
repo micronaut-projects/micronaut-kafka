@@ -20,6 +20,14 @@ class TasksTest {
                 return result != null && result > 3;
             }
         );
+    }
 
+    @Test
+    void uniqueGroupIdDeleteOnShutdown(@Client("/") HttpClient client) {
+        await().atMost(30, SECONDS).until(() -> {
+                Integer result = client.toBlocking().retrieve("/tasks/unique-group-id-delete-on-shutdown", Integer.class);
+                return result != null && result > 3;
+            }
+        );
     }
 }
