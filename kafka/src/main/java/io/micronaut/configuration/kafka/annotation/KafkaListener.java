@@ -89,6 +89,7 @@ public @interface KafkaListener {
      *
      * @return {@code true} to delete the unique group ID on shutdown, {@code false} otherwise.
      * Defaults to {@code false}.
+     * @since 5.8.0
      */
     boolean uniqueGroupIdDeleteOnShutdown() default false;
 
