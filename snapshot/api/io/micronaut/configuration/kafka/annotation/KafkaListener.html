@@ -185,9 +185,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">A unique string (UUID) can be appended to the group ID.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#uniqueGroupIdDeleteOnShutdown()" class="member-name-link">uniqueGroupIdDeleteOnShutdown</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Indicates whether the newly created group ID should be deleted upon application shutdown.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Sets the consumer group id of the Kafka consumer.</div>
 </div>
 </div>
@@ -245,6 +250,43 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>True to make each group ID unique. Defaults to false.</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd>false</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="uniqueGroupIdDeleteOnShutdown()">
+<h3>uniqueGroupIdDeleteOnShutdown</h3>
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">uniqueGroupIdDeleteOnShutdown</span></div>
+<div class="block">Indicates whether the newly created group ID should be deleted upon application shutdown.
+
+ <p>When <a href="#uniqueGroupId()"><code>uniqueGroupId()</code></a> is set to <code>true</code>, a unique group ID is generated for
+ the Kafka consumer. By default, this group ID remains in Kafka even after the application
+ shuts down, which may lead to unnecessary entries in the Kafka group list.
+
+ <p>If <code>uniqueGroupIdDeleteOnShutdown</code> is set to <code>true</code> alongside <code>uniqueGroupId</code>,
+ the unique group ID will be automatically deleted during the application shutdown process,
+ ensuring better manageability of Kafka group IDs.
+
+ <p>Example usage:
+ <pre><code>
+ @KafkaListener(groupId = "message-app", uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)
+ public class KafkaMessageConsumerClient {
+     @Topic("user-online")
+     void consumeEvent(String message) {
+         log.debug("event from Kafka: {}", message);
+     }
+ }
+ </code></pre></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> to delete the unique group ID on shutdown, <code>false</code> otherwise.
+ Defaults to <code>false</code>.</dd>
+<dt>Since:</dt>
+<dd>5.8.0</dd>
 </dl>
 <dl class="notes">
 <dt>Default:</dt>
