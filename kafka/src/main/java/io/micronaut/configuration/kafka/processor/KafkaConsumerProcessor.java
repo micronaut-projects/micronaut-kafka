@@ -288,27 +288,39 @@ class KafkaConsumerProcessor
             return; // No topics to consume
         }
         final Class<?> beanType = beanDefinition.getBeanType();
-        String groupId = consumerAnnotation.stringValue("groupId")
-                .filter(StringUtils::isNotEmpty)
-                .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
+        final Optional<String> groupId = consumerAnnotation.stringValue("groupId")
+                .filter(StringUtils::isNotEmpty);
+
         final String clientId = consumerAnnotation.stringValue("clientId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(groupId);
+        final Optional<String> id =  consumerAnnotation.stringValue("id")
+            .filter(StringUtils::isNotEmpty)
+            .or(() -> groupId);
+
+        final String configId = id.orElseGet(() -> this.groupIdFallback(beanType));
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(configId);
+
         boolean uniqueGroupIdDeleteOnShutdown = false;
+        String effectiveGroupId = groupId.orElseGet(() -> this.groupIdFallback(beanType));
+
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
-            groupId = groupId + "_" + UUID.randomUUID();
+            effectiveGroupId = effectiveGroupId + "_" + UUID.randomUUID();
             if (consumerAnnotation.isTrue("uniqueGroupIdDeleteOnShutdown")) {
                 uniqueGroupIdDeleteOnShutdown = true;
             }
         }
         final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
-        final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
+        final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId,  effectiveGroupId, groupId.isPresent(), offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
-        submitConsumerThreads(method, clientId, groupId, offsetStrategy, topicAnnotations,
+        submitConsumerThreads(method, clientId, effectiveGroupId, offsetStrategy, topicAnnotations,
             consumerAnnotation, consumerConfiguration, properties, beanType, uniqueGroupIdDeleteOnShutdown);
+    }
+
+    String groupIdFallback(Class<?> beanType) {
+        return applicationConfiguration.getName().orElse(beanType.getName());
     }
 
     @Override
@@ -392,23 +404,23 @@ class KafkaConsumerProcessor
     }
 
     @SuppressWarnings("rawtypes")
-    private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String groupId) {
-        return findConfigurationBean(groupId)
-            .or(() -> findHyphenatedConsumerConfigurationBean(groupId))
+    private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String id) {
+        return findConfigurationBean(id)
+            .or(() -> findHyphenatedConsumerConfigurationBean(id))
             .orElse(defaultConsumerConfiguration);
     }
 
     @SuppressWarnings("rawtypes")
-    private Optional<AbstractKafkaConsumerConfiguration> findConfigurationBean(String groupId) {
-        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(groupId));
+    private Optional<AbstractKafkaConsumerConfiguration> findConfigurationBean(String id) {
+        return beanContext.findBean(AbstractKafkaConsumerConfiguration.class, Qualifiers.byName(id));
     }
 
     @SuppressWarnings("rawtypes")
-    private Optional<AbstractKafkaConsumerConfiguration> findHyphenatedConsumerConfigurationBean(String groupId) {
-        if (NameUtils.isValidHyphenatedPropertyName(groupId)) {
+    private Optional<AbstractKafkaConsumerConfiguration> findHyphenatedConsumerConfigurationBean(String id) {
+        if (NameUtils.isValidHyphenatedPropertyName(id)) {
             return Optional.empty();
         }
-        return findConfigurationBean(NameUtils.hyphenate(groupId));
+        return findConfigurationBean(NameUtils.hyphenate(id));
     }
 
     @SuppressWarnings("rawtypes")
@@ -416,6 +428,7 @@ class KafkaConsumerProcessor
                                                 final DefaultKafkaConsumerConfiguration consumerConfiguration,
                                                 final String clientId,
                                                 final String groupId,
+                                                final boolean overrideGroupId,
                                                 final OffsetStrategy offsetStrategy) {
         final Properties properties = consumerConfiguration.getConfig();
 
@@ -439,7 +452,12 @@ class KafkaConsumerProcessor
         consumerAnnotation.enumValue("isolation", IsolationLevel.class)
                 .ifPresent(isolation -> properties.putIfAbsent(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolation.toString().toLowerCase(Locale.ROOT)));
 
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        if (overrideGroupId) {
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        }
+        else {
+            properties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        }
 
         if (clientId != null) {
             properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);

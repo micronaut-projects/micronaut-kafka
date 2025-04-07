@@ -40,21 +40,29 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface KafkaListener {
 
     /**
+     * Sets the id of the consumer under which it can be referenced in the application configuration.
+     * If not explicitly set, it defaults to the {@link #groupId()}
+     *
+     * @return The id
+     */
+    @AliasFor(member = "id")
+    String value() default "";
+
+    /**
+     * The same as {@link #value()}.
+     *
+     * @return The id
+     */
+    @AliasFor(member = "value")
+    String id() default "";
+
+    /**
      * Sets the consumer group id of the Kafka consumer. If not specified the group id is configured
      * to be the value of {@link io.micronaut.runtime.ApplicationConfiguration#getName()} otherwise
      * the name of the class is used.
      *
      * @return The group id
      */
-    @AliasFor(member = "groupId")
-    String value() default "";
-
-    /**
-     * The same as {@link #value()}.
-     *
-     * @return The group id
-     */
-    @AliasFor(member = "value")
     String groupId() default "";
 
     /**
