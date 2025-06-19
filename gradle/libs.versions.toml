@@ -7,7 +7,7 @@ micronaut-gradle-plugin = "4.5.3"
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka = '3.9.1'
 
-groovy = "4.0.15"
+groovy = "4.0.27"
 
 awaitility = '4.3.0'
 opentracing-kafka-client = '0.1.15'
