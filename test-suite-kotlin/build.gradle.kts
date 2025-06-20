@@ -9,6 +9,7 @@ dependencies {
     kaptTest(mn.micronaut.inject.java)
     testImplementation(mnTest.micronaut.test.junit5)
     testImplementation(mn.kotlinx.coroutines.core)
+    testImplementation(mnTest.junit.platform.launcher)
 }
 
 kotlin {
