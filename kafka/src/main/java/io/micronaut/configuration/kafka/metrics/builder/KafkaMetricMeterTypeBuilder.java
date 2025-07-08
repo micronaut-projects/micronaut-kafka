@@ -134,7 +134,8 @@ public class KafkaMetricMeterTypeBuilder {
         KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(this.name);
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
-                return Optional.of(Gauge.builder(getMetricName(), () -> (Number) kafkaMetric.metricValue())
+            final KafkaMetric kafkaMetric = this.kafkaMetric;
+            return Optional.of(Gauge.builder(getMetricName(), () -> (Number) kafkaMetric.metricValue())
                     .tags(tagFunction.apply(kafkaMetric.metricName()))
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
