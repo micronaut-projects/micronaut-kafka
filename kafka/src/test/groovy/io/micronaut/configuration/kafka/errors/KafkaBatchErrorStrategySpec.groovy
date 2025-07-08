@@ -87,9 +87,9 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
     void "test batch mode with 'retry' error strategy when there are serialization errors"() {
         when: "A record cannot be deserialized"
         MyClient myClient = context.getBean(MyClient)
+        myClient.sendBatch(BATCH_MODE_RETRY_DESER, ['Not an integer'])
         myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_DESER, [111, 222])
         myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_DESER, [333])
-        myClient.sendBatch(BATCH_MODE_RETRY_DESER, ['Not an integer'])
         myClient.sendBatchOfNumbers(BATCH_MODE_RETRY_DESER, [444, 555])
 
         RetryDeserConsumer myConsumer = context.getBean(RetryDeserConsumer)
@@ -97,15 +97,15 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
         then: "The message that threw the exception was eventually left behind"
         conditions.eventually {
-            myConsumer.received == ['111/222', '333', '444/555']
+            myConsumer.received == ['111/222', '333/444', '555']
         }
 
         and: "The retry error strategy was honored"
         myConsumer.exceptions.size() == 2
         myConsumer.exceptions[0].message.startsWith('Error deserializing VALUE')
-        (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 3
+        (myConsumer.exceptions[0].cause as RecordDeserializationException).offset() == 0
         myConsumer.exceptions[1].message.startsWith('Error deserializing VALUE')
-        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 3
+        (myConsumer.exceptions[1].cause as RecordDeserializationException).offset() == 0
     }
 
     void "test batch mode with 'retry conditionally' error strategy when there are serialization errors"() {
