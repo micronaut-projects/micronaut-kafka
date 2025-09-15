@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * The internal state of the consumer.
@@ -66,7 +67,7 @@ abstract class ConsumerState {
     Set<TopicPartition> assignments;
     private Set<TopicPartition> pausedTopicPartitions;
     private Set<TopicPartition> pauseRequests;
-    private boolean autoPaused;
+    private CountDownLatch startupLatch;
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
 
@@ -81,7 +82,7 @@ abstract class ConsumerState {
         this.kafkaConsumer = consumer;
         this.consumerBean = consumerBean;
         this.subscriptions = Collections.unmodifiableSet(kafkaConsumer.subscription());
-        this.autoPaused = !info.autoStartup;
+        this.startupLatch = info.autoStartup ? null : new CountDownLatch(1);
         this.boundArguments = new HashMap<>(2);
         Optional.ofNullable(info.consumerArg).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
         this.closedState = ConsumerCloseState.NOT_STARTED;
@@ -107,18 +108,25 @@ abstract class ConsumerState {
     }
 
     synchronized void resume() {
-        autoPaused = false;
         pauseRequests = null;
+        if (startupLatch != null) {
+            startupLatch.countDown();
+        }
     }
 
     synchronized void resume(@NonNull Collection<TopicPartition> topicPartitions) {
-        autoPaused = false;
         if (pauseRequests != null) {
             pauseRequests.removeAll(topicPartitions);
+        }
+        if (startupLatch != null) {
+            startupLatch.countDown();
         }
     }
 
     synchronized boolean isPaused(@NonNull Collection<TopicPartition> topicPartitions) {
+        if (startupLatch != null && startupLatch.getCount() > 0) {
+            return true;
+        }
         if (pauseRequests == null || pausedTopicPartitions == null) {
             return false;
         }
@@ -127,6 +135,11 @@ abstract class ConsumerState {
 
     void wakeUp() {
         kafkaConsumer.wakeup();
+        synchronized (this) {
+            if (startupLatch != null) {
+                startupLatch.countDown();
+            }
+        }
     }
 
     void close() {
@@ -149,12 +162,25 @@ abstract class ConsumerState {
 
     void threadPollLoop() {
         try (kafkaConsumer) {
+            holdStartup();
             //noinspection InfiniteLoopStatement
             while (true) { //NOSONAR
                 refreshAssignmentsPollAndProcessRecords();
             }
+        } catch (InterruptedException e) {
+            closedState = ConsumerCloseState.CLOSED;
+            Thread.currentThread().interrupt();
         } catch (WakeupException e) {
             closedState = ConsumerCloseState.CLOSED;
+        }
+    }
+
+    private void holdStartup() throws InterruptedException {
+        if (startupLatch != null) {
+            startupLatch.await();
+            synchronized (this) {
+                startupLatch = null;
+            }
         }
     }
 
@@ -181,12 +207,6 @@ abstract class ConsumerState {
         if (!newAssignments.equals(assignments)) {
             LOG.info("Consumer [{}] assignments changed: {} -> {}", info.clientId, assignments, newAssignments);
             assignments = Collections.unmodifiableSet(newAssignments);
-        }
-        synchronized (this) {
-            if (autoPaused) {
-                pause(assignments);
-                kafkaConsumer.pause(assignments);
-            }
         }
     }
 
