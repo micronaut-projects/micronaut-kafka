@@ -23,7 +23,7 @@ micronaut-serde = "2.15.1"
 micronaut-tracing = "7.1.4"
 micronaut-test = "4.8.1"
 micronaut-test-resources="2.10.1"
-sonatype-scan = "3.1.1"
+sonatype-scan = "3.1.4"
 
 [libraries]
 # Core
