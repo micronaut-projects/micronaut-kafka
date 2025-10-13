@@ -1,7 +1,7 @@
 [versions]
 micronaut = "4.9.11"
 micronaut-platform = "4.8.3"
-micronaut-docs = "2.0.0"
+micronaut-docs = "3.0.0"
 micronaut-gradle-plugin = "4.5.3"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
