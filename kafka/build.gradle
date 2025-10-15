@@ -5,13 +5,13 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.graalvm.sdk:graal-sdk:23.1.2'
-        force 'io.micronaut.platform:micronaut-platform:4.3.8'
+        force 'org.graalvm.sdk:graal-sdk:24.2.1'
+        force 'io.micronaut.platform:micronaut-platform:4.8.3'
     }
 }
 
 micronaut {
-    version = '4.3.7'
+    version = '4.9.4'
     testResources {
         enabled = true
         additionalModules.add(KAFKA)

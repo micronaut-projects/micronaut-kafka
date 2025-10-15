@@ -1,7 +1,7 @@
 package io.micronaut.kafka.docs
 
 import io.micronaut.test.support.TestPropertyProvider
-import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
@@ -11,7 +11,7 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
 
     @Override
     Map<String, String> getProperties() {

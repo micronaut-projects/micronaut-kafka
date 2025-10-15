@@ -5,12 +5,12 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'io.micronaut.platform:micronaut-platform:4.3.8'
+        force 'io.micronaut.platform:micronaut-platform:4.8.3'
     }
 }
 
 micronaut {
-    version = '4.3.7'
+    version = '4.9.4'
     testResources {
         enabled = true
         additionalModules.add(KAFKA)
@@ -20,6 +20,7 @@ micronaut {
 dependencies {
     api projects.micronautKafka
     api libs.managed.kafka.streams
+    compileOnly mnSerde.micronaut.serde.api
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
     testImplementation mnSerde.micronaut.serde.jackson

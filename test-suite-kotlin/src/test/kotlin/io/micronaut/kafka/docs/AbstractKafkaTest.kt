@@ -1,7 +1,7 @@
 package io.micronaut.kafka.docs
 
 import io.micronaut.test.support.TestPropertyProvider
-import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
 /**
@@ -10,7 +10,7 @@ import org.testcontainers.utility.DockerImageName
 abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
-        var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+        var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
     }
 
     override fun getProperties(): MutableMap<String, String> {

@@ -11,4 +11,8 @@ public class TasksController {
         return TasksListener.TASKS_PROCESSED.get();
     }
 
+    @Get("/unique-group-id-delete-on-shutdown")
+    public int uniqueGroupIdDeleteOnShutdown() {
+        return ConsumerGroupIdDeleteOnShutDownTaskListener.TASKS_PROCESSED.get();
+    }
 }

@@ -53,7 +53,7 @@ snippet::io.micronaut.kafka.docs.consumer.errors.ConditionalRetryListener[tags =
 
 When a ann:configuration.kafka.annotation.KafkaListener[] does not implement ann:configuration.kafka.retry.ConditionalRetryBehaviourHandler[], the ann:configuration.kafka.exceptions.DefaultConditionalRetryBehaviourHandler[] will be used and all messages that failed processing will be retried.
 
-If you wish to apply the same conditional retry strategy for all of your ann:configuration.kafka.annotation.KafkaListener[] you can define a bean that implements `ConditionalRetryBehaviourHandler` and use Micronaut's <<replaces, Bean Replacement>> feature to replace the default bean: `@Replaces(DefaultConditionalRetryBehaviourHandler.class)`.
+If you wish to apply the same conditional retry strategy for all of your ann:configuration.kafka.annotation.KafkaListener[] you can define a bean that implements `ConditionalRetryBehaviourHandler` and use Micronaut's link:https://docs.micronaut.io/latest/guide/#replaces[Bean Replacement] feature to replace the default bean: `@Replaces(DefaultConditionalRetryBehaviourHandler.class)`.
 
 NOTE: Conditional retry behaviour only applies to `RETRY_CONDITIONALLY_ON_ERROR` and `RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR` error strategies.
 
@@ -65,7 +65,7 @@ The following options are available to configure the default Kafka listener exce
 
 include::{includedir}configurationProperties/io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHandlerConfigurationProperties.adoc[]
 
-If you wish to replace this default exception handling with another implementation you can use the Micronaut's <<replaces, Bean Replacement>> feature to define a bean that replaces it: `@Replaces(DefaultKafkaListenerExceptionHandler.class)`.
+If you wish to replace this default exception handling with another implementation you can use the Micronaut's link:https://docs.micronaut.io/latest/guide/#replaces[Bean Replacement] feature to define a bean that replaces it: `@Replaces(DefaultKafkaListenerExceptionHandler.class)`.
 
 You can also define per bean exception handling logic by implementing the api:configuration.kafka.exceptions.KafkaListenerExceptionHandler[] interface in your ann:configuration.kafka.annotation.KafkaListener[] class.
 

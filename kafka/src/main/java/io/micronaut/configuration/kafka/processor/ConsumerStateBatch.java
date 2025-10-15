@@ -22,7 +22,7 @@ import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
-import java.util.HashMap;
+import io.micronaut.core.util.CollectionUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -71,7 +72,7 @@ final class ConsumerStateBatch extends ConsumerState {
             // By default, seek past the record to continue consumption
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
-            resolveWithErrorStrategy(null, currentOffsets, ex);
+            resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), ex);
             // By now, it's been decided whether this record should be retried and the exception may have been handled
             return null;
         }
@@ -145,15 +146,16 @@ final class ConsumerStateBatch extends ConsumerState {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
             if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
+                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
                 // Check how many retries so far
-                final int currentRetryCount = getCurrentRetryCount(partitions, currentOffsets);
+                final int currentRetryCount = getCurrentRetryCount(partitions, reconstructedOffsets);
                 if (info.retryCount >= currentRetryCount) {
                     // We will retry this batch again next time
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, null);
                     }
                     // Move back to the previous positions
-                    partitions.forEach(tp -> kafkaConsumer.seek(tp, currentOffsets.get(tp).offset()));
+                    partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
                     // Decide how long should we wait to retry this batch again
                     delayRetry(currentRetryCount, partitions);
                     return true;
@@ -177,5 +179,32 @@ final class ConsumerStateBatch extends ConsumerState {
 
     private OffsetAndMetadata getCurrentOffset(TopicPartition tp) {
         return new OffsetAndMetadata(kafkaConsumer.position(tp), null);
+    }
+
+    private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
+        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets, RecordDeserializationException ex) {
+        // Only after the first poll there are no current offsets, but they can be reconstructed from the exception
+        return CollectionUtils.isEmpty(currentOffsets)
+            ? Map.of(ex.topicPartition(), new OffsetAndMetadata(ex.offset(), null))
+            : currentOffsets;
+    }
+
+    @Nullable
+    private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
+        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
+        @Nullable ConsumerRecords<?, ?> consumerRecords) {
+        // Only after the first poll there are no current offsets, but they can be reconstructed from the fetched records
+        if (CollectionUtils.isEmpty(currentOffsets) && consumerRecords != null) {
+            Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = new HashMap<>();
+            for (ConsumerRecord<?, ?> record : consumerRecords) {
+                TopicPartition tp = new TopicPartition(record.topic(), record.partition());
+                if (!reconstructedOffsets.containsKey(tp)) {
+                    reconstructedOffsets.put(tp, new OffsetAndMetadata(record.offset(), null));
+                }
+            }
+            return reconstructedOffsets;
+        } else {
+            return currentOffsets;
+        }
     }
 }

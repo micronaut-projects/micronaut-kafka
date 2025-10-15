@@ -113,6 +113,7 @@ class KafkaConsumerProcessor
 
     private final ExecutorService executorService;
     private final ApplicationConfiguration applicationConfiguration;
+    private final KafkaConsumerGroupManager kafkaConsumerGroupManager;
     private final BeanContext beanContext;
     @SuppressWarnings("rawtypes")
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
@@ -135,6 +136,7 @@ class KafkaConsumerProcessor
      *
      * @param executorService               The executor service
      * @param applicationConfiguration      The application configuration
+     * @param kafkaConsumerGroupManager     The {@link KafkaConsumerGroupManager}
      * @param beanContext                   The bean context
      * @param defaultConsumerConfiguration  The default consumer config
      * @param binderRegistry                The {@link ConsumerRecordBinderRegistry}
@@ -151,6 +153,7 @@ class KafkaConsumerProcessor
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
             ApplicationConfiguration applicationConfiguration,
+            KafkaConsumerGroupManager kafkaConsumerGroupManager,
             BeanContext beanContext,
             AbstractKafkaConsumerConfiguration defaultConsumerConfiguration,
             ConsumerRecordBinderRegistry binderRegistry,
@@ -165,6 +168,7 @@ class KafkaConsumerProcessor
             ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler) {
         this.executorService = executorService;
         this.applicationConfiguration = applicationConfiguration;
+        this.kafkaConsumerGroupManager = kafkaConsumerGroupManager;
         this.beanContext = beanContext;
         this.defaultConsumerConfiguration = defaultConsumerConfiguration;
         this.binderRegistry = binderRegistry;
@@ -293,18 +297,27 @@ class KafkaConsumerProcessor
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
         final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(groupId);
+        boolean uniqueGroupIdDeleteOnShutdown = false;
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             groupId = groupId + "_" + UUID.randomUUID();
+            if (consumerAnnotation.isTrue("uniqueGroupIdDeleteOnShutdown")) {
+                uniqueGroupIdDeleteOnShutdown = true;
+            }
         }
         final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
         final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
-        submitConsumerThreads(method, clientId, groupId, offsetStrategy, topicAnnotations, consumerAnnotation, consumerConfiguration, properties, beanType);
+        submitConsumerThreads(method, clientId, groupId, offsetStrategy, topicAnnotations,
+            consumerAnnotation, consumerConfiguration, properties, beanType, uniqueGroupIdDeleteOnShutdown);
     }
 
     @Override
     @PreDestroy
     public void close() {
+        kafkaConsumerGroupManager.getRegisteredClientIdsForDeletion().forEach(clientId -> {
+            LOG.info("Already closed consumer client : {}", clientId);
+            consumers.remove(clientId);
+        });
         consumers.values().forEach(ConsumerState::wakeUp);
         consumers.values().forEach(ConsumerState::close);
         consumers.clear();
@@ -461,7 +474,8 @@ class KafkaConsumerProcessor
                                        final AnnotationValue<KafkaListener> consumerAnnotation,
                                        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
                                        final Properties properties,
-                                       final Class<?> beanType) {
+                                       final Class<?> beanType,
+                                       boolean uniqueGroupIdDeleteOnShutdown) {
         final int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
         for (int i = 0; i < consumerThreads; i++) {
             final String finalClientId;
@@ -488,6 +502,10 @@ class KafkaConsumerProcessor
                 new ConsumerStateBatch(this, consumerInfo, kafkaConsumer, consumerBean) :
                 new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);
             consumers.put(finalClientId, consumerState);
+            if (uniqueGroupIdDeleteOnShutdown) {
+                kafkaConsumerGroupManager.registerConsumerForGroupDeletion(finalClientId, consumerState);
+                kafkaConsumerGroupManager.registerConsumerGroupIdForDeletion(groupId);
+            }
             executorService.submit(consumerState::threadPollLoop);
         }
     }

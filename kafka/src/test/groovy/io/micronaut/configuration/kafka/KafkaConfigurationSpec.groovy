@@ -77,8 +77,8 @@ class KafkaConfigurationSpec extends Specification {
 
         then: "the new consumer's deserializers have the configured encoding"
         consumer != null
-        (consumer.delegate.deserializers.keyDeserializer as StringDeserializer).encoding == StandardCharsets.US_ASCII.name()
-        (consumer.delegate.deserializers.valueDeserializer as StringDeserializer).encoding == StandardCharsets.ISO_8859_1.name()
+        (consumer.delegate.deserializers.keyDeserializer as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (consumer.delegate.deserializers.valueDeserializer as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         consumer.close()
@@ -103,8 +103,8 @@ class KafkaConfigurationSpec extends Specification {
 
         then: "the new producer's serializers have the configured encoding"
         producer != null
-        (producer.keySerializer as StringSerializer).encoding == StandardCharsets.US_ASCII.name()
-        (producer.valueSerializer as StringSerializer).encoding == StandardCharsets.ISO_8859_1.name()
+        (producer.keySerializer as StringSerializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (producer.valueSerializer as StringSerializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         producer.close()

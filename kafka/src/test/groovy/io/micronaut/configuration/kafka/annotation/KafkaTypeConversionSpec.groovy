@@ -48,7 +48,7 @@ class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
             myConsumer.lastException != null
             myConsumer.lastException.cause instanceof SerializationException
             myConsumer.lastException.cause.printStackTrace()
-            myConsumer.lastException.cause.message.contains("deserializing key/value for partition")
+            myConsumer.lastException.cause.message.contains("Error deserializing KEY for partition")
         }
     }
 

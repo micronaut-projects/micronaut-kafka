@@ -50,7 +50,7 @@ snippet::io.micronaut.kafka.docs.producer.config.ProductClient[tags="imports, cl
 
 When serializing keys and values Micronaut will by default attempt to automatically pick a link:{kafkaapi}/org/apache/kafka/common/serialization/Serializer.html[Serializer] to use. This is done via the api:configuration.kafka.serde.CompositeSerdeRegistry[] bean.
 
-TIP: You can replace the default api:configuration.kafka.serde.SerdeRegistry[] bean with your own implementation by defining a bean that uses `@Replaces(CompositeSerdeRegistry.class)`. See the section on <<replaces, Bean Replacement>>.
+TIP: You can replace the default api:configuration.kafka.serde.SerdeRegistry[] bean with your own implementation by defining a bean that uses `@Replaces(CompositeSerdeRegistry.class)`. See the section on link:https://docs.micronaut.io/latest/guide/#replaces[Bean Replacement].
 
 All common `java.lang` types (`String`, `Integer`, primitives etc.) are supported and for POJOs by default a Jackson based JSON serializer is used.
 

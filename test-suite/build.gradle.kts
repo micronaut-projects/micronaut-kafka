@@ -7,4 +7,5 @@ dependencies {
     testAnnotationProcessor(platform(mn.micronaut.core.bom))
     testAnnotationProcessor(mn.micronaut.inject.java)
     testImplementation(mnTest.micronaut.test.junit5)
+    testImplementation(mnTest.junit.platform.launcher)
 }

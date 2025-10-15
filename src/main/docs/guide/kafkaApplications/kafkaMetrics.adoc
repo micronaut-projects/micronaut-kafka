@@ -1,3 +1,4 @@
 You can enable Kafka Metrics collection by enabling https://micronaut-projects.github.io/micronaut-micrometer/latest/guide[Micrometer Metrics].
 
 If you do not wish to collect Kafka metrics, you can set `micronaut.metrics.binders.kafka.enabled` to `false` in `application.yml`.
+In the case of Kafka Streams metrics, you can use `micronaut.metrics.binders.kafka.streams.enabled` instead.

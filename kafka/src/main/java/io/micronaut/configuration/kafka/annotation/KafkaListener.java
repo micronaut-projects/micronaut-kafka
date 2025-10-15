@@ -66,6 +66,34 @@ public @interface KafkaListener {
     boolean uniqueGroupId() default false;
 
     /**
+     * Indicates whether the newly created group ID should be deleted upon application shutdown.
+     *
+     * <p>When {@link #uniqueGroupId()} is set to {@code true}, a unique group ID is generated for
+     * the Kafka consumer. By default, this group ID remains in Kafka even after the application
+     * shuts down, which may lead to unnecessary entries in the Kafka group list.
+     *
+     * <p>If {@code uniqueGroupIdDeleteOnShutdown} is set to {@code true} alongside {@code uniqueGroupId},
+     * the unique group ID will be automatically deleted during the application shutdown process,
+     * ensuring better manageability of Kafka group IDs.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * @KafkaListener(groupId = "message-app", uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)
+     * public class KafkaMessageConsumerClient {
+     *     @Topic("user-online")
+     *     void consumeEvent(String message) {
+     *         log.debug("event from Kafka: {}", message);
+     *     }
+     * }
+     * }</pre>
+     *
+     * @return {@code true} to delete the unique group ID on shutdown, {@code false} otherwise.
+     * Defaults to {@code false}.
+     * @since 5.8.0
+     */
+    boolean uniqueGroupIdDeleteOnShutdown() default false;
+
+    /**
      * Sets the client id of the Kafka consumer. If not specified the client id is configured
      * to be the value of {@link io.micronaut.runtime.ApplicationConfiguration#getName()}.
      *

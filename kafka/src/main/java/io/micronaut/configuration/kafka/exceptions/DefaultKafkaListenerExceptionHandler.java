@@ -125,7 +125,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             if (matcher.find()) {
                 final String topic = matcher.group(1);
                 final int partition = Integer.valueOf(matcher.group(2));
-                final int offset = Integer.valueOf(matcher.group(3));
+                final long offset = Long.valueOf(matcher.group(3));
                 TopicPartition tp = new TopicPartition(topic, partition);
                 LOG.debug("Seeking past unserializable consumer record for partition {}-{} and offset {}", topic, partition, offset);
 
