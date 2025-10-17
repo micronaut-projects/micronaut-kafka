@@ -9,8 +9,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Requires(property = "spec.name", value = "BookClientTest")
+//tag::clazz[]
 @KafkaClient("product-client")
 interface BookClient {
+//end::clazz[]
 
     // tag::mono[]
     @Topic("my-books")
