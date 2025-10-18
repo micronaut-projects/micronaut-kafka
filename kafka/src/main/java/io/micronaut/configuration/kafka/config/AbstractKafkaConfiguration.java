@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.config;
 
 import io.micronaut.context.env.Environment;
+import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.util.Toggleable;
 
 import io.micronaut.core.annotation.NonNull;
@@ -81,6 +82,11 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
             return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
         }).forEach(entry -> {
             Object value = entry.getValue();
+
+            if (value == null) {
+                throw new ConfigurationException(String.format("Value for property kafka.%s resolved as null", entry.getKey()));
+            }
+
             if (environment.canConvert(entry.getValue().getClass(), String.class)) {
                 Optional<?> converted = environment.convert(entry.getValue(), String.class);
                 if (converted.isPresent()) {

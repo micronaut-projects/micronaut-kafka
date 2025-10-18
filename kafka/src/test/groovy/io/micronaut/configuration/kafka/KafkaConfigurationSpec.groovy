@@ -7,6 +7,8 @@ import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
+import io.micronaut.context.exceptions.BeanInstantiationException
+import io.micronaut.context.exceptions.ConfigurationException
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -72,6 +74,22 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    void "test configure default properties, throw exception when kafka.* property is null"() {
+        when:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.' + GROUP_ID_CONFIG): null,
+                ('kafka.' + MAX_POLL_RECORDS_CONFIG): "100",
+                ("kafka." + KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+
+        then:
+        BeanInstantiationException exception = thrown()
+        exception.getCause().getClass() == ConfigurationException
+        exception.getCause().getMessage() == "Value for property kafka.${GROUP_ID_CONFIG} resolved as null"
     }
 
     void "test override consumer default properties"() {
