@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("io.micronaut.internal.build.kafka-testsuite")
     alias(libs.plugins.kotlin.jvm)
@@ -12,8 +14,13 @@ dependencies {
     testImplementation(mnTest.junit.platform.launcher)
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
     }
 }
