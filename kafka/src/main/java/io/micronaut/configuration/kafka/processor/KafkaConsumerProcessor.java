@@ -149,7 +149,7 @@ class KafkaConsumerProcessor
      * @param startedEventPublisher         The KafkaConsumerStartedPollingEvent publisher
      * @param subscribedEventPublisher      The KafkaConsumerSubscribedEvent publisher
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "checkstyle:ParameterNumber"})
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
             ApplicationConfiguration applicationConfiguration,
