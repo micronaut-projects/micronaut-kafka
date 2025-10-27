@@ -18,8 +18,9 @@ dependencies {
     testImplementation(mnTestResources.testcontainers.kafka)
     testImplementation libs.awaitility
 
-    testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly mnLogging.logback.classic
+    testRuntimeOnly(mnTest.junit.platform.launcher)
+    testRuntimeOnly(mnTest.junit.jupiter.engine)
 }
 
 micronaut {
