@@ -1,6 +1,7 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-base'
     id "io.micronaut.test-resources"
+    id "io.micronaut.build.internal.kotlin-base"
 }
 
 tasks.withType(Test) {
