@@ -111,7 +111,6 @@ public interface ConsumerRegistry {
      */
     void pause(@NonNull String id, @NonNull Collection<TopicPartition> topicPartitions);
 
-
     /**
      * Resume the consumer for the given ID. Note that this method will request that the consumer is resumed, however
      * does not block until the consumer is actually resumed. You can use the {@link #isPaused(String)} method to
