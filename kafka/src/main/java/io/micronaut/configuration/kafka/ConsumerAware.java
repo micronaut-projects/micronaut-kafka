@@ -16,7 +16,7 @@
 package io.micronaut.configuration.kafka;
 
 import org.apache.kafka.clients.consumer.Consumer;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interface for {@link io.micronaut.configuration.kafka.annotation.KafkaListener} instances to implement

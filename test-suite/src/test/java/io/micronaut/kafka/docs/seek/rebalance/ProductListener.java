@@ -4,7 +4,7 @@ import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import java.util.*;

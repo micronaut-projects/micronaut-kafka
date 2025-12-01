@@ -15,7 +15,7 @@
  */
 package io.micronaut.configuration.kafka.streams;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import io.micronaut.core.naming.Named;
 import org.apache.kafka.streams.StreamsBuilder;
 

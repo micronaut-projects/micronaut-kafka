@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperation;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;

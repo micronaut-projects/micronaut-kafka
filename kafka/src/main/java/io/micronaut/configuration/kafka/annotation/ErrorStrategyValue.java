@@ -16,7 +16,7 @@
 package io.micronaut.configuration.kafka.annotation;
 
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 

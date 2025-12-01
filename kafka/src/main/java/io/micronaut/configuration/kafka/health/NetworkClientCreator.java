@@ -16,7 +16,7 @@
 package io.micronaut.configuration.kafka.health;
 
 import io.micronaut.context.annotation.DefaultImplementation;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.NetworkClient;
 import org.apache.kafka.common.ClusterResourceListener;
 
