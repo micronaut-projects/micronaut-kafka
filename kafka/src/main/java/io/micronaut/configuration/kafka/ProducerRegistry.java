@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka;
 import io.micronaut.core.type.Argument;
 import org.apache.kafka.clients.producer.Producer;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A registry of managed {@link Producer} instances key by id and type.

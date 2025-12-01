@@ -16,7 +16,7 @@
 package io.micronaut.configuration.kafka.health;
 
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
 import jdk.jfr.Experimental;
 import org.apache.kafka.clients.ApiVersions;

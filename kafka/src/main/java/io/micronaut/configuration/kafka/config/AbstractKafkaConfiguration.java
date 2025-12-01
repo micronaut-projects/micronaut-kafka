@@ -18,7 +18,7 @@ package io.micronaut.configuration.kafka.config;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.util.Toggleable;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.Optional;

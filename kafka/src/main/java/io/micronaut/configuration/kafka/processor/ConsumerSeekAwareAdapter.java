@@ -18,8 +18,8 @@ package io.micronaut.configuration.kafka.processor;
 import io.micronaut.configuration.kafka.ConsumerSeekAware;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.core.annotation.Internal;
-import io.micronaut.core.annotation.NonNull;
-import io.micronaut.core.annotation.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
 

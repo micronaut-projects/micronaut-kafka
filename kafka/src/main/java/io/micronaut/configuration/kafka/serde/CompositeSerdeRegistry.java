@@ -23,7 +23,7 @@ import io.micronaut.core.serialize.exceptions.SerializationException;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

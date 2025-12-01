@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka.seek;
 
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.core.annotation.Internal;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 
 /**
