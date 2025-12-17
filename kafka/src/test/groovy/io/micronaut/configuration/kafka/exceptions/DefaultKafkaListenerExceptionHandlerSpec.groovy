@@ -82,7 +82,7 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
             errorHandler.handle(exception)
             TopicPartition tp = new TopicPartition(topic, 0)
             currentPosition = exception.kafkaConsumer.position(tp)
-            OffsetAndMetadata committedOffsetAndMetadata = exception.kafkaConsumer.committed(tp)
+            OffsetAndMetadata committedOffsetAndMetadata = exception.kafkaConsumer.committed(Set.of(tp)).get(tp)
             if (committedOffsetAndMetadata != null) {
                 committedOffset = committedOffsetAndMetadata.offset()
             } else {
