@@ -1,7 +1,9 @@
 package io.micronaut.kafka.docs.seek.rebalance;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.jspecify.annotations.NonNull;
