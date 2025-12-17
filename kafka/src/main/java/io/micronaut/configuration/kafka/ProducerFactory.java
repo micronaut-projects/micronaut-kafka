@@ -17,7 +17,7 @@ package io.micronaut.configuration.kafka;
 
 import java.util.Properties;
 
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serializer;
 
