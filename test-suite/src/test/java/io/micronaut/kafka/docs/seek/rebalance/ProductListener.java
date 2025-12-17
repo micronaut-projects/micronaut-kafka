@@ -5,11 +5,15 @@ import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.jspecify.annotations.NonNull;
-import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
-import java.util.*;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+@KafkaListener(groupId = "consumer-rebalance-listener-group", offsetReset = OffsetReset.EARLIEST)
 @Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
 public class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 

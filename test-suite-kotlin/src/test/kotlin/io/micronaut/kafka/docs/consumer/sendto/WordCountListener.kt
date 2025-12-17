@@ -8,7 +8,7 @@ import io.micronaut.context.annotation.Requires
 import org.slf4j.LoggerFactory
 
 @Requires(property = "spec.name", value = "WordCounterTest")
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(groupId = "words-count-group", offsetReset = OffsetReset.EARLIEST)
 class WordCountListener {
 
     companion object {

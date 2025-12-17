@@ -1,14 +1,17 @@
 package io.micronaut.kafka.docs.seek.rebalance
 
 import io.micronaut.configuration.kafka.ConsumerAware
-import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.annotation.NonNull
 import io.micronaut.kafka.docs.Product
-import org.apache.kafka.clients.consumer.*
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.common.TopicPartition
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(groupId = 'consumer-rebalance-listener-group', offsetReset = OffsetReset.EARLIEST)
 @Requires(property = "spec.name", value = "ConsumerRebalanceListenerSpec")
 class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 

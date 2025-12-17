@@ -1,13 +1,15 @@
 package io.micronaut.kafka.docs.seek.aware
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperation
+import io.micronaut.configuration.kafka.seek.KafkaSeeker
 import io.micronaut.context.annotation.Requires
 import io.micronaut.kafka.docs.Product
 import org.apache.kafka.common.TopicPartition
 
-@KafkaListener
+@KafkaListener(groupId = "consumer-seek-aware-group")
 @Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
 class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerSeekAware { // <1>
 

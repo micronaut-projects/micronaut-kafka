@@ -32,7 +32,7 @@ internal class MyTest : AbstractKafkaTest() {
     }
 
     @Requires(property = "spec.name", value = "MyTest")
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = "my-test", offsetReset = OffsetReset.EARLIEST)
     class MyConsumer {
         var consumed: String? = null
 

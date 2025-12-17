@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Requires(property = "spec.name", value = "WordCounterTest")
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(groupId = "words-count-group", offsetReset = OffsetReset.EARLIEST)
 public class WordCountListener {
 
     private static final Logger LOG = getLogger(WordCountListener.class);

@@ -12,6 +12,7 @@ import org.apache.kafka.common.IsolationLevel
 @Requires(property = "spec.name", value = "WordCounterTest")
 // tag::transactional[]
 @KafkaListener(
+    groupId = "words-count-group",
     offsetReset = OffsetReset.EARLIEST,
     producerClientId = "word-counter-producer", // <1>
     producerTransactionalId = "tx-word-counter-id", // <2>

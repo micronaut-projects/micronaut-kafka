@@ -43,7 +43,7 @@ class MyTest extends AbstractKafkaTest {
     }
 
     @Requires(property = "spec.name", value = "MyTest")
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @KafkaListener(groupId = 'my-test', offsetReset = OffsetReset.EARLIEST)
     static class MyConsumer {
         String consumed
 

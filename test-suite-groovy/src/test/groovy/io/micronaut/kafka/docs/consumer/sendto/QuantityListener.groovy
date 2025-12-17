@@ -9,7 +9,7 @@ import io.micronaut.context.annotation.Requires
 
 @Slf4j
 @Requires(property = 'spec.name', value = 'SendToProductListenerTest')
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(groupId = 'send-to-product-group', offsetReset = OffsetReset.EARLIEST)
 class QuantityListener {
 
     Integer quantity

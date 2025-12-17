@@ -4,7 +4,6 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.StringUtils
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.Test
-import java.util.Map
 import java.util.concurrent.TimeUnit
 
 class WordCounterTest {

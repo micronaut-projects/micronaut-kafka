@@ -5,8 +5,6 @@ import io.micronaut.testcontainers.kafka.Kafka
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-import static java.util.concurrent.TimeUnit.SECONDS
-
 class WordCounterTest extends Specification {
 
     void "test Word Counter"() {
