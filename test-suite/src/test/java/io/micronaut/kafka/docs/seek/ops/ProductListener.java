@@ -1,13 +1,23 @@
 package io.micronaut.kafka.docs.seek.ops;
 
-import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.configuration.kafka.seek.*;
-import io.micronaut.context.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperation;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.apache.kafka.common.TopicPartition;
-import java.util.*;
 
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = @Property(name = "max.poll.records", value = "1"))
+import java.util.ArrayList;
+import java.util.List;
+
+@KafkaListener(
+    groupId = "kafka-seek-operations-group",
+    offsetReset = OffsetReset.EARLIEST,
+    properties = @Property(name = "max.poll.records", value = "1")
+)
 @Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
 public class ProductListener {
 

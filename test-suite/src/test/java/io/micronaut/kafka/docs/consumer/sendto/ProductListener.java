@@ -16,7 +16,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 // end::imports[]
 
 @Requires(property = "spec.name", value = "SendToProductListenerTest")
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@KafkaListener(groupId = "send-to-product-group", offsetReset = OffsetReset.EARLIEST)
 public class ProductListener {
     private static final Logger LOG = getLogger(BookListener.class);
 
