@@ -82,8 +82,8 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
             return Stream.of("embedded", "consumers", "producers", "streams").noneMatch(key::startsWith);
         }).forEach(entry -> {
             Object value = entry.getValue();
-            if (environment.canConvert(entry.getValue().getClass(), String.class)) {
-                Optional<?> converted = environment.convert(entry.getValue(), String.class);
+            if (environment.getConversionService().canConvert(entry.getValue().getClass(), String.class)) {
+                Optional<?> converted = environment.getConversionService().convert(entry.getValue(), String.class);
                 if (converted.isPresent()) {
                     value = converted.get();
                 }
