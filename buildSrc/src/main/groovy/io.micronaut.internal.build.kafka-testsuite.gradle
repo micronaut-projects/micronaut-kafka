@@ -1,6 +1,5 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-base'
-    id "io.micronaut.test-resources"
 }
 
 tasks.withType(Test) {
@@ -15,7 +14,7 @@ dependencies {
     testImplementation mnSerde.micronaut.serde.jackson
     testImplementation mnReactor.micronaut.reactor
     testImplementation mnSerde.micronaut.serde.jackson
-    testImplementation(mnTestResources.testcontainers.kafka)
+    testImplementation(project(":test-suite-utils"))
     testImplementation libs.awaitility
 
     testRuntimeOnly mnLogging.logback.classic
@@ -25,7 +24,4 @@ dependencies {
 
 micronaut {
     importMicronautPlatform.set(false)
-    testResources {
-        additionalModules.add("kafka")
-    }
 }
