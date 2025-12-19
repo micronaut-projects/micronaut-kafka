@@ -7,6 +7,8 @@ dependencies {
     testImplementation(platform(mn.micronaut.core.bom))
     testCompileOnly(mn.micronaut.inject.groovy)
     testImplementation(mnTest.micronaut.test.spock)
+    implementation(platform(mnTest.boms.testcontainers))
+    implementation(libs.testcontainers.kafka)
 }
 
 //TODO remove once Micronaut Test ships Spock version compatible with Groovy 5
