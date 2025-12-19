@@ -1,6 +1,5 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-module'
-    id 'io.micronaut.test-resources'
 }
 
 configurations.all {
@@ -10,15 +9,12 @@ configurations.all {
     }
 }
 
-micronaut {
-    version = '4.10.3'
-}
 
 dependencies {
     annotationProcessor mn.micronaut.graal
 
     api libs.managed.kafka.clients
-
+    implementation(platform(mnTest.boms.testcontainers))
     compileOnly mnMicrometer.micronaut.micrometer.core
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal

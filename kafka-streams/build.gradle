@@ -1,6 +1,5 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-module'
-    id 'io.micronaut.test-resources'
 }
 
 configurations.all {
@@ -9,13 +8,7 @@ configurations.all {
     }
 }
 
-micronaut {
-    version = '4.10.3'
-    testResources {
-        enabled = true
-        additionalModules.add(KAFKA)
-    }
-}
+
 
 dependencies {
     api projects.micronautKafka
@@ -24,4 +17,5 @@ dependencies {
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
     testImplementation mnSerde.micronaut.serde.jackson
+    implementation(platform(mnTest.boms.testcontainers))
 }
