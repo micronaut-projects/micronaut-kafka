@@ -1,8 +1,7 @@
 
 plugins {
     id("io.micronaut.internal.build.kafka-testsuite")
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
+    id("io.micronaut.build.internal.kotlin-kapt")
 }
 
 dependencies {

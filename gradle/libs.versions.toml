@@ -22,7 +22,6 @@ micronaut-serde = "3.0.0-M1"
 micronaut-tracing = "7.2.0"
 micronaut-test = "4.9.0"
 micronaut-test-resources="2.10.1"
-kotlin="2.2.21"
 
 [libraries]
 # Core
@@ -47,5 +46,4 @@ micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", ver
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
 
 [plugins]
-kotlin-jvm = { id = 'org.jetbrains.kotlin.jvm', version.ref = 'kotlin' }
-kotlin-kapt = { id = 'org.jetbrains.kotlin.kapt', version.ref = 'kotlin' }
+
