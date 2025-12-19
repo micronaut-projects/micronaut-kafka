@@ -1,5 +1,5 @@
 plugins {
-    id 'io.micronaut.build.internal.kafka-base'
+    id 'io.micronaut.build.internal.java-base'
 }
 
 tasks.withType(Test) {
@@ -22,6 +22,3 @@ dependencies {
     testRuntimeOnly(mnTest.junit.jupiter.engine)
 }
 
-micronaut {
-    importMicronautPlatform.set(false)
-}

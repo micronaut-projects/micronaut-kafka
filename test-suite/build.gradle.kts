@@ -1,5 +1,4 @@
 plugins {
-    java
     id("io.micronaut.internal.build.kafka-testsuite")
 }
 
