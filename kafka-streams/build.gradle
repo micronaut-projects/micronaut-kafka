@@ -17,6 +17,6 @@ dependencies {
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
     testImplementation mnSerde.micronaut.serde.jackson
-    implementation(platform(mnTest.boms.testcontainers))
+    testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
 }

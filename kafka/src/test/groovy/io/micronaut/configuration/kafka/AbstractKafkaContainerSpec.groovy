@@ -1,5 +1,7 @@
 package io.micronaut.configuration.kafka
 
+import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
@@ -11,8 +13,13 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     @Shared @AutoCleanup ApplicationContext context
     @Shared String bootstrapServers
+    @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
+        def kafkaImage = DockerImageName
+                .parse("apache/kafka:3.9.1")
+        kafkaContainer = new KafkaContainer(kafkaImage)
+        kafkaContainer.start()
         startContext()
         afterKafkaStarted()
     }
@@ -25,6 +32,12 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
                 getConfiguration()
         )
         bootstrapServers = context.getRequiredProperty("kafka.bootstrap.servers", String.class);
+    }
+
+    protected Map<String, Object> getConfiguration() {
+        def config = super.getConfiguration()
+        config['kafka.bootstrap.servers'] = kafkaContainer.getBootstrapServers()
+        config
     }
 
     void createTopic(String name, int numPartitions, int replicationFactor) {

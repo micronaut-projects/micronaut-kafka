@@ -6,4 +6,7 @@ application {
     mainClass = 'example.Application'
 }
 
-
+dependencies {
+    testImplementation(platform(mnTest.boms.testcontainers))
+    testImplementation(libs.testcontainers.kafka)
+}

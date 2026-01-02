@@ -10,4 +10,6 @@ dependencies {
     testImplementation(mnTest.micronaut.test.junit5)
     testImplementation(mn.kotlinx.coroutines.core)
     testImplementation(mnTest.junit.platform.launcher)
+    testImplementation(platform(mnTest.boms.testcontainers))
+    testImplementation(libs.testcontainers.kafka)
 }
