@@ -7,7 +7,7 @@ import jakarta.inject.Inject
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-@MicronautTest
+@MicronautTest(environments = "kafka")
 @Property(name = "spec.name", value = "ConsumerRebalanceListenerSpec")
 class ConsumerRebalanceListenerSpec extends Specification {
 

@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.consumer.sendto
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.testcontainers.kafka.Kafka
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -10,9 +11,10 @@ class WordCounterTest extends Specification {
 
     void "test Word Counter"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run(
-                'kafka.enabled': true, 'spec.name': 'WordCounterTest'
-        )
+        def config = new HashMap<>(Kafka.getProperties());
+        config.put("kafka.enabled", "true");
+        config.put("spec.name", "WordCounterTest");
+        ApplicationContext ctx = ApplicationContext.run(config)
 
         when:
         WordCounterClient client = ctx.getBean(WordCounterClient.class)

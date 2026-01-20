@@ -9,6 +9,7 @@ dependencies {
     testImplementation(mnTest.micronaut.test.spock)
     implementation(platform(mnTest.boms.testcontainers))
     implementation(libs.testcontainers.kafka)
+    testImplementation(projects.testSuiteKafkaUtils)
 }
 
 //TODO remove once Micronaut Test ships Spock version compatible with Groovy 5

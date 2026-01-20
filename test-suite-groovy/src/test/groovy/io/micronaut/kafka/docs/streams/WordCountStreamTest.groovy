@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.streams
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.testcontainers.kafka.Kafka
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -10,10 +11,10 @@ class WordCountStreamTest extends Specification {
 
     void "test word counter"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run(
-                'kafka.enabled': true, 'spec.name': 'WordCountStreamTest'
-        )
-
+        def config = new HashMap<>(Kafka.getProperties());
+        config.put("kafka.enabled", "true");
+        config.put("spec.name", "WordCountStreamTest");
+        ApplicationContext ctx = ApplicationContext.run(config)
         when:
         WordCountClient client = ctx.getBean(WordCountClient)
         client.publishSentence('test to test for words')
