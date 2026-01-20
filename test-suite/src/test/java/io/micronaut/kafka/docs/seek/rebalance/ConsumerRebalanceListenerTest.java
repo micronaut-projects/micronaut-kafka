@@ -6,6 +6,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.test.support.TestPropertyProvider;
 import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import static org.awaitility.Awaitility.await;
 
 @MicronautTest
 @Property(name = "spec.name", value = "ConsumerRebalanceListenerTest")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConsumerRebalanceListenerTest implements TestPropertyProvider {
 
     @Override

@@ -11,6 +11,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.MIN_INSYNC_REPLICAS_PROPERTY
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
 import static io.micronaut.health.HealthStatus.UP
 

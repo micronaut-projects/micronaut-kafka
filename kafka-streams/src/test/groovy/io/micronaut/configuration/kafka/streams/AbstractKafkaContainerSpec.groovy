@@ -5,7 +5,6 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
@@ -14,9 +13,7 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
     @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
-        def kafkaImage = DockerImageName
-                .parse("apache/kafka:latest")
-        kafkaContainer = new KafkaContainer(kafkaImage)
+        kafkaContainer = new KafkaContainer("apache/kafka-native")
         kafkaContainer.start()
 
         startContext()

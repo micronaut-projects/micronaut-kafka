@@ -7,12 +7,14 @@ import io.micronaut.test.support.TestPropertyProvider;
 import io.micronaut.testcontainers.kafka.Kafka;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.Map;
 
 @Property(name = "spec.name", value = "QuickstartTest")
 @Property(name = "kafka.enabled", value = "true")
 @MicronautTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QuickstartTest implements TestPropertyProvider {
     @Inject
     ApplicationContext applicationContext;

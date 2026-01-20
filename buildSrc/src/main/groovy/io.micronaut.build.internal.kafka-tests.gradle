@@ -1,6 +1,7 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-base'
     id 'io.micronaut.application'
+    id 'io.micronaut.test-resources'
 }
 configurations.all {
     resolutionStrategy.dependencySubstitution {
@@ -18,6 +19,10 @@ micronaut {
     version libs.versions.micronaut.platform.get()
     testRuntime "junit5"
     runtime "netty"
+    testResources {
+        clientTimeout = 300
+        inferClasspath = false
+    }
 }
 
 
