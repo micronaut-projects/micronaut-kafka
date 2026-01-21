@@ -11,7 +11,7 @@ internal class BookSenderTest {
     @Test
     fun testBookSender() {
         ApplicationContext.run(mapOf( // <1>
-            "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest")).use { ctx ->
+            "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest"), "kafka").use { ctx ->
             val bookSender = ctx.getBean(BookSender::class.java) // <2>
             val book = Book("The Stand")
             bookSender.send("Stephen King", book)

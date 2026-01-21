@@ -2,6 +2,7 @@ package io.micronaut.testcontainers.kafka;
 
 import org.testcontainers.kafka.KafkaContainer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Kafka {
@@ -27,9 +28,9 @@ public class Kafka {
     }
 
     private static Map<String, String> getProperties(KafkaContainer container) {
-        final Map<String, String> map = Map.of(
+        final Map<String, String> map = new HashMap<>(Map.of(
             "kafka.bootstrap.servers", container.getBootstrapServers()
-        );
+        ));
         System.out.println("map = " + map);
         return map;
     }

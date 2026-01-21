@@ -12,4 +12,5 @@ dependencies {
     testImplementation(mnTest.junit.platform.launcher)
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
+    testImplementation(projects.testSuiteKafkaUtils)
 }

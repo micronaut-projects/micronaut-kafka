@@ -7,7 +7,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-@MicronautTest
+@MicronautTest(environments = ["kafka"])
 @Property(name = "spec.name", value = "ConsumerSeekAwareTest")
 internal class ConsumerSeekAwareTest {
     @Test

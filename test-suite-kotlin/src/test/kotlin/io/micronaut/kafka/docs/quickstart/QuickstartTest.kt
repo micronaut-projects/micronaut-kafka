@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 @Property(name = "spec.name", value = "QuickstartTest")
 @Property(name = "kafka.enabled", value = StringUtils.TRUE)
-@MicronautTest
+@MicronautTest(environments = ["kafka"])
 internal class QuickstartTest {
 
     @Inject

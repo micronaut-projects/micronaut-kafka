@@ -14,7 +14,7 @@ class ProductListener constructor(config: ProductListenerConfiguration) : Consum
     var processed: MutableList<Product> = mutableListOf()
     private var consumer: Consumer<*, *>? = null
 
-    override fun setKafkaConsumer(consumer: Consumer<Any?, Any?>?) { // <1>
+    override fun setKafkaConsumer(consumer: Consumer<Any?, Any?>) { // <1>
         this.consumer = consumer
     }
 
