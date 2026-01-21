@@ -18,6 +18,7 @@ public class Kafka {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
             } while(!container.isRunning());

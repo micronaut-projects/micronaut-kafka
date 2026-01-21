@@ -9,4 +9,9 @@ application {
 dependencies {
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
+    testImplementation(projects.testSuiteKafkaUtils)
+}
+
+tasks.named("internalStartTestResourcesService") {
+    setProperty("useClassDataSharing", false)
 }
