@@ -12,12 +12,3 @@ dependencies {
     testImplementation(projects.testSuiteKafkaUtils)
 }
 
-micronaut {
-    testResources {
-        enabled = false
-    }
-}
-
-tasks.named("internalStartTestResourcesService") {
-    setProperty("useClassDataSharing", false)
-}
