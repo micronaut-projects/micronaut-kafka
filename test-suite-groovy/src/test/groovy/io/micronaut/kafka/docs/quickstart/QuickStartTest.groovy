@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 @Property(name = 'spec.name', value = 'QuickStartTest')
 @Property(name = 'kafka.enabled', value = 'true')
-@MicronautTest
+@MicronautTest(environments = "kafka")
 class QuickStartTest extends Specification {
 
     @Inject

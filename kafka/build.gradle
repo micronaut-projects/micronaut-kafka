@@ -1,6 +1,5 @@
 plugins {
     id 'io.micronaut.build.internal.kafka-module'
-    id 'io.micronaut.test-resources'
 }
 
 configurations.all {
@@ -10,19 +9,13 @@ configurations.all {
     }
 }
 
-micronaut {
-    version = '4.10.3'
-    testResources {
-        enabled = true
-        additionalModules.add(KAFKA)
-    }
-}
 
 dependencies {
     annotationProcessor mn.micronaut.graal
 
     api libs.managed.kafka.clients
-
+    testImplementation(platform(mnTest.boms.testcontainers))
+    testImplementation(libs.testcontainers.kafka)
     compileOnly mnMicrometer.micronaut.micrometer.core
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
@@ -30,6 +23,7 @@ dependencies {
     testImplementation mnSerde.micronaut.serde.jackson
     testImplementation(mnReactor.micronaut.reactor)
     testImplementation mn.micronaut.http.client
+    testImplementation(projects.testSuiteKafkaUtils)
 
     testRuntimeOnly mnMicrometer.micronaut.micrometer.registry.statsd
     testRuntimeOnly mnTracing.micronaut.tracing.core

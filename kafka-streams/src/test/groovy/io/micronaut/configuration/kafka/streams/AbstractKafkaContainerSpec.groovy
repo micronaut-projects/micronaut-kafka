@@ -4,12 +4,18 @@ import io.micronaut.context.ApplicationContext
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
+import org.testcontainers.kafka.KafkaContainer
+
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     @Shared @AutoCleanup ApplicationContext context
     @Shared String bootstrapServers
+    @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
+        kafkaContainer = new KafkaContainer("apache/kafka-native")
+        kafkaContainer.start()
+
         startContext()
         afterKafkaStarted()
     }
@@ -26,6 +32,12 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     void stopContext() {
         context?.stop()
+    }
+
+    protected Map<String, Object> getConfiguration() {
+        def config = super.getConfiguration()
+        config['kafka.bootstrap.servers'] = kafkaContainer.getBootstrapServers()
+        config
     }
 
     void cleanupSpec() {

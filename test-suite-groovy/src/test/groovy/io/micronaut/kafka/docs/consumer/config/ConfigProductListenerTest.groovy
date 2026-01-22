@@ -2,15 +2,17 @@ package io.micronaut.kafka.docs.consumer.config
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.kafka.docs.Product
+import io.micronaut.testcontainers.kafka.Kafka
 import spock.lang.Specification
 
 class ConfigProductListenerTest extends Specification {
 
     void "test Send Product"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run(
-                'kafka.enabled': true, 'spec.name': 'ConfigProductListenerTest'
-        )
+        def config = new HashMap<>(Kafka.getProperties());
+        config.put("kafka.enabled", "true");
+        config.put("spec.name", "ConfigProductListenerTest");
+        ApplicationContext ctx = ApplicationContext.run(config)
 
         when:
         Product product = new Product('Blue Trainers', 5)

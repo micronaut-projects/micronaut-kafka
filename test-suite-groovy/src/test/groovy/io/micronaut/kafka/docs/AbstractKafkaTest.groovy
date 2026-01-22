@@ -11,7 +11,7 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
+    KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka-native")
 
     @Override
     Map<String, String> getProperties() {

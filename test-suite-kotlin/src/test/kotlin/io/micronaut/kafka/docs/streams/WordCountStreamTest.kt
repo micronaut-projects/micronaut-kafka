@@ -2,6 +2,7 @@ package io.micronaut.kafka.docs.streams
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.util.StringUtils
+import io.micronaut.testcontainers.kafka.Kafka
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -9,10 +10,11 @@ import java.util.concurrent.TimeUnit
 internal class WordCountStreamTest {
 
     @Test
+    @Suppress("UNCHECKED_CAST")
     fun testWordCounter() {
-        ApplicationContext.run(
-            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCountStreamTest")
-        ).use { ctx ->
+        val props = Kafka.getProperties() as MutableMap<String, Any>
+        props.putAll(mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCountStreamTest"))
+        ApplicationContext.run(props).use { ctx ->
             val client = ctx.getBean(WordCountClient::class.java)
             client.publishSentence("test to test for words")
 

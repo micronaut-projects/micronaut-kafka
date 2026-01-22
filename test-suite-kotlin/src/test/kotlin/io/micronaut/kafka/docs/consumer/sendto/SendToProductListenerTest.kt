@@ -13,7 +13,7 @@ class SendToProductListenerTest {
     @Test
     fun testSendProduct() {
         ApplicationContext.run(
-            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "SendToProductListenerTest")
+            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "SendToProductListenerTest"), "kafka"
         ).use { ctx ->
             val product = Product("Blue Trainers", 5)
             val client = ctx.getBean(ProductClient::class.java)

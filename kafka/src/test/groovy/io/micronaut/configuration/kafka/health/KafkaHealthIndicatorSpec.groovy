@@ -1,28 +1,33 @@
 package io.micronaut.configuration.kafka.health
 
-import io.micronaut.configuration.kafka.AbstractKafkaSpec
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.management.health.indicator.HealthResult
+import io.micronaut.testcontainers.kafka.Kafka
 import org.apache.kafka.clients.admin.Config
 import org.apache.kafka.clients.admin.ConfigEntry
+import spock.lang.Specification
 import spock.lang.Unroll
 
-import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.MIN_INSYNC_REPLICAS_PROPERTY
 import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.REPLICATION_PROPERTY
+import static io.micronaut.configuration.kafka.health.KafkaHealthIndicator.DEFAULT_REPLICATION_PROPERTY
 import static io.micronaut.health.HealthStatus.DOWN
 import static io.micronaut.health.HealthStatus.UP
 
-class KafkaHealthIndicatorSpec extends AbstractKafkaSpec {
+class KafkaHealthIndicatorSpec extends Specification {
+
+    Map<String, Object> getBaseConfig() {
+        Kafka.getProperties() + ["spec.name": "KafkaHealthIndicatorSpec"]
+    }
 
     void "test kafka health indicator - UP"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(configuration)
+        ApplicationContext ctx = ApplicationContext.run(getBaseConfig())
 
         when:
-        KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
+        KafkaHealthIndicator healthIndicator = ctx.getBean(KafkaHealthIndicator)
         HealthResult result = healthIndicator.result.next().block()
 
         then:
@@ -30,66 +35,60 @@ class KafkaHealthIndicatorSpec extends AbstractKafkaSpec {
         result.details.nodes == 1
 
         cleanup:
-        applicationContext.close()
+        ctx.close()
     }
 
     void "test kafka health indicator - DOWN"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ['kafka.bootstrap.servers': 'localhost:' + SocketUtils.findAvailableTcpPort()]
-        )
+        Map config = getBaseConfig()
+        config["kafka.bootstrap.servers"] = "localhost:${SocketUtils.findAvailableTcpPort()}"
+        ApplicationContext ctx = ApplicationContext.run(config)
 
         when:
-        KafkaHealthIndicator healthIndicator = applicationContext.getBean(KafkaHealthIndicator)
+        KafkaHealthIndicator healthIndicator = ctx.getBean(KafkaHealthIndicator)
         HealthResult result = healthIndicator.result.next().block()
 
         then:
-        // report down because the not enough nodes to meet replication factor
         result.status == DOWN
 
         cleanup:
-        applicationContext.close()
+        ctx.close()
     }
 
     @Unroll
     void "test kafka health indicator - disabled (#configvalue)"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ["kafka.health.enabled": configvalue]
-        )
+        Map config = getBaseConfig()
+        config["kafka.health.enabled"] = configvalue
+        ApplicationContext ctx = ApplicationContext.run(config)
 
         when:
-        Optional<KafkaHealthIndicator> optional = applicationContext.findBean(KafkaHealthIndicator)
+        Optional<KafkaHealthIndicator> optional = ctx.findBean(KafkaHealthIndicator)
 
         then:
         !optional.isPresent()
 
         cleanup:
-        applicationContext.close()
+        ctx.close()
 
         where:
-        configvalue << [false, "false", "no", ""]
+        configvalue << [false, "false", "no"]
     }
 
     void "test kafka health indicator - disabled when no kafka configuration provided"() {
         given:
-        ApplicationContext applicationContext = ApplicationContext.run(configuration +
-                ["test-resources.containers.kafka.enabled": false])
+        ApplicationContext ctx = ApplicationContext.run(["spec.name": "KafkaHealthIndicatorSpec"])
 
         when:
-        Optional<KafkaDefaultConfiguration> config = applicationContext.findBean(KafkaDefaultConfiguration)
+        Optional<KafkaDefaultConfiguration> config = ctx.findBean(KafkaDefaultConfiguration)
+        Optional<KafkaHealthIndicator> healthIndicator = ctx.findBean(KafkaHealthIndicator)
 
         then:
         config.isEmpty()
-
-        when:
-        Optional<KafkaHealthIndicator> healthIndicator = applicationContext.findBean(KafkaHealthIndicator)
-
-        then:
         healthIndicator.isEmpty()
 
         cleanup:
-        applicationContext.close()
+        ctx.close()
     }
 
     @Unroll

@@ -17,7 +17,7 @@ internal class MyTopicFactoryTest {
             mapOf(
                 "kafka.enabled" to "true",
                 "spec.name" to "MyTopicFactoryTest"
-            )
+            ), "kafka"
         ).use { ctx ->
             val newTopics = ctx.getBean(KafkaNewTopics::class.java)
             Awaitility.await().atMost(5, TimeUnit.SECONDS).until { areNewTopicsDone(newTopics) }

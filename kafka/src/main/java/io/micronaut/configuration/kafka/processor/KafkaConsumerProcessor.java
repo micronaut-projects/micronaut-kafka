@@ -278,7 +278,7 @@ class KafkaConsumerProcessor
     }
 
     @Override
-    public void process(BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
+    public <B> void process(BeanDefinition<B> beanDefinition, ExecutableMethod<B, ?> method) {
         List<AnnotationValue<Topic>> topicAnnotations = method.getDeclaredAnnotationValuesByType(Topic.class);
         final AnnotationValue<KafkaListener> consumerAnnotation = method.getAnnotation(KafkaListener.class);
         if (CollectionUtils.isEmpty(topicAnnotations)) {

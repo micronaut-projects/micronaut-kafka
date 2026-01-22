@@ -1,6 +1,7 @@
 package io.micronaut.kafka.docs.producer.inject
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.testcontainers.kafka.Kafka
 import org.apache.kafka.clients.producer.RecordMetadata
 import spock.lang.Specification
 
@@ -11,9 +12,11 @@ class BookSenderTest extends Specification {
     // tag::test[]
     void "test Book Sender"() {
         given:
-        ApplicationContext ctx = ApplicationContext.run(  // <1>
-            'kafka.enabled': true, 'spec.name': 'BookSenderTest'
-        )
+        def config = new HashMap<>(Kafka.getProperties());
+        config.put("kafka.enabled", "true");
+        config.put("spec.name", "BookSenderTest");
+
+        ApplicationContext ctx = ApplicationContext.run(config)  // <1>
         BookSender bookSender = ctx.getBean(BookSender) // <2>
         Book book = new Book('The Stand')
 

@@ -12,7 +12,7 @@ class WordCounterTest {
     @Test
     fun testWordCounter() {
         ApplicationContext.run(
-            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCounterTest")
+            mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCounterTest"), "kafka"
         ).use { ctx ->
             val client = ctx.getBean(WordCounterClient::class.java)
             client.send("test to test for words")

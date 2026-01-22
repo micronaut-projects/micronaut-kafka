@@ -6,6 +6,8 @@ import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.event.ApplicationEventListener
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
+import io.micronaut.test.support.TestPropertyProvider
+import io.micronaut.testcontainers.kafka.Kafka
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -18,13 +20,18 @@ import static org.apache.kafka.clients.consumer.internals.SubscriptionState.Fetc
 // as client id and subscriptions - consider refactoring
 @Property(name = "spec.name", value = "KafkaConsumerEventSpec")
 @MicronautTest(startApplication = false)
-class KafkaConsumerEventSpec extends Specification {
+class KafkaConsumerEventSpec extends Specification implements TestPropertyProvider {
 
     @Inject
     KafkaConsumerSubscribedEventListener subscribedEventListener
 
     @Inject
     KafkaConsumerStartedPollingEventListener startedPollingEvent
+
+    @Override
+    Map<String, String> getProperties() {
+        return Kafka.getProperties()
+    }
 
     void "listen to kafka consumer subscribed events"() {
         expect: "the event is emitted and consumed by the event listener"

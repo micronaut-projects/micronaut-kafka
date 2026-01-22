@@ -7,8 +7,12 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.micronaut.test.support.TestPropertyProvider;
+import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
@@ -16,7 +20,12 @@ import static org.awaitility.Awaitility.await;
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MyTest extends AbstractKafkaTest {
+class MyTest implements TestPropertyProvider {
+
+    @Override
+    public Map<String, String> getProperties() {
+        return Kafka.getProperties();
+    }
 
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {

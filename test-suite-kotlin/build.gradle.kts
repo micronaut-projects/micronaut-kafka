@@ -1,8 +1,7 @@
 
 plugins {
     id("io.micronaut.internal.build.kafka-testsuite")
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
+    id("io.micronaut.build.internal.kotlin-kapt")
 }
 
 dependencies {
@@ -11,4 +10,7 @@ dependencies {
     testImplementation(mnTest.micronaut.test.junit5)
     testImplementation(mn.kotlinx.coroutines.core)
     testImplementation(mnTest.junit.platform.launcher)
+    testImplementation(platform(mnTest.boms.testcontainers))
+    testImplementation(libs.testcontainers.kafka)
+    testImplementation(projects.testSuiteKafkaUtils)
 }

@@ -61,10 +61,10 @@ import static org.apache.kafka.common.utils.Time.SYSTEM;
 @Requires(bean = KafkaDefaultConfiguration.class)
 @Requires(property = KafkaHealthConfigurationProperties.PREFIX + ".enabled", value = StringUtils.TRUE, defaultValue = StringUtils.TRUE)
 public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceListener {
+    public static final String MIN_INSYNC_REPLICAS_PROPERTY = "min.insync.replicas";
+    public static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
+    public static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
     private static final String ID = "kafka";
-    private static final String MIN_INSYNC_REPLICAS_PROPERTY = "min.insync.replicas";
-    private static final String REPLICATION_PROPERTY = "offsets.topic.replication.factor";
-    private static final String DEFAULT_REPLICATION_PROPERTY = "default.replication.factor";
     private static final String DETAILS_BROKER_ID = "brokerId";
     private static final String DETAILS_CLUSTER_ID = "clusterId";
     private static final String DETAILS_NODES = "nodes";
