@@ -1,0 +1,6 @@
+The Micronaut Control Panel module has support for Kafka by adding the following dependency:
+
+dependency:io.micronaut.controlpanel:micronaut-control-panel-kafka[scope=developmentOnly]
+
+Check
+https://micronaut-projects.github.io/micronaut-control-panel/latest/guide/#kafka[the documentation] for more information.

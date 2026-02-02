@@ -36,5 +36,6 @@ kafkaStreams:
   kafkaStreamInteractiveQuery: Interactive Query Service
   kafkaStreamHealth: Kafka Stream Health Checks
   kafkaStreamExceptions: Handling Uncaught Exceptions
+controlPanel: Control Panel
 kafkaGuides: Guides
 repository: Repository
