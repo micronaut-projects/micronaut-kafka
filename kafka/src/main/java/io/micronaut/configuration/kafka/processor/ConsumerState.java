@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -70,6 +71,8 @@ abstract class ConsumerState {
     private CountDownLatch startupLatch;
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
+    private volatile boolean shutdownRequested;
+    private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
     protected ConsumerState(
         KafkaConsumerProcessor kafkaConsumerProcessor,
@@ -142,6 +145,18 @@ abstract class ConsumerState {
         }
     }
 
+    void requestShutdown() {
+        shutdownRequested = true;
+    }
+
+    CompletableFuture<Void> getShutdownFuture() {
+        return shutdownFuture;
+    }
+
+    boolean isActive() {
+        return closedState != ConsumerCloseState.CLOSED;
+    }
+
     void close() {
         if (closedState == ConsumerCloseState.POLLING) {
             final Instant start = Instant.now();
@@ -163,15 +178,18 @@ abstract class ConsumerState {
     void threadPollLoop() {
         try (kafkaConsumer) {
             holdStartup();
-            //noinspection InfiniteLoopStatement
-            while (true) { //NOSONAR
+
+            while (!shutdownRequested) {
                 refreshAssignmentsPollAndProcessRecords();
             }
         } catch (InterruptedException e) {
-            closedState = ConsumerCloseState.CLOSED;
+            LOG.debug("Consumer {} interrupted", info.clientId);
             Thread.currentThread().interrupt();
         } catch (WakeupException e) {
+            LOG.debug("Consumer {} woken up", info.clientId);
+        } finally {
             closedState = ConsumerCloseState.CLOSED;
+            shutdownFuture.complete(null);
         }
     }
 
