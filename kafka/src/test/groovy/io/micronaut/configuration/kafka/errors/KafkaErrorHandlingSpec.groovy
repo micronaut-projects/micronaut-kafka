@@ -21,9 +21,7 @@ class KafkaErrorHandlingSpec extends AbstractEmbeddedServerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micronaut.executors.default.type': 'FIXED',
-                 'micronaut.executors.default.nThreads': 5,
-                 (EMBEDDED_TOPICS): ["errors"]]
+                [(EMBEDDED_TOPICS): ["errors"]]
     }
 
     void "test an exception that is thrown is not committed"() {

@@ -32,9 +32,7 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Override
     protected Map<String, Object> getConfiguration() {
-        return super.getConfiguration() + ['micronaut.executors.default.type': 'FIXED',
-                                           'micronaut.executors.default.nThreads': 5,
-                                           'micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
+        return super.getConfiguration() + ['micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
     }
 
     void "test batch mode with 'resume' error strategy"() {

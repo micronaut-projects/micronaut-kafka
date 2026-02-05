@@ -15,9 +15,7 @@ class KafkaPauseResumeSpec extends AbstractEmbeddedServerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micronaut.executors.default.type': 'FIXED',
-                 'micronaut.executors.default.nThreads': 5,
-                 'micrometer.metrics.enabled' : true,
+                ['micrometer.metrics.enabled' : true,
                  'endpoints.metrics.sensitive': false,
                  (EMBEDDED_TOPICS)            : ['fruits']]
     }

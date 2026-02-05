@@ -28,8 +28,6 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration + [
-                'micronaut.executors.default.type': 'FIXED',
-                'micronaut.executors.default.nThreads': 5,
                 'kafka.producers.tx-word-counter.key.serializer'  : StringSerializer.name,
                 'kafka.producers.tx-word-counter.value.serializer': IntegerSerializer.name
         ]

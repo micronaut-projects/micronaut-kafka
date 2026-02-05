@@ -45,9 +45,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micronaut.executors.default.type': 'FIXED',
-                 'micronaut.executors.default.nThreads': 5,
-                 'micrometer.metrics.enabled': true,
+                ['micrometer.metrics.enabled': true,
                  'endpoints.metrics.sensitive': false,
                  'my.thread.count': 3,
                  (EMBEDDED_TOPICS): ['words', 'books', 'words-records', 'books-records']]

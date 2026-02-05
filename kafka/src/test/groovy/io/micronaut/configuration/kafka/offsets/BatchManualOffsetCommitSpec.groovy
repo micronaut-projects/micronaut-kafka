@@ -21,9 +21,7 @@ class BatchManualOffsetCommitSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['micronaut.executors.default.type': 'FIXED',
-                 'micronaut.executors.default.nThreads': 5,
-                 (EMBEDDED_TOPICS): [TOPIC_SYNC]]
+                [(EMBEDDED_TOPICS): [TOPIC_SYNC]]
     }
 
     void "test manual offset commit"() {
