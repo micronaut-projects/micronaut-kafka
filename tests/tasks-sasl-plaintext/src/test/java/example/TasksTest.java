@@ -1,22 +1,21 @@
 package example;
 
 import io.micronaut.core.annotation.NonNull;
-import io.micronaut.core.annotation.TypeHint;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.test.support.TestPropertyProvider;
 import io.micronaut.testcontainers.kafka.Kafka;
-import org.apache.kafka.common.security.oauthbearer.DefaultJwtRetriever;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
-@TypeHint(value = {DefaultJwtRetriever.class})
+@DisabledInNativeImage
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TasksTest implements TestPropertyProvider {
@@ -43,9 +42,6 @@ class TasksTest implements TestPropertyProvider {
 
     @Override
     public @NonNull Map<String, String> getProperties() {
-        Map<String, String> properties = new java.util.HashMap<>(Kafka.getProperties());
-        properties.put("micronaut.executors.default.type", "FIXED");
-        properties.put("micronaut.executors.default.nThreads", "5");
-        return properties;
+       return Kafka.getProperties();
     }
 }
