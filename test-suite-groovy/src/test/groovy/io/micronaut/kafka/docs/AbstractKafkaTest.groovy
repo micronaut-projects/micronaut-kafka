@@ -17,6 +17,9 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
     Map<String, String> getProperties() {
         kafkaContainer.start()
 
-        ["kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()]
+        ["kafka.bootstrap.servers": kafkaContainer.getBootstrapServers(),
+         "micronaut.executors.default.type": "FIXED",
+         "micronaut.executors.default.nThreads": "5"
+        ]
     }
 }
