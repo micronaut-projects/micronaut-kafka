@@ -37,7 +37,9 @@ class KafkaProducerSpec extends AbstractKafkaContainerSpec {
 
     Map<String, Object> getConfiguration() {
         super.configuration +
-        ['micronaut.application.name'                : 'test-app',
+        ['micronaut.executors.default.type': 'FIXED',
+         'micronaut.executors.default.nThreads': 5,
+         'micronaut.application.name'                : 'test-app',
          "kafka.schema.registry.url"                 : "http://localhot:8081",
          "kafka.producers.named.key.serializer"      : StringSerializer.name,
          "kafka.producers.named.value.serializer"    : StringSerializer.name,

@@ -43,7 +43,9 @@ class KafkaErrorsSpec extends AbstractEmbeddedServerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ['kafka.consumers.default.max.poll.records': 10,
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 'kafka.consumers.default.max.poll.records': 10,
                  'errors-spec-topic-name': "errors-spec-topic"]
     }
 

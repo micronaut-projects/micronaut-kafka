@@ -20,7 +20,9 @@ class AssignToPartitionSpec extends AbstractKafkaContainerSpec {
     public static final String TOPIC_SYNC = "AssignToPartitionSpec-products-sync"
 
     protected Map<String, Object> getConfiguration() {
-        super.configuration + [(EMBEDDED_TOPICS): [TOPIC_SYNC]]
+        super.configuration + ['micronaut.executors.default.type': 'FIXED',
+                               'micronaut.executors.default.nThreads': 5,
+                               (EMBEDDED_TOPICS): [TOPIC_SYNC]]
     }
 
     void "test manual offset commit"() {

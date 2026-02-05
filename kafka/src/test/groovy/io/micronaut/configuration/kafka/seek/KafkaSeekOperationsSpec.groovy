@@ -32,7 +32,9 @@ class KafkaSeekOperationsSpec extends AbstractKafkaContainerSpec {
 
     @Override
     protected Map<String, Object> getConfiguration() {
-        super.configuration + ['kafka.consumers.default.max.poll.records': 1, (EMBEDDED_TOPICS): TEST_TOPIC]
+        super.configuration + ['micronaut.executors.default.type': 'FIXED',
+                               'micronaut.executors.default.nThreads': 5,
+                               'kafka.consumers.default.max.poll.records': 1, (EMBEDDED_TOPICS): TEST_TOPIC]
     }
 
     @Override

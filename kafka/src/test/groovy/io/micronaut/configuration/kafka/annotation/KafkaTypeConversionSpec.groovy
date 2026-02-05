@@ -18,7 +18,9 @@ class KafkaTypeConversionSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                [(EMBEDDED_TOPICS): ['uuids']]
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 (EMBEDDED_TOPICS): ['uuids']]
     }
 
     void "test send valid UUID key"() {

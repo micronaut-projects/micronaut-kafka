@@ -28,6 +28,8 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration + [
+                'micronaut.executors.default.type': 'FIXED',
+                'micronaut.executors.default.nThreads': 5,
                 'kafka.producers.tx-word-counter.key.serializer'  : StringSerializer.name,
                 'kafka.producers.tx-word-counter.value.serializer': IntegerSerializer.name
         ]
@@ -138,6 +140,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
     @KafkaListener(
+            groupId = "word-collector-group",
             isolation = READ_COMMITTED,
             offsetReset = EARLIEST,
             offsetStrategy = SYNC,

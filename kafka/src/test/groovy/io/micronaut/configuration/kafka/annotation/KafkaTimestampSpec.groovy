@@ -13,7 +13,9 @@ class KafkaTimestampSpec extends AbstractKafkaContainerSpec {
     public static final String TOPIC_WORDS = "KafkaTimestampSpec-words"
 
     protected Map<String, Object> getConfiguration() {
-        super.configuration + [(EMBEDDED_TOPICS): [TOPIC_WORDS]]
+        super.configuration + ['micronaut.executors.default.type': 'FIXED',
+                               'micronaut.executors.default.nThreads': 5,
+                               (EMBEDDED_TOPICS): [TOPIC_WORDS]]
     }
 
     void "test client without timestamp"() {

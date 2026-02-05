@@ -25,7 +25,9 @@ class KafkaSendToSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                [(EMBEDDED_TOPICS): [TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO]]
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 (EMBEDDED_TOPICS): [TOPIC_SINGLE, TOPIC_QUANTITY, TOPIC_FLOWABLE, TOPIC_FLUX, TOPIC_MONO]]
     }
 
     void "test send to another topic - blocking"() {

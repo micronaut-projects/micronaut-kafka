@@ -19,7 +19,9 @@ class BatchManualAckSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                [(EMBEDDED_TOPICS): [TOPIC_SYNC]]
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 (EMBEDDED_TOPICS): [TOPIC_SYNC]]
     }
 
     void "test manual ack"() {

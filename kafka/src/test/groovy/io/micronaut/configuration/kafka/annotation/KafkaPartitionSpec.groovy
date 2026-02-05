@@ -19,7 +19,9 @@ class KafkaPartitionSpec extends AbstractEmbeddedServerSpec {
 
     Map<String, Object> getConfiguration() {
         super.configuration +
-                ["kafka.consumers.kafka-partition-group.allow.auto.create.topics" : false]
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 "kafka.consumers.kafka-partition-group.allow.auto.create.topics" : false]
     }
 
     void "test client without partition"() {

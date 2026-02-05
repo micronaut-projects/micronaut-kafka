@@ -33,7 +33,9 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
 
     @Override
     protected Map<String, Object> getConfiguration() {
-        super.configuration + [(EMBEDDED_TOPICS): TEST_TOPIC]
+        super.configuration + ['micronaut.executors.default.type': 'FIXED',
+                               'micronaut.executors.default.nThreads': 5,
+                               (EMBEDDED_TOPICS): TEST_TOPIC]
     }
 
     void "perform seek operations on partitions assigned"() {

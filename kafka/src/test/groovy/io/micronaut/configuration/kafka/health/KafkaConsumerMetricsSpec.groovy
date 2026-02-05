@@ -27,7 +27,9 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                ["micrometer.metrics.enabled" : true,
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 "micrometer.metrics.enabled" : true,
                  'endpoints.metrics.sensitive': false,
                  (EMBEDDED_TOPICS)            : ["words-metrics", "words", "books", "words-records", "books-records"]]
     }

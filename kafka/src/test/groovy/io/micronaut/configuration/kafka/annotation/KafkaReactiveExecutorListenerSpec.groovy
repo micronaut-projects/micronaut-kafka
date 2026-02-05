@@ -24,6 +24,8 @@ class KafkaReactiveExecutorListenerSpec extends AbstractKafkaContainerSpec {
     protected Map<String, Object> getConfiguration() {
         super.configuration +
                 [(EMBEDDED_TOPICS): [TOPIC_NAME],
+                 'micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
                  'kafka.producers.default.executor': TaskExecutors.BLOCKING]
     }
 

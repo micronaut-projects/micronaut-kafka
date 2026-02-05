@@ -33,7 +33,9 @@ class KafkaBatchListenerSpec extends AbstractKafkaContainerSpec {
 
     protected Map<String, Object> getConfiguration() {
         super.configuration +
-                [(EMBEDDED_TOPICS): [TITLES_TOPIC,
+                [       'micronaut.executors.default.type': 'FIXED',
+                        'micronaut.executors.default.nThreads': 5,
+                        (EMBEDDED_TOPICS): [TITLES_TOPIC,
                                      BOOKS_LIST_TOPIC,
                                      BOOKS_ARRAY_TOPIC,
                                      BOOKS_TOPIC,

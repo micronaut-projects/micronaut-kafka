@@ -21,6 +21,13 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
     private static final String TOPIC_COMMIT = "on-deserialization-error-commit"
     private static final String TOPIC_NOTHING = "on-deserialization-error-do-nothing"
 
+    @Override
+    protected Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ['micronaut.executors.default.type': 'FIXED',
+                                           'micronaut.executors.default.nThreads': 5,
+                                           'micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
+    }
+
     void "test seek past record on deserialization error by default"() {
         given:
         StringProducer stringProducer = context.getBean(StringProducer)

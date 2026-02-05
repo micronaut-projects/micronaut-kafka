@@ -13,7 +13,9 @@ class KafkaPartitionedErrorsSpec extends KafkaErrorsSpec {
     @Override
     protected Map<String, Object> getConfiguration() {
         return super.configuration +
-                ['spec.name': KafkaErrorsSpec.class.simpleName,
+                ['micronaut.executors.default.type': 'FIXED',
+                 'micronaut.executors.default.nThreads': 5,
+                 'spec.name': KafkaErrorsSpec.class.simpleName,
                  'kafka.consumers.default.max.poll.records': 10,
                   'errors-spec-topic-name': 'partitioned-errors-spec-topic',
                   'kafka.consumers.default.allow.auto.create.topics' : false]
