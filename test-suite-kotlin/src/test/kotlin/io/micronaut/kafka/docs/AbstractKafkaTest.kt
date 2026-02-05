@@ -14,11 +14,17 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
     }
 
     override fun getProperties(): MutableMap<String, String> {
-        if(!MY_KAFKA.isRunning) {
+        if (!MY_KAFKA.isRunning) {
             MY_KAFKA.start()
         }
-        return mutableMapOf(
+
+        val properties = mutableMapOf(
             "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
         )
+
+        properties["micronaut.executors.default.type"] = "FIXED"
+        properties["micronaut.executors.default.nThreads"] = "5"
+
+        return properties
     }
 }
