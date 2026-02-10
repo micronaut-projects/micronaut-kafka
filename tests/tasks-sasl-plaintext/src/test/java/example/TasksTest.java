@@ -8,14 +8,12 @@ import io.micronaut.test.support.TestPropertyProvider;
 import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
-@DisabledInNativeImage
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TasksTest implements TestPropertyProvider {
