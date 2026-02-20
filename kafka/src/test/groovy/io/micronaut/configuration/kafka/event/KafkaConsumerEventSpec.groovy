@@ -31,10 +31,6 @@ class KafkaConsumerEventSpec extends Specification implements TestPropertyProvid
     @Override
     Map<String, String> getProperties() {
         Map<String, String> properties = Kafka.getProperties()
-        properties.putAll([
-                'micronaut.executors.default.type'    : 'FIXED',
-                'micronaut.executors.default.nThreads': '5'
-        ])
         return properties
     }
 

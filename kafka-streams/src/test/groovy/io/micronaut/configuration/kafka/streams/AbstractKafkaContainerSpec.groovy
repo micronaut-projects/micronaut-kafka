@@ -36,11 +36,7 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     protected Map<String, Object> getConfiguration() {
         def config = super.getConfiguration()
-
         config['kafka.bootstrap.servers'] = kafkaContainer.getBootstrapServers()
-        config['micronaut.executors.default.type'] = 'FIXED'
-        config['micronaut.executors.default.nThreads'] = 5
-
         return config
     }
 

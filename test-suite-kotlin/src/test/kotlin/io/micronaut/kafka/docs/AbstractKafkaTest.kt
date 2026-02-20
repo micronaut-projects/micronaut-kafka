@@ -21,10 +21,6 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
         val properties = mutableMapOf(
             "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
         )
-
-        properties["micronaut.executors.default.type"] = "FIXED"
-        properties["micronaut.executors.default.nThreads"] = "5"
-
         return properties
     }
 }

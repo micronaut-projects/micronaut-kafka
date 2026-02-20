@@ -30,11 +30,8 @@ public class Kafka {
 
     private static Map<String, String> getProperties(KafkaContainer container) {
         final Map<String, String> map = new HashMap<>(Map.of(
-            "kafka.bootstrap.servers", container.getBootstrapServers(),
-            "micronaut.executors.default.type", "FIXED",
-            "micronaut.executors.default.nThreads", "5"
+            "kafka.bootstrap.servers", container.getBootstrapServers()
         ));
-        System.out.println("map = " + map);
         return map;
     }
 }
