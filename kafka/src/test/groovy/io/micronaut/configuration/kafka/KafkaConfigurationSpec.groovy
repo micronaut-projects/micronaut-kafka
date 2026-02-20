@@ -174,8 +174,6 @@ class KafkaConfigurationSpec extends Specification {
         given:
         applicationContext = ApplicationContext.run(
                 'spec.name': 'KafkaConfigurationSpec',
-                'micronaut.executors.default.type': 'FIXED',
-                'micronaut.executors.default.nThreads': '1',
                 ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
                 ('kafka.consumers.my-kebab-group.' + ConsumerConfig.GROUP_ID_CONFIG): "my-kebab-group",
                 ('kafka.consumers.my-kebab-group.' + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): IntegerDeserializer.name,
