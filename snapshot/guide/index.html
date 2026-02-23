@@ -62,9 +62,11 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -161,9 +163,11 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>8.3</strong><span>Handling Uncaught Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-controlPanel"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+        
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
         
         </div>
     </div>
@@ -2218,12 +2222,14 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
     }
 
     override fun getProperties(): MutableMap&lt;String, String&gt; {
-        if(!MY_KAFKA.isRunning) {
+        if (!MY_KAFKA.isRunning) {
             MY_KAFKA.start()
         }
-        return mutableMapOf(
+
+        val properties = mutableMapOf(
             "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
         )
+        return properties
     }
 }</code></pre>
 </div>
@@ -7090,7 +7096,42 @@ public class MyStreamsUncaughtExceptionHandler
 </div>
 </div>
 
-<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>9 Guides</h1>
+<h1 id="controlPanel"><a class="anchor" href="#controlPanel"></a>9 Control Panel</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/controlPanel.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The Micronaut Control Panel module has support for Kafka by adding the following dependency:</p>
+</div>
+<div class="paragraph">
+<p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">developmentOnly(<span class="hljs-string">"io.micronaut.controlpanel:micronaut-control-panel-kafka")</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.controlpanel&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-control-panel-kafka&lt;/artifactId&gt;
+    &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</p>
+</div>
+<div class="paragraph">
+<p>Check
+<a href="https://micronaut-projects.github.io/micronaut-control-panel/latest/guide/#kafka">the documentation</a> for more information.</p>
+</div>
+
+<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>10 Guides</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaGuides.adoc"'>
@@ -7106,7 +7147,7 @@ public class MyStreamsUncaughtExceptionHandler
 <p><a href="https://guides.micronaut.io/latest/tag-kafka.html" class="bare">https://guides.micronaut.io/latest/tag-kafka.html</a></p>
 </div>
 
-<h1 id="repository"><a class="anchor" href="#repository"></a>10 Repository</h1>
+<h1 id="repository"><a class="anchor" href="#repository"></a>11 Repository</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/repository.adoc"'>
