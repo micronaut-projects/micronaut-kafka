@@ -1,0 +1,30 @@
+[
+  {
+    "name": "org.apache.kafka.common.security.oauthbearer.DefaultJwtValidator",
+    "condition" : {
+      "typeReachable": "org.apache.kafka.common.config.ConfigDef"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.kafka.common.security.oauthbearer.DefaultJwtRetriever",
+    "condition" : {
+      "typeReachable": "org.apache.kafka.common.config.ConfigDef"
+    },
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+
+        ]
+      }
+    ]
+  }
+]

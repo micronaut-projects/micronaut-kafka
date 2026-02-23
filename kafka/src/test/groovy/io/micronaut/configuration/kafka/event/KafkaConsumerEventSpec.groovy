@@ -30,7 +30,8 @@ class KafkaConsumerEventSpec extends Specification implements TestPropertyProvid
 
     @Override
     Map<String, String> getProperties() {
-        return Kafka.getProperties()
+        Map<String, String> properties = Kafka.getProperties()
+        return properties
     }
 
     void "listen to kafka consumer subscribed events"() {

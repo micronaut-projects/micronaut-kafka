@@ -12,6 +12,11 @@ import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 
 class KafkaConsumerAutoStartupSpec extends AbstractKafkaContainerSpec {
 
+    @Override
+    protected Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ['micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
+    }
+
     @Shared
     TestListener listener
 

@@ -30,6 +30,11 @@ class KafkaBatchErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static final String BATCH_MODE_RETRY_CONDITIONALLY_DESER = "batch-mode-retry-conditionally-deser"
     static final String BATCH_MODE_RETRY_HANDLE_ALL = "batch-mode-retry-handle-all"
 
+    @Override
+    protected Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ['micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
+    }
+
     void "test batch mode with 'resume' error strategy"() {
         when: "A consumer throws an exception"
         MyClient myClient = context.getBean(MyClient)

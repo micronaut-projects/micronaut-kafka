@@ -138,6 +138,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
     @KafkaListener(
+            groupId = "word-collector-group",
             isolation = READ_COMMITTED,
             offsetReset = EARLIEST,
             offsetStrategy = SYNC,

@@ -77,8 +77,8 @@ class KafkaConfigurationSpec extends Specification {
 
         then: "the new consumer's deserializers have the configured encoding"
         consumer != null
-        (consumer.delegate.deserializers.keyDeserializer as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
-        (consumer.delegate.deserializers.valueDeserializer as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
+        (consumer.delegate.deserializers.keyDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (consumer.delegate.deserializers.valueDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         consumer.close()
@@ -103,8 +103,8 @@ class KafkaConfigurationSpec extends Specification {
 
         then: "the new producer's serializers have the configured encoding"
         producer != null
-        (producer.keySerializer as StringSerializer).encoding.name() == StandardCharsets.US_ASCII.name()
-        (producer.valueSerializer as StringSerializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
+        (producer.keySerializerPlugin.get() as StringSerializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (producer.valueSerializerPlugin.get() as StringSerializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
 
         cleanup:
         producer.close()
@@ -192,8 +192,8 @@ class KafkaConfigurationSpec extends Specification {
         then:
         kafkaConsumer != null
         kafkaConsumer.delegate.groupId.orElse(null) == 'MY_KEBAB_GROUP'
-        kafkaConsumer.delegate.deserializers.keyDeserializer instanceof IntegerDeserializer
-        kafkaConsumer.delegate.deserializers.valueDeserializer instanceof StringDeserializer
+        kafkaConsumer.delegate.deserializers.keyDeserializer() instanceof IntegerDeserializer
+        kafkaConsumer.delegate.deserializers.valueDeserializer() instanceof StringDeserializer
 
         cleanup:
         applicationContext.close()

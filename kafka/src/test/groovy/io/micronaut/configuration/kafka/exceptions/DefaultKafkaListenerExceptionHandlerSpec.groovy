@@ -21,6 +21,11 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
     private static final String TOPIC_COMMIT = "on-deserialization-error-commit"
     private static final String TOPIC_NOTHING = "on-deserialization-error-do-nothing"
 
+    @Override
+    protected Map<String, Object> getConfiguration() {
+        return super.getConfiguration() + ['micrometer.metrics.enabled' : true, 'endpoints.metrics.sensitive': false]
+    }
+
     void "test seek past record on deserialization error by default"() {
         given:
         StringProducer stringProducer = context.getBean(StringProducer)
@@ -82,7 +87,7 @@ class DefaultKafkaListenerExceptionHandlerSpec extends AbstractEmbeddedServerSpe
             errorHandler.handle(exception)
             TopicPartition tp = new TopicPartition(topic, 0)
             currentPosition = exception.kafkaConsumer.position(tp)
-            OffsetAndMetadata committedOffsetAndMetadata = exception.kafkaConsumer.committed(tp)
+            OffsetAndMetadata committedOffsetAndMetadata = exception.kafkaConsumer.committed(Set.of(tp)).get(tp)
             if (committedOffsetAndMetadata != null) {
                 committedOffset = committedOffsetAndMetadata.offset()
             } else {

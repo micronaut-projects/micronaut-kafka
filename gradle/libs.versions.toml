@@ -1,11 +1,11 @@
 [versions]
-micronaut = "5.0.0-M6"
-micronaut-platform = "4.10.6"
-micronaut-gradle-plugin = "4.6.1"
+micronaut = "5.0.0-M13"
+micronaut-platform = "4.10.8"
+micronaut-gradle-plugin = "4.6.2"
 micronaut-test = "5.0.0-M3"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
-managed-kafka = '3.9.1'
+managed-kafka = '4.1.1'
 
 groovy = "4.0.27"
 

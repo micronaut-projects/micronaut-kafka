@@ -32,7 +32,6 @@ public class Kafka {
         final Map<String, String> map = new HashMap<>(Map.of(
             "kafka.bootstrap.servers", container.getBootstrapServers()
         ));
-        System.out.println("map = " + map);
         return map;
     }
 }

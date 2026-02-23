@@ -37,7 +37,7 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
     protected Map<String, Object> getConfiguration() {
         def config = super.getConfiguration()
         config['kafka.bootstrap.servers'] = kafkaContainer.getBootstrapServers()
-        config
+        return config
     }
 
     void cleanupSpec() {

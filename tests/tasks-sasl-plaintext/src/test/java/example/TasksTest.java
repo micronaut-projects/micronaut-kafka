@@ -40,6 +40,6 @@ class TasksTest implements TestPropertyProvider {
 
     @Override
     public @NonNull Map<String, String> getProperties() {
-        return Kafka.getProperties();
+       return Kafka.getProperties();
     }
 }
