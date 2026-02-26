@@ -11,10 +11,3 @@ dependencies {
     implementation(libs.testcontainers.kafka)
     testImplementation(projects.testSuiteKafkaUtils)
 }
-
-//TODO remove once Micronaut Test ships Spock version compatible with Groovy 5
-configurations.all {
-    resolutionStrategy {
-        force("org.spockframework:spock-core:2.4-M7-groovy-5.0")
-    }
-}
