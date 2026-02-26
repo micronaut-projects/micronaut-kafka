@@ -8,6 +8,7 @@ configurations.all {
     }
 }
 dependencies {
+    implementation(platform(libs.micronaut.test))
     implementation projects.micronautKafka
     implementation mnSerde.micronaut.serde.jackson
     implementation mn.snakeyaml

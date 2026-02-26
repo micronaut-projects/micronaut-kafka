@@ -2,7 +2,7 @@
 micronaut = "5.0.0-M13"
 micronaut-platform = "4.10.8"
 micronaut-gradle-plugin = "4.6.2"
-micronaut-test = "5.0.0-M3"
+micronaut-test = "5.0.0-M6"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka = '4.1.1'
@@ -39,6 +39,7 @@ micronaut-micrometer = { module = "io.micronaut.micrometer:micronaut-micrometer-
 micronaut-reactor = { module = "io.micronaut.reactor:micronaut-reactor-bom", version.ref = "micronaut-reactor" }
 micronaut-serde = { module = "io.micronaut.serde:micronaut-serde-bom", version.ref = "micronaut-serde" }
 micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", version.ref = "micronaut-tracing" }
+micronaut-test = { module = "io.micronaut.test:micronaut-test-bom", version.ref = "micronaut-test" }
 testcontainers = { module = "org.testcontainers:testcontainers" }
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
