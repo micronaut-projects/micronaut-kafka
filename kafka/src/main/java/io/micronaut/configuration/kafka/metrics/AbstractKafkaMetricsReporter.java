@@ -51,7 +51,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
-        if (!meterRegistries.contains(registry)) {
+        if (\!meterRegistries.contains(registry)) {
             meterRegistries.add(registry);
         }
     }
@@ -81,7 +81,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     @Override
     public void configure(Map<String, ?> configs) {
         Object meterRegistry = configs.get("meter.registry");
-        if (meterRegistry != null) {
+        if (meterRegistry \!= null) {
             meterRegistries.add((MeterRegistry) meterRegistry);
         }
     }
@@ -89,7 +89,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     @PreDestroy
     @Override
     public void close() {
-        if (metrics != null) {
+        if (metrics \!= null) {
             metrics.clear();
             metrics = null;
         }
@@ -97,6 +97,16 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
+        List<Tag> tags = getTagFunction().apply(metric.metricName());
+        if (tags.isEmpty()) {
+            // Skip metrics that resolve to no tags. Kafka's internal bookkeeping metrics
+            // (e.g. kafka-metrics-count/count from the root Metrics instance) carry no tags,
+            // whereas the same metric name is later registered with tags (e.g. client-id) by
+            // the actual client instance. Registering both the tagless and tagged variants with
+            // Prometheus causes a WARN because Prometheus requires every occurrence of a given
+            // metric name to carry exactly the same set of label (tag) keys.
+            return;
+        }
         KafkaMetricMeterTypeBuilder.newBuilder()
                 .prefix(getMetricPrefix())
                 .metric(metric)
@@ -116,7 +126,16 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     /**
-     * The tags to include in the gauge. Defaults to just the client-id.
+     * The tags to include in the gauge.
+     *
+     * <p>Defaults to {@code client-id} and {@code topic}. {@code node-id} is intentionally
+     * excluded from the base set: Kafka registers certain metrics (e.g. {@code request-total})
+     * both with and without a {@code node-id} tag depending on which internal client instance
+     * performs the registration. Including {@code node-id} here causes some occurrences of a
+     * metric name to carry {@code [client_id, node_id]} while others carry only
+     * {@code [client_id]}, which Prometheus rejects with a tag-key mismatch WARN. Subclasses
+     * that genuinely require per-node breakdown may override this method and add
+     * {@link #NODE_ID_TAG} explicitly.
      *
      * @return The tags to include
      */
@@ -124,7 +143,6 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         HashSet<String> tags = new HashSet<>();
         tags.add(CLIENT_ID_TAG);
         tags.add(TOPIC_TAG);
-        tags.add(NODE_ID_TAG);
         return tags;
     }
 
