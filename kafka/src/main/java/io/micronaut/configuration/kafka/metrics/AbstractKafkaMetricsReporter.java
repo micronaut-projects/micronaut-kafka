@@ -51,7 +51,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
-        if (\!meterRegistries.contains(registry)) {
+        if (!meterRegistries.contains(registry)) {
             meterRegistries.add(registry);
         }
     }
@@ -81,7 +81,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     @Override
     public void configure(Map<String, ?> configs) {
         Object meterRegistry = configs.get("meter.registry");
-        if (meterRegistry \!= null) {
+        if (meterRegistry != null) {
             meterRegistries.add((MeterRegistry) meterRegistry);
         }
     }
@@ -89,7 +89,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     @PreDestroy
     @Override
     public void close() {
-        if (metrics \!= null) {
+        if (metrics != null) {
             metrics.clear();
             metrics = null;
         }
