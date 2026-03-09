@@ -159,9 +159,9 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         reporter.metricChange(m2)
 
         then: "both produce meters, and all meters share the same tag key set (no mismatch)"
-        def tagKeySets = registry.meters.collect { Meter m ->
-            m.id.tags.collect { it.key }.sort() as Set
+        def tagKeyLists = registry.meters.collect { Meter m ->
+            m.id.tags.collect { it.key }.sort()
         }
-        tagKeySets.toUnique().size() == 1
+        tagKeyLists.unique().size() == 1
     }
 }
