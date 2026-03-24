@@ -20,13 +20,13 @@ import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.OrderUtil;
 import io.micronaut.core.reflect.ReflectionUtils;
 import io.micronaut.core.serialize.exceptions.SerializationException;
+import io.micronaut.core.util.clhm.ConcurrentLinkedHashMap;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
 import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The default {@link SerdeRegistry} that combines multiple registries into a single registry.
@@ -38,8 +38,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Internal
 public class CompositeSerdeRegistry implements SerdeRegistry {
 
+    private static final long MAX_SERDE_CACHE_CAPACITY = 100;
+
     private final List<SerdeRegistry> registries;
-    private final Map<Class, Serde> serdeMap = new ConcurrentHashMap<>();
+    private final Map<Class, Serde> serdeMap = new ConcurrentLinkedHashMap.Builder<Class, Serde>()
+        .maximumWeightedCapacity(MAX_SERDE_CACHE_CAPACITY)
+        .build();
 
     /**
      * The default constructor.

@@ -18,12 +18,12 @@ package io.micronaut.configuration.kafka.serde;
 import io.micronaut.context.BeanContext;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.reflect.ClassUtils;
+import io.micronaut.core.util.clhm.ConcurrentLinkedHashMap;
 import jakarta.inject.Singleton;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link SerdeRegistry} that computes {@link Serde} instances that use Jackson to JSON serialization.
@@ -35,8 +35,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class JsonSerdeRegistry implements SerdeRegistry {
 
+    private static final long MAX_SERDE_CACHE_CAPACITY = 100;
+
     private final BeanContext beanContext;
-    private final Map<Class, JsonObjectSerde> serdes = new ConcurrentHashMap<>();
+    private final Map<Class, JsonObjectSerde> serdes = new ConcurrentLinkedHashMap.Builder<Class, JsonObjectSerde>()
+        .maximumWeightedCapacity(MAX_SERDE_CACHE_CAPACITY)
+        .build();
 
     /**
      * Constructs a new instance.
