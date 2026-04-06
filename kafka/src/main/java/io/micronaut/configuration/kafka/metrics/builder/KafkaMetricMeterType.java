@@ -15,8 +15,8 @@
  */
 package io.micronaut.configuration.kafka.metrics.builder;
 
-import io.micrometer.core.lang.NonNull;
 import io.micronaut.core.annotation.Internal;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.TimeUnit;
 

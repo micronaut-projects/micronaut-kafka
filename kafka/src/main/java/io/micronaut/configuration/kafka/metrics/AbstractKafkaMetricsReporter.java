@@ -18,13 +18,13 @@ package io.micronaut.configuration.kafka.metrics;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import io.micrometer.core.lang.NonNull;
 import io.micronaut.configuration.kafka.metrics.builder.KafkaMetricMeterTypeBuilder;
 import io.micronaut.core.annotation.Internal;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.MetricsReporter;
+import org.jspecify.annotations.NonNull;
 
 import java.io.Closeable;
 import java.util.Collection;
