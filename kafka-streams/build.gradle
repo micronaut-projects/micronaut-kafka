@@ -4,7 +4,7 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'io.micronaut.platform:micronaut-platform:5.0.0-M1'
+        force 'io.micronaut.platform:micronaut-platform:4.10.3'
     }
 }
 
@@ -16,6 +16,7 @@ dependencies {
     compileOnly mnSerde.micronaut.serde.api
     compileOnly mnMicrometer.micronaut.micrometer.core
     testImplementation mn.micronaut.http.client
+    testImplementation mn.micronaut.jackson.databind
     testImplementation mnSerde.micronaut.serde.jackson
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)

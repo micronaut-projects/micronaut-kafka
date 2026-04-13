@@ -220,7 +220,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
     private static Map<String, Object> taskDetails(Set<TaskMetadata> taskMetadataSet) {
         final Map<String, Object> details = new HashMap<>();
         for (TaskMetadata taskMetadata : taskMetadataSet) {
-            details.put("taskId", taskMetadata.taskId());
+            details.put("taskId", taskMetadata.taskId().toString());
             if (details.containsKey(METADATA_PARTITIONS)) {
                 @SuppressWarnings("unchecked")
                 List<String> partitionsInfo = (List<String>) details.get(METADATA_PARTITIONS);
