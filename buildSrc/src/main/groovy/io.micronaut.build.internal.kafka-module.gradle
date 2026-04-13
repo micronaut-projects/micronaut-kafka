@@ -35,6 +35,6 @@ test {
 
 ossIndexAudit {
     excludeCoordinates = [
-            "org.lz4:lz4-java:1.8.0" // no version patched https://ossindex.sonatype.org/vulnerability/CVE-2025-12183?component-type=maven&component-name=org.lz4%2Flz4-java&utm_source=ossindex-client&utm_medium=integration&utm_content=1.8.2
+            "org.lz4:lz4-java:1.8.1" // no version patched https://ossindex.sonatype.org/vulnerability/CVE-2025-12183?component-type=maven&component-name=org.lz4%2Flz4-java&utm_source=ossindex-client&utm_medium=integration&utm_content=1.8.2
     ]
 }
