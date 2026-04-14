@@ -123,22 +123,23 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     private Function<MetricName, List<Tag>> getTagFunction() {
         return metricName -> {
+            Set<String> includedTags = getIncludedTags();
             List<Tag> tags = new ArrayList<>(metricName
                     .tags()
                     .entrySet()
                     .stream()
-                    .filter(entry -> getIncludedTags().contains(entry.getKey()))
+                    .filter(entry -> includedTags.contains(entry.getKey()))
                     .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
                     .toList());
-            if (shouldIncludeEmptyNodeIdTag(metricName)) {
+            if (shouldIncludeEmptyNodeIdTag(metricName, includedTags)) {
                 tags.add(Tag.of(NODE_ID_TAG, EMPTY_OPTIONAL_TAG_VALUE));
             }
             return tags;
         };
     }
 
-    private boolean shouldIncludeEmptyNodeIdTag(MetricName metricName) {
-        return getIncludedTags().contains(NODE_ID_TAG)
+    private boolean shouldIncludeEmptyNodeIdTag(MetricName metricName, Set<String> includedTags) {
+        return includedTags.contains(NODE_ID_TAG)
                 && !metricName.tags().containsKey(NODE_ID_TAG)
                 && NODE_ID_OPTIONAL_METRICS.contains(metricName.name());
     }
