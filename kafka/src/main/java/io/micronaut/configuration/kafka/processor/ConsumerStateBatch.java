@@ -70,7 +70,7 @@ final class ConsumerStateBatch extends ConsumerState {
         } catch (RecordDeserializationException ex) {
             // Try to honor the configured error strategy
             LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod, ex);
-            // By default, seek past the record to continue consumption
+            // When offset management is enabled, seek past the record to continue consumption
             if (info.offsetStrategy != OffsetStrategy.DISABLED) {
                 kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             }

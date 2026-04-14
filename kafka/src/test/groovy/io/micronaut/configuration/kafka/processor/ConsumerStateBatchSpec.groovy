@@ -1,16 +1,18 @@
 package io.micronaut.configuration.kafka.processor
 
-import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue
+import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
+import io.micronaut.core.annotation.AnnotationValue
+import io.micronaut.core.type.Argument
+import io.micronaut.core.type.ReturnType
+import io.micronaut.inject.ExecutableMethod
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.RecordDeserializationException
 import spock.lang.Specification
-import sun.misc.Unsafe
 
-import java.lang.reflect.Field
 import java.time.Duration
 import java.util.Collections
 
@@ -72,31 +74,23 @@ class ConsumerStateBatchSpec extends Specification {
         1 * kafkaConsumerProcessor.handleException(_, _ as KafkaListenerException)
     }
 
-    private static ConsumerInfo consumerInfo(OffsetStrategy offsetStrategy) {
-        ConsumerInfo info = allocateInstance(ConsumerInfo)
-        setField(info, "offsetStrategy", offsetStrategy)
-        setField(info, "errorStrategy", ErrorStrategyValue.NONE)
-        setField(info, "retryCount", 0)
-        setField(info, "shouldHandleAllExceptions", false)
-        setField(info, "pollTimeout", Duration.ofMillis(1))
-        setField(info, "logMethod", "TestConsumer#receive")
-        setField(info, "autoStartup", true)
-        return info
-    }
-
-    private static <T> T allocateInstance(Class<T> type) {
-        return type.cast(Unsafe.class.getMethod("allocateInstance", Class).invoke(unsafe(), type))
-    }
-
-    private static void setField(Object target, String fieldName, Object value) {
-        Field field = ConsumerInfo.class.getDeclaredField(fieldName)
-        field.accessible = true
-        field.set(target, value)
-    }
-
-    private static Unsafe unsafe() {
-        Field field = Unsafe.class.getDeclaredField("theUnsafe")
-        field.accessible = true
-        return (Unsafe) field.get(null)
+    private ConsumerInfo consumerInfo(OffsetStrategy offsetStrategy) {
+        AnnotationValue<KafkaListener> kafkaListener = AnnotationValue.builder(KafkaListener).build()
+        ReturnType<?> returnType = Stub(ReturnType) {
+            getType() >> Void
+            isAsyncOrReactive() >> false
+            getFirstTypeVariable() >> Optional.empty()
+        }
+        ExecutableMethod<?, ?> method = Stub(ExecutableMethod) {
+            getDeclaringType() >> ConsumerStateBatchSpec
+            getName() >> "receive"
+            isTrue(_, _) >> false
+            hasAnnotation(_) >> false
+            getValue(KafkaListener, "pollTimeout", Duration) >> Optional.of(Duration.ofMillis(1))
+            getArguments() >> new Argument[0]
+            stringValues(_) >> null
+            getReturnType() >> returnType
+        }
+        return new ConsumerInfo("test-client", null, offsetStrategy, kafkaListener, method)
     }
 }
