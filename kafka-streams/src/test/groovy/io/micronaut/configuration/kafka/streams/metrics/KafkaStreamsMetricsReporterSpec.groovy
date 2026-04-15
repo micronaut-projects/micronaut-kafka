@@ -18,12 +18,14 @@ class KafkaStreamsMetricsReporterSpec extends Specification {
 
         when:
         reporter.init([
+                createMetric("process-rate", "stream-processor-node-metrics", ["processor-node-id": "KSTREAM-SOURCE-0000000000"]),
                 createMetric("process-rate", "stream-thread-metrics", ["thread-id": "StreamThread-1"]),
                 createMetric("process-rate", "stream-task-metrics", ["task-id": "0_0"]),
                 createMetric("fetch-rate", "consumer-fetch-manager-metrics", ["client-id": "stream-consumer"])
         ])
 
         then:
+        registry.find("kafka-streams.stream-processor-node-metrics.process-rate").meter() != null
         registry.find("kafka-streams.stream-thread-metrics.process-rate").meter() != null
         registry.find("kafka-streams.stream-task-metrics.process-rate").meter() != null
         registry.find("kafka-streams.fetch-rate").meter() != null
