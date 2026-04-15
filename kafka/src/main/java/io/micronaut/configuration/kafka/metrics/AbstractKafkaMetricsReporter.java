@@ -99,10 +99,21 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
         KafkaMetricMeterTypeBuilder.newBuilder()
                 .prefix(getMetricPrefix())
+                .name(getMetricName(metric))
                 .metric(metric)
                 .tagFunction(getTagFunction())
                 .registry(meterRegistry)
                 .build();
+    }
+
+    /**
+     * Resolve the exported metric name for the supplied Kafka metric.
+     *
+     * @param metric The Kafka metric
+     * @return The metric name to register with Micrometer
+     */
+    protected String getMetricName(KafkaMetric metric) {
+        return metric.metricName().name();
     }
 
     private Function<MetricName, List<Tag>> getTagFunction() {
