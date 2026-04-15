@@ -19,24 +19,29 @@ import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.core.annotation.Internal;
-import org.jspecify.annotations.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
+import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.CollectionUtils;
+import io.micronaut.inject.ExecutableMethod;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.RecordDeserializationException;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,19 +70,14 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected ConsumerRecords<?, ?> pollRecords(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
-        // Deserialization errors can happen while polling
         try {
             return kafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
-            // Try to honor the configured error strategy
-            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod, ex);
-            // When offset management is enabled, seek past the record to continue consumption
+            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
             if (info.offsetStrategy != OffsetStrategy.DISABLED) {
                 kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             }
-            // The error strategy and the exception handler can still decide what to do about this record
             resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), makeConsumerRecord(ex), ex);
-            // By now, it's been decided whether this record should be retried and the exception may have been handled
             return null;
         }
     }
@@ -85,14 +85,22 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            // Bind Acknowledgement argument
-            if (info.ackArg != null) {
-                final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(consumerRecords);
-                boundArguments.put(info.ackArg, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+            for (ConsumerRecords<?, ?> topicRecords : splitByTopic(consumerRecords)) {
+                final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
+                final ExecutableMethod<Object, ?> method = info.method(topic);
+                Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
+                    final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
+                    boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+                });
+                Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+                if (method.isSuspend()) {
+                    Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
+                    boundArguments.put(lastArgument, null);
+                }
+                final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
+                final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), topicRecords).invoke(consumerBean);
+                handleResult(normalizeResult(result), topicRecords, topic);
             }
-            final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
-            final Object result = batchBinder.bind(info.method, kafkaConsumerProcessor.getBatchBinderRegistry(), consumerRecords).invoke(consumerBean);
-            handleResult(normalizeResult(result), consumerRecords);
             failed = false;
         } catch (Exception e) {
             failed = resolveWithErrorStrategy(consumerRecords, currentOffsets, null, e);
@@ -117,13 +125,11 @@ final class ConsumerStateBatch extends ConsumerState {
         return result;
     }
 
-    private void handleResult(Object result, ConsumerRecords<?, ?> consumerRecords) {
+    private void handleResult(Object result, ConsumerRecords<?, ?> consumerRecords, String topic) {
         if (result != null) {
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
-            final boolean isBlocking = info.isBlocking || !isPublisher;
-            // Flux of tuples (consumer record / result)
+            final boolean isBlocking = info.isBlocking(topic) || !isPublisher;
             final Flux<? extends Tuple2<?, ? extends ConsumerRecord<?, ?>>> resultRecordFlux;
-            // Flux of results
             final Flux<?> resultFlux;
             if (result instanceof Iterable<?> iterable) {
                 resultFlux = Flux.fromIterable(iterable);
@@ -132,10 +138,8 @@ final class ConsumerStateBatch extends ConsumerState {
             } else {
                 resultFlux = Flux.just(result);
             }
-            // Zip result flux with consumer records
             resultRecordFlux = resultFlux.zipWithIterable(consumerRecords)
-                .doOnNext(x -> handleResultFlux(consumerRecords, x.getT2(), Flux.just(x.getT1()), isBlocking));
-            // Block on the zipped flux or subscribe if non-blocking
+                .doOnNext(x -> handleResultFlux(consumerRecords, x.getT2(), topic, Flux.just(x.getT1()), isBlocking));
             if (isBlocking) {
                 resultRecordFlux.blockLast();
             } else {
@@ -145,37 +149,34 @@ final class ConsumerStateBatch extends ConsumerState {
     }
 
     @SuppressWarnings("java:S1874") // ErrorStrategyValue.NONE is deprecated
-    private boolean resolveWithErrorStrategy(@Nullable ConsumerRecords<?, ?> consumerRecords,
-        Map<TopicPartition, OffsetAndMetadata> currentOffsets, @Nullable ConsumerRecord<?, ?> consumerRecord, Throwable e) {
+    private boolean resolveWithErrorStrategy(
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets,
+        @Nullable ConsumerRecord<?, ?> consumerRecord,
+        Throwable e
+    ) {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
             if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
                 Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
-                // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(partitions, reconstructedOffsets);
                 if (info.retryCount >= currentRetryCount) {
-                    // We will retry this batch again next time
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, null);
                     }
-                    // Move back to the previous positions
                     partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
-                    // Decide how long should we wait to retry this batch again
                     delayRetry(currentRetryCount, partitions);
                     return true;
                 }
             }
-            // We will NOT retry this batch anymore
             partitions.forEach(topicPartitionRetries::remove);
         }
-        // Skip the failing batch of records
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
     }
 
-    private int getCurrentRetryCount(Set<TopicPartition> partitions,
-        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+    private int getCurrentRetryCount(Set<TopicPartition> partitions, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         return partitions.stream()
             .map(tp -> {
                 OffsetAndMetadata offsetAndMetadata = currentOffsets.get(tp);
@@ -191,8 +192,9 @@ final class ConsumerStateBatch extends ConsumerState {
     }
 
     private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
-        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets, RecordDeserializationException ex) {
-        // Current offsets can be missing after the first poll if assignments changed while records were being fetched.
+        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
+        RecordDeserializationException ex
+    ) {
         if (CollectionUtils.isEmpty(currentOffsets)) {
             return Map.of(ex.topicPartition(), new OffsetAndMetadata(ex.offset(), null));
         }
@@ -207,8 +209,8 @@ final class ConsumerStateBatch extends ConsumerState {
     @Nullable
     private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
-        @Nullable ConsumerRecords<?, ?> consumerRecords) {
-        // Current offsets can be missing for some partitions if assignments changed while records were being fetched.
+        @Nullable ConsumerRecords<?, ?> consumerRecords
+    ) {
         if (consumerRecords == null) {
             return currentOffsets;
         }
@@ -229,5 +231,22 @@ final class ConsumerStateBatch extends ConsumerState {
     private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
         final TopicPartition tp = ex.topicPartition();
         return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
+    }
+
+    private static java.util.List<ConsumerRecords<?, ?>> splitByTopic(ConsumerRecords<?, ?> consumerRecords) {
+        if (consumerRecords.partitions().stream().map(TopicPartition::topic).distinct().count() <= 1) {
+            return java.util.List.of(consumerRecords);
+        }
+        Map<String, Map<TopicPartition, java.util.List<ConsumerRecord<?, ?>>>> byTopic = new LinkedHashMap<>();
+        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+            byTopic.computeIfAbsent(consumerRecord.topic(), ignored -> new LinkedHashMap<>())
+                .computeIfAbsent(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), ignored -> new ArrayList<>())
+                .add(consumerRecord);
+        }
+        java.util.List<ConsumerRecords<?, ?>> splitRecords = new ArrayList<>(byTopic.size());
+        for (Map<TopicPartition, java.util.List<ConsumerRecord<?, ?>>> topicRecords : byTopic.values()) {
+            splitRecords.add(new ConsumerRecords<>((Map) topicRecords));
+        }
+        return splitRecords;
     }
 }

@@ -20,9 +20,13 @@ import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
-import io.micronaut.core.annotation.*;
+import io.micronaut.core.annotation.AnnotationValue;
+import io.micronaut.core.annotation.Blocking;
+import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.reflect.ReflectionUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArrayUtils;
@@ -31,14 +35,19 @@ import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.messaging.Acknowledgement;
 import io.micronaut.messaging.annotation.SendTo;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Internal consumer info.
@@ -54,7 +63,7 @@ final class ConsumerInfo {
     final OffsetStrategy offsetStrategy;
     final ErrorStrategyValue errorStrategy;
     @Nullable final String dlq;
-    final @Nullable Duration retryDelay;
+    @Nullable final Duration retryDelay;
     final int retryCount;
     final boolean shouldHandleAllExceptions;
     final List<Class<? extends Throwable>> exceptionTypes;
@@ -62,20 +71,43 @@ final class ConsumerInfo {
     @Nullable final String producerTransactionalId;
     final boolean isTransactional;
     final ExecutableMethod<Object, ?> method;
-    final String logMethod;
     final boolean autoStartup;
     final boolean isBatch;
-    final boolean isBlocking;
     final Duration pollTimeout;
-    @Nullable final Argument<?> consumerArg;
-    @Nullable final Argument<?> seekArg;
-    @Nullable final Argument<?> ackArg;
     final boolean trackPartitions;
-    final List<String> sendToTopics;
     final boolean shouldSendOffsetsToTransaction;
-    final boolean returnsOneKafkaMessage;
-    final boolean returnsManyKafkaMessages;
     final boolean cooperativeStickyAssignmentStrategy;
+    private final List<ExecutableMethod<Object, ?>> listenerMethods;
+    private final Map<String, ExecutableMethod<Object, ?>> topicMethods = new HashMap<>();
+    private final List<PatternMethod> patternMethods;
+    private final Map<String, ExecutableMethod<Object, ?>> resolvedMethods = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, Optional<Argument<?>>> consumerArgCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, Optional<Argument<?>>> seekArgCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, Optional<Argument<?>>> ackArgCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, List<String>> sendToTopicsCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, Boolean> returnsOneKafkaMessageCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, Boolean> returnsManyKafkaMessagesCache = new ConcurrentHashMap<>();
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        ExecutableMethod<?, ?> method
+    ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method));
+    }
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        List<ExecutableMethod<?, ?>> methods
+    ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, new Properties(), methods);
+    }
 
     @SuppressWarnings("unchecked")
     ConsumerInfo(
@@ -84,7 +116,7 @@ final class ConsumerInfo {
         OffsetStrategy offsetStrategy,
         AnnotationValue<KafkaListener> kafkaListener,
         Properties properties,
-        ExecutableMethod<?, ?> method
+        List<ExecutableMethod<?, ?>> methods
     ) {
         this.clientId = clientId;
         this.groupId = groupId;
@@ -103,31 +135,151 @@ final class ConsumerInfo {
         this.producerClientId = kafkaListener.stringValue("producerClientId").orElse(null);
         this.producerTransactionalId = kafkaListener.stringValue("producerTransactionalId").filter(StringUtils::isNotEmpty).orElse(null);
         this.isTransactional = producerTransactionalId != null;
-        this.method = (ExecutableMethod<Object, ?>) method;
-        this.logMethod = method.getDeclaringType().getSimpleName() + "#" + method.getName();
+        this.cooperativeStickyAssignmentStrategy = OffsetCommitExceptionLogger.isCooperativeStickyAssignor(properties.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
+        java.util.ArrayList<ExecutableMethod<Object, ?>> listenerMethods = new java.util.ArrayList<>(methods.size());
+        for (ExecutableMethod<?, ?> executableMethod : methods) {
+            listenerMethods.add((ExecutableMethod<Object, ?>) executableMethod);
+        }
+        this.listenerMethods = List.copyOf(listenerMethods);
+        this.method = this.listenerMethods.get(0);
+        this.patternMethods = resolveTopicMethods(this.listenerMethods);
         this.autoStartup = kafkaListener.booleanValue("autoStartup").orElse(true);
         this.isBatch = method.isTrue(KafkaListener.class, "batch");
-        this.isBlocking = method.hasAnnotation(Blocking.class);
         this.pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class).orElseGet(() -> Duration.ofMillis(100));
-        this.consumerArg = Arrays.stream(method.getArguments()).filter(arg -> Consumer.class.isAssignableFrom(arg.getType())).findFirst().orElse(null);
-        this.seekArg = Arrays.stream(method.getArguments()).filter(arg -> KafkaSeekOperations.class.isAssignableFrom(arg.getType())).findFirst().orElse(null);
-        this.ackArg = Arrays.stream(method.getArguments()).filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType())).findFirst().orElse(null);
-        this.trackPartitions = ackArg != null || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
-        this.sendToTopics = Optional.ofNullable(method.stringValues(SendTo.class)).filter(ArrayUtils::isNotEmpty).stream().flatMap(Arrays::stream).toList();
+        this.trackPartitions = anyMethodHasAckArg() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
         this.shouldSendOffsetsToTransaction = offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION;
-        this.returnsOneKafkaMessage = method.getReturnType().getType().isAssignableFrom(KafkaMessage.class) || method.getReturnType().isAsyncOrReactive() && method.getReturnType().getFirstTypeVariable()
-            .map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
-        this.returnsManyKafkaMessages = Iterable.class.isAssignableFrom(method.getReturnType().getType()) && method.getReturnType().getFirstTypeVariable()
-            .map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
-        this.cooperativeStickyAssignmentStrategy = OffsetCommitExceptionLogger.isCooperativeStickyAssignor(properties.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
 
         if (shouldSendOffsetsToTransaction) {
-            if (!isTransactional || !method.hasAnnotation(SendTo.class)) {
+            if (!isTransactional || !listenerMethods.stream().allMatch(executableMethod -> executableMethod.hasAnnotation(SendTo.class))) {
                 throw new MessagingSystemException("Offset strategy 'SEND_TO_TRANSACTION' can only be used when transaction is enabled and @SendTo is used");
             }
             if (shouldRedeliver) {
                 throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
             }
         }
+    }
+
+    ExecutableMethod<Object, ?> method(String topic) {
+        if (topicMethods.isEmpty() && patternMethods.isEmpty()) {
+            return method;
+        }
+        return resolvedMethods.computeIfAbsent(topic, this::resolveMethod);
+    }
+
+    String logMethod(String topic) {
+        ExecutableMethod<Object, ?> executableMethod = method(topic);
+        return executableMethod.getDeclaringType().getSimpleName() + "#" + executableMethod.getName();
+    }
+
+    boolean isBlocking(String topic) {
+        return method(topic).hasAnnotation(Blocking.class);
+    }
+
+    List<String> sendToTopics(String topic) {
+        return sendToTopicsCache.computeIfAbsent(method(topic), executableMethod ->
+            Optional.ofNullable(executableMethod.stringValues(SendTo.class))
+                .filter(ArrayUtils::isNotEmpty)
+                .stream()
+                .flatMap(Arrays::stream)
+                .toList()
+        );
+    }
+
+    boolean returnsOneKafkaMessage(String topic) {
+        return returnsOneKafkaMessageCache.computeIfAbsent(method(topic), executableMethod -> {
+            var returnType = executableMethod.getReturnType();
+            return returnType.getType().isAssignableFrom(KafkaMessage.class) ||
+                (returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable()
+                    .map(t -> t.getType().isAssignableFrom(KafkaMessage.class))
+                    .orElse(false));
+        });
+    }
+
+    boolean returnsManyKafkaMessages(String topic) {
+        return returnsManyKafkaMessagesCache.computeIfAbsent(method(topic), executableMethod -> {
+            var returnType = executableMethod.getReturnType();
+            return Iterable.class.isAssignableFrom(returnType.getType()) &&
+                returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+        });
+    }
+
+    @Nullable
+    Argument<?> consumerArg(String topic) {
+        return consumerArgCache.computeIfAbsent(method(topic), executableMethod ->
+            Arrays.stream(executableMethod.getArguments())
+                .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
+                .findFirst()
+        ).orElse(null);
+    }
+
+    @Nullable
+    Argument<?> seekArg(String topic) {
+        return seekArgCache.computeIfAbsent(method(topic), executableMethod ->
+            Arrays.stream(executableMethod.getArguments())
+                .filter(arg -> KafkaSeekOperations.class.isAssignableFrom(arg.getType()))
+                .findFirst()
+        ).orElse(null);
+    }
+
+    @Nullable
+    Argument<?> ackArg(String topic) {
+        return ackArgCache.computeIfAbsent(method(topic), executableMethod ->
+            Arrays.stream(executableMethod.getArguments())
+                .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
+                .findFirst()
+        ).orElse(null);
+    }
+
+    private boolean anyMethodHasAckArg() {
+        return listenerMethods.stream()
+            .anyMatch(executableMethod -> Arrays.stream(executableMethod.getArguments()).anyMatch(arg -> Acknowledgement.class.isAssignableFrom(arg.getType())));
+    }
+
+    private List<PatternMethod> resolveTopicMethods(List<ExecutableMethod<Object, ?>> methods) {
+        List<PatternMethod> patterns = new java.util.ArrayList<>();
+        for (ExecutableMethod<Object, ?> executableMethod : methods) {
+            for (AnnotationValue<Topic> topicAnnotation : executableMethod.getDeclaredAnnotationValuesByType(Topic.class)) {
+                for (String topic : topicAnnotation.stringValues()) {
+                    ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
+                    if (previous != null && previous != executableMethod) {
+                        throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
+                    }
+                }
+                for (String pattern : topicAnnotation.stringValues("patterns")) {
+                    try {
+                        patterns.add(new PatternMethod(Pattern.compile(pattern), executableMethod));
+                    } catch (PatternSyntaxException e) {
+                        throw new MessagingSystemException("Invalid @Topic pattern [" + pattern + "] for listener method [" + executableMethod.getDeclaringType().getName() + "#" + executableMethod.getName() + "]: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return List.copyOf(patterns);
+    }
+
+    private ExecutableMethod<Object, ?> resolveMethod(String topic) {
+        ExecutableMethod<Object, ?> executableMethod = topicMethods.get(topic);
+        if (executableMethod != null) {
+            return executableMethod;
+        }
+        ExecutableMethod<Object, ?> matchedMethod = null;
+        for (PatternMethod patternMethod : patternMethods) {
+            if (patternMethod.pattern.matcher(topic).matches()) {
+                if (matchedMethod != null && matchedMethod != patternMethod.method) {
+                    throw new MessagingSystemException("Multiple @Topic patterns matched consumed topic [" + topic + "] for listener [" + method.getDeclaringType().getName() + ']');
+                }
+                matchedMethod = patternMethod.method;
+            }
+        }
+        if (matchedMethod != null) {
+            return matchedMethod;
+        }
+        if (listenerMethods.size() == 1) {
+            return method;
+        }
+        throw new MessagingSystemException("No @Topic method found for consumed topic [" + topic + "] in listener [" + method.getDeclaringType().getName() + "]");
+    }
+
+    private record PatternMethod(Pattern pattern, ExecutableMethod<Object, ?> method) {
     }
 }

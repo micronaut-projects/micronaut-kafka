@@ -191,6 +191,14 @@ public @interface KafkaListener {
     int threads() default 1;
 
     /**
+     * Defines how consumers are created for multiple {@link Topic} methods within the same listener.
+     *
+     * @return The consumer creation strategy
+     * @since 4.9.0
+     */
+    ConsumerCreationStrategy consumerCreationStrategy() default ConsumerCreationStrategy.PER_TOPIC;
+
+    /**
      * The timeout to use for calls to {@link org.apache.kafka.clients.consumer.Consumer#poll(java.time.Duration)}.
      *
      * @return The timeout. Defaults to 100ms

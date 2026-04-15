@@ -100,7 +100,6 @@ abstract class ConsumerState {
         this.subscriptions = Collections.unmodifiableSet(kafkaConsumer.subscription());
         this.startupLatch = info.autoStartup ? null : new CountDownLatch(1);
         this.boundArguments = new HashMap<>(2);
-        Optional.ofNullable(info.consumerArg).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
         this.closedState = ConsumerCloseState.NOT_STARTED;
         this.closedLatch = new CountDownLatch(1);
         this.topicPartitionRetries = this.info.errorStrategy.isRetry() ? new HashMap<>() : null;
@@ -258,11 +257,6 @@ abstract class ConsumerState {
         if (consumerRecords == null || consumerRecords.isEmpty()) {
             return; // No consumer records to process
         }
-        // Support Kotlin coroutines
-        if (info.method.isSuspend()) {
-            Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
-            boundArguments.put(lastArgument, null);
-        }
         processRecords(consumerRecords, currentOffsets);
         if (failed) {
             return;
@@ -328,22 +322,23 @@ abstract class ConsumerState {
     protected void handleResultFlux(
         ConsumerRecords<?, ?> consumerRecords,
         ConsumerRecord<?, ?> consumerRecord,
+        String topic,
         Flux<?> publisher,
         boolean isBlocking
     ) {
         final Flux<RecordMetadata> recordMetadataProducer = publisher
-            .flatMap(value -> sendToDestination(value, consumerRecord, consumerRecords));
+            .flatMap(value -> sendToDestination(topic, value, consumerRecord, consumerRecords));
 
         if (isBlocking) {
             List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
-            LOG.trace("Method [{}] produced record metadata: {}", info.method, listRecords);
+            LOG.trace("Method [{}] produced record metadata: {}", info.logMethod(topic), listRecords);
         } else {
-            recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", info.logMethod, recordMetadata));
+            recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", info.logMethod(topic), recordMetadata));
         }
     }
 
-    private Publisher<RecordMetadata> sendToDestination(Object value, ConsumerRecord<?, ?> consumerRecord, ConsumerRecords<?, ?> consumerRecords) {
-        if (value == null || info.sendToTopics.isEmpty()) {
+    private Publisher<RecordMetadata> sendToDestination(String topic, Object value, ConsumerRecord<?, ?> consumerRecord, ConsumerRecords<?, ?> consumerRecords) {
+        if (value == null || info.sendToTopics(topic).isEmpty()) {
             return Flux.empty();
         }
         final Object key = consumerRecord.key();
@@ -362,16 +357,24 @@ abstract class ConsumerState {
                 value.getClass()
             );
         }
-        Flux<RecordMetadata> result = Flux.create(emitter -> sendToDestination(emitter, kafkaProducer, key, value, consumerRecord, consumerRecords));
-        return result.onErrorResume(error -> handleSendToError(error, consumerRecords, consumerRecord));
+        Flux<RecordMetadata> result = Flux.create(emitter -> sendToDestination(emitter, kafkaProducer, topic, key, value, consumerRecord, consumerRecords));
+        return result.onErrorResume(error -> handleSendToError(topic, error, consumerRecords, consumerRecord));
     }
 
-    private void sendToDestination(FluxSink<RecordMetadata> emitter, Producer<?, ?> kafkaProducer, Object key, Object value, ConsumerRecord<?, ?> consumerRecord, ConsumerRecords<?, ?> consumerRecords) {
+    private void sendToDestination(
+        FluxSink<RecordMetadata> emitter,
+        Producer<?, ?> kafkaProducer,
+        String topic,
+        Object key,
+        Object value,
+        ConsumerRecord<?, ?> consumerRecord,
+        ConsumerRecords<?, ?> consumerRecords
+    ) {
         try {
             if (info.shouldSendOffsetsToTransaction) {
                 beginTransaction(kafkaProducer);
             }
-            sendToDestination(kafkaProducer, new FluxCallback(emitter), key, value, consumerRecord);
+            sendToDestination(kafkaProducer, new FluxCallback(emitter), topic, key, value, consumerRecord);
             if (info.shouldSendOffsetsToTransaction) {
                 endTransaction(kafkaProducer, consumerRecords);
             }
@@ -385,9 +388,9 @@ abstract class ConsumerState {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void sendToDestination(Producer<?, ?> kafkaProducer, Callback callback, Object key, Object value, ConsumerRecord<?, ?> consumerRecord) {
-        for (String destinationTopic : info.sendToTopics) {
-            if (info.returnsManyKafkaMessages) {
+    private void sendToDestination(Producer<?, ?> kafkaProducer, Callback callback, String topic, Object key, Object value, ConsumerRecord<?, ?> consumerRecord) {
+        for (String destinationTopic : info.sendToTopics(topic)) {
+            if (info.returnsManyKafkaMessages(topic)) {
                 final Iterable<KafkaMessage> messages = (Iterable<KafkaMessage>) value;
                 for (KafkaMessage message : messages) {
                     final ProducerRecord producerRecord = createFromMessage(destinationTopic, message);
@@ -395,7 +398,7 @@ abstract class ConsumerState {
                 }
             } else {
                 final ProducerRecord producerRecord;
-                if (info.returnsOneKafkaMessage) {
+                if (info.returnsOneKafkaMessage(topic)) {
                     producerRecord = createFromMessage(destinationTopic, (KafkaMessage) value);
                 } else {
                     producerRecord = new ProducerRecord(destinationTopic, null, key, value, consumerRecord.headers());
@@ -446,15 +449,15 @@ abstract class ConsumerState {
         }
     }
 
-    private Publisher<RecordMetadata> handleSendToError(Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
-        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
+    private Publisher<RecordMetadata> handleSendToError(String topic, Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method(topic) + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
 
         if (!info.shouldRedeliver) {
             return Flux.empty();
         }
 
         return redeliver(consumerRecord)
-            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method + "]: " + error.getMessage(), ex, consumerRecords, consumerRecord));
+            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method(topic) + "]: " + error.getMessage(), ex, consumerRecords, consumerRecord));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

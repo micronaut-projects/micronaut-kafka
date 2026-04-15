@@ -26,6 +26,8 @@ import org.jspecify.annotations.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
+import io.micronaut.core.type.Argument;
+import io.micronaut.inject.ExecutableMethod;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.RecordDeserializationException;
@@ -59,7 +61,7 @@ final class ConsumerStateSingle extends ConsumerState {
             return kafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
             // Try to honor the configured error strategy
-            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod, ex);
+            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
             // By default, seek past the record to continue consumption
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
@@ -75,8 +77,9 @@ final class ConsumerStateSingle extends ConsumerState {
         final Iterator<? extends ConsumerRecord<?, ?>> iterator = consumerRecords.iterator();
         while (iterator.hasNext()) {
             final ConsumerRecord<?, ?> consumerRecord = iterator.next();
+            final String topic = consumerRecord.topic();
 
-            LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod, consumerRecord);
+            LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
 
             if (info.trackPartitions) {
                 final TopicPartition topicPartition = getTopicPartition(consumerRecord);
@@ -84,9 +87,10 @@ final class ConsumerStateSingle extends ConsumerState {
                 currentOffsets.put(topicPartition, offsetAndMetadata);
             }
 
-            final KafkaSeekOperations seek = Optional.ofNullable(info.seekArg).map(x -> KafkaSeekOperations.newInstance()).orElse(null);
-            Optional.ofNullable(info.seekArg).ifPresent(argument -> boundArguments.put(argument, seek));
-            Optional.ofNullable(info.ackArg).ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
+            final KafkaSeekOperations seek = Optional.ofNullable(info.seekArg(topic)).map(x -> KafkaSeekOperations.newInstance()).orElse(null);
+            Optional.ofNullable(info.seekArg(topic)).ifPresent(argument -> boundArguments.put(argument, seek));
+            Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
+            Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
             try {
                 process(consumerRecord, consumerRecords);
@@ -115,12 +119,18 @@ final class ConsumerStateSingle extends ConsumerState {
 
     private void process(ConsumerRecord<?, ?> consumerRecord,
         ConsumerRecords<?, ?> consumerRecords) {
+        final String topic = consumerRecord.topic();
+        final ExecutableMethod<Object, ?> method = info.method(topic);
+        if (method.isSuspend()) {
+            Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
+            boundArguments.put(lastArgument, null);
+        }
         final ExecutableBinder<ConsumerRecord<?, ?>> executableBinder = new DefaultExecutableBinder<>(boundArguments);
-        final Object result = executableBinder.bind(info.method, kafkaConsumerProcessor.getBinderRegistry(), consumerRecord).invoke(consumerBean);
+        final Object result = executableBinder.bind(method, kafkaConsumerProcessor.getBinderRegistry(), consumerRecord).invoke(consumerBean);
         if (result != null) {
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
             final Flux<?> publisher = isPublisher ? kafkaConsumerProcessor.convertPublisher(result) : Flux.just(result);
-            handleResultFlux(consumerRecords, consumerRecord, publisher, isPublisher || info.isBlocking);
+            handleResultFlux(consumerRecords, consumerRecord, topic, publisher, isPublisher || info.isBlocking(topic));
         }
     }
 
