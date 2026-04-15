@@ -30,7 +30,9 @@ kafka:
 ----
 
 
-You should then define a ann:context.annotation.Factory[] for your streams that defines beans that return a `KStream`. For example to implement the Word Count example from the Kafka Streams documentation:
+You should then define a ann:context.annotation.Factory[] for your streams that defines beans that register topology components against the injected `ConfiguredStreamBuilder`. These beans can return a `KStream`, `KTable`, or `GlobalKTable`, depending on the topology you are building. For example to implement the Word Count example from the Kafka Streams documentation:
+
+NOTE: If a stream topology is composed only of a `KTable` or `GlobalKTable`, make that bean eager (for example with ann:context.annotation.Context[]) so Micronaut initializes the topology before the corresponding `KafkaStreams` bean is resolved.
 
 .Kafka Streams Word Count
 
@@ -110,7 +112,7 @@ You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[
 
 snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="myOtherStream", indent=0]
 
-NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
+NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` you have multiple topology beans defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
 
 .Kafka Streams Word Count
 
