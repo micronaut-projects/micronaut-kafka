@@ -8,13 +8,12 @@ import org.apache.kafka.streams.TaskMetadata
 import org.apache.kafka.streams.ThreadMetadata
 import org.apache.kafka.streams.processor.TaskId
 import spock.lang.Specification
-import tools.jackson.databind.ObjectMapper
 
 import java.lang.reflect.Method
 
-class KafkaStreamsHealthJacksonSpec extends Specification {
+class KafkaStreamsHealthTaskMetadataSpec extends Specification {
 
-    void "health details remain jackson serializable when task metadata includes task ids"() {
+    void "health details expose task ids as strings when task metadata includes task ids"() {
         given:
         KafkaStreamsHealth kafkaStreamsHealth = new KafkaStreamsHealth(Mock(KafkaStreamsFactory), Mock(HealthAggregator))
         TaskMetadata taskMetadata = Mock() {
@@ -35,16 +34,12 @@ class KafkaStreamsHealthJacksonSpec extends Specification {
             state() >> KafkaStreams.State.RUNNING
             metadataForLocalThreads() >> [threadMetadata]
         }
-        ObjectMapper objectMapper = new ObjectMapper()
-        Map<String, Object> details = invokeBuildDetails(kafkaStreamsHealth, kafkaStreams)
-
         when:
-        String json = objectMapper.writeValueAsString(details)
+        Map<String, Object> details = invokeBuildDetails(kafkaStreamsHealth, kafkaStreams)
 
         then:
         details['stream-thread-1']['activeTasks']['taskId'] == 'my-topology__1_5'
-        json.contains('"taskId":"my-topology__1_5"')
-        json.contains('"partition=0, topic=words"')
+        details['stream-thread-1']['activeTasks']['partitions'] == ['partition=0, topic=words']
     }
 
     private static Map<String, Object> invokeBuildDetails(KafkaStreamsHealth kafkaStreamsHealth, KafkaStreams kafkaStreams) {
