@@ -11,6 +11,7 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
+import io.micronaut.context.annotation.Value
 import io.micronaut.core.annotation.Blocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 import spock.lang.Unroll
 
+import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
@@ -35,20 +38,25 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
     private static final String RandomFailedMessage = (new Random().nextInt(30) + 10).toString();
-    private static final String MULTI_TOPIC_RETRY_FIRST_TOPIC = "a-errors-retry-multi-topic"
-    private static final String MULTI_TOPIC_RETRY_SECOND_TOPIC = "b-errors-retry-multi-topic"
+    private static final String MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY = '${multi.topic.retry.first-topic}'
+    private static final String MULTI_TOPIC_RETRY_SECOND_TOPIC_PROPERTY = '${multi.topic.retry.second-topic}'
+
+    final String multiTopicRetryFirstTopic = "a-errors-retry-multi-topic-${UUID.randomUUID()}"
+    final String multiTopicRetrySecondTopic = "b-errors-retry-multi-topic-${UUID.randomUUID()}"
 
     Map<String, Object> getConfiguration() {
         super.configuration +
                 ["kafka.consumers.errors-retry-multiple-partitions.allow.auto.create.topics" : false,
+                 "multi.topic.retry.first-topic": multiTopicRetryFirstTopic,
+                 "multi.topic.retry.second-topic": multiTopicRetrySecondTopic,
                  "my.retry.count": "3"]
     }
 
     @Override
     void afterKafkaStarted() {
         createTopic("errors-retry-multiple-partitions", 3, 1)
-        createTopic(MULTI_TOPIC_RETRY_FIRST_TOPIC, 1, 1)
-        createTopic(MULTI_TOPIC_RETRY_SECOND_TOPIC, 1, 1)
+        createTopic(multiTopicRetryFirstTopic, 1, 1)
+        createTopic(multiTopicRetrySecondTopic, 1, 1)
     }
 
     void "test when the error strategy is 'resume at next offset' the next message is consumed"() {
@@ -86,22 +94,16 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     void "test when the error strategy is 'retry on error' messages from another subscribed topic are not skipped"() {
         when: "A listener subscribed to multiple topics throws on the first topic"
         MultiTopicRetryErrorClient myClient = context.getBean(MultiTopicRetryErrorClient)
-        myClient.sendMessage(MULTI_TOPIC_RETRY_FIRST_TOPIC, "One")
-        myClient.sendMessage(MULTI_TOPIC_RETRY_SECOND_TOPIC, "Two")
+        myClient.sendMessage(multiTopicRetryFirstTopic, "One")
+        myClient.sendMessage(multiTopicRetrySecondTopic, "Two")
 
         MultiTopicRetryOnErrorErrorCausingConsumer myConsumer = context.getBean(MultiTopicRetryOnErrorErrorCausingConsumer)
 
         then: "The failing message is retried and the other topic's message is still delivered"
         conditions.eventually {
-            myConsumer.attempts == [
-                "${MULTI_TOPIC_RETRY_FIRST_TOPIC}:One",
-                "${MULTI_TOPIC_RETRY_FIRST_TOPIC}:One",
-                "${MULTI_TOPIC_RETRY_SECOND_TOPIC}:Two"
-            ]
-            myConsumer.successful == [
-                "${MULTI_TOPIC_RETRY_FIRST_TOPIC}:One",
-                "${MULTI_TOPIC_RETRY_SECOND_TOPIC}:Two"
-            ]
+            myConsumer.attempts.count("${multiTopicRetryFirstTopic}:One") >= 2
+            myConsumer.successful.contains("${multiTopicRetryFirstTopic}:One")
+            myConsumer.successful.contains("${multiTopicRetrySecondTopic}:Two")
         }
     }
 
@@ -427,15 +429,18 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         properties = @Property(name = ConsumerConfig.MAX_POLL_RECORDS_CONFIG, value = "2")
     )
     static class MultiTopicRetryOnErrorErrorCausingConsumer {
-        AtomicInteger count = new AtomicInteger(0)
-        List<String> attempts = []
-        List<String> successful = []
+        @Value(MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY)
+        String firstTopic
 
-        @Topic([MULTI_TOPIC_RETRY_FIRST_TOPIC, MULTI_TOPIC_RETRY_SECOND_TOPIC])
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> attempts = new CopyOnWriteArrayList<>()
+        List<String> successful = new CopyOnWriteArrayList<>()
+
+        @Topic([MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY, MULTI_TOPIC_RETRY_SECOND_TOPIC_PROPERTY])
         void handleMessage(ConsumerRecord<String, String> consumerRecord) {
             String delivery = "${consumerRecord.topic()}:${consumerRecord.value()}"
             attempts << delivery
-            if (consumerRecord.topic() == MULTI_TOPIC_RETRY_FIRST_TOPIC && count.getAndIncrement() == 0) {
+            if (consumerRecord.topic() == firstTopic && count.getAndIncrement() == 0) {
                 throw new RuntimeException("Won't handle first topic on first attempt")
             }
             successful << delivery

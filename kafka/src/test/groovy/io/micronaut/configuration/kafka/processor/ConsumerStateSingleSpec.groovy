@@ -1,24 +1,30 @@
 package io.micronaut.configuration.kafka.processor
 
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetStrategy
+import io.micronaut.core.annotation.AnnotationValue
+import io.micronaut.core.type.Argument
+import io.micronaut.core.type.ReturnType
+import io.micronaut.inject.ExecutableMethod
+import io.micronaut.messaging.annotation.SendTo
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
 import spock.lang.Specification
-import sun.misc.Unsafe
 
-import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import java.time.Duration
+import java.util.Optional
 
 class ConsumerStateSingleSpec extends Specification {
 
     void "reset the following partitions seeks each topic partition independently"() {
         given:
-        ConsumerStateSingle state = allocateInstance(ConsumerStateSingle)
         List<TopicPartition> seeks = []
         List<Long> offsets = []
         Consumer consumer = createConsumer(seeks, offsets)
-        setField(ConsumerState, state, "kafkaConsumer", consumer)
+        ConsumerStateSingle state = new ConsumerStateSingle(null, buildConsumerInfo(), consumer, new Object())
         Method method = ConsumerStateSingle.getDeclaredMethod("resetTheFollowingPartitions", ConsumerRecord, Iterator)
         method.accessible = true
 
@@ -47,6 +53,9 @@ class ConsumerStateSingleSpec extends Specification {
             ConsumerStateSingleSpec.classLoader,
             [Consumer] as Class<?>[],
             { _, method, args ->
+                if (method.name == "subscription") {
+                    return Collections.emptySet()
+                }
                 if (method.name == "seek") {
                     seeks << (TopicPartition) args[0]
                     offsets << (Long) args[1]
@@ -55,6 +64,53 @@ class ConsumerStateSingleSpec extends Specification {
                 defaultValue(method.returnType)
             }
         ) as Consumer
+    }
+
+    private static ConsumerInfo buildConsumerInfo() {
+        ReturnType<?> returnType = Proxy.newProxyInstance(
+            ConsumerStateSingleSpec.classLoader,
+            [ReturnType] as Class<?>[],
+            { _, method, _ ->
+                switch (method.name) {
+                    case "getType":
+                        return Void.TYPE
+                    case "isAsyncOrReactive":
+                        return false
+                    case "getFirstTypeVariable":
+                        return Optional.empty()
+                    default:
+                        return defaultValue(method.returnType)
+                }
+            }
+        ) as ReturnType<?>
+        ExecutableMethod<?, ?> executableMethod = Proxy.newProxyInstance(
+            ConsumerStateSingleSpec.classLoader,
+            [ExecutableMethod] as Class<?>[],
+            { _, method, args ->
+                switch (method.name) {
+                    case "getDeclaringType":
+                        return ConsumerStateSingleSpec
+                    case "getName":
+                        return "handleMessage"
+                    case "isTrue":
+                        return false
+                    case "hasAnnotation":
+                        return false
+                    case "getValue":
+                        return Optional.empty()
+                    case "getArguments":
+                        return Argument.ZERO_ARGUMENTS
+                    case "stringValues":
+                        return [] as String[]
+                    case "getReturnType":
+                        return returnType
+                    default:
+                        return defaultValue(method.returnType)
+                }
+            }
+        ) as ExecutableMethod<?, ?>
+        AnnotationValue<KafkaListener> annotation = AnnotationValue.builder(KafkaListener).build()
+        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, executableMethod)
     }
 
     private static Object defaultValue(Class<?> returnType) {
@@ -83,20 +139,5 @@ class ConsumerStateSingleSpec extends Specification {
             return (char) 0
         }
         null
-    }
-
-    private static <T> T allocateInstance(Class<T> type) {
-        Field field = Unsafe.class.getDeclaredField("theUnsafe")
-        field.accessible = true
-        Unsafe unsafe = (Unsafe) field.get(null)
-        Method allocateInstance = Unsafe.class.getDeclaredMethod("allocateInstance", Class)
-        allocateInstance.accessible = true
-        type.cast(allocateInstance.invoke(unsafe, type))
-    }
-
-    private static void setField(Class<?> owner, Object instance, String fieldName, Object value) {
-        Field field = owner.getDeclaredField(fieldName)
-        field.accessible = true
-        field.set(instance, value)
     }
 }
