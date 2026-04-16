@@ -38,9 +38,6 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
     private static final String RandomFailedMessage = (new Random().nextInt(30) + 10).toString();
-    private static final String MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY = '${multi.topic.retry.first-topic}'
-    private static final String MULTI_TOPIC_RETRY_SECOND_TOPIC_PROPERTY = '${multi.topic.retry.second-topic}'
-
     final String multiTopicRetryFirstTopic = "a-errors-retry-multi-topic-${UUID.randomUUID()}"
     final String multiTopicRetrySecondTopic = "b-errors-retry-multi-topic-${UUID.randomUUID()}"
 
@@ -429,14 +426,14 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         properties = @Property(name = ConsumerConfig.MAX_POLL_RECORDS_CONFIG, value = "2")
     )
     static class MultiTopicRetryOnErrorErrorCausingConsumer {
-        @Value(MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY)
+        @Value('${multi.topic.retry.first-topic}')
         String firstTopic
 
         AtomicInteger count = new AtomicInteger(0)
         List<String> attempts = new CopyOnWriteArrayList<>()
         List<String> successful = new CopyOnWriteArrayList<>()
 
-        @Topic([MULTI_TOPIC_RETRY_FIRST_TOPIC_PROPERTY, MULTI_TOPIC_RETRY_SECOND_TOPIC_PROPERTY])
+        @Topic(['${multi.topic.retry.first-topic}', '${multi.topic.retry.second-topic}'])
         void handleMessage(ConsumerRecord<String, String> consumerRecord) {
             String delivery = "${consumerRecord.topic()}:${consumerRecord.value()}"
             attempts << delivery
