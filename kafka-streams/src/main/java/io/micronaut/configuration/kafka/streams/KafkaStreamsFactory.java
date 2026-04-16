@@ -110,12 +110,13 @@ public class KafkaStreamsFactory implements Closeable {
             ConfiguredStreamBuilder builder,
             KafkaClientSupplier kafkaClientSupplier,
             BeanProvider<KStream<?, ?>> kStreamsProvider,
-            BeanProvider<KTable<?, ?>> kTablesProvider,
-            BeanProvider<GlobalKTable<?, ?>> globalKTablesProvider
+        BeanProvider<KTable<?, ?>> kTablesProvider,
+        BeanProvider<GlobalKTable<?, ?>> globalKTablesProvider
     ) {
         KStream<?, ?>[] kStreams = kStreamsProvider.stream().toArray(KStream[]::new);
-        KTable<?, ?>[] kTables = kTablesProvider.stream().toArray(KTable[]::new);
-        GlobalKTable<?, ?>[] globalKTables = globalKTablesProvider.stream().toArray(GlobalKTable[]::new);
+        // Initialize table topology beans before building the topology.
+        kTablesProvider.stream().count();
+        globalKTablesProvider.stream().count();
         Topology topology = builder.build(builder.getConfiguration());
         TopologyDescription topologyDescription = topology.describe();
         if (topologyDescription.subtopologies().isEmpty() && topologyDescription.globalStores().isEmpty()) {
