@@ -9,9 +9,11 @@ import spock.lang.Specification
 
 abstract class AbstractKafkaTest extends Specification implements TestPropertyProvider {
 
+    private static final DockerImageName KAFKA_IMAGE = DockerImageName.parse("apache/kafka:4.2.0")
+
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka-native")
+    KafkaContainer kafkaContainer = new KafkaContainer(KAFKA_IMAGE)
 
     @Override
     Map<String, String> getProperties() {
