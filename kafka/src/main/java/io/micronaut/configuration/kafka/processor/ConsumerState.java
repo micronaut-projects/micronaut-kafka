@@ -43,6 +43,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The internal state of the consumer.
@@ -54,6 +55,7 @@ import java.util.concurrent.CountDownLatch;
 abstract class ConsumerState {
 
     protected static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
+    private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
 
     protected final KafkaConsumerProcessor kafkaConsumerProcessor;
     protected final Object consumerBean;
@@ -68,6 +70,7 @@ abstract class ConsumerState {
     private Set<TopicPartition> pausedTopicPartitions;
     private Set<TopicPartition> pauseRequests;
     private CountDownLatch startupLatch;
+    private final CountDownLatch closedLatch;
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
 
@@ -86,6 +89,7 @@ abstract class ConsumerState {
         this.boundArguments = new HashMap<>(2);
         Optional.ofNullable(info.consumerArg).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
         this.closedState = ConsumerCloseState.NOT_STARTED;
+        this.closedLatch = new CountDownLatch(1);
         this.topicPartitionRetries = this.info.errorStrategy.isRetry() ? new HashMap<>() : null;
     }
 
@@ -143,21 +147,23 @@ abstract class ConsumerState {
     }
 
     void close() {
-        if (closedState == ConsumerCloseState.POLLING) {
+        boolean closed = closedState == ConsumerCloseState.CLOSED;
+        if (!closed && (pollingStarted || closedState == ConsumerCloseState.POLLING)) {
             final Instant start = Instant.now();
-            Instant silentTime = start;
-            do {
+            final Duration timeout = getCloseTimeout();
+            try {
+                closed = closedLatch.await(Math.max(0, timeout.toMillis()), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            if (!closed) {
                 if (LOG.isTraceEnabled()) {
-                    final Instant now = Instant.now();
-                    if (now.isAfter(silentTime)) {
-                        LOG.trace("Consumer {} is not closed yet (waiting {})", info.clientId, Duration.between(start, now));
-                        // Inhibit TRACE messages for a while to avoid polluting the logs
-                        silentTime = now.plusSeconds(5);
-                    }
+                    LOG.trace("Consumer {} is not closed yet (waiting {})", info.clientId, Duration.between(start, Instant.now()));
                 }
-            } while (closedState == ConsumerCloseState.POLLING);
+                LOG.warn("Consumer {} was not closed after waiting {}", info.clientId, timeout);
+            }
         }
-        LOG.debug("Consumer {} is closed", info.clientId);
+        LOG.debug("Consumer {} is {}", info.clientId, closedState == ConsumerCloseState.CLOSED ? "closed" : "not closed");
     }
 
     void threadPollLoop() {
@@ -168,10 +174,11 @@ abstract class ConsumerState {
                 refreshAssignmentsPollAndProcessRecords();
             }
         } catch (InterruptedException e) {
-            closedState = ConsumerCloseState.CLOSED;
             Thread.currentThread().interrupt();
         } catch (WakeupException e) {
-            closedState = ConsumerCloseState.CLOSED;
+            // Ignore and let the finally block mark this consumer as closed.
+        } finally {
+            closeComplete();
         }
     }
 
@@ -212,44 +219,48 @@ abstract class ConsumerState {
 
     private void pollAndProcessRecords() {
         failed = true;
-        try {
-            // We need to retrieve current offsets in case we need to retry the current record or batch
-            final Map<TopicPartition, OffsetAndMetadata> currentOffsets = getCurrentOffsets();
-            // Poll records
-            pauseTopicPartitions();
-            final ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
-            closedState = ConsumerCloseState.POLLING;
-            if (!pollingStarted) {
-                pollingStarted = true;
-                kafkaConsumerProcessor.publishStartedPollingEvent(kafkaConsumer);
-            }
-            resumeTopicPartitions();
-            if (consumerRecords == null || consumerRecords.isEmpty()) {
-                return; // No consumer records to process
-            }
-            // Support Kotlin coroutines
-            if (info.method.isSuspend()) {
-                Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
-                boundArguments.put(lastArgument, null);
-            }
-            processRecords(consumerRecords, currentOffsets);
-            if (failed) {
-                return;
-            }
-            if (info.offsetStrategy == OffsetStrategy.SYNC) {
-                try {
-                    kafkaConsumer.commitSync();
-                } catch (CommitFailedException e) {
-                    handleException(e, consumerRecords, null);
-                }
-            } else if (info.offsetStrategy == OffsetStrategy.ASYNC) {
-                kafkaConsumer.commitAsync(resolveCommitCallback());
-            }
-        } finally {
-            if (closedState == ConsumerCloseState.POLLING) {
-                closedState = ConsumerCloseState.NOT_STARTED;
-            }
+        // We need to retrieve current offsets in case we need to retry the current record or batch
+        final Map<TopicPartition, OffsetAndMetadata> currentOffsets = getCurrentOffsets();
+        // Poll records
+        pauseTopicPartitions();
+        final ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
+        closedState = ConsumerCloseState.POLLING;
+        if (!pollingStarted) {
+            pollingStarted = true;
+            kafkaConsumerProcessor.publishStartedPollingEvent(kafkaConsumer);
         }
+        resumeTopicPartitions();
+        if (consumerRecords == null || consumerRecords.isEmpty()) {
+            return; // No consumer records to process
+        }
+        // Support Kotlin coroutines
+        if (info.method.isSuspend()) {
+            Argument<?> lastArgument = info.method.getArguments()[info.method.getArguments().length - 1];
+            boundArguments.put(lastArgument, null);
+        }
+        processRecords(consumerRecords, currentOffsets);
+        if (failed) {
+            return;
+        }
+        if (info.offsetStrategy == OffsetStrategy.SYNC) {
+            try {
+                kafkaConsumer.commitSync();
+            } catch (CommitFailedException e) {
+                handleException(e, consumerRecords, null);
+            }
+        } else if (info.offsetStrategy == OffsetStrategy.ASYNC) {
+            kafkaConsumer.commitAsync(resolveCommitCallback());
+        }
+    }
+
+    private void closeComplete() {
+        closedState = ConsumerCloseState.CLOSED;
+        closedLatch.countDown();
+    }
+
+    @NonNull
+    protected Duration getCloseTimeout() {
+        return CLOSE_TIMEOUT;
     }
 
     private synchronized void pauseTopicPartitions() {

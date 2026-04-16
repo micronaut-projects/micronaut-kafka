@@ -2,21 +2,24 @@ package io.micronaut.configuration.kafka.processor
 
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.core.annotation.AnnotationValue
+import io.micronaut.context.ApplicationContext
 import io.micronaut.inject.BeanDefinition
 import io.micronaut.inject.ExecutableMethod
+import io.micronaut.configuration.kafka.annotation.KafkaListener
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import spock.lang.Specification
 
+import java.time.Duration
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 class ConsumerStateSpec extends Specification {
 
-    void "close does not spin after a successful poll cycle"() {
+    void "close does not spin indefinitely after a successful poll cycle"() {
         given:
         ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer())
         setField(state, 'pollingStarted', true)
@@ -25,11 +28,11 @@ class ConsumerStateSpec extends Specification {
         invokeRefreshAssignmentsPollAndProcessRecords(state)
         Thread closeThread = new Thread(state.&close)
         closeThread.start()
-        closeThread.join(500)
+        closeThread.join(1000)
 
         then:
         !closeThread.alive
-        getClosedState(state) != ConsumerCloseState.POLLING
+        getClosedState(state) == ConsumerCloseState.POLLING
 
         cleanup:
         if (closeThread?.alive) {
@@ -39,13 +42,12 @@ class ConsumerStateSpec extends Specification {
     }
 
     private static ConsumerInfo createConsumerInfo() {
-        BeanDefinition<ConsumerStateSpecListener> beanDefinition =
-            Class.forName('io.micronaut.configuration.kafka.processor.$ConsumerStateSpecListener$Definition')
-                .getDeclaredConstructor()
-                .newInstance() as BeanDefinition<ConsumerStateSpecListener>
-        ExecutableMethod<ConsumerStateSpecListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
-        AnnotationValue kafkaListener = method.findAnnotation(io.micronaut.configuration.kafka.annotation.KafkaListener).orElseThrow()
-        new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, method)
+        try (ApplicationContext context = ApplicationContext.run()) {
+            BeanDefinition<ConsumerStateSpecListener> beanDefinition = context.getBeanDefinition(ConsumerStateSpecListener)
+            ExecutableMethod<ConsumerStateSpecListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
+            AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
+            return new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, method)
+        }
     }
 
     @SuppressWarnings('unchecked')
@@ -121,6 +123,11 @@ class ConsumerStateSpec extends Specification {
         @Override
         protected Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets() {
             [:]
+        }
+
+        @Override
+        protected Duration getCloseTimeout() {
+            Duration.ofMillis(200)
         }
     }
 }
