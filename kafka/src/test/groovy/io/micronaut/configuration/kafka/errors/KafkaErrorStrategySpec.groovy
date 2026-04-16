@@ -96,12 +96,14 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myClient.sendMessage(multiTopicRetrySecondTopic, "Two")
 
         MultiTopicRetryOnErrorErrorCausingConsumer myConsumer = context.getBean(MultiTopicRetryOnErrorErrorCausingConsumer)
+        String retriedMessage = multiTopicRetryFirstTopic + ":One"
+        String otherTopicMessage = multiTopicRetrySecondTopic + ":Two"
 
         then: "The failing message is retried and the other topic's message is still delivered"
         conditions.eventually {
-            myConsumer.attempts.count("${multiTopicRetryFirstTopic}:One") >= 2
-            myConsumer.successful.contains("${multiTopicRetryFirstTopic}:One")
-            myConsumer.successful.contains("${multiTopicRetrySecondTopic}:Two")
+            myConsumer.attempts.count(retriedMessage) >= 2
+            myConsumer.successful.contains(retriedMessage)
+            myConsumer.successful.contains(otherTopicMessage)
         }
     }
 
