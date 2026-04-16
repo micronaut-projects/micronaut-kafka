@@ -132,6 +132,7 @@ public class KafkaMetricMeterTypeBuilder {
         }
 
         KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(this.name);
+        removeExistingMeter();
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
             final KafkaMetric kafkaMetric = this.kafkaMetric;
@@ -165,5 +166,14 @@ public class KafkaMetricMeterTypeBuilder {
 
     private String getMetricName() {
         return prefix + "." + name;
+    }
+
+    private void removeExistingMeter() {
+        Meter existingMeter = meterRegistry.find(getMetricName())
+                .tags(tagFunction.apply(kafkaMetric.metricName()))
+                .meter();
+        if (existingMeter != null) {
+            meterRegistry.remove(existingMeter);
+        }
     }
 }
