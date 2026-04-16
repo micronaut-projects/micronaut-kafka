@@ -133,21 +133,21 @@ public class KafkaMetricMeterTypeBuilder {
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(Gauge.builder(getMetricName(), kafkaMetric, value -> ((Number) value.metricValue()).doubleValue())
+            return Optional.of(Gauge.builder(getMetricName(), kafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
         } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, value -> ((Number) value.metricValue()).doubleValue())
+            return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
                     .register(meterRegistry));
         } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), value -> ((Number) value.metricValue()).doubleValue())
+            return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .register(meterRegistry));
