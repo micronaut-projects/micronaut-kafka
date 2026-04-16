@@ -41,16 +41,13 @@ import java.util.function.Function;
 @Internal
 public class KafkaMetricMeterTypeBuilder {
 
+    private static final KafkaMetricMeterTypeRegistry KAFKA_METRIC_METER_TYPE_REGISTRY = new KafkaMetricMeterTypeRegistry();
+
     private MeterRegistry meterRegistry;
     private String name;
     private Function<MetricName, List<Tag>> tagFunction;
     private KafkaMetric kafkaMetric;
     private String prefix;
-
-    /**
-     * Construct this here instead of using static map in registry to free memory at runtime.
-     */
-    private final KafkaMetricMeterTypeRegistry kafkaMetricMeterTypeRegistry = new KafkaMetricMeterTypeRegistry();
 
     /**
      * Method for creating a new builder class.
@@ -131,13 +128,12 @@ public class KafkaMetricMeterTypeBuilder {
             name = kafkaMetric.metricName().name();
         }
 
-        KafkaMetricMeterType kafkaMetricMeterType = kafkaMetricMeterTypeRegistry.lookup(this.name);
+        KafkaMetricMeterType kafkaMetricMeterType = KAFKA_METRIC_METER_TYPE_REGISTRY.lookup(this.name);
         List<Tag> tags = tagFunction.apply(kafkaMetric.metricName());
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
-            final KafkaMetric kafkaMetric = this.kafkaMetric;
             removeExistingMeter(tags);
-            return Optional.of(Gauge.builder(getMetricName(), () -> (Number) kafkaMetric.metricValue())
+            return Optional.of(Gauge.builder(getMetricName(), kafkaMetric, value -> ((Number) value.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
