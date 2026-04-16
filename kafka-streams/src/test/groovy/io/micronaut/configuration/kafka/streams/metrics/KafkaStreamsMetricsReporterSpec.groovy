@@ -21,6 +21,7 @@ class KafkaStreamsMetricsReporterSpec extends Specification {
                 createMetric("process-rate", "stream-processor-node-metrics", ["processor-node-id": "KSTREAM-SOURCE-0000000000"]),
                 createMetric("process-rate", "stream-thread-metrics", ["thread-id": "StreamThread-1"]),
                 createMetric("process-rate", "stream-task-metrics", ["task-id": "0_0"]),
+                createMetric("alive-stream-threads", "stream-metrics", [:]),
                 createMetric("fetch-rate", "consumer-fetch-manager-metrics", ["client-id": "stream-consumer"])
         ])
 
@@ -28,8 +29,10 @@ class KafkaStreamsMetricsReporterSpec extends Specification {
         registry.find("kafka-streams.stream-processor-node-metrics.process-rate").meter() != null
         registry.find("kafka-streams.stream-thread-metrics.process-rate").meter() != null
         registry.find("kafka-streams.stream-task-metrics.process-rate").meter() != null
+        registry.find("kafka-streams.alive-stream-threads").meter() != null
         registry.find("kafka-streams.fetch-rate").meter() != null
         registry.find("kafka-streams.process-rate").meter() == null
+        registry.find("kafka-streams.stream-metrics.alive-stream-threads").meter() == null
     }
 
     private KafkaMetric createMetric(String name, String group, Map<String, String> tags) {
