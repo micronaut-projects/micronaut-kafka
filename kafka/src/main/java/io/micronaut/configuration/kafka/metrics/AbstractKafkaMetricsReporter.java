@@ -122,20 +122,22 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         }
 
         String meterName = getMetricPrefix() + "." + metric.metricName().name();
-        List<Tag> expectedTags = getTags(metric.metricName());
-        meters.values()
-                .stream()
-                .filter(meter -> meter.getId().getName().equals(meterName))
-                .filter(meter -> meter.getId().getTags().size() == expectedTags.size()
-                        && meter.getId().getTags().containsAll(expectedTags))
-                .toList()
-                .forEach(meter -> {
-                    meterRegistry.remove(meter);
-                    meters.remove(meter.getId());
-                });
+        Set<Tag> expectedTags = Set.copyOf(getTags(metric.metricName()));
+        for (var iterator = meters.entrySet().iterator(); iterator.hasNext(); ) {
+            var meterEntry = iterator.next();
+            Meter meter = meterEntry.getValue();
+            if (meter.getId().getName().equals(meterName) && hasExpectedTags(meter.getId().getTags(), expectedTags)) {
+                meterRegistry.remove(meter);
+                iterator.remove();
+            }
+        }
         if (meters.isEmpty()) {
             registeredMeters.remove(meterRegistry, meters);
         }
+    }
+
+    private static boolean hasExpectedTags(List<Tag> meterTags, Set<Tag> expectedTags) {
+        return meterTags.size() == expectedTags.size() && expectedTags.containsAll(meterTags);
     }
 
     private Function<MetricName, List<Tag>> getTagFunction() {
