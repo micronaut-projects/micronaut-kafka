@@ -6,8 +6,11 @@ import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
+import org.apache.kafka.common.errors.TopicExistsException
 import spock.lang.AutoCleanup
 import spock.lang.Shared
+
+import java.util.concurrent.ExecutionException
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
@@ -40,7 +43,13 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
     void createTopic(String name, int numPartitions, int replicationFactor) {
         try (def admin = AdminClient.create([(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG): bootstrapServers])) {
-            admin.createTopics([new NewTopic(name, numPartitions, (short) replicationFactor)]).all().get()
+            try {
+                admin.createTopics([new NewTopic(name, numPartitions, (short) replicationFactor)]).all().get()
+            } catch (ExecutionException e) {
+                if (!(e.cause instanceof TopicExistsException)) {
+                    throw e
+                }
+            }
         }
     }
 
