@@ -80,10 +80,14 @@ class KafkaMetricMeterTypeBuilderSpec extends Specification {
                 .build()
 
         then:
-        registry.get("kafka.consumer.records-lag")
+        def matchingMeters = registry.find("kafka.consumer.records-lag")
+                .tags("client-id", "consumer-1", "topic", "words", "partition", "0")
+                .meters()
+        def updatedGauge = registry.get("kafka.consumer.records-lag")
                 .tags("client-id", "consumer-1", "topic", "words", "partition", "0")
                 .gauge()
-                .value() == 9
+        matchingMeters.size() == 1
+        updatedGauge.value() == 9
     }
 
     private KafkaMetric createMetric() {
