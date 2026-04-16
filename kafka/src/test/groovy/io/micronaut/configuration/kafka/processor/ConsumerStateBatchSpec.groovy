@@ -15,6 +15,7 @@ import org.apache.kafka.common.TopicPartition
 import spock.lang.Specification
 
 import java.time.Duration
+import java.util.Properties
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
 
@@ -81,6 +82,7 @@ class ConsumerStateBatchSpec extends Specification {
                 'group',
                 OffsetStrategy.DISABLED,
                 kafkaListenerAnnotation(),
+                new Properties(),
                 executableMethod()
         )
         new ConsumerStateBatch(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())

@@ -13,7 +13,7 @@ class DefaultKafkaListenerExceptionHandlerLoggingSpec extends Specification {
     void "logs commit failures at #expectedLevel when cooperativeSticky=#cooperativeSticky"() {
         given:
         Logger logger = Mock()
-        DefaultKafkaListenerExceptionHandler handler = new TestDefaultKafkaListenerExceptionHandler(new DefaultKafkaListenerExceptionHandlerConfigurationProperties(), logger)
+        DefaultKafkaListenerExceptionHandler handler = new DefaultKafkaListenerExceptionHandler(new DefaultKafkaListenerExceptionHandlerConfigurationProperties(), logger)
         CommitFailedException cause = new CommitFailedException('rebalance in progress')
         KafkaListenerException exception = new KafkaListenerException(
             'commit failed',
@@ -45,19 +45,5 @@ class DefaultKafkaListenerExceptionHandlerLoggingSpec extends Specification {
         cooperativeSticky || expectedLevel
         true              || 'WARN'
         false             || 'ERROR'
-    }
-
-    private static final class TestDefaultKafkaListenerExceptionHandler extends DefaultKafkaListenerExceptionHandler {
-        private final Logger logger
-
-        TestDefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfigurationProperties config, Logger logger) {
-            super(config)
-            this.logger = logger
-        }
-
-        @Override
-        protected Logger getLogger() {
-            return logger
-        }
     }
 }

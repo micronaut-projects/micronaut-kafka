@@ -48,6 +48,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     private static final Logger LOG = LoggerFactory.getLogger(KafkaListenerExceptionHandler.class);
     private static final Pattern SERIALIZATION_EXCEPTION_MESSAGE_PATTERN = Pattern.compile(".+ for partition (.+)-(\\d+) at offset (\\d+)\\..+");
 
+    private final Logger logger;
     private boolean skipRecordOnDeserializationFailure;
     private boolean commitRecordOnDeserializationFailure;
 
@@ -58,6 +59,11 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
      */
     @Inject
     public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
+        this(config, LOG);
+    }
+
+    DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config, Logger logger) {
+        this.logger = logger;
         skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
         commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
     }
@@ -72,7 +78,6 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
 
     @Override
     public void handle(KafkaListenerException exception) {
-        final Logger logger = getLogger();
         final Throwable cause = exception.getCause();
         final Object consumerBean = exception.getKafkaListener();
         if (cause instanceof SerializationException) {
@@ -102,10 +107,6 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
                 }
             }
         }
-    }
-
-    protected Logger getLogger() {
-        return LOG;
     }
 
     /**
