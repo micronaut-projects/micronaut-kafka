@@ -19,6 +19,7 @@ import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
+import spock.lang.Shared
 import spock.lang.Unroll
 
 import java.util.UUID
@@ -38,8 +39,8 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaErrorStrategySpec.class);
     private static final String RandomFailedMessage = (new Random().nextInt(30) + 10).toString();
-    final String multiTopicRetryFirstTopic = "a-errors-retry-multi-topic-${UUID.randomUUID()}"
-    final String multiTopicRetrySecondTopic = "b-errors-retry-multi-topic-${UUID.randomUUID()}"
+    @Shared final String multiTopicRetryFirstTopic = "a-errors-retry-multi-topic-${UUID.randomUUID()}"
+    @Shared final String multiTopicRetrySecondTopic = "b-errors-retry-multi-topic-${UUID.randomUUID()}"
 
     Map<String, Object> getConfiguration() {
         super.configuration +
