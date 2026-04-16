@@ -114,7 +114,7 @@ public class KafkaStreamsFactory implements Closeable {
         BeanProvider<GlobalKTable<?, ?>> globalKTablesProvider
     ) {
         KStream<?, ?>[] kStreams = kStreamsProvider.stream().toArray(KStream[]::new);
-        // Initialize table topology beans before building the topology.
+        // count() forces eager resolution before build() without allocating unused arrays.
         kTablesProvider.stream().count();
         globalKTablesProvider.stream().count();
         Topology topology = builder.build(builder.getConfiguration());
