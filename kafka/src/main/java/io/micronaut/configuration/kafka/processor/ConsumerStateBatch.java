@@ -36,6 +36,7 @@ import reactor.util.function.Tuple2;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -175,7 +176,11 @@ final class ConsumerStateBatch extends ConsumerState {
     private int getCurrentRetryCount(Set<TopicPartition> partitions,
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         return partitions.stream()
-            .map(tp -> getPartitionRetryState(tp, currentOffsets.get(tp).offset()))
+            .map(tp -> {
+                OffsetAndMetadata offsetAndMetadata = currentOffsets.get(tp);
+                return offsetAndMetadata == null ? null : getPartitionRetryState(tp, offsetAndMetadata.offset());
+            })
+            .filter(Objects::nonNull)
             .mapToInt(x -> x.currentRetryCount)
             .max().orElse(info.retryCount);
     }
@@ -186,28 +191,37 @@ final class ConsumerStateBatch extends ConsumerState {
 
     private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets, RecordDeserializationException ex) {
-        // Only after the first poll there are no current offsets, but they can be reconstructed from the exception
-        return CollectionUtils.isEmpty(currentOffsets)
-            ? Map.of(ex.topicPartition(), new OffsetAndMetadata(ex.offset(), null))
-            : currentOffsets;
+        // Current offsets can be missing after the first poll if assignments changed while records were being fetched.
+        if (CollectionUtils.isEmpty(currentOffsets)) {
+            return Map.of(ex.topicPartition(), new OffsetAndMetadata(ex.offset(), null));
+        }
+        if (currentOffsets.containsKey(ex.topicPartition())) {
+            return currentOffsets;
+        }
+        Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = new HashMap<>(currentOffsets);
+        reconstructedOffsets.put(ex.topicPartition(), new OffsetAndMetadata(ex.offset(), null));
+        return reconstructedOffsets;
     }
 
     @Nullable
     private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
         @Nullable ConsumerRecords<?, ?> consumerRecords) {
-        // Only after the first poll there are no current offsets, but they can be reconstructed from the fetched records
-        if (CollectionUtils.isEmpty(currentOffsets) && consumerRecords != null) {
-            Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = new HashMap<>();
-            for (ConsumerRecord<?, ?> record : consumerRecords) {
-                TopicPartition tp = new TopicPartition(record.topic(), record.partition());
-                if (!reconstructedOffsets.containsKey(tp)) {
-                    reconstructedOffsets.put(tp, new OffsetAndMetadata(record.offset(), null));
-                }
-            }
-            return reconstructedOffsets;
-        } else {
+        // Current offsets can be missing for some partitions if assignments changed while records were being fetched.
+        if (consumerRecords == null) {
             return currentOffsets;
         }
+        Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = CollectionUtils.isEmpty(currentOffsets)
+            ? new HashMap<>()
+            : new HashMap<>(currentOffsets);
+        boolean changed = CollectionUtils.isEmpty(currentOffsets);
+        for (ConsumerRecord<?, ?> record : consumerRecords) {
+            TopicPartition tp = new TopicPartition(record.topic(), record.partition());
+            if (!reconstructedOffsets.containsKey(tp)) {
+                reconstructedOffsets.put(tp, new OffsetAndMetadata(record.offset(), null));
+                changed = true;
+            }
+        }
+        return changed ? reconstructedOffsets : currentOffsets;
     }
 }
