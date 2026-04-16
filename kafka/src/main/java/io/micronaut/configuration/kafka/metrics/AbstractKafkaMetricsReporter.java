@@ -116,19 +116,26 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private void removeMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
-        meterRegistry.find(getMetricPrefix() + "." + metric.metricName().name())
-                .tags(getTags(metric.metricName()))
-                .meters()
+        Map<Meter.Id, Meter> meters = registeredMeters.get(meterRegistry);
+        if (meters == null || meters.isEmpty()) {
+            return;
+        }
+
+        String meterName = getMetricPrefix() + "." + metric.metricName().name();
+        List<Tag> expectedTags = getTags(metric.metricName());
+        meters.values()
+                .stream()
+                .filter(meter -> meter.getId().getName().equals(meterName))
+                .filter(meter -> meter.getId().getTags().size() == expectedTags.size()
+                        && meter.getId().getTags().containsAll(expectedTags))
+                .toList()
                 .forEach(meter -> {
                     meterRegistry.remove(meter);
-                    Map<Meter.Id, Meter> meters = registeredMeters.get(meterRegistry);
-                    if (meters != null) {
-                        meters.remove(meter.getId());
-                        if (meters.isEmpty()) {
-                            registeredMeters.remove(meterRegistry, meters);
-                        }
-                    }
+                    meters.remove(meter.getId());
                 });
+        if (meters.isEmpty()) {
+            registeredMeters.remove(meterRegistry, meters);
+        }
     }
 
     private Function<MetricName, List<Tag>> getTagFunction() {

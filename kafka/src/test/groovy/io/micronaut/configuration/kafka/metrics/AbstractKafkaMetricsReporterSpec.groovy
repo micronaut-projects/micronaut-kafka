@@ -41,6 +41,41 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.meters.isEmpty()
     }
 
+    void "metric removal removes meters from all bound registries"() {
+        given:
+        def firstRegistry = new SimpleMeterRegistry()
+        def secondRegistry = new SimpleMeterRegistry()
+        def reporter = new TestKafkaMetricsReporter()
+        reporter.bindTo(firstRegistry)
+        reporter.bindTo(secondRegistry)
+
+        when:
+        def metric = createMetric(1)
+        reporter.metricChange(metric)
+        reporter.metricRemoval(metric)
+
+        then:
+        firstRegistry.meters.isEmpty()
+        secondRegistry.meters.isEmpty()
+    }
+
+    void "close removes registered meters from all bound registries"() {
+        given:
+        def firstRegistry = new SimpleMeterRegistry()
+        def secondRegistry = new SimpleMeterRegistry()
+        def reporter = new TestKafkaMetricsReporter()
+        reporter.bindTo(firstRegistry)
+        reporter.bindTo(secondRegistry)
+
+        when:
+        reporter.metricChange(createMetric(1))
+        reporter.close()
+
+        then:
+        firstRegistry.meters.isEmpty()
+        secondRegistry.meters.isEmpty()
+    }
+
     private static KafkaMetric createMetric(int partition) {
         new KafkaMetric(
                 new Object(),
