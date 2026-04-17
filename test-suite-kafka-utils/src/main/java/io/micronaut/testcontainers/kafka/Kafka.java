@@ -1,15 +1,13 @@
 package io.micronaut.testcontainers.kafka;
 
 import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Kafka {
 
-    // Avoid the floating experimental kafka-native image in CI.
-    private static final DockerImageName IMAGE_NAME = DockerImageName.parse("apache/kafka:4.2.0");
+    private static final String IMAGE_NAME = "apache/kafka:4.2.0";
     private static KafkaContainer container;
 
     public static Map<String, String> getProperties() {
