@@ -16,6 +16,7 @@ import java.time.Duration
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import java.util.Properties
 
 class ConsumerStateSpec extends Specification {
 
@@ -46,7 +47,7 @@ class ConsumerStateSpec extends Specification {
             BeanDefinition<ConsumerStateSpecListener> beanDefinition = context.getBeanDefinition(ConsumerStateSpecListener)
             ExecutableMethod<ConsumerStateSpecListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
             AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
-            return new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, method)
+            return new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, new Properties(), method)
         }
     }
 
