@@ -98,9 +98,9 @@ public class KafkaStreamsFactory implements Closeable {
      * @param name                 The configuration name
      * @param builder              The builder
      * @param kafkaClientSupplier  The kafka client supplier used to create consumers and producers in the streams app
-     * @param kStreams             The KStream definitions
-     * @param kTables              The KTable definitions
-     * @param globalKTables        The GlobalKTable definitions
+     * @param kStreamsProvider     The KStream definitions
+     * @param kTablesProvider      The KTable definitions
+     * @param globalKTablesProvider The GlobalKTable definitions
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
