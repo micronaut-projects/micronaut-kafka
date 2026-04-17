@@ -1,11 +1,10 @@
 package io.micronaut.configuration.kafka
 
-import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 import io.micronaut.context.ApplicationContext
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
+import org.testcontainers.kafka.KafkaContainer
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 
@@ -16,7 +15,7 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
     @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
-        kafkaContainer = new KafkaContainer("apache/kafka-native")
+        kafkaContainer = new KafkaContainer("apache/kafka:4.2.0")
         kafkaContainer.start()
         startContext()
         afterKafkaStarted()
