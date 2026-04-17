@@ -59,6 +59,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
 import io.micronaut.runtime.ApplicationConfiguration;
+import io.micronaut.runtime.graceful.GracefulShutdownCapable;
 import io.micronaut.scheduling.ScheduledExecutorTaskScheduler;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.TaskScheduler;
@@ -85,9 +86,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -105,7 +108,7 @@ import java.util.regex.PatternSyntaxException;
 @Requires(beans = KafkaDefaultConfiguration.class)
 @Internal
 class KafkaConsumerProcessor
-        implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry {
+        implements ExecutableMethodProcessor<Topic>, AutoCloseable, ConsumerRegistry, GracefulShutdownCapable {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class);
     private static final ByteArrayDeserializer DEFAULT_KEY_DESERIALIZER = new ByteArrayDeserializer();
@@ -312,14 +315,38 @@ class KafkaConsumerProcessor
     }
 
     @Override
+    public CompletableFuture<Void> shutdownGracefully() {
+        if (consumers.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
+        consumers.values().forEach(ConsumerState::requestShutdown);
+        consumers.values().forEach(ConsumerState::wakeUp);
+        return CompletableFuture.allOf(consumers.values().stream()
+            .map(ConsumerState::getShutdownFuture)
+            .toArray(CompletableFuture[]::new));
+    }
+
+    @Override
+    public OptionalLong reportActiveTasks() {
+        return OptionalLong.of(consumers.values().stream()
+            .filter(ConsumerState::isActive)
+            .count());
+    }
+
+    @Override
     @PreDestroy
     public void close() {
         kafkaConsumerGroupManager.getRegisteredClientIdsForDeletion().forEach(clientId -> {
             LOG.info("Already closed consumer client : {}", clientId);
             consumers.remove(clientId);
         });
-        consumers.values().forEach(ConsumerState::wakeUp);
-        consumers.values().forEach(ConsumerState::close);
+        consumers.values().forEach(ConsumerState::requestShutdown);
+        consumers.values().forEach(state -> {
+            if (state.isActive()) {
+                state.wakeUp();
+            }
+            state.close();
+        });
         consumers.clear();
     }
 
