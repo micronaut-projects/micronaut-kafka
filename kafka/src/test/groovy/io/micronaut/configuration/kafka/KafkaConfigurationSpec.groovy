@@ -10,6 +10,8 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
+import io.micronaut.context.exceptions.BeanInstantiationException
+import io.micronaut.context.exceptions.ConfigurationException
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -137,6 +139,22 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    void "test null kafka property reports the failing property path"() {
+        when:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.custom.users'): null,
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+        applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        BeanInstantiationException exception = thrown()
+        exception.cause instanceof ConfigurationException
+        exception.cause.message == "Value for property kafka.custom.users resolved as null"
     }
 
     void "test override consumer default properties"() {
