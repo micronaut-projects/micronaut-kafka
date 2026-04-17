@@ -30,7 +30,9 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.WakeupException;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,11 @@ abstract class ConsumerState {
 
     protected static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
     private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
+    private static final String DLQ_EXCEPTION_CLASS_HEADER = "micronaut-kafka-exception-class";
+    private static final String DLQ_EXCEPTION_MESSAGE_HEADER = "micronaut-kafka-exception-message";
+    private static final String DLQ_ORIGINAL_TOPIC_HEADER = "micronaut-kafka-original-topic";
+    private static final String DLQ_ORIGINAL_PARTITION_HEADER = "micronaut-kafka-original-partition";
+    private static final String DLQ_ORIGINAL_OFFSET_HEADER = "micronaut-kafka-original-offset";
 
     protected final KafkaConsumerProcessor kafkaConsumerProcessor;
     protected final Object consumerBean;
@@ -491,9 +498,53 @@ abstract class ConsumerState {
         handleException(e.getMessage(), e, consumerRecords, consumerRecord);
     }
 
+    protected void publishToDlq(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord) {
+        if (info.errorStrategy != io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD || info.dlq == null) {
+            return;
+        }
+        if (consumerRecord != null) {
+            publishConsumerRecordToDlq(consumerRecord, e);
+        } else if (consumerRecords != null) {
+            for (ConsumerRecord<?, ?> failedRecord : consumerRecords) {
+                publishConsumerRecordToDlq(failedRecord, e);
+            }
+        }
+    }
+
     private void handleException(String message, Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
         kafkaConsumerProcessor.handleException(consumerBean,
             wrapExceptionInKafkaListenerException(message, e, consumerRecords, consumerRecord));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void publishConsumerRecordToDlq(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        final Object key = consumerRecord.key();
+        final Object value = consumerRecord.value();
+        final Producer<?, ?> kafkaProducer = kafkaConsumerProcessor.getProducer(
+            Optional.ofNullable(info.producerClientId).orElse(info.groupId),
+            (Class<?>) (key != null ? key.getClass() : byte[].class),
+            (Class<?>) (value != null ? value.getClass() : byte[].class)
+        );
+        final Headers headers = new RecordHeaders(consumerRecord.headers());
+        addDlqHeader(headers, DLQ_EXCEPTION_CLASS_HEADER, error.getClass().getName());
+        addDlqHeader(headers, DLQ_EXCEPTION_MESSAGE_HEADER, error.getMessage());
+        addDlqHeader(headers, DLQ_ORIGINAL_TOPIC_HEADER, consumerRecord.topic());
+        addDlqHeader(headers, DLQ_ORIGINAL_PARTITION_HEADER, Integer.toString(consumerRecord.partition()));
+        addDlqHeader(headers, DLQ_ORIGINAL_OFFSET_HEADER, Long.toString(consumerRecord.offset()));
+        final Long timestamp = consumerRecord.timestamp() >= 0 ? consumerRecord.timestamp() : null;
+        final ProducerRecord producerRecord = new ProducerRecord(info.dlq, null, timestamp, key, value, headers);
+        try {
+            kafkaProducer.send(producerRecord).get();
+        } catch (Exception dlqError) {
+            LOG.error("Error publishing record [{}] to DLQ [{}]: {}", consumerRecord, info.dlq, dlqError.getMessage(), dlqError);
+        }
+    }
+
+    private static void addDlqHeader(Headers headers, String name, @Nullable String value) {
+        if (value != null) {
+            headers.add(new RecordHeader(name, value.getBytes(StandardCharsets.UTF_8)));
+        }
     }
 
     private KafkaListenerException wrapExceptionInKafkaListenerException(String message, Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
