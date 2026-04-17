@@ -10,7 +10,8 @@ import org.testcontainers.utility.DockerImageName
 abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
-        var MY_KAFKA: KafkaContainer = KafkaContainer("apache/kafka-native")
+        private val KAFKA_IMAGE: DockerImageName = DockerImageName.parse("apache/kafka:4.2.0")
+        var MY_KAFKA: KafkaContainer = KafkaContainer(KAFKA_IMAGE)
     }
 
     override fun getProperties(): MutableMap<String, String> {

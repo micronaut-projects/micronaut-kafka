@@ -11,12 +11,14 @@ import spock.lang.Shared
 
 abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
 
+    private static final DockerImageName KAFKA_IMAGE = DockerImageName.parse("apache/kafka:4.2.0")
+
     @Shared @AutoCleanup ApplicationContext context
     @Shared String bootstrapServers
     @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
-        kafkaContainer = new KafkaContainer("apache/kafka-native")
+        kafkaContainer = new KafkaContainer(KAFKA_IMAGE)
         kafkaContainer.start()
         startContext()
         afterKafkaStarted()
