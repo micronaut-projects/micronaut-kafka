@@ -2,7 +2,6 @@ package io.micronaut.kafka.docs
 
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 
 /**
  * @see <a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers">Singleton containers</a>
@@ -10,8 +9,7 @@ import org.testcontainers.utility.DockerImageName
 abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
-        private val KAFKA_IMAGE: DockerImageName = DockerImageName.parse("apache/kafka:4.2.0")
-        var MY_KAFKA: KafkaContainer = KafkaContainer(KAFKA_IMAGE)
+        var MY_KAFKA: KafkaContainer = KafkaContainer("apache/kafka:4.2.0")
     }
 
     override fun getProperties(): MutableMap<String, String> {

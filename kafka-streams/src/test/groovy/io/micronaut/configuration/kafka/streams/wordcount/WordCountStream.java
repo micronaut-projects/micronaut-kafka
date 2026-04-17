@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.streams.wordcount;
 // tag::imports[]
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -21,6 +22,7 @@ import java.util.Properties;
 
 // tag::clazz[]
 @Factory
+@Requires(property = "spec.name", notEquals = "GlobalKTableOnlySpec")
 public class WordCountStream {
 
     public static final String STREAM_WORD_COUNT = "word-count";

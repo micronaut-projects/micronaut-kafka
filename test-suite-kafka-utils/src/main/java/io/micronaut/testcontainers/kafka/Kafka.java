@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Kafka {
 
-    private static final String IMAGE_NAME = "apache/kafka-native";
+    private static final String IMAGE_NAME = "apache/kafka:4.2.0";
     private static KafkaContainer container;
 
     public static Map<String, String> getProperties() {

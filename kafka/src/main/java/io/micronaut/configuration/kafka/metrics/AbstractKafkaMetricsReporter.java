@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.metrics;
 
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
@@ -46,6 +48,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     public static final String NODE_ID_TAG = "node-id";
 
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
+    private final Map<MeterRegistry, Map<Meter.Id, Meter>> registeredMeters = new ConcurrentHashMap<>();
 
     private List<KafkaMetric> metrics;
 
@@ -75,7 +78,9 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     @Override
     public void metricRemoval(KafkaMetric metric) {
-        // no-op (Micrometer doesn't support removal)
+        for (MeterRegistry meterRegistry : meterRegistries) {
+            removeMetric(meterRegistry, metric);
+        }
     }
 
     @Override
@@ -93,6 +98,8 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
             metrics.clear();
             metrics = null;
         }
+        registeredMeters.forEach((meterRegistry, meters) -> meters.values().forEach(meterRegistry::remove));
+        registeredMeters.clear();
         meterRegistries.clear();
     }
 
@@ -102,11 +109,43 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
                 .metric(metric)
                 .tagFunction(getTagFunction())
                 .registry(meterRegistry)
-                .build();
+                .build()
+                .ifPresent(meter -> registeredMeters
+                        .computeIfAbsent(meterRegistry, ignored -> new ConcurrentHashMap<>())
+                        .put(meter.getId(), meter));
+    }
+
+    private void removeMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
+        Map<Meter.Id, Meter> meters = registeredMeters.get(meterRegistry);
+        if (meters == null || meters.isEmpty()) {
+            return;
+        }
+
+        String meterName = getMetricPrefix() + "." + metric.metricName().name();
+        Set<Tag> expectedTags = Set.copyOf(getTags(metric.metricName()));
+        for (var iterator = meters.entrySet().iterator(); iterator.hasNext(); ) {
+            var meterEntry = iterator.next();
+            Meter meter = meterEntry.getValue();
+            if (meter.getId().getName().equals(meterName) && hasExpectedTags(meter.getId().getTags(), expectedTags)) {
+                meterRegistry.remove(meter);
+                iterator.remove();
+            }
+        }
+        if (meters.isEmpty()) {
+            registeredMeters.remove(meterRegistry, meters);
+        }
+    }
+
+    private static boolean hasExpectedTags(List<Tag> meterTags, Set<Tag> expectedTags) {
+        return meterTags.size() == expectedTags.size() && expectedTags.containsAll(meterTags);
     }
 
     private Function<MetricName, List<Tag>> getTagFunction() {
-        return metricName -> metricName
+        return this::getTags;
+    }
+
+    private List<Tag> getTags(MetricName metricName) {
+        return metricName
                 .tags()
                 .entrySet()
                 .stream()
