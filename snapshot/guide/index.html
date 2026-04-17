@@ -2210,7 +2210,6 @@ interface RandomTransactionalIdClient {
 
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 
 /**
  * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
@@ -2218,7 +2217,7 @@ import org.testcontainers.utility.DockerImageName
 abstract class AbstractKafkaTest : TestPropertyProvider {
 
     companion object {
-        var MY_KAFKA: KafkaContainer = KafkaContainer("apache/kafka-native")
+        var MY_KAFKA: KafkaContainer = KafkaContainer("apache/kafka:4.2.0")
     }
 
     override fun getProperties(): MutableMap&lt;String, String&gt; {
@@ -2240,7 +2239,6 @@ abstract class AbstractKafkaTest : TestPropertyProvider {
 
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -2249,7 +2247,7 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka-native")
+    KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka:4.2.0")
 
     @Override
     Map&lt;String, String&gt; getProperties() {
@@ -5896,7 +5894,19 @@ class MessageClientFallback implements MessageClient { // <b class="conum">(3)</
 </div>
 </div>
 <div class="paragraph">
-<p>You should then define a <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that return a <code>KStream</code>. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+<p>You should then define an <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that register topology components against the injected <code>ConfiguredStreamBuilder</code>. These beans can return a <code>KStream</code>, <code>KTable</code>, or <code>GlobalKTable</code>, depending on the topology you are building. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If a stream topology is composed only of a <code>KTable</code> or <code>GlobalKTable</code>, make that bean eager (for example with <a href="../api/io/micronaut/context/annotation/Context.html">@Context</a>) so Micronaut initializes the topology before the corresponding <code>KafkaStreams</code> bean is resolved.
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Kafka Streams Word Count</div>
@@ -6537,7 +6547,7 @@ KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> and you have multiple topology beans defined, they share the default configurations such as client id and application id. When using multiple streams in a single app, it is advisable to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
 </td>
 </tr>
 </table>
