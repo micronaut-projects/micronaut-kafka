@@ -58,6 +58,7 @@ abstract class ConsumerState {
 
     protected static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
     private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration DLQ_PUBLISH_TIMEOUT = Duration.ofSeconds(5);
     private static final String DLQ_EXCEPTION_CLASS_HEADER = "micronaut-kafka-exception-class";
     private static final String DLQ_EXCEPTION_MESSAGE_HEADER = "micronaut-kafka-exception-message";
     private static final String DLQ_ORIGINAL_TOPIC_HEADER = "micronaut-kafka-original-topic";
@@ -535,13 +536,35 @@ abstract class ConsumerState {
         final Long timestamp = consumerRecord.timestamp() >= 0 ? consumerRecord.timestamp() : null;
         final ProducerRecord producerRecord = new ProducerRecord(info.dlq, null, timestamp, key, value, headers);
         try {
-            kafkaProducer.send(producerRecord).get();
+            kafkaProducer.send(producerRecord).get(DLQ_PUBLISH_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException dlqError) {
+            Thread.currentThread().interrupt();
+            LOG.error(
+                "Error publishing record [topic={}, partition={}, offset={}, headers={}] to DLQ [{}]: {}",
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
+                consumerRecord.headers().toArray().length,
+                info.dlq,
+                dlqError.getMessage(),
+                dlqError
+            );
         } catch (Exception dlqError) {
-            LOG.error("Error publishing record [{}] to DLQ [{}]: {}", consumerRecord, info.dlq, dlqError.getMessage(), dlqError);
+            LOG.error(
+                "Error publishing record [topic={}, partition={}, offset={}, headers={}] to DLQ [{}]: {}",
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
+                consumerRecord.headers().toArray().length,
+                info.dlq,
+                dlqError.getMessage(),
+                dlqError
+            );
         }
     }
 
     private static void addDlqHeader(Headers headers, String name, @Nullable String value) {
+        headers.remove(name);
         if (value != null) {
             headers.add(new RecordHeader(name, value.getBytes(StandardCharsets.UTF_8)));
         }

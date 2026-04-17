@@ -23,7 +23,7 @@ You can choose one of the error strategies:
 
 - `NONE` - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.
 
-NOTE: The error strategies apply only for non-batch messages processing.
+NOTE: For batch listeners, `LOG_AND_RESUME_AT_NEXT_RECORD` is supported. The other error strategies apply only to non-batch message processing.
 
 NOTE: When using retry error strategies in combination with reactive consumer methods, it is necessary to add the `@Blocking` annotation to the reactive consumer method.
 

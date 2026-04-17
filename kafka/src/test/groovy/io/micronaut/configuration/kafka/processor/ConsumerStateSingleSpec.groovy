@@ -34,6 +34,7 @@ class ConsumerStateSingleSpec extends Specification {
         }
         ConsumerStateSingle consumerState = newConsumerStateSingle(kafkaConsumerProcessor, kafkaConsumer)
         ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        consumerRecord.headers().add('micronaut-kafka-original-topic', 'stale-topic'.getBytes(StandardCharsets.UTF_8))
         ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([
             (new TopicPartition(consumerRecord.topic(), consumerRecord.partition())): [consumerRecord]
         ])
@@ -57,6 +58,7 @@ class ConsumerStateSingleSpec extends Specification {
                     headerValue(record, 'micronaut-kafka-exception-class') == RuntimeException.name &&
                     headerValue(record, 'micronaut-kafka-exception-message') == 'boom' &&
                     headerValue(record, 'micronaut-kafka-original-topic') == 'source-topic' &&
+                    headerCount(record, 'micronaut-kafka-original-topic') == 1 &&
                     headerValue(record, 'micronaut-kafka-original-partition') == '2' &&
                     headerValue(record, 'micronaut-kafka-original-offset') == '7'
         }) >> CompletableFuture.completedFuture(null)
@@ -109,6 +111,10 @@ class ConsumerStateSingleSpec extends Specification {
 
     private static String headerValue(ProducerRecord<?, ?> record, String name) {
         new String(record.headers().lastHeader(name).value(), StandardCharsets.UTF_8)
+    }
+
+    private static int headerCount(ProducerRecord<?, ?> record, String name) {
+        record.headers().headers(name).toList().size()
     }
 
     private static final class TestListener {
