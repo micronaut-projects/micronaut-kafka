@@ -46,6 +46,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The internal state of the consumer.
@@ -535,8 +536,20 @@ abstract class ConsumerState {
         addDlqHeader(headers, DLQ_ORIGINAL_OFFSET_HEADER, Long.toString(consumerRecord.offset()));
         final Long timestamp = consumerRecord.timestamp() >= 0 ? consumerRecord.timestamp() : null;
         final ProducerRecord producerRecord = new ProducerRecord(info.dlq, null, timestamp, key, value, headers);
+        final long dlqPublishTimeoutSeconds = DLQ_PUBLISH_TIMEOUT.toSeconds();
         try {
-            kafkaProducer.send(producerRecord).get(DLQ_PUBLISH_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            kafkaProducer.send(producerRecord).get(dlqPublishTimeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException dlqError) {
+            LOG.error(
+                "Timed out publishing record [topic={}, partition={}, offset={}, headers={}] to DLQ [{}] after {} s",
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
+                consumerRecord.headers().toArray().length,
+                info.dlq,
+                dlqPublishTimeoutSeconds,
+                dlqError
+            );
         } catch (InterruptedException dlqError) {
             Thread.currentThread().interrupt();
             LOG.error(

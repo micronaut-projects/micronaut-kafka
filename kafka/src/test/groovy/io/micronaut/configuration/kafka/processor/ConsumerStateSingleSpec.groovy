@@ -34,7 +34,11 @@ class ConsumerStateSingleSpec extends Specification {
         }
         ConsumerStateSingle consumerState = newConsumerStateSingle(kafkaConsumerProcessor, kafkaConsumer)
         ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        consumerRecord.headers().add('micronaut-kafka-exception-class', 'stale-class'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-exception-message', 'stale-message'.getBytes(StandardCharsets.UTF_8))
         consumerRecord.headers().add('micronaut-kafka-original-topic', 'stale-topic'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-original-partition', '999'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-original-offset', '1234'.getBytes(StandardCharsets.UTF_8))
         ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([
             (new TopicPartition(consumerRecord.topic(), consumerRecord.partition())): [consumerRecord]
         ])
@@ -56,11 +60,15 @@ class ConsumerStateSingleSpec extends Specification {
                     record.key() == 'key' &&
                     record.value() == 'value' &&
                     headerValue(record, 'micronaut-kafka-exception-class') == RuntimeException.name &&
+                    headerCount(record, 'micronaut-kafka-exception-class') == 1 &&
                     headerValue(record, 'micronaut-kafka-exception-message') == 'boom' &&
+                    headerCount(record, 'micronaut-kafka-exception-message') == 1 &&
                     headerValue(record, 'micronaut-kafka-original-topic') == 'source-topic' &&
                     headerCount(record, 'micronaut-kafka-original-topic') == 1 &&
                     headerValue(record, 'micronaut-kafka-original-partition') == '2' &&
-                    headerValue(record, 'micronaut-kafka-original-offset') == '7'
+                    headerCount(record, 'micronaut-kafka-original-partition') == 1 &&
+                    headerValue(record, 'micronaut-kafka-original-offset') == '7' &&
+                    headerCount(record, 'micronaut-kafka-original-offset') == 1
         }) >> CompletableFuture.completedFuture(null)
         1 * kafkaConsumerProcessor.handleException(_, _)
     }
@@ -114,7 +122,11 @@ class ConsumerStateSingleSpec extends Specification {
     }
 
     private static int headerCount(ProducerRecord<?, ?> record, String name) {
-        record.headers().headers(name).toList().size()
+        int count = 0
+        for (def ignored : record.headers().headers(name)) {
+            count++
+        }
+        count
     }
 
     private static final class TestListener {
