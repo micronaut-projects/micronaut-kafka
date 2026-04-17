@@ -16,7 +16,7 @@ abstract class AbstractKafkaContainerSpec extends AbstractKafkaSpec {
     @Shared @AutoCleanup KafkaContainer kafkaContainer
 
     void setupSpec() {
-        kafkaContainer = new KafkaContainer("apache/kafka-native")
+        kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka-native:4.2.0"))
         kafkaContainer.start()
         startContext()
         afterKafkaStarted()
