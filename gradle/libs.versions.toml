@@ -1,8 +1,8 @@
 [versions]
 micronaut = "4.10.21"
-micronaut-platform = "4.8.3"
+micronaut-platform = "4.10.12"
 micronaut-docs = "3.0.0"
-micronaut-gradle-plugin = "4.5.5"
+micronaut-gradle-plugin = "4.6.2"
 
 # Required to keep catalog compatibility with 3.4.x.  Can be removed for 4.0.0
 managed-kafka = '3.9.2'
@@ -21,7 +21,7 @@ micronaut-micrometer = "5.13.0"
 micronaut-reactor = "3.9.0"
 micronaut-serde = "2.15.5"
 micronaut-tracing = "7.2.0"
-micronaut-test = "4.9.0"
+micronaut-test = "4.10.3"
 micronaut-test-resources="2.10.1"
 
 [libraries]
