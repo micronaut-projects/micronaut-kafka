@@ -58,11 +58,19 @@ public final class OffsetCommitExceptionLogger {
     }
 
     public static void log(Logger logger, boolean cooperativeStickyAssignmentStrategy, String message, Throwable exception, Object... arguments) {
-        Object[] logArguments = Arrays.copyOf(arguments, arguments.length + 1);
-        logArguments[arguments.length] = exception;
         if (cooperativeStickyAssignmentStrategy) {
+            if (!logger.isWarnEnabled()) {
+                return;
+            }
+            Object[] logArguments = Arrays.copyOf(arguments, arguments.length + 1);
+            logArguments[arguments.length] = exception;
             logger.warn(message, logArguments);
         } else {
+            if (!logger.isErrorEnabled()) {
+                return;
+            }
+            Object[] logArguments = Arrays.copyOf(arguments, arguments.length + 1);
+            logArguments[arguments.length] = exception;
             logger.error(message, logArguments);
         }
     }

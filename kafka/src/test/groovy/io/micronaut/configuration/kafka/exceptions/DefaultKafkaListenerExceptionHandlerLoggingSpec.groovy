@@ -30,11 +30,13 @@ class DefaultKafkaListenerExceptionHandlerLoggingSpec extends Specification {
 
         then:
         if (cooperativeSticky) {
+            1 * logger.isWarnEnabled() >> true
             1 * logger.warn('Kafka consumer [{}] produced error: {}', {
                 it.length == 3 && it[0] == 'listener' && it[1] == 'rebalance in progress' && it[2].is(cause)
             } as Object[])
             0 * logger.error(_, _ as Object[])
         } else {
+            1 * logger.isErrorEnabled() >> true
             1 * logger.error('Kafka consumer [{}] produced error: {}', {
                 it.length == 3 && it[0] == 'listener' && it[1] == 'rebalance in progress' && it[2].is(cause)
             } as Object[])

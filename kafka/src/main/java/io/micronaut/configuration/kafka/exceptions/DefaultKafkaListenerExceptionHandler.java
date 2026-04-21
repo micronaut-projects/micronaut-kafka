@@ -101,7 +101,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             if (logger.isErrorEnabled()) {
                 Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
                 if (consumerRecord.isPresent()) {
-                    logger.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord, consumerBean, cause.getMessage(), cause);
+                    logger.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord.get(), consumerBean, cause.getMessage(), cause);
                 } else {
                     logger.error("Kafka consumer [{}] produced error: {}", consumerBean, cause.getMessage(), cause);
                 }

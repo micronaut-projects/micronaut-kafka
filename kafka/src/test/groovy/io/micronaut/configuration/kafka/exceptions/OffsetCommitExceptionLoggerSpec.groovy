@@ -16,7 +16,7 @@ class OffsetCommitExceptionLoggerSpec extends Specification {
         description                 | value                                                                                                 || expected
         'fully qualified class'     | CooperativeStickyAssignor.class.name                                                                    || true
         'simple class name'         | CooperativeStickyAssignor.class.simpleName                                                              || true
-        'class instance'            | CooperativeStickyAssignor.class                                                                         || true
+        'class object'              | CooperativeStickyAssignor.class                                                                         || true
         'comma separated strategies'| "org.apache.kafka.clients.consumer.RangeAssignor, ${CooperativeStickyAssignor.class.name}"            || true
         'list of strategies'        | ['org.apache.kafka.clients.consumer.RangeAssignor', CooperativeStickyAssignor.class.name]             || true
         'array of strategies'       | ['org.apache.kafka.clients.consumer.RangeAssignor', CooperativeStickyAssignor.class.name] as Object[] || true
@@ -36,11 +36,13 @@ class OffsetCommitExceptionLoggerSpec extends Specification {
 
         then:
         if (cooperativeSticky) {
+            1 * logger.isWarnEnabled() >> true
             1 * logger.warn('Commit failed for offsets [{}]: {}', {
                 it.length == 3 && it[0] == 'offsets' && it[1] == 'boom' && it[2].is(exception)
             } as Object[])
             0 * logger.error(_, _ as Object[])
         } else {
+            1 * logger.isErrorEnabled() >> true
             1 * logger.error('Commit failed for offsets [{}]: {}', {
                 it.length == 3 && it[0] == 'offsets' && it[1] == 'boom' && it[2].is(exception)
             } as Object[])
@@ -51,5 +53,21 @@ class OffsetCommitExceptionLoggerSpec extends Specification {
         cooperativeSticky || expectedLevel
         true              || 'WARN'
         false             || 'ERROR'
+    }
+
+    def "does not log commit failures when target level is disabled"() {
+        given:
+        Logger logger = Mock()
+        IllegalStateException exception = new IllegalStateException('boom')
+
+        when:
+        OffsetCommitExceptionLogger.log(logger, true, 'Commit failed', exception, 'offsets')
+        OffsetCommitExceptionLogger.log(logger, false, 'Commit failed', exception, 'offsets')
+
+        then:
+        1 * logger.isWarnEnabled() >> false
+        1 * logger.isErrorEnabled() >> false
+        0 * logger.warn(_, _ as Object[])
+        0 * logger.error(_, _ as Object[])
     }
 }
