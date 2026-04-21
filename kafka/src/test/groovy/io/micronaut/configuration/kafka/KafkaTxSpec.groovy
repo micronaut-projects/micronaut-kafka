@@ -1,5 +1,6 @@
 package io.micronaut.configuration.kafka
 
+import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
@@ -37,8 +38,13 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
         given:
         StringProducer stringProducer = context.getBean(StringProducer)
         WordCountCollector wordCountCollector = context.getBean(WordCountCollector)
+        ConsumerRegistry registry = context.getBean(ConsumerRegistry)
 
         when:
+        conditions.eventually {
+            registry.getConsumerAssignment("tx-word-counter-listener")?.size() == 1
+            registry.getConsumerAssignment("tx-word-count-collector")?.size() == 1
+        }
         stringProducer.send("The quick brown fox jumps over the lazy dog. THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG'S BACK")
 
         then:
@@ -213,7 +219,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
-    @KafkaListener(isolation = READ_COMMITTED)
+    @KafkaListener(isolation = READ_COMMITTED, clientId = "tx-word-count-collector")
     static class WordCountCollector {
 
         Map<String, Integer> counter = [:]
@@ -226,6 +232,7 @@ class KafkaTxSpec extends AbstractKafkaContainerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaTxSpec')
     @KafkaListener(
+            clientId = "tx-word-counter-listener",
             producerClientId = "tx-word-counter",
             producerTransactionalId = "tx-word-counter",
             offsetStrategy = SEND_TO_TRANSACTION, isolation = READ_COMMITTED)
