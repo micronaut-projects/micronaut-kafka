@@ -1,5 +1,6 @@
 package io.micronaut.configuration.kafka.event
 
+import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
@@ -10,23 +11,24 @@ import io.micronaut.test.support.TestPropertyProvider
 import io.micronaut.testcontainers.kafka.Kafka
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-import static org.apache.kafka.clients.consumer.internals.SubscriptionState.FetchStates.FETCHING
-
-//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
-// as client id and subscriptions - consider refactoring
 @Property(name = "spec.name", value = "KafkaConsumerEventSpec")
 @MicronautTest(startApplication = false)
 class KafkaConsumerEventSpec extends Specification implements TestPropertyProvider {
+
+    private static final String CLIENT_ID = "my-nifty-kafka-consumer"
+    private static final String TOPIC = "my-nifty-topic"
 
     @Inject
     KafkaConsumerSubscribedEventListener subscribedEventListener
 
     @Inject
     KafkaConsumerStartedPollingEventListener startedPollingEvent
+
+    @Inject
+    ConsumerRegistry consumerRegistry
 
     @Override
     Map<String, String> getProperties() {
@@ -40,7 +42,7 @@ class KafkaConsumerEventSpec extends Specification implements TestPropertyProvid
             subscribedEventListener.received instanceof KafkaConsumerSubscribedEvent
         }
         and: "the kafka consumer is subscribed to the expected topic"
-        subscribedEventListener.consumer.delegate.subscriptions.subscription == ['my-nifty-topic'] as Set
+        subscribedEventListener.subscription == [TOPIC] as Set
     }
 
     void "listen to kafka consumer started polling events"() {
@@ -48,30 +50,32 @@ class KafkaConsumerEventSpec extends Specification implements TestPropertyProvid
         new PollingConditions(timeout: 10, delay: 1).eventually {
             startedPollingEvent.received instanceof KafkaConsumerStartedPollingEvent
         }
-        and: "the kafka consumer starts fetching records"
+        and: "the kafka consumer has a public assignment for the expected topic"
         new PollingConditions(timeout: 10, delay: 1).eventually {
-            subscribedEventListener.consumer.delegate.subscriptions.assignment.partitionStateValues()[0].fetchState == FETCHING
+            def assignment = consumerRegistry.getConsumerAssignment(CLIENT_ID)
+            assignment.size() == 1
+            assignment.first().topic() == TOPIC
         }
     }
 
-    @KafkaListener(clientId = "my-nifty-kafka-consumer")
+    @KafkaListener(clientId = CLIENT_ID)
     @Requires(property = "spec.name", value = "KafkaConsumerEventSpec")
     static class MyKafkaConsumer {
-        @Topic("my-nifty-topic")
+        @Topic(TOPIC)
         void consume(String event) {}
     }
 
     static class AbstractKafkaConsumerEventListener<T extends AbstractKafkaApplicationEvent> implements ApplicationEventListener<T> {
         AbstractKafkaApplicationEvent received
-        KafkaConsumer consumer
+        Set<String> subscription = Collections.emptySet()
 
         @Override
         void onApplicationEvent(T event) {
-            // Skip consumers unrelated to this test
-            if ((event.source as KafkaConsumer).delegate.clientId.startsWith('my-nifty-kafka-consumer')) {
+            def currentSubscription = event.source.subscription()
+            if (currentSubscription.contains(TOPIC)) {
                 if (received != null) throw new RuntimeException("Expecting one event only")
                 received = event
-                consumer = event.source
+                subscription = Set.copyOf(currentSubscription)
             }
         }
     }
