@@ -2,6 +2,7 @@ package io.micronaut.configuration.kafka.streams.optimization;
 
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -14,6 +15,7 @@ import org.apache.kafka.streams.kstream.Materialized;
 import java.util.Properties;
 
 @Factory
+@Requires(property = "spec.name", notEquals = "GlobalKTableOnlySpec")
 public class OptimizationStream {
 
     public static final String STREAM_OPTIMIZATION_ON = "optimization-on";

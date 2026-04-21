@@ -19,7 +19,7 @@ You can choose one of the error strategies:
 
 - `RESUME_AT_NEXT_RECORD` - This strategy will ignore the current error and will resume at the next offset, in this case it's recommended to have a custom exception handler that moves the failed message into an error queue.
 
-- `LOG_AND_RESUME_AT_NEXT_RECORD` - This strategy will publish the failed record to a dead letter topic, invoke the exception handler, and resume at the next offset. Configure the target topic with `dlq`.
+- `LOG_AND_RESUME_AT_NEXT_RECORD` - This strategy will publish the failed record to a dead letter topic, invoke the exception handler, and resume at the next offset. You must configure the target topic with `dlq`.
 
 - `NONE` - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.
 
