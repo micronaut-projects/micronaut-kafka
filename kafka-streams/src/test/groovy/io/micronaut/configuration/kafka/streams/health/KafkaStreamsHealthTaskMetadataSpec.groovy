@@ -9,16 +9,20 @@ import org.apache.kafka.streams.ThreadMetadata
 import org.apache.kafka.streams.processor.TaskId
 import spock.lang.Specification
 
-import java.lang.reflect.Method
-
 class KafkaStreamsHealthTaskMetadataSpec extends Specification {
 
-    void "health details expose task ids as strings when task metadata includes task ids"() {
+    void "health details expose task ids as strings and preserve task metadata per task"() {
         given:
         KafkaStreamsHealth kafkaStreamsHealth = new KafkaStreamsHealth(Mock(KafkaStreamsFactory), Mock(HealthAggregator))
-        TaskMetadata taskMetadata = Mock() {
-            taskId() >> new TaskId(1, 5, "my-topology")
+        TaskId firstTaskId = new TaskId(1, 5, "my-topology")
+        TaskId secondTaskId = new TaskId(1, 6, "my-topology")
+        TaskMetadata firstTaskMetadata = Mock() {
+            taskId() >> firstTaskId
             topicPartitions() >> ([new TopicPartition("words", 0)] as Set)
+        }
+        TaskMetadata secondTaskMetadata = Mock() {
+            taskId() >> secondTaskId
+            topicPartitions() >> ([new TopicPartition("words", 1)] as Set)
         }
         ThreadMetadata threadMetadata = Mock() {
             threadName() >> "stream-thread-1"
@@ -27,7 +31,7 @@ class KafkaStreamsHealthTaskMetadataSpec extends Specification {
             consumerClientId() >> "consumer-1"
             restoreConsumerClientId() >> "restore-1"
             producerClientIds() >> ["producer-1"]
-            activeTasks() >> ([taskMetadata] as Set)
+            activeTasks() >> ([firstTaskMetadata, secondTaskMetadata] as Set)
             standbyTasks() >> ([] as Set)
         }
         KafkaStreams kafkaStreams = Mock() {
@@ -35,16 +39,13 @@ class KafkaStreamsHealthTaskMetadataSpec extends Specification {
             metadataForLocalThreads() >> [threadMetadata]
         }
         when:
-        Map<String, Object> details = invokeBuildDetails(kafkaStreamsHealth, kafkaStreams)
+        Map<String, Object> details = kafkaStreamsHealth.buildDetails(kafkaStreams)
+        List<Map<String, Object>> activeTasks = (List<Map<String, Object>>) details['stream-thread-1']['activeTasks']
 
         then:
-        details['stream-thread-1']['activeTasks']['taskId'] == 'my-topology__1_5'
-        details['stream-thread-1']['activeTasks']['partitions'] == ['partition=0, topic=words']
-    }
-
-    private static Map<String, Object> invokeBuildDetails(KafkaStreamsHealth kafkaStreamsHealth, KafkaStreams kafkaStreams) {
-        Method buildDetails = KafkaStreamsHealth.getDeclaredMethod("buildDetails", KafkaStreams)
-        buildDetails.accessible = true
-        (Map<String, Object>) buildDetails.invoke(kafkaStreamsHealth, kafkaStreams)
+        activeTasks*.taskId as Set == [firstTaskId.toString(), secondTaskId.toString()] as Set
+        activeTasks.every { it.taskId instanceof String }
+        activeTasks.find { it.taskId == firstTaskId.toString() }?.partitions == ['partition=0, topic=words']
+        activeTasks.find { it.taskId == secondTaskId.toString() }?.partitions == ['partition=1, topic=words']
     }
 }
