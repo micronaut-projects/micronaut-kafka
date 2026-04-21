@@ -6,6 +6,9 @@ import io.micronaut.context.annotation.Requires
 
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
@@ -24,14 +27,17 @@ class KafkaGracefulShutdownSpec extends AbstractKafkaContainerSpec {
                 (EMBEDDED_TOPICS): ['idle-topic']
             ]
             ApplicationContext ctx = ApplicationContext.run(config)
-
+            Duration shutdownDuration
         when: "the context is closed"
             Instant start = Instant.now()
             ctx.close()
-            Duration shutdownDuration = Duration.between(start, Instant.now())
-
+            shutdownDuration = Duration.between(start, Instant.now())
         then: "shutdown completes quickly without waiting the full grace period"
-            shutdownDuration.seconds < 5
+            shutdownDuration.toMillis() < 5000
+        cleanup:
+            if (ctx.isRunning()) {
+                ctx.close()
+            }
     }
 
     void "graceful shutdown completes in-flight message processing"() {
@@ -45,27 +51,31 @@ class KafkaGracefulShutdownSpec extends AbstractKafkaContainerSpec {
                 (EMBEDDED_TOPICS): ['in-flight-products']
             ]
             ApplicationContext ctx = ApplicationContext.run(config)
-
+            Duration shutdownDuration
         when: "a message is sent"
             def client = ctx.getBean(InFlightClient)
             def consumer = ctx.getBean(InFlightConsumer)
             client.send("test-product")
-
         then: "message starts processing"
             conditions.eventually {
-                consumer.processing.get()
+                consumer.hasStartedProcessing()
             }
-
         when: "shutdown is triggered while processing"
             Instant start = Instant.now()
-            ctx.close()
-            Duration shutdownDuration = Duration.between(start, Instant.now())
-
+            def closeFuture = CompletableFuture.runAsync {
+                ctx.close()
+            }
+            consumer.allowProcessingToComplete()
+            closeFuture.get(15, TimeUnit.SECONDS)
+            shutdownDuration = Duration.between(start, Instant.now())
         then: "the message is fully processed"
             consumer.messageProcessed.get()
-
         and: "shutdown completes before grace period"
-            shutdownDuration.seconds < 15
+            shutdownDuration.toMillis() < 15000
+        cleanup:
+            if (ctx.isRunning()) {
+                ctx.close()
+            }
     }
 
     @Requires(property = 'spec.name', value = 'KafkaGracefulShutdownIdleSpec')
@@ -82,17 +92,27 @@ class KafkaGracefulShutdownSpec extends AbstractKafkaContainerSpec {
     static class InFlightConsumer {
         AtomicBoolean processing = new AtomicBoolean(false)
         AtomicBoolean messageProcessed = new AtomicBoolean(false)
+        CountDownLatch processingStarted = new CountDownLatch(1)
+        CountDownLatch completionSignal = new CountDownLatch(1)
 
         @Topic("in-flight-products")
         void receive(String product) {
             processing.set(true)
+            processingStarted.countDown()
             try {
-                // Simulate some processing time
-                sleep(2000)
+                completionSignal.await(5, TimeUnit.SECONDS)
                 messageProcessed.set(true)
             } finally {
                 processing.set(false)
             }
+        }
+
+        boolean hasStartedProcessing() {
+            processingStarted.getCount() == 0
+        }
+
+        void allowProcessingToComplete() {
+            completionSignal.countDown()
         }
     }
 

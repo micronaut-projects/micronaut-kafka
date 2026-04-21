@@ -316,12 +316,13 @@ class KafkaConsumerProcessor
 
     @Override
     public CompletableFuture<Void> shutdownGracefully() {
-        if (consumers.isEmpty()) {
+        List<ConsumerState> consumerStates = List.copyOf(consumers.values());
+        if (consumerStates.isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
-        consumers.values().forEach(ConsumerState::requestShutdown);
-        consumers.values().forEach(ConsumerState::wakeUp);
-        return CompletableFuture.allOf(consumers.values().stream()
+        consumerStates.forEach(ConsumerState::requestShutdown);
+        consumerStates.forEach(ConsumerState::wakeUp);
+        return CompletableFuture.allOf(consumerStates.stream()
             .map(ConsumerState::getShutdownFuture)
             .toArray(CompletableFuture[]::new));
     }
