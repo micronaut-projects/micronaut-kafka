@@ -42,33 +42,33 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
 
     void "metric removal removes meters from registry"() {
         given:
-        def registry = new SimpleMeterRegistry()
+        def meterRegistry = new SimpleMeterRegistry()
         def reporter = new TestKafkaMetricsReporter()
-        reporter.bindTo(registry)
+        reporter.bindTo(meterRegistry)
 
         when:
         (0..<10).each { partition ->
-            KafkaMetric metric = createPartitionMetric(partition)
+            KafkaMetric metric = createMetric(partition)
             reporter.metricChange(metric)
             reporter.metricRemoval(metric)
         }
 
         then:
-        registry.meters.isEmpty()
+        meterRegistry.meters.isEmpty()
     }
 
     void "close removes registered meters from registry"() {
         given:
-        def registry = new SimpleMeterRegistry()
+        def meterRegistry = new SimpleMeterRegistry()
         def reporter = new TestKafkaMetricsReporter()
-        reporter.bindTo(registry)
+        reporter.bindTo(meterRegistry)
 
         when:
-        reporter.metricChange(createPartitionMetric(1))
+        reporter.metricChange(createMetric(1))
         reporter.close()
 
         then:
-        registry.meters.isEmpty()
+        meterRegistry.meters.isEmpty()
     }
 
     void "metric removal removes meters from all bound registries"() {
@@ -80,7 +80,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         reporter.bindTo(secondRegistry)
 
         when:
-        def metric = createPartitionMetric(1)
+        def metric = createMetric(1)
         reporter.metricChange(metric)
         reporter.metricRemoval(metric)
 
@@ -98,7 +98,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         reporter.bindTo(secondRegistry)
 
         when:
-        reporter.metricChange(createPartitionMetric(1))
+        reporter.metricChange(createMetric(1))
         reporter.close()
 
         then:
@@ -116,7 +116,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         )
     }
 
-    private static KafkaMetric createPartitionMetric(int partition) {
+    private static KafkaMetric createMetric(int partition) {
         new KafkaMetric(
                 new Object(),
                 new MetricName(
