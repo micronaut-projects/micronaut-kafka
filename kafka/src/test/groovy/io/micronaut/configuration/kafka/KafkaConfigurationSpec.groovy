@@ -13,10 +13,13 @@ import io.micronaut.context.env.MapPropertySource
 import io.micronaut.context.exceptions.NoSuchBeanException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.IntegerDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -137,6 +140,50 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    @Issue('https://github.com/micronaut-projects/micronaut-kafka/issues/1127')
+    void "test ssl configuration implies ssl security protocol by default"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG): '/tmp/client.keystore.p12',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_TYPE_CONFIG): 'PKCS12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG): '/tmp/client.truststore.p12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG): 'PKCS12',
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+        Properties props = config.getConfig()
+
+        then:
+        props[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] == SecurityProtocol.SSL.name
+        props[SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG] == '/tmp/client.keystore.p12'
+        props[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] == '/tmp/client.truststore.p12'
+    }
+
+    void "test explicit security protocol is not overridden when ssl properties are present"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
+                ('kafka.' + CommonClientConfigs.SECURITY_PROTOCOL_CONFIG): SecurityProtocol.SASL_SSL.name,
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG): '/tmp/client.truststore.p12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG): 'PKCS12',
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        config.config[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] == SecurityProtocol.SASL_SSL.name
     }
 
     void "test override consumer default properties"() {
