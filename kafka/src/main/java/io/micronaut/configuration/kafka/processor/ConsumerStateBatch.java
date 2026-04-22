@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
+import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.core.annotation.Internal;
 import org.jspecify.annotations.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
@@ -70,8 +71,10 @@ final class ConsumerStateBatch extends ConsumerState {
         } catch (RecordDeserializationException ex) {
             // Try to honor the configured error strategy
             LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod, ex);
-            // By default, seek past the record to continue consumption
-            kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
+            // When offset management is enabled, seek past the record to continue consumption
+            if (info.offsetStrategy != OffsetStrategy.DISABLED) {
+                kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
+            }
             // The error strategy and the exception handler can still decide what to do about this record
             resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), ex);
             // By now, it's been decided whether this record should be retried and the exception may have been handled
