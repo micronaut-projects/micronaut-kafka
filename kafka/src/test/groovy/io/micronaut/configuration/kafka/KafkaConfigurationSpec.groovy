@@ -154,7 +154,8 @@ class KafkaConfigurationSpec extends Specification {
         then:
         BeanInstantiationException exception = thrown()
         exception.cause instanceof ConfigurationException
-        exception.cause.message == "Value for property kafka.custom.users resolved as null"
+        exception.cause.message.contains("kafka.custom.users")
+        exception.cause.message.contains("resolved as null")
     }
 
     void "test override consumer default properties"() {

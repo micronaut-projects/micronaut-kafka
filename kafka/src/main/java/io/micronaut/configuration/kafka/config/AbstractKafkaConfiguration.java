@@ -84,7 +84,7 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
         }).forEach(entry -> {
             Object value = entry.getValue();
             if (value == null) {
-                throw new ConfigurationException("Value for property kafka." + entry.getKey() + " resolved as null");
+                throw new ConfigurationException("Value for property " + PREFIX + "." + entry.getKey().toString() + " resolved as null");
             }
             if (environment.getConversionService().canConvert(value.getClass(), String.class)) {
                 Optional<?> converted = environment.getConversionService().convert(value, String.class);
