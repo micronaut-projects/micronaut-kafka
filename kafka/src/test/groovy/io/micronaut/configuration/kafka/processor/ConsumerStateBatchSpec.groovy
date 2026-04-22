@@ -17,8 +17,8 @@ import org.apache.kafka.common.errors.RecordDeserializationException
 import spock.lang.Specification
 
 import java.time.Duration
-import java.util.Properties
 import java.util.Collections
+import java.util.Properties
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
 
