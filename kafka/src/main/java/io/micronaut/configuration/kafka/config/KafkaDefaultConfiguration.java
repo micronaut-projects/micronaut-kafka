@@ -24,7 +24,9 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.util.StringUtils;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 
 /**
  * The default Kafka configuration to apply to both the consumer and the producer, but can be overridden by either.
@@ -80,6 +82,11 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
         Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
-        return toKafkaProperties(environment, values);
+        Properties properties = toKafkaProperties(environment, values);
+        if (!properties.containsKey(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG)
+                && properties.stringPropertyNames().stream().anyMatch(name -> name.startsWith("ssl."))) {
+            properties.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
+        }
+        return properties;
     }
 }
