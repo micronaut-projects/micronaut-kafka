@@ -163,7 +163,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         @Topic(TEST_TOPIC) void consume(String message) { messages << message }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer01 extends MyAbstractConsumer {
         MyConsumer01(TestMessages test) {}
@@ -179,7 +179,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = LATEST)
+    @KafkaListener(offsetReset = LATEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer02 extends MyAbstractConsumer {
         MyConsumer02(TestMessages test) {}
@@ -188,7 +188,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = LATEST)
+    @KafkaListener(offsetReset = LATEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer03 extends MyAbstractConsumer {
         MyConsumer03(TestMessages test) {}
@@ -197,7 +197,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer04 extends MyAbstractConsumer {
         MyConsumer04(TestMessages test) {}
@@ -206,7 +206,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer05 extends MyAbstractConsumer {
         MyConsumer05(TestMessages test) {}
@@ -215,7 +215,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer06 extends MyAbstractConsumer {
         MyConsumer06(TestMessages test) {}
@@ -224,7 +224,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer07 extends MyAbstractConsumer {
         MyConsumer07(TestMessages test) {}
@@ -232,7 +232,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
             KafkaSeekOperation.seekToTimestamp(partitions, 0L).forEach(seeker::perform)
         }
     }
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer08 extends MyAbstractConsumer {
         MyConsumer08(TestMessages test) {}
@@ -241,7 +241,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer09 extends MyAbstractConsumer {
         MyConsumer09(TestMessages test) {}
@@ -250,7 +250,7 @@ class ConsumerSeekAwareSpec extends AbstractKafkaContainerSpec {
         }
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = EARLIEST, uniqueGroupId = true)
     @Requires(property = 'spec.name', value = 'ConsumerSeekAwareSpec')
     static class MyConsumer10 extends MyAbstractConsumer {
         MyConsumer10(TestMessages test) {}

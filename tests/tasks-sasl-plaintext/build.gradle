@@ -6,4 +6,8 @@ application {
     mainClass = 'example.Application'
 }
 
-
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
