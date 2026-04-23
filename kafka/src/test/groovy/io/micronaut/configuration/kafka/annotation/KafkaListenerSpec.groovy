@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.annotation
 import groovy.transform.EqualsAndHashCode
 import io.micrometer.core.instrument.MeterRegistry
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
+import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.health.KafkaHealthIndicator
 import io.micronaut.configuration.kafka.metrics.KafkaConsumerMetrics
@@ -21,9 +22,7 @@ import io.micronaut.messaging.MessageHeaders
 import io.micronaut.messaging.annotation.MessageBody
 import io.micronaut.messaging.annotation.MessageHeader
 import io.micronaut.serde.annotation.Serdeable
-import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -36,8 +35,6 @@ import spock.lang.Stepwise
 import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration.EMBEDDED_TOPICS
 
-//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
-// as client id - consider refactoring
 @Stepwise
 class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
@@ -207,17 +204,21 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     void "test kafka consumer with configurable number of threads"() {
         expect:
-        context.getBean(MyConsumer6).kafkaConsumers.size() == 3
+        consumerIds("kafka-consumer-with-configurable-number-of-threads").size() == 3
     }
 
     void "test kafka consumer with fixed number of threads"() {
         expect:
-        context.getBean(MyConsumer7).kafkaConsumers.size() == 2
+        consumerIds("kafka-consumer-with-fixed-number-of-threads").size() == 2
     }
 
     void "test kafka consumer with both thread settings set"() {
         expect:
-        context.getBean(MyConsumer8).kafkaConsumers.size() == 3
+        consumerIds("kafka-consumer-with-both-thread-settings-set").size() == 3
+    }
+
+    private List<String> consumerIds(String prefix) {
+        context.getBean(ConsumerRegistry).consumerIds.findAll { it.startsWith(prefix) }.toList()
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
@@ -305,20 +306,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(clientId = "kafka-consumer-with-configurable-number-of-threads", threadsValue = '${my.thread.count}')
-    static class MyConsumer6 implements BeanCreatedEventListener<Consumer> {
-        List<KafkaConsumer> kafkaConsumers = []
-
-        @Override
-        Consumer onCreated(BeanCreatedEvent<Consumer> event) {
-            if (event.bean instanceof KafkaConsumer) {
-                final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-configurable-number-of-threads")) {
-                    kafkaConsumers << consumer
-                }
-            }
-            return event.bean
-        }
-
+    static class MyConsumer6 {
         @Topic("words")
         void consume(String sentence) {
             // Do nothing
@@ -327,20 +315,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(clientId = "kafka-consumer-with-fixed-number-of-threads", threads = 2)
-    static class MyConsumer7 implements BeanCreatedEventListener<Consumer> {
-        List<KafkaConsumer> kafkaConsumers = []
-
-        @Override
-        Consumer onCreated(BeanCreatedEvent<Consumer> event) {
-            if (event.bean instanceof KafkaConsumer) {
-                final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-fixed-number-of-threads")) {
-                    kafkaConsumers << consumer
-                }
-            }
-            return event.bean
-        }
-
+    static class MyConsumer7 {
         @Topic("words")
         void consume(String sentence) {
             // Do nothing
@@ -349,20 +324,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
     @KafkaListener(clientId = "kafka-consumer-with-both-thread-settings-set", threads = 10, threadsValue = '${my.thread.count}')
-    static class MyConsumer8 implements BeanCreatedEventListener<Consumer> {
-        List<KafkaConsumer> kafkaConsumers = []
-
-        @Override
-        Consumer onCreated(BeanCreatedEvent<Consumer> event) {
-            if (event.bean instanceof KafkaConsumer) {
-                final consumer = ((KafkaConsumer) event.bean)
-                if (consumer.delegate.clientId.startsWith("kafka-consumer-with-both-thread-settings-set")) {
-                    kafkaConsumers << consumer
-                }
-            }
-            return event.bean
-        }
-
+    static class MyConsumer8 {
         @Topic("words")
         void consume(String sentence) {
             // Do nothing
