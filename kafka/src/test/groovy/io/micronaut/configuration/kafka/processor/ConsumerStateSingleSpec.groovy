@@ -7,6 +7,7 @@ import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.core.type.Argument
 import io.micronaut.core.type.ReturnType
 import io.micronaut.inject.ExecutableMethod
+import io.micronaut.messaging.exceptions.MessagingSystemException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -73,6 +74,22 @@ class ConsumerStateSingleSpec extends Specification {
         1 * kafkaConsumerProcessor.handleException(_, _)
     }
 
+    void "consumer info requires dlq for log and resume strategy"() {
+        when:
+        new ConsumerInfo(
+            'client',
+            'group',
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(null),
+            executableMethod()
+        )
+
+        then:
+        def ex = thrown(MessagingSystemException)
+        ex.message.contains('LOG_AND_RESUME_AT_NEXT_RECORD')
+        ex.message.contains('dlq')
+    }
+
     private ConsumerStateSingle newConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, Consumer<?, ?> kafkaConsumer) {
         ConsumerInfo consumerInfo = new ConsumerInfo(
             'client',
@@ -90,12 +107,14 @@ class ConsumerStateSingleSpec extends Specification {
         method.invoke(target, arguments)
     }
 
-    private AnnotationValue<KafkaListener> kafkaListenerAnnotation() {
+    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(String dlq = 'errors-dlq') {
+        def errorStrategy = AnnotationValue.builder(ErrorStrategy)
+            .member('value', LOG_AND_RESUME_AT_NEXT_RECORD)
+        if (dlq != null) {
+            errorStrategy.member('dlq', dlq)
+        }
         AnnotationValue.builder(KafkaListener)
-            .member('errorStrategy', AnnotationValue.builder(ErrorStrategy)
-                .member('value', LOG_AND_RESUME_AT_NEXT_RECORD)
-                .member('dlq', 'errors-dlq')
-                .build())
+            .member('errorStrategy', errorStrategy.build())
             .build()
     }
 
