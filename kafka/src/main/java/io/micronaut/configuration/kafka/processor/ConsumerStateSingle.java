@@ -170,14 +170,15 @@ final class ConsumerStateSingle extends ConsumerState {
     }
 
     private void resetTheFollowingPartitions(ConsumerRecord<?, ?> errorConsumerRecord, Iterator<? extends ConsumerRecord<?, ?>> iterator) {
-        Set<Integer> processedPartition = new HashSet<>();
-        processedPartition.add(errorConsumerRecord.partition());
+        Set<TopicPartition> processedPartitions = new HashSet<>();
+        processedPartitions.add(getTopicPartition(errorConsumerRecord));
         while (iterator.hasNext()) {
             ConsumerRecord<?, ?> consumerRecord = iterator.next();
-            if (!processedPartition.add(consumerRecord.partition())) {
+            TopicPartition topicPartition = getTopicPartition(consumerRecord);
+            if (!processedPartitions.add(topicPartition)) {
                 continue;
             }
-            kafkaConsumer.seek(getTopicPartition(consumerRecord), consumerRecord.offset());
+            kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         }
     }
 

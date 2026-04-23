@@ -45,6 +45,8 @@ class KafkaStreamsMetricsDisabledSpec extends AbstractTestContainersSpec {
             def response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
             !result.names.contains("kafka-streams.active-buffer-count")
+            !result.names.contains("kafka-streams.stream-thread-metrics.process-rate")
+            !result.names.contains("kafka-streams.stream-task-metrics.process-rate")
             !result.names.contains("kafka-streams.process-rate")
             !result.names.contains("kafka-streams.alive-stream-threads")
             !result.names.contains("kafka-streams.fetch-rate")

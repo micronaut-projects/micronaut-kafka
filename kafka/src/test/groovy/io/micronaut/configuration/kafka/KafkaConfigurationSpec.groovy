@@ -10,13 +10,18 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
+import io.micronaut.context.exceptions.BeanInstantiationException
+import io.micronaut.context.exceptions.ConfigurationException
 import io.micronaut.context.exceptions.NoSuchBeanException
+import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.IntegerDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -28,8 +33,6 @@ import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
 
-//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
-// as group id and deserializers - consider refactoring
 class KafkaConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext applicationContext
@@ -72,16 +75,9 @@ class KafkaConfigurationSpec extends Specification {
         config.setKeyDeserializer(new StringDeserializer())
         config.setValueDeserializer(new StringDeserializer())
 
-        and: "a consumer is created"
-        KafkaConsumer consumer = applicationContext.createBean(Consumer, config)
-
-        then: "the new consumer's deserializers have the configured encoding"
-        consumer != null
-        (consumer.delegate.deserializers.keyDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
-        (consumer.delegate.deserializers.valueDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
-
-        cleanup:
-        consumer.close()
+        then: "the configured deserializers have the expected encoding"
+        (config.getKeyDeserializer().get() as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (config.getValueDeserializer().get() as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
     }
 
     void "test custom producer serializer"() {
@@ -139,6 +135,75 @@ class KafkaConfigurationSpec extends Specification {
         consumer.close()
     }
 
+    void "test null kafka property reports the failing property path"() {
+        when:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.custom.users'): null,
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+        applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        BeanInstantiationException exception = thrown()
+        exception.cause instanceof ConfigurationException
+        exception.cause.message.contains("kafka.custom.users")
+        exception.cause.message.contains("resolved as null")
+    }
+
+    @Issue('https://github.com/micronaut-projects/micronaut-kafka/issues/1127')
+    void "test ssl configuration implies ssl security protocol by default"() {
+        given:
+        applicationContext = ApplicationContext.builder()
+                .properties(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG): '/tmp/client.keystore.p12',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_KEYSTORE_TYPE_CONFIG): 'PKCS12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG): '/tmp/client.truststore.p12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG): 'PKCS12',
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+                .eagerBeansEnabled(false)
+                .eagerInitSingletons(false)
+                .start()
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+        Properties props = config.getConfig()
+
+        then:
+        props[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] == SecurityProtocol.SSL.name
+        props[SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG] == '/tmp/client.keystore.p12'
+        props[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] == '/tmp/client.truststore.p12'
+    }
+
+    void "test explicit security protocol is not overridden when ssl properties are present"() {
+        given:
+        applicationContext = ApplicationContext.builder()
+                .properties(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
+                ('kafka.' + CommonClientConfigs.SECURITY_PROTOCOL_CONFIG): SecurityProtocol.SASL_SSL.name,
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG): '/tmp/client.truststore.p12',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG): 'secret',
+                ('kafka.' + SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG): 'PKCS12',
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+                .eagerBeansEnabled(false)
+                .eagerInitSingletons(false)
+                .start()
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        config.config[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] == SecurityProtocol.SASL_SSL.name
+    }
+
     void "test override consumer default properties"() {
         given:
         applicationContext = ApplicationContext.run(
@@ -187,13 +252,17 @@ class KafkaConfigurationSpec extends Specification {
         consumer != null
 
         when:
-        KafkaConsumer kafkaConsumer = consumer.kafkaConsumer
+        Consumer<String, String> kafkaConsumer = consumer.kafkaConsumer
+        KafkaConsumerConfiguration config = applicationContext.getBean(
+                KafkaConsumerConfiguration,
+                Qualifiers.byName("my-kebab-group")
+        )
 
         then:
         kafkaConsumer != null
-        kafkaConsumer.delegate.groupId.orElse(null) == 'MY_KEBAB_GROUP'
-        kafkaConsumer.delegate.deserializers.keyDeserializer() instanceof IntegerDeserializer
-        kafkaConsumer.delegate.deserializers.valueDeserializer() instanceof StringDeserializer
+        kafkaConsumer.groupMetadata().groupId() == 'MY_KEBAB_GROUP'
+        config.config[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] == IntegerDeserializer.name
+        config.config[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] == StringDeserializer.name
 
         cleanup:
         applicationContext.close()
