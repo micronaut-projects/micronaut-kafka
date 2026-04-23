@@ -10,11 +10,13 @@ import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.EnvironmentPropertySource
 import io.micronaut.context.env.MapPropertySource
+import io.micronaut.context.exceptions.BeanInstantiationException
+import io.micronaut.context.exceptions.ConfigurationException
 import io.micronaut.context.exceptions.NoSuchBeanException
+import io.micronaut.inject.qualifiers.Qualifiers
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -31,8 +33,6 @@ import java.nio.charset.StandardCharsets
 
 import static io.micronaut.context.env.PropertySource.PropertyConvention.ENVIRONMENT_VARIABLE
 
-//TODO - This spec is not ideal as it depends on internal Kafka client implementation details to access properties such
-// as group id and deserializers - consider refactoring
 class KafkaConfigurationSpec extends Specification {
 
     @AutoCleanup ApplicationContext applicationContext
@@ -75,16 +75,9 @@ class KafkaConfigurationSpec extends Specification {
         config.setKeyDeserializer(new StringDeserializer())
         config.setValueDeserializer(new StringDeserializer())
 
-        and: "a consumer is created"
-        KafkaConsumer consumer = applicationContext.createBean(Consumer, config)
-
-        then: "the new consumer's deserializers have the configured encoding"
-        consumer != null
-        (consumer.delegate.deserializers.keyDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
-        (consumer.delegate.deserializers.valueDeserializer() as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
-
-        cleanup:
-        consumer.close()
+        then: "the configured deserializers have the expected encoding"
+        (config.getKeyDeserializer().get() as StringDeserializer).encoding.name() == StandardCharsets.US_ASCII.name()
+        (config.getValueDeserializer().get() as StringDeserializer).encoding.name() == StandardCharsets.ISO_8859_1.name()
     }
 
     void "test custom producer serializer"() {
@@ -140,6 +133,23 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    void "test null kafka property reports the failing property path"() {
+        when:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                ('kafka.custom.users'): null,
+                ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
+                ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
+        )
+        applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        BeanInstantiationException exception = thrown()
+        exception.cause instanceof ConfigurationException
+        exception.cause.message.contains("kafka.custom.users")
+        exception.cause.message.contains("resolved as null")
     }
 
     @Issue('https://github.com/micronaut-projects/micronaut-kafka/issues/1127')
@@ -242,13 +252,17 @@ class KafkaConfigurationSpec extends Specification {
         consumer != null
 
         when:
-        KafkaConsumer kafkaConsumer = consumer.kafkaConsumer
+        Consumer<String, String> kafkaConsumer = consumer.kafkaConsumer
+        KafkaConsumerConfiguration config = applicationContext.getBean(
+                KafkaConsumerConfiguration,
+                Qualifiers.byName("my-kebab-group")
+        )
 
         then:
         kafkaConsumer != null
-        kafkaConsumer.delegate.groupId.orElse(null) == 'MY_KEBAB_GROUP'
-        kafkaConsumer.delegate.deserializers.keyDeserializer() instanceof IntegerDeserializer
-        kafkaConsumer.delegate.deserializers.valueDeserializer() instanceof StringDeserializer
+        kafkaConsumer.groupMetadata().groupId() == 'MY_KEBAB_GROUP'
+        config.config[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] == IntegerDeserializer.name
+        config.config[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] == StringDeserializer.name
 
         cleanup:
         applicationContext.close()
