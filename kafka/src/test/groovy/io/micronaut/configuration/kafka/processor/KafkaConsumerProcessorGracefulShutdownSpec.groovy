@@ -10,6 +10,7 @@ import io.micronaut.configuration.kafka.event.KafkaConsumerSubscribedEvent
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler
 import io.micronaut.configuration.kafka.serde.SerdeRegistry
+import io.micronaut.context.BeanProvider
 import io.micronaut.context.BeanContext
 import io.micronaut.context.event.ApplicationEventPublisher
 import io.micronaut.inject.BeanDefinition
@@ -88,7 +89,7 @@ class KafkaConsumerProcessorGracefulShutdownSpec extends Specification {
         new KafkaConsumerProcessor(
             Stub(ExecutorService),
             Stub(ApplicationConfiguration),
-            Stub(KafkaConsumerGroupManager),
+            Stub(BeanProvider<KafkaConsumerGroupManager>),
             beanContext,
             Stub(AbstractKafkaConsumerConfiguration),
             Stub(ConsumerRecordBinderRegistry),

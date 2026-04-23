@@ -37,6 +37,7 @@ import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler
 import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
+import io.micronaut.context.BeanProvider;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
@@ -116,7 +117,7 @@ class KafkaConsumerProcessor
 
     private final ExecutorService executorService;
     private final ApplicationConfiguration applicationConfiguration;
-    private final KafkaConsumerGroupManager kafkaConsumerGroupManager;
+    private final BeanProvider<KafkaConsumerGroupManager> kafkaConsumerGroupManager;
     private final BeanContext beanContext;
     @SuppressWarnings("rawtypes")
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
@@ -156,7 +157,7 @@ class KafkaConsumerProcessor
     KafkaConsumerProcessor(
             @Named(TaskExecutors.MESSAGE_CONSUMER) ExecutorService executorService,
             ApplicationConfiguration applicationConfiguration,
-            KafkaConsumerGroupManager kafkaConsumerGroupManager,
+            BeanProvider<KafkaConsumerGroupManager> kafkaConsumerGroupManager,
             BeanContext beanContext,
             AbstractKafkaConsumerConfiguration defaultConsumerConfiguration,
             ConsumerRecordBinderRegistry binderRegistry,
@@ -337,10 +338,6 @@ class KafkaConsumerProcessor
     @Override
     @PreDestroy
     public void close() {
-        kafkaConsumerGroupManager.getRegisteredClientIdsForDeletion().forEach(clientId -> {
-            LOG.info("Already closed consumer client : {}", clientId);
-            consumers.remove(clientId);
-        });
         consumers.values().forEach(ConsumerState::requestShutdown);
         consumers.values().forEach(state -> {
             if (state.isActive()) {
@@ -531,8 +528,9 @@ class KafkaConsumerProcessor
                 new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);
             consumers.put(finalClientId, consumerState);
             if (uniqueGroupIdDeleteOnShutdown) {
-                kafkaConsumerGroupManager.registerConsumerForGroupDeletion(finalClientId, consumerState);
-                kafkaConsumerGroupManager.registerConsumerGroupIdForDeletion(groupId);
+                KafkaConsumerGroupManager consumerGroupManager = kafkaConsumerGroupManager.get();
+                consumerGroupManager.registerConsumerForGroupDeletion(finalClientId, consumerState);
+                consumerGroupManager.registerConsumerGroupIdForDeletion(groupId);
             }
             executorService.submit(consumerState::threadPollLoop);
         }

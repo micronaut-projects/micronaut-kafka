@@ -16,6 +16,7 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.time.Duration
 import java.util.Optional
+import java.util.Properties
 
 class ConsumerStateSingleSpec extends Specification {
 
@@ -110,7 +111,7 @@ class ConsumerStateSingleSpec extends Specification {
             }
         ) as ExecutableMethod<?, ?>
         AnnotationValue<KafkaListener> annotation = AnnotationValue.builder(KafkaListener).build()
-        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, executableMethod)
+        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, new Properties(), executableMethod)
     }
 
     private static Object defaultValue(Class<?> returnType) {

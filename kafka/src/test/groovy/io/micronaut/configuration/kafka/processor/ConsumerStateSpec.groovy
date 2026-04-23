@@ -43,7 +43,7 @@ class ConsumerStateSpec extends Specification {
     }
 
     private static ConsumerInfo createConsumerInfo() {
-        try (ApplicationContext context = ApplicationContext.run()) {
+        try (ApplicationContext context = ApplicationContext.run(['spec.name': 'ConsumerStateSpec'])) {
             BeanDefinition<ConsumerStateSpecListener> beanDefinition = context.getBeanDefinition(ConsumerStateSpecListener)
             ExecutableMethod<ConsumerStateSpecListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
             AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
