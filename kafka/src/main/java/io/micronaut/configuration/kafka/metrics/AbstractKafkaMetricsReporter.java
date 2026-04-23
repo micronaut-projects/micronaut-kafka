@@ -28,6 +28,7 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 import org.jspecify.annotations.NonNull;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
+
 
 /**
  * A {@link MetricsReporter} that binds metrics to micrometer.
@@ -46,6 +48,21 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     public static final String CLIENT_ID_TAG = "client-id";
     public static final String TOPIC_TAG = "topic";
     public static final String NODE_ID_TAG = "node-id";
+    private static final String EMPTY_OPTIONAL_TAG_VALUE = "";
+    private static final Set<String> NODE_ID_OPTIONAL_METRICS = Set.of(
+            "incoming-byte-rate",
+            "incoming-byte-total",
+            "outgoing-byte-rate",
+            "outgoing-byte-total",
+            "request-latency-avg",
+            "request-latency-max",
+            "request-rate",
+            "request-size-avg",
+            "request-size-max",
+            "request-total",
+            "response-rate",
+            "response-total"
+    );
 
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
     private final Map<MeterRegistry, Map<Meter.Id, Meter>> registeredMeters = new ConcurrentHashMap<>();
@@ -156,13 +173,24 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private List<Tag> getTags(MetricName metricName) {
-        return metricName
+        Set<String> includedTags = getIncludedTags();
+        List<Tag> tags = new ArrayList<>(metricName
                 .tags()
                 .entrySet()
                 .stream()
-                .filter(entry -> getIncludedTags().contains(entry.getKey()))
+                .filter(entry -> includedTags.contains(entry.getKey()))
                 .map(entry -> Tag.of(entry.getKey(), entry.getValue()))
-                .toList();
+                .toList());
+        if (shouldIncludeEmptyNodeIdTag(metricName, includedTags)) {
+            tags.add(Tag.of(NODE_ID_TAG, EMPTY_OPTIONAL_TAG_VALUE));
+        }
+        return tags;
+    }
+
+    private boolean shouldIncludeEmptyNodeIdTag(MetricName metricName, Set<String> includedTags) {
+        return includedTags.contains(NODE_ID_TAG)
+                && !metricName.tags().containsKey(NODE_ID_TAG)
+                && NODE_ID_OPTIONAL_METRICS.contains(metricName.name());
     }
 
     /**
