@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#getMetricPrefix()" tabindex="0">getMetricPrefix()</a></li>
+<li><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">getMetricName(KafkaMetric)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 </ol>
 </li>
@@ -133,8 +134,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Method to close bean.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 </div>
 </div>
@@ -188,6 +194,24 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="../../metrics/AbstractKafkaMetricsReporter.html#getMetricPrefix()">getMetricPrefix</a></code>&nbsp;in class&nbsp;<code><a href="../../metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
 <dt>Returns:</dt>
 <dd>prefix name</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">
+<h3>getMetricName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getMetricName</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="../../metrics/AbstractKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">AbstractKafkaMetricsReporter</a></code></span></div>
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="../../metrics/AbstractKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">getMetricName</a></code>&nbsp;in class&nbsp;<code><a href="../../metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>metric</code> - The Kafka metric</dd>
+<dt>Returns:</dt>
+<dd>The metric name to register with Micrometer</dd>
 </dl>
 </div>
 </section>

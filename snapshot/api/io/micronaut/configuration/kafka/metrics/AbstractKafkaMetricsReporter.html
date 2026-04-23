@@ -77,6 +77,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">metricRemoval(KafkaMetric)</a></li>
 <li><a href="#configure(java.util.Map)" tabindex="0">configure(Map)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
+<li><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">getMetricName(KafkaMetric)</a></li>
 <li><a href="#getIncludedTags()" tabindex="0">getIncludedTags()</a></li>
 <li><a href="#getMetricPrefix()" tabindex="0">getMetricPrefix()</a></li>
 </ol>
@@ -170,20 +171,25 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">The tags to include in the gauge.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#init(java.util.List)" class="member-name-link">init</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&gt;&nbsp;metrics)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricChange</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#init(java.util.List)" class="member-name-link">init</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&gt;&nbsp;metrics)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricRemoval</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricChange</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricRemoval</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -349,6 +355,21 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Closeable.html#close()" title="class or interface in java.io" class="external-link">close</a></code>&nbsp;in interface&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a></code></dd>
 <dt>Specified by:</dt>
 <dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html#close--" title="class or interface in org.apache.kafka.common.metrics" class="external-link">close</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">MetricsReporter</a></code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">
+<h3>getMetricName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getMetricName</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</span></div>
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>metric</code> - The Kafka metric</dd>
+<dt>Returns:</dt>
+<dd>The metric name to register with Micrometer</dd>
 </dl>
 </div>
 </section>
