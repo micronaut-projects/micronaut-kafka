@@ -145,7 +145,8 @@ class KafkaConfigurationSpec extends Specification {
     @Issue('https://github.com/micronaut-projects/micronaut-kafka/issues/1127')
     void "test ssl configuration implies ssl security protocol by default"() {
         given:
-        applicationContext = ApplicationContext.run(
+        applicationContext = ApplicationContext.builder()
+                .properties(
                 ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
                 ('kafka.' + SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG): '/tmp/client.keystore.p12',
                 ('kafka.' + SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG): 'secret',
@@ -156,6 +157,9 @@ class KafkaConfigurationSpec extends Specification {
                 ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
                 ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
         )
+                .eagerBeansEnabled(false)
+                .eagerInitSingletons(false)
+                .start()
 
         when:
         AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
@@ -169,7 +173,8 @@ class KafkaConfigurationSpec extends Specification {
 
     void "test explicit security protocol is not overridden when ssl properties are present"() {
         given:
-        applicationContext = ApplicationContext.run(
+        applicationContext = ApplicationContext.builder()
+                .properties(
                 ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:9093',
                 ('kafka.' + CommonClientConfigs.SECURITY_PROTOCOL_CONFIG): SecurityProtocol.SASL_SSL.name,
                 ('kafka.' + SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG): '/tmp/client.truststore.p12',
@@ -178,6 +183,9 @@ class KafkaConfigurationSpec extends Specification {
                 ("kafka." + ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name,
                 ("kafka." + ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG): StringDeserializer.name
         )
+                .eagerBeansEnabled(false)
+                .eagerInitSingletons(false)
+                .start()
 
         when:
         AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
