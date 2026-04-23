@@ -6,7 +6,6 @@ import io.micronaut.configuration.kafka.streams.uncaught.CustomUncaughtHandlerSt
 import io.micronaut.configuration.kafka.streams.uncaught.OnErrorStreamFactory;
 import io.micronaut.configuration.kafka.streams.wordcount.WordCountStream;
 import io.micronaut.context.annotation.BootstrapContextCompatible;
-import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.context.env.BootstrapPropertySourceLocator;
 import io.micronaut.context.env.Environment;
@@ -27,7 +26,6 @@ import java.util.stream.Stream;
 
 @BootstrapContextCompatible
 @Singleton
-@Requires(property = "kafka.test.initializer.enabled", notEquals = "false", defaultValue = "true")
 public class KafkaTestInitializer implements BootstrapPropertySourceLocator {
 
     private final Map<String, Object> adminProps;

@@ -2,7 +2,6 @@ package io.micronaut.configuration.kafka.streams.startkafkastreams;
 
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
 import io.micronaut.context.annotation.Factory;
-import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.apache.kafka.common.serialization.Serdes;
@@ -12,7 +11,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import java.util.Properties;
 
 @Factory
-@Requires(property = "spec.name", notEquals = "GlobalKTableOnlySpec")
 public class StartKafkaStreamsOff {
 
     public static final String START_KAFKA_STREAMS_OFF = "start-kafka-streams-off";

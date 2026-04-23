@@ -44,7 +44,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -83,8 +82,6 @@ abstract class ConsumerState {
     private final CountDownLatch closedLatch;
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
-    private volatile boolean shutdownRequested;
-    private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
     protected ConsumerState(
         KafkaConsumerProcessor kafkaConsumerProcessor,
@@ -158,18 +155,6 @@ abstract class ConsumerState {
         }
     }
 
-    void requestShutdown() {
-        shutdownRequested = true;
-    }
-
-    CompletableFuture<Void> getShutdownFuture() {
-        return shutdownFuture;
-    }
-
-    boolean isActive() {
-        return !shutdownFuture.isDone();
-    }
-
     void close() {
         boolean closed = closedState == ConsumerCloseState.CLOSED;
         if (!closed && (pollingStarted || closedState == ConsumerCloseState.POLLING)) {
@@ -193,14 +178,14 @@ abstract class ConsumerState {
     void threadPollLoop() {
         try (kafkaConsumer) {
             holdStartup();
-            while (!shutdownRequested) {
+            //noinspection InfiniteLoopStatement
+            while (true) { //NOSONAR
                 refreshAssignmentsPollAndProcessRecords();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (WakeupException e) {
-            // Closing a Kafka consumer relies on wakeup to break a blocked poll.
-            LOG.debug("Consumer {} woken up during shutdown", info.clientId);
+            // Ignore and let the finally block mark this consumer as closed.
         } finally {
             closeComplete();
         }
@@ -280,7 +265,6 @@ abstract class ConsumerState {
     private void closeComplete() {
         closedState = ConsumerCloseState.CLOSED;
         closedLatch.countDown();
-        shutdownFuture.complete(null);
     }
 
     @NonNull

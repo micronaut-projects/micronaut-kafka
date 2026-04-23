@@ -16,17 +16,12 @@
 package io.micronaut.configuration.kafka;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration;
-import io.micronaut.core.annotation.TypeHint;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
-import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.RangeAssignor;
-import org.apache.kafka.clients.consumer.RoundRobinAssignor;
-import org.apache.kafka.clients.consumer.StickyAssignor;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Optional;
@@ -39,15 +34,6 @@ import java.util.Properties;
  * @since 1.0
  */
 @Factory
-@TypeHint(
-        value = {
-                RangeAssignor.class,
-                CooperativeStickyAssignor.class,
-                RoundRobinAssignor.class,
-                StickyAssignor.class
-        },
-        accessType = TypeHint.AccessType.ALL_PUBLIC_CONSTRUCTORS
-)
 public class KafkaConsumerFactory {
 
     /**

@@ -17,21 +17,16 @@ package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.configuration.kafka.streams.event.AfterKafkaStreamsStart;
 import io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart;
-import io.micronaut.context.BeanProvider;
 import io.micronaut.context.annotation.*;
-import io.micronaut.context.exceptions.DisabledBeanException;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse;
-import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.processor.internals.DefaultKafkaClientSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,9 +93,7 @@ public class KafkaStreamsFactory implements Closeable {
      * @param name                 The configuration name
      * @param builder              The builder
      * @param kafkaClientSupplier  The kafka client supplier used to create consumers and producers in the streams app
-     * @param kStreamsProvider     The KStream definitions
-     * @param kTablesProvider      The KTable definitions
-     * @param globalKTablesProvider The GlobalKTable definitions
+     * @param kStreams             The KStream definitions
      * @return The {@link KafkaStreams} bean
      */
     @EachBean(ConfiguredStreamBuilder.class)
@@ -109,19 +102,9 @@ public class KafkaStreamsFactory implements Closeable {
             @Parameter String name,
             ConfiguredStreamBuilder builder,
             KafkaClientSupplier kafkaClientSupplier,
-            BeanProvider<KStream<?, ?>> kStreamsProvider,
-        BeanProvider<KTable<?, ?>> kTablesProvider,
-        BeanProvider<GlobalKTable<?, ?>> globalKTablesProvider
+            KStream<?, ?>... kStreams
     ) {
-        KStream<?, ?>[] kStreams = kStreamsProvider.stream().toArray(KStream[]::new);
-        // count() forces eager resolution before build() without allocating unused arrays.
-        kTablesProvider.stream().count();
-        globalKTablesProvider.stream().count();
         Topology topology = builder.build(builder.getConfiguration());
-        TopologyDescription topologyDescription = topology.describe();
-        if (topologyDescription.subtopologies().isEmpty() && topologyDescription.globalStores().isEmpty()) {
-            throw new DisabledBeanException("No topology components registered for stream builder: " + name);
-        }
         KafkaStreams kafkaStreams = new KafkaStreams(
                 topology,
                 builder.getConfiguration(),
@@ -136,7 +119,7 @@ public class KafkaStreamsFactory implements Closeable {
         }
         streams.put(kafkaStreams, builder);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Initializing Application {} with topology:\n{}", name, topologyDescription.toString());
+            LOG.debug("Initializing Application {} with topology:\n{}", name, topology.describe().toString());
         }
 
         if (startKafkaStreams) {
