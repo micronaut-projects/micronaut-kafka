@@ -106,6 +106,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     private void registerMetric(MeterRegistry meterRegistry, KafkaMetric metric) {
         KafkaMetricMeterTypeBuilder.newBuilder()
                 .prefix(getMetricPrefix())
+                .name(getMetricName(metric))
                 .metric(metric)
                 .tagFunction(getTagFunction())
                 .registry(meterRegistry)
@@ -138,6 +139,16 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
 
     private static boolean hasExpectedTags(List<Tag> meterTags, Set<Tag> expectedTags) {
         return meterTags.size() == expectedTags.size() && expectedTags.containsAll(meterTags);
+    }
+
+    /**
+     * Resolve the exported metric name for the supplied Kafka metric.
+     *
+     * @param metric The Kafka metric
+     * @return The metric name to register with Micrometer
+     */
+    protected String getMetricName(KafkaMetric metric) {
+        return metric.metricName().name();
     }
 
     private Function<MetricName, List<Tag>> getTagFunction() {
