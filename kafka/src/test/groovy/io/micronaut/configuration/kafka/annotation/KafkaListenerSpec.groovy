@@ -218,7 +218,7 @@ class KafkaListenerSpec extends AbstractEmbeddedServerSpec {
     }
 
     private List<String> consumerIds(String prefix) {
-        context.getBean(ConsumerRegistry).consumerIds.findAll { it.startsWith(prefix) }
+        context.getBean(ConsumerRegistry).consumerIds.findAll { it.startsWith(prefix) }.toList()
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerSpec')
