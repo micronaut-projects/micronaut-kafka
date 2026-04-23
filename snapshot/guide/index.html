@@ -15,7 +15,7 @@
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" href="../css/multi-language-sample.css"/>
     <script src="../js/docs.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.13/clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
     <script type="text/javascript">
         function addJsClass(el) {
             var classes = document.body.className.split(" ");
@@ -23,7 +23,9 @@
             document.body.className = classes.join(" ");
         }
     </script>
-
+    <style type="text/css">
+        .lang-java { display: block }; .lang-python { display: block }; .lang-kotlin { display: block }; .lang-groovy { display: block }; 
+    </style>
 </head>
 
 <body class="body" id="docs" onload="addJsClass();" onhashchange="highlightMenu()">
@@ -60,9 +62,11 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -159,9 +163,11 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>8.3</strong><span>Handling Uncaught Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>9</strong><span>Guides</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-controlPanel"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>10</strong><span>Repository</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+        
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
         
         </div>
     </div>
@@ -171,13 +177,13 @@
         <h1>Micronaut Kafka</h1>
         <p></p>
         <p>Integration between Micronaut and Kafka Messaging</p>
-        <p><strong>Version:</strong> 5.10.1-SNAPSHOT </p>
+        <p><strong>Version:</strong> 6.0.0-SNAPSHOT </p>
     </div>
     
 <h1 id="introduction"><a class="anchor" href="#introduction"></a>1 Introduction</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/introduction.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/introduction.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -196,7 +202,7 @@
 <h1 id="releaseHistory"><a class="anchor" href="#releaseHistory"></a>2 Release History</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/releaseHistory.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/releaseHistory.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -249,7 +255,7 @@
 <h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>3 Using the Micronaut CLI</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaCli.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaCli.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -313,7 +319,7 @@ See the guide for <a href="https://guides.micronaut.io/latest/micronaut-kafka.ht
 <h1 id="kafkaQuickStart"><a class="anchor" href="#kafkaQuickStart"></a>4 Kafka Quick Start</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaQuickStart.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaQuickStart.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -336,7 +342,8 @@ See the guide for <a href="https://guides.micronaut.io/latest/micronaut-kafka.ht
     &lt;artifactId&gt;micronaut-kafka&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
-</div></p>
+</div>
+</p>
 </div>
 <div class="sect1">
 <h2 id="_configuring_kafka">Configuring Kafka</h2>
@@ -709,6 +716,23 @@ public interface ProductClient {
 <div class="listingblock multi-language-sample">
 <div class="title">ProductClient.java</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaKey
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+
+@KafkaClient // <b class="conum">(1)</b>
+interface ProductClient {
+    @Topic("my-products")  // <b class="conum">(2)</b>
+    fun sendProduct(@KafkaKey brand: String, name: String) // <b class="conum">(3)</b>
+
+    fun sendProduct(@Topic topic: String, @KafkaKey brand: String, name: String) // <b class="conum">(4)</b>
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">ProductClient.java</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -721,23 +745,6 @@ public interface ProductClient {
     void sendProduct(@KafkaKey String brand, String name) // <b class="conum">(3)</b>
 
     void sendProduct(@Topic String topic, @KafkaKey String brand, String name) // <b class="conum">(4)</b>
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">ProductClient.java</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-
-@KafkaClient // <b class="conum">(1)</b>
-interface ProductClient {
-    @Topic("my-products")  // <b class="conum">(2)</b>
-    fun sendProduct(@KafkaKey brand: String, name: String) // <b class="conum">(3)</b>
-
-    fun sendProduct(@Topic topic: String, @KafkaKey brand: String, name: String) // <b class="conum">(4)</b>
 }</code></pre>
 </div>
 </div>
@@ -830,25 +837,6 @@ public class ProductListener {
 <div class="listingblock multi-language-sample">
 <div class="title">ProductListener.java</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-
-@Slf4j
-@KafkaListener(offsetReset = OffsetReset.EARLIEST) // <b class="conum">(1)</b>
-class ProductListener {
-
-    @Topic('my-products') // <b class="conum">(2)</b>
-    void receive(@KafkaKey String brand, String name) { // <b class="conum">(3)</b>
-        log.info("Got Product - {} by {}", name, brand)
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">ProductListener.java</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetReset
@@ -865,6 +853,25 @@ class ProductListener {
     @Topic("my-products") // <b class="conum">(2)</b>
     fun receive(@KafkaKey brand: String, name: String) { // <b class="conum">(3)</b>
         LOG.info("Got Product - {} by {}", name, brand)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">ProductListener.java</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+
+@Slf4j
+@KafkaListener(offsetReset = OffsetReset.EARLIEST) // <b class="conum">(1)</b>
+class ProductListener {
+
+    @Topic('my-products') // <b class="conum">(2)</b>
+    void receive(@KafkaKey String brand, String name) { // <b class="conum">(3)</b>
+        log.info("Got Product - {} by {}", name, brand)
     }
 }</code></pre>
 </div>
@@ -946,7 +953,7 @@ class ProductListener {
 <h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>5 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -957,7 +964,7 @@ class ProductListener {
 <h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>5.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -979,14 +986,14 @@ class ProductListener {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
-    void sendProduct(@KafkaKey String brand, String name)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
+    fun sendProduct(@KafkaKey brand: String, name: String)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
-    fun sendProduct(@KafkaKey brand: String, name: String)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
+    void sendProduct(@KafkaKey String brand, String name)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1006,14 +1013,14 @@ class ProductListener {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
-    void sendProduct(@KafkaKey String brand, String name, @MessageHeader('My-Header') String myHeader)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
+    fun sendProduct(@KafkaKey brand: String, name: String, @MessageHeader("My-Header") myHeader: String)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-products")
-    fun sendProduct(@KafkaKey brand: String, name: String, @MessageHeader("My-Header") myHeader: String)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-products')
+    void sendProduct(@KafkaKey String brand, String name, @MessageHeader('My-Header') String myHeader)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1038,19 +1045,6 @@ public interface ProductClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Declaring @KafkaClient Headers</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.messaging.annotation.MessageHeader
-
-@KafkaClient(id='product-client')
-@MessageHeader(name = 'X-Token', value = '${my.application.token}')
-interface ProductClient {
-    // define client API
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Declaring @KafkaClient Headers</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.messaging.annotation.MessageHeader
 
@@ -1058,6 +1052,19 @@ import io.micronaut.messaging.annotation.MessageHeader
 @MessageHeader(name = "X-Token", value = "\${my.application.token}")
 interface ProductClient {
 // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring @KafkaClient Headers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.messaging.annotation.MessageHeader
+
+@KafkaClient(id='product-client')
+@MessageHeader(name = 'X-Token', value = '${my.application.token}')
+interface ProductClient {
+    // define client API
 }</code></pre>
 </div>
 </div>
@@ -1080,15 +1087,15 @@ interface ProductClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Collection&lt;Header&gt; Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
-    void sendBicycle(@KafkaKey String brand, String model, Collection&lt;Header&gt; headers)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
+    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Collection&lt;Header&gt;)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Collection&lt;Header&gt; Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
-    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Collection&lt;Header&gt;)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
+    void sendBicycle(@KafkaKey String brand, String model, Collection&lt;Header&gt; headers)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1104,15 +1111,15 @@ interface ProductClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Headers Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
-    void sendBicycle(@KafkaKey String brand, String model, Headers headers)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
+    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Headers)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Headers Argument</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-bicycles")
-    fun sendBicycle(@KafkaKey brand: String, model: String, headers: Headers)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-bicycles')
+    void sendBicycle(@KafkaKey String brand, String model, Headers headers)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1241,13 +1248,12 @@ public interface BookClient {</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy"></code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin"></code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient("product-client")
-interface BookClient {</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy"></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1264,14 +1270,14 @@ interface BookClient {</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
-    Mono&lt;Book&gt; sendBook(@KafkaKey String author, Mono&lt;Book&gt; book);</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
+    fun sendBook(@KafkaKey author: String, book: Mono&lt;Book&gt;): Mono&lt;Book&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
-    fun sendBook(@KafkaKey author: String, book: Mono&lt;Book&gt;): Mono&lt;Book&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
+    Mono&lt;Book&gt; sendBook(@KafkaKey String author, Mono&lt;Book&gt; book);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1288,14 +1294,14 @@ interface BookClient {</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
-    Flux&lt;RecordMetadata&gt; sendBooks(@KafkaKey String author, Flux&lt;Book&gt; book);</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
+    fun sendBooks(@KafkaKey author: String, book: Flux&lt;Book&gt;): Flux&lt;RecordMetadata&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    @Topic("my-books")
-    fun sendBooks(@KafkaKey author: String, book: Flux&lt;Book&gt;): Flux&lt;RecordMetadata&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    @Topic('my-books')
+    Flux&lt;RecordMetadata&gt; sendBooks(@KafkaKey String author, Flux&lt;Book&gt; book);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1361,7 +1367,7 @@ interface BookClient {</code></pre>
 <h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>5.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1467,13 +1473,13 @@ kafka.producers.default.bootstrap.servers=localhost:9096</code></pre>
 <div class="listingblock multi-language-sample">
 <div class="title">Using a Client ID</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient('product-client')</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient("product-client")</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Using a Client ID</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient("product-client")</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient('product-client')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1602,24 +1608,6 @@ public interface ProductClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Configuring Producer Properties with @KafkaClient</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.context.annotation.Property
-import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.producer.ProducerConfig
-
-@KafkaClient(
-        id = "product-client",
-        acks = KafkaClient.Acknowledge.ALL,
-        properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = '5')
-)
-interface ProductClient {
-    // define client API
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Configuring Producer Properties with @KafkaClient</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
@@ -1629,6 +1617,24 @@ import org.apache.kafka.clients.producer.ProducerConfig
     id = "product-client",
     acks = KafkaClient.Acknowledge.ALL,
     properties = [Property(name = ProducerConfig.RETRIES_CONFIG, value = "5")]
+)
+interface ProductClient {
+    // define client API
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Configuring Producer Properties with @KafkaClient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.producer.ProducerConfig
+
+@KafkaClient(
+        id = "product-client",
+        acks = KafkaClient.Acknowledge.ALL,
+        properties = @Property(name = ProducerConfig.RETRIES_CONFIG, value = '5')
 )
 interface ProductClient {
     // define client API
@@ -1738,14 +1744,14 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>5.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
 
 
 <div class="paragraph">
-<p>By default if you define a method that takes a container type such as a <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html">List</a> the list will be serialized using the specified <code>value.serializer</code> (the default will result in a JSON array).</p>
+<p>By default if you define a method that takes a container type such as a <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html">List</a> the list will be serialized using the specified <code>value.serializer</code> (the default will result in a JSON array).</p>
 </div>
 <div class="paragraph">
 <p>For example the following two methods will both send serialized arrays:</p>
@@ -1763,21 +1769,21 @@ void sendBooks(Book...books);</code></pre>
 <div class="listingblock multi-language-sample">
 <div class="title">Sending Arrays and Lists</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('books')
-void sendList(List&lt;Book&gt; books)
-
-@Topic('books')
-void sendBooks(Book...books)</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Sending Arrays and Lists</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("books")
 fun sendList(books: List&lt;Book&gt;)
 
 @Topic("books")
 fun sendBooks(vararg books: Book)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Sending Arrays and Lists</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('books')
+void sendList(List&lt;Book&gt; books)
+
+@Topic('books')
+void sendBooks(Book...books)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1799,21 +1805,21 @@ public interface BookClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Sending <code>ProducerRecord</code> batches</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
-interface BookClient {
-
-    @Topic('books')
-    void sendList(List&lt;Book&gt; books)</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Sending <code>ProducerRecord</code> batches</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(batch = true)
 interface BookClient {
 
     @Topic("books")
     fun sendList(books: List&lt;Book&gt;)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Sending <code>ProducerRecord</code> batches</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
+interface BookClient {
+
+    @Topic('books')
+    void sendList(List&lt;Book&gt; books)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1832,21 +1838,21 @@ public interface BookClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Sending <code>ProducerRecord</code> batches Reactively</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
-interface BookClient {
-
-    @Topic('books')
-    Flux&lt;RecordMetadata&gt; send(List&lt;Book&gt; books)</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Sending <code>ProducerRecord</code> batches Reactively</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(batch = true)
 interface BookClient {
 
     @Topic("books")
     fun send(books: List&lt;Book&gt;): Flux&lt;RecordMetadata&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Sending <code>ProducerRecord</code> batches Reactively</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
+interface BookClient {
+
+    @Topic('books')
+    Flux&lt;RecordMetadata&gt; send(List&lt;Book&gt; books)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1865,16 +1871,6 @@ public interface BookClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Sending <code>ProducerRecord</code> batches from a Flux</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
-interface BookClient {
-
-    @Topic('books')
-    Flux&lt;RecordMetadata&gt; send(Flux&lt;Book&gt; books)</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Sending <code>ProducerRecord</code> batches from a Flux</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(batch = true)
 interface BookClient {
 
@@ -1882,11 +1878,21 @@ interface BookClient {
     fun send(books: Flux&lt;Book&gt;): Flux&lt;RecordMetadata&gt;</code></pre>
 </div>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="title">Sending <code>ProducerRecord</code> batches from a Flux</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(batch = true)
+interface BookClient {
+
+    @Topic('books')
+    Flux&lt;RecordMetadata&gt; send(Flux&lt;Book&gt; books)</code></pre>
+</div>
+</div>
 
 <h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>5.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -1928,6 +1934,28 @@ public class BookSender {
 <div class="listingblock multi-language-sample">
 <div class="title">Using a KafkaProducer directly</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
+import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import java.util.concurrent.Future
+
+@Requires(property = "spec.name", value = "BookSenderTest")
+@Singleton
+class BookSender(
+    @param:KafkaClient("book-producer") private val kafkaProducer: Producer&lt;String, Book&gt;) { // <b class="conum">(1)</b>
+
+    fun send(author: String, book: Book): Future&lt;RecordMetadata&gt; {
+        return kafkaProducer.send(ProducerRecord("books", author, book)) // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.context.annotation.Requires
 import jakarta.inject.Singleton
@@ -1948,28 +1976,6 @@ class BookSender {
 
     Future&lt;RecordMetadata&gt; send(String author, Book book) {
         kafkaProducer.send(new ProducerRecord&lt;&gt;('books', author, book)) // <b class="conum">(2)</b>
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Using a KafkaProducer directly</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.context.annotation.Requires
-import jakarta.inject.Singleton
-import org.apache.kafka.clients.producer.Producer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.producer.RecordMetadata
-import java.util.concurrent.Future
-
-@Requires(property = "spec.name", value = "BookSenderTest")
-@Singleton
-class BookSender(
-    @param:KafkaClient("book-producer") private val kafkaProducer: Producer&lt;String, Book&gt;) { // <b class="conum">(1)</b>
-
-    fun send(author: String, book: Book): Future&lt;RecordMetadata&gt; {
-        return kafkaProducer.send(ProducerRecord("books", author, book)) // <b class="conum">(2)</b>
     }
 }</code></pre>
 </div>
@@ -1997,11 +2003,14 @@ class BookSender(
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Test
 void testBookSender() {
+    Map&lt;String, String&gt; kafkaProps = Kafka.getProperties();
 
-    try (ApplicationContext ctx = ApplicationContext.run( // <b class="conum">(1)</b>
-        Map.of("kafka.enabled", "true", "spec.name", "BookSenderTest")
-    )) {
-        BookSender bookSender = ctx.getBean(BookSender.class); // <b class="conum">(2)</b>
+    Map&lt;String, Object&gt; config = new HashMap&lt;&gt;(kafkaProps);
+    config.put("kafka.enabled", "true");
+    config.put("spec.name", "BookSenderTest");
+
+    try (ApplicationContext ctx = ApplicationContext.run(config)) {
+        BookSender bookSender = ctx.getBean(BookSender.class);
         Book book = new Book("The Stand");
         Future&lt;RecordMetadata&gt; stephenKing = bookSender.send("Stephen King", book);
         assertDoesNotThrow(() -&gt; {
@@ -2015,11 +2024,31 @@ void testBookSender() {
 <div class="listingblock multi-language-sample">
 <div class="title">Using a KafkaProducer directly</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Test
+fun testBookSender() {
+    ApplicationContext.run(mapOf( // <b class="conum">(1)</b>
+        "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest"), "kafka").use { ctx -&gt;
+        val bookSender = ctx.getBean(BookSender::class.java) // <b class="conum">(2)</b>
+        val book = Book("The Stand")
+        bookSender.send("Stephen King", book)
+        val stephenKing = bookSender.send("Stephen King", book)
+        Assertions.assertDoesNotThrow {
+            val recordMetadata = stephenKing.get()
+            Assertions.assertEquals("books", recordMetadata.topic())
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using a KafkaProducer directly</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">void "test Book Sender"() {
     given:
-    ApplicationContext ctx = ApplicationContext.run(  // <b class="conum">(1)</b>
-        'kafka.enabled': true, 'spec.name': 'BookSenderTest'
-    )
+    def config = new HashMap&lt;&gt;(Kafka.getProperties());
+    config.put("kafka.enabled", "true");
+    config.put("spec.name", "BookSenderTest");
+
+    ApplicationContext ctx = ApplicationContext.run(config)  // <b class="conum">(1)</b>
     BookSender bookSender = ctx.getBean(BookSender) // <b class="conum">(2)</b>
     Book book = new Book('The Stand')
 
@@ -2035,24 +2064,6 @@ void testBookSender() {
     cleanup:
     ctx.close()
 }</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Using a KafkaProducer directly</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Test
-fun testBookSender() {
-    ApplicationContext.run(mapOf( // <b class="conum">(1)</b>
-        "kafka.enabled" to StringUtils.TRUE, "spec.name" to "BookSenderTest")).use { ctx -&gt;
-        val bookSender = ctx.getBean(BookSender::class.java) // <b class="conum">(2)</b>
-        val book = Book("The Stand")
-        bookSender.send("Stephen King", book)
-        val stephenKing = bookSender.send("Stephen King", book)
-        Assertions.assertDoesNotThrow {
-            val recordMetadata = stephenKing.get()
-            Assertions.assertEquals("books", recordMetadata.topic())
-        }
-    }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -2074,7 +2085,7 @@ fun testBookSender() {
 <h2 id="kafkaClientTx"><a class="anchor" href="#kafkaClientTx"></a>5.5 Transactions</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaClientTx.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientTx.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2095,7 +2106,7 @@ public interface TransactionalClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Transactional Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
 interface TransactionalClient {
     // define client API
 }</code></pre>
@@ -2104,7 +2115,7 @@ interface TransactionalClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Transactional Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient(id = "my-client", transactionalId = "my-tx-id")
 interface TransactionalClient {
     // define client API
 }</code></pre>
@@ -2146,8 +2157,8 @@ public interface RandomTransactionalIdClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Random transactional ID</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Prototype
-@KafkaClient(id = "my-client", transactionalId = 'my-tx-id-${random.uuid}')
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Prototype
+@KafkaClient(id = "my-client", transactionalId = "my-tx-id-\${random.uuid}")
 interface RandomTransactionalIdClient {
     // define client API
 }</code></pre>
@@ -2156,8 +2167,8 @@ interface RandomTransactionalIdClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Random transactional ID</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Prototype
-@KafkaClient(id = "my-client", transactionalId = "my-tx-id-\${random.uuid}")
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Prototype
+@KafkaClient(id = "my-client", transactionalId = 'my-tx-id-${random.uuid}')
 interface RandomTransactionalIdClient {
     // define client API
 }</code></pre>
@@ -2171,7 +2182,7 @@ interface RandomTransactionalIdClient {
 <h2 id="kafkaDockerized"><a class="anchor" href="#kafkaDockerized"></a>5.6 Running Kafka while testing and developing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaClient/kafkaDockerized.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaDockerized.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2195,31 +2206,29 @@ interface RandomTransactionalIdClient {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs;
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
 
-import io.micronaut.test.support.TestPropertyProvider;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
-
-import java.util.Collections;
-import java.util.Map;
+import io.micronaut.test.support.TestPropertyProvider
+import org.testcontainers.kafka.KafkaContainer
 
 /**
  * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
  */
-public abstract class AbstractKafkaTest implements TestPropertyProvider {
-    static protected final KafkaContainer MY_KAFKA = new KafkaContainer(
-        DockerImageName.parse("apache/kafka:latest")
-    );
+abstract class AbstractKafkaTest : TestPropertyProvider {
 
-    @Override
-    public Map&lt;String, String&gt; getProperties() {
-        if (!MY_KAFKA.isRunning()) {
-            MY_KAFKA.start();
+    companion object {
+        var MY_KAFKA: KafkaContainer = KafkaContainer("apache/kafka:4.2.0")
+    }
+
+    override fun getProperties(): MutableMap&lt;String, String&gt; {
+        if (!MY_KAFKA.isRunning) {
+            MY_KAFKA.start()
         }
-        return Collections.singletonMap(
-            "kafka.bootstrap.servers", MY_KAFKA.getBootstrapServers()
-        );
+
+        val properties = mutableMapOf(
+            "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
+        )
+        return properties
     }
 }</code></pre>
 </div>
@@ -2230,7 +2239,6 @@ public abstract class AbstractKafkaTest implements TestPropertyProvider {
 
 import io.micronaut.test.support.TestPropertyProvider
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -2239,41 +2247,13 @@ abstract class AbstractKafkaTest extends Specification implements TestPropertyPr
 
     @Shared
     @AutoCleanup
-    KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
+    KafkaContainer kafkaContainer = new KafkaContainer("apache/kafka:4.2.0")
 
     @Override
     Map&lt;String, String&gt; getProperties() {
         kafkaContainer.start()
 
         ["kafka.bootstrap.servers": kafkaContainer.getBootstrapServers()]
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
-
-import io.micronaut.test.support.TestPropertyProvider
-import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
-
-/**
- * @see &lt;a href="https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers"&gt;Singleton containers&lt;/a&gt;
- */
-abstract class AbstractKafkaTest : TestPropertyProvider {
-
-    companion object {
-        var MY_KAFKA: KafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
-    }
-
-    override fun getProperties(): MutableMap&lt;String, String&gt; {
-        if(!MY_KAFKA.isRunning) {
-            MY_KAFKA.start()
-        }
-        return mutableMapOf(
-            "kafka.bootstrap.servers" to MY_KAFKA.bootstrapServers
-        )
     }
 }</code></pre>
 </div>
@@ -2292,8 +2272,12 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.micronaut.test.support.TestPropertyProvider;
+import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
@@ -2301,7 +2285,12 @@ import static org.awaitility.Awaitility.await;
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MyTest extends AbstractKafkaTest {
+class MyTest implements TestPropertyProvider {
+
+    @Override
+    public Map&lt;String, String&gt; getProperties() {
+        return Kafka.getProperties();
+    }
 
     @Test
     void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
@@ -2324,6 +2313,54 @@ class MyTest extends AbstractKafkaTest {
         @Topic("my-topic")
         public void consume(String message) {
             consumed = message;
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
+
+import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import java.util.concurrent.TimeUnit
+
+@Property(name = "spec.name", value = "MyTest")
+@MicronautTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class MyTest : AbstractKafkaTest() {
+
+    @Test
+    fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
+        val message = "hello"
+        producer.produce(message)
+        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaClient
+    interface MyProducer {
+        @Topic("my-topic")
+        fun produce(message: String)
+    }
+
+    @Requires(property = "spec.name", value = "MyTest")
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    class MyConsumer {
+        var consumed: String? = null
+
+        @Topic("my-topic")
+        fun consume(message: String) {
+            consumed = message
         }
     }
 }</code></pre>
@@ -2389,59 +2426,11 @@ class MyTest extends AbstractKafkaTest {
 }</code></pre>
 </div>
 </div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs
-
-import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Property
-import io.micronaut.context.annotation.Requires
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import java.util.concurrent.TimeUnit
-
-@Property(name = "spec.name", value = "MyTest")
-@MicronautTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class MyTest : AbstractKafkaTest() {
-
-    @Test
-    fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
-        val message = "hello"
-        producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
-    }
-
-    @Requires(property = "spec.name", value = "MyTest")
-    @KafkaClient
-    interface MyProducer {
-        @Topic("my-topic")
-        fun produce(message: String)
-    }
-
-    @Requires(property = "spec.name", value = "MyTest")
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
-    class MyConsumer {
-        var consumed: String? = null
-
-        @Topic("my-topic")
-        fun consume(message: String) {
-            consumed = message
-        }
-    }
-}</code></pre>
-</div>
-</div>
 
 <h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>6 Kafka Consumers Using @KafkaListener</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2540,13 +2529,13 @@ micronaut.executors.consumer.nThreads=25</code></pre>
 <div class="listingblock multi-language-sample">
 <div class="title">Scaling with Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId='myGroup', threads = 10)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threads = 10)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Scaling with Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threads = 10)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId='myGroup', threads = 10)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2576,13 +2565,13 @@ micronaut.executors.consumer.nThreads=25</code></pre>
 <div class="listingblock multi-language-sample">
 <div class="title">Dynamically Configuring Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', threadsValue = '${my.thread.count}')</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threadsValue = "\${my.thread.count}")</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Dynamically Configuring Threads</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", threadsValue = "\${my.thread.count}")</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', threadsValue = '${my.thread.count}')</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -2704,7 +2693,7 @@ See the guide for <a href="https://guides.micronaut.io/latest/testing-micronaut-
 <h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -2752,18 +2741,18 @@ public void receiveMultiTopics(@KafkaKey String brand, String name) {
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying Multiple Topics</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic(['fun-products', 'awesome-products'])
-void receiveMultiTopics(@KafkaKey String brand, String name) {
-    log.info("Got Product - {} by {}", name, brand)
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("fun-products", "awesome-products")
+fun receiveMultiTopics(@KafkaKey brand: String, name: String) {
+    LOG.info("Got Product - {} by {}", name, brand)
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying Multiple Topics</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("fun-products", "awesome-products")
-fun receiveMultiTopics(@KafkaKey brand: String, name: String) {
-    LOG.info("Got Product - {} by {}", name, brand)
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic(['fun-products', 'awesome-products'])
+void receiveMultiTopics(@KafkaKey String brand, String name) {
+    log.info("Got Product - {} by {}", name, brand)
 }</code></pre>
 </div>
 </div>
@@ -2782,18 +2771,18 @@ public void receivePatternTopics(@KafkaKey String brand, String name) {
 <div class="listingblock multi-language-sample">
 <div class="title">Using regular expressions to match Topics</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic(patterns='products-\\w+')
-void receivePatternTopics(@KafkaKey String brand, String name) {
-    log.info("Got Product - {} by {}", name, brand)
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic(patterns = ["products-\\w+"])
+fun receivePatternTopics(@KafkaKey brand: String, name: String) {
+    LOG.info("Got Product - {} by {}", name, brand)
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Using regular expressions to match Topics</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic(patterns = ["products-\\w+"])
-fun receivePatternTopics(@KafkaKey brand: String, name: String) {
-    LOG.info("Got Product - {} by {}", name, brand)
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic(patterns='products-\\w+')
+void receivePatternTopics(@KafkaKey String brand, String name) {
+    log.info("Got Product - {} by {}", name, brand)
 }</code></pre>
 </div>
 </div>
@@ -2910,20 +2899,6 @@ public void receive(@KafkaKey String brand, // <b class="conum">(1)</b>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying Parameters for offset, topic etc.</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('awesome-products')
-void receive(@KafkaKey String brand,  // <b class="conum">(1)</b>
-             Product product, // <b class="conum">(2)</b>
-             long offset, // <b class="conum">(3)</b>
-             int partition, // <b class="conum">(4)</b>
-             String topic, // <b class="conum">(5)</b>
-             long timestamp) { // <b class="conum">(6)</b>
-    log.info("Got Product - {} by {}", product.name, brand)
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Specifying Parameters for offset, topic etc.</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("awesome-products")
 fun receive(
     @KafkaKey brand: String,  // <b class="conum">(1)</b>
@@ -2934,6 +2909,20 @@ fun receive(
     timestamp: Long // <b class="conum">(6)</b>
 ) {
     LOG.info("Got Product - {} by {}", product.name, brand)
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying Parameters for offset, topic etc.</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('awesome-products')
+void receive(@KafkaKey String brand,  // <b class="conum">(1)</b>
+             Product product, // <b class="conum">(2)</b>
+             long offset, // <b class="conum">(3)</b>
+             int partition, // <b class="conum">(4)</b>
+             String topic, // <b class="conum">(5)</b>
+             long timestamp) { // <b class="conum">(6)</b>
+    log.info("Got Product - {} by {}", product.name, brand)
 }</code></pre>
 </div>
 </div>
@@ -2990,22 +2979,22 @@ public void receive(ConsumerRecord&lt;String, Product&gt; record) { // <b class=
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying Parameters for offset, topic etc.</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("awesome-products")
-public void receive(ConsumerRecord&lt;String, Product&gt; record) { // <b class="conum">(1)</b>
-    Product product = record.value() // <b class="conum">(2)</b>
-    String brand = record.key() // <b class="conum">(3)</b>
-    log.info("Got Product - {} by {}", product.name, brand)
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("awesome-products")
+fun receive(record: ConsumerRecord&lt;String, Product&gt;) { // <b class="conum">(1)</b>
+    val name = record.value() // <b class="conum">(2)</b>
+    val brand = record.key() // <b class="conum">(3)</b>
+    LOG.info("Got Product - $name by $brand")
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying Parameters for offset, topic etc.</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("awesome-products")
-fun receive(record: ConsumerRecord&lt;String, Product&gt;) { // <b class="conum">(1)</b>
-    val name = record.value() // <b class="conum">(2)</b>
-    val brand = record.key() // <b class="conum">(3)</b>
-    LOG.info("Got Product - $name by $brand")
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("awesome-products")
+public void receive(ConsumerRecord&lt;String, Product&gt; record) { // <b class="conum">(1)</b>
+    Product product = record.value() // <b class="conum">(2)</b>
+    String brand = record.key() // <b class="conum">(3)</b>
+    log.info("Got Product - {} by {}", product.name, brand)
 }</code></pre>
 </div>
 </div>
@@ -3054,24 +3043,24 @@ public Mono&lt;Product&gt; receive(@KafkaKey String brand,  // <b class="conum">
 <div class="listingblock multi-language-sample">
 <div class="title">Using Reactive Types</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('reactive-products')
-Mono&lt;Product&gt; receive(@KafkaKey String brand,  // <b class="conum">(1)</b>
-                      Mono&lt;Product&gt; productPublisher) { // <b class="conum">(2)</b>
-    return productPublisher.doOnSuccess(product -&gt;
-        log.info("Got Product - {} by {}", product.name, brand) // <b class="conum">(3)</b>
-    )
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Using Reactive Types</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("reactive-products")
 fun receive(@KafkaKey brand: String,  // <b class="conum">(1)</b>
     product: Mono&lt;Product&gt;): Mono&lt;Product&gt; { // <b class="conum">(2)</b>
     return product.doOnSuccess { (name): Product -&gt;
         LOG.info("Got Product - {} by {}", name, brand) // <b class="conum">(3)</b>
     }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Using Reactive Types</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('reactive-products')
+Mono&lt;Product&gt; receive(@KafkaKey String brand,  // <b class="conum">(1)</b>
+                      Mono&lt;Product&gt; productPublisher) { // <b class="conum">(2)</b>
+    return productPublisher.doOnSuccess(product -&gt;
+        log.info("Got Product - {} by {}", product.name, brand) // <b class="conum">(3)</b>
+    )
 }</code></pre>
 </div>
 </div>
@@ -3115,18 +3104,6 @@ public Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Produ
 <div class="listingblock multi-language-sample">
 <div class="title">Blocking with Reactive Consumers</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Blocking
-@Topic('reactive-products')
-Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; productPublisher) {
-    return productPublisher.doOnSuccess(product -&gt;
-            log.info("Got Product - {} by {}", product.name, brand)
-    )
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Blocking with Reactive Consumers</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Blocking
 @Topic("reactive-products")
 fun receiveBlocking(@KafkaKey brand: String, product: Mono&lt;Product&gt;): Mono&lt;Product&gt; {
@@ -3136,13 +3113,25 @@ fun receiveBlocking(@KafkaKey brand: String, product: Mono&lt;Product&gt;): Mono
 }</code></pre>
 </div>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="title">Blocking with Reactive Consumers</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Blocking
+@Topic('reactive-products')
+Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; productPublisher) {
+    return productPublisher.doOnSuccess(product -&gt;
+            log.info("Got Product - {} by {}", product.name, brand)
+    )
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 
 <h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>6.2 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -3162,13 +3151,13 @@ fun receiveBlocking(@KafkaKey brand: String, product: Mono&lt;Product&gt;): Mono
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying a Consumer Group</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener('myGroup')</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener("myGroup")</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying a Consumer Group</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener("myGroup")</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener('myGroup')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3183,13 +3172,13 @@ fun receiveBlocking(@KafkaKey brand: String, product: Mono&lt;Product&gt;): Mono
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying a Consumer Group alternative</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup')</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup")</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying a Consumer Group alternative</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup")</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup')</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3220,13 +3209,13 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 <div class="listingblock multi-language-sample">
 <div class="title">Unique group IDs</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', uniqueGroupId = true)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", uniqueGroupId = true)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Unique group IDs</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", uniqueGroupId = true)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', uniqueGroupId = true)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3243,12 +3232,12 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(groupId = "myGroup", uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(groupId = 'myGroup', uniqueGroupId = true, uniqueGroupIdDeleteOnShutdown = true)</code></pre>
 </div>
 </div>
 </div>
@@ -3453,26 +3442,6 @@ public class ProductListener {</code></pre>
 <div class="listingblock multi-language-sample">
 <div class="title">Configuring Consumer Properties with @KafkaListener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Property
-import io.micronaut.context.annotation.Requires
-import io.micronaut.kafka.docs.Product
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.ConsumerRecord
-
-@KafkaListener(
-        groupId = 'products',
-        pollTimeout = '500ms',
-        properties = @Property(name = ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, value = '10000')
-)
-class ProductListener {</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Configuring Consumer Properties with @KafkaListener</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -3489,6 +3458,26 @@ import org.slf4j.LoggerFactory
     groupId = "products",
     pollTimeout = "500ms",
     properties = [Property(name = ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, value = "10000")]
+)
+class ProductListener {</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Configuring Consumer Properties with @KafkaListener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaKey
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Property
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.ConsumerRecord
+
+@KafkaListener(
+        groupId = 'products',
+        pollTimeout = '500ms',
+        properties = @Property(name = ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, value = '10000')
 )
 class ProductListener {</code></pre>
 </div>
@@ -3614,7 +3603,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>6.3 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -3703,11 +3692,11 @@ public class ProductListener {
 <div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with <code>ack()</code></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
 class ProductListener {
 
-    @Topic('awesome-products')
-    void receive(Product product, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+    @Topic("awesome-products")
+    fun receive(product: Product, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
         // process product record
         acknowledgement.ack() // <b class="conum">(3)</b>
     }
@@ -3717,11 +3706,11 @@ class ProductListener {
 <div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with <code>ack()</code></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
 class ProductListener {
 
-    @Topic("awesome-products")
-    fun receive(product: Product, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
+    @Topic('awesome-products')
+    void receive(Product product, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
         // process product record
         acknowledgement.ack() // <b class="conum">(3)</b>
     }
@@ -3782,36 +3771,6 @@ public class ProductListener {
 <div class="listingblock multi-language-sample">
 <div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-import io.micronaut.kafka.docs.Product
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.OffsetAndMetadata
-import org.apache.kafka.common.TopicPartition
-
-import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
-import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
-
-@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
-class ProductListener {
-
-    @Topic('awesome-products')
-    void receive(Product product, long offset, int partition, String topic, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
-        // process product record
-
-        // commit offsets
-        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(3)</b>
-                new TopicPartition(topic, partition),
-                new OffsetAndMetadata(offset + 1, 'my metadata')
-        ))
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
@@ -3841,6 +3800,36 @@ class ProductListener {
 }</code></pre>
 </div>
 </div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
+
+import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
+import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.DISABLED
+
+@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED) // <b class="conum">(1)</b>
+class ProductListener {
+
+    @Topic('awesome-products')
+    void receive(Product product, long offset, int partition, String topic, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+        // process product record
+
+        // commit offsets
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(3)</b>
+                new TopicPartition(topic, partition),
+                new OffsetAndMetadata(offset + 1, 'my metadata')
+        ))
+    }
+}</code></pre>
+</div>
+</div>
 <div class="colist arabic">
 <table>
 <tr>
@@ -3862,7 +3851,7 @@ class ProductListener {
 <h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>6.4 Assigning Kafka Offsets</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSeek.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -3873,7 +3862,7 @@ class ProductListener {
 <h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>6.4.1 Manually Assigning Offsets to a Consumer Bean</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsToAConsumerBean.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsToAConsumerBean.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -3932,6 +3921,40 @@ public class ProductListener implements ConsumerSeekAware { // <b class="conum">
 <div class="listingblock multi-language-sample">
 <div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.aware
+
+import io.micronaut.configuration.kafka.ConsumerSeekAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener
+@Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
+class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerSeekAware { // <b class="conum">(1)</b>
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+
+    @Topic("wonderful-products")
+    fun receive(product: Product) {
+        processed.add(product)
+    }
+
+    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;, seeker: KafkaSeeker) { // <b class="conum">(3)</b>
+        // seek to offset here
+        partitions.stream().map { tp -&gt; KafkaSeekOperation.seek(tp, 1) }.forEach(seeker::perform)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs.seek.aware
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware
@@ -3965,40 +3988,6 @@ class ProductListener implements ConsumerSeekAware { // <b class="conum">(1)</b>
     void onPartitionsAssigned(Collection&lt;TopicPartition&gt; partitions, KafkaSeeker seeker) { // <b class="conum">(3)</b>
         // seek to offset here
         partitions.collect { KafkaSeekOperation.seek(it, 1) }.each(seeker.&amp;perform)
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Manually seeking offsets with the <code>ConsumerSeekAware</code> API</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.aware
-
-import io.micronaut.configuration.kafka.ConsumerSeekAware
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.configuration.kafka.seek.*
-import io.micronaut.context.annotation.Requires
-import io.micronaut.kafka.docs.Product
-import org.apache.kafka.common.TopicPartition
-
-@KafkaListener
-@Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
-class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerSeekAware { // <b class="conum">(1)</b>
-
-    var processed: MutableList&lt;Product&gt; = mutableListOf()
-
-    @Topic("wonderful-products")
-    fun receive(product: Product) {
-        processed.add(product)
-    }
-
-    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
-        // save offsets here
-    }
-
-    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;, seeker: KafkaSeeker) { // <b class="conum">(3)</b>
-        // seek to offset here
-        partitions.stream().map { tp -&gt; KafkaSeekOperation.seek(tp, 1) }.forEach(seeker::perform)
     }
 }</code></pre>
 </div>
@@ -4043,7 +4032,7 @@ import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
-import io.micronaut.core.annotation.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import java.util.*;
@@ -4079,6 +4068,47 @@ public class ProductListener implements ConsumerRebalanceListener, ConsumerAware
         // seek to offset here
         for (TopicPartition partition : partitions) {
             consumer.seek(partition, 1);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.rebalance
+
+import io.micronaut.configuration.kafka.ConsumerAware
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.context.annotation.Requires
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.clients.consumer.*
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
+class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerRebalanceListener, ConsumerAware&lt;Any?, Any?&gt; {
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+    private var consumer: Consumer&lt;*, *&gt;? = null
+
+    override fun setKafkaConsumer(consumer: Consumer&lt;Any?, Any?&gt;) { // <b class="conum">(1)</b>
+        this.consumer = consumer
+    }
+
+    @Topic("fantastic-products")
+    fun receive(product: Product) {
+        processed.add(product)
+    }
+
+    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
+        // save offsets here
+    }
+
+    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(3)</b>
+        // seek to offset here
+        for (partition in partitions) {
+            consumer!!.seek(partition, 1)
         }
     }
 }</code></pre>
@@ -4133,47 +4163,6 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 }</code></pre>
 </div>
 </div>
-<div class="listingblock multi-language-sample">
-<div class="title">Manually seeking offsets with the <code>KafkaConsumer</code> API</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.rebalance
-
-import io.micronaut.configuration.kafka.ConsumerAware
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.context.annotation.Requires
-import io.micronaut.kafka.docs.Product
-import org.apache.kafka.clients.consumer.*
-import org.apache.kafka.common.TopicPartition
-
-@KafkaListener(offsetReset = OffsetReset.EARLIEST)
-@Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
-class ProductListener constructor(config: ProductListenerConfiguration) : ConsumerRebalanceListener, ConsumerAware&lt;Any?, Any?&gt; {
-
-    var processed: MutableList&lt;Product&gt; = mutableListOf()
-    private var consumer: Consumer&lt;*, *&gt;? = null
-
-    override fun setKafkaConsumer(consumer: Consumer&lt;Any?, Any?&gt;?) { // <b class="conum">(1)</b>
-        this.consumer = consumer
-    }
-
-    @Topic("fantastic-products")
-    fun receive(product: Product) {
-        processed.add(product)
-    }
-
-    override fun onPartitionsRevoked(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(2)</b>
-        // save offsets here
-    }
-
-    override fun onPartitionsAssigned(partitions: Collection&lt;TopicPartition&gt;) { // <b class="conum">(3)</b>
-        // seek to offset here
-        for (partition in partitions) {
-            consumer!!.seek(partition, 1)
-        }
-    }
-}</code></pre>
-</div>
-</div>
 <div class="colist arabic">
 <table>
 <tr>
@@ -4194,7 +4183,7 @@ class ProductListener constructor(config: ProductListenerConfiguration) : Consum
 <h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>6.4.2 Manual Offsets with Multiple Topics</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSeek/manualOffsetsWithMultipleTopics.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manualOffsetsWithMultipleTopics.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -4222,7 +4211,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 <h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>6.4.3 Manually Assigning Offsets from a Consumer Method</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsFromAConsumerMethod.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsFromAConsumerMethod.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -4265,6 +4254,30 @@ public class ProductListener {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.ops
+
+import io.micronaut.configuration.kafka.annotation.*
+import io.micronaut.configuration.kafka.seek.*
+import io.micronaut.context.annotation.*
+import io.micronaut.kafka.docs.Product
+import org.apache.kafka.common.TopicPartition
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = [Property(name = "max.poll.records", value = "1")])
+@Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
+class ProductListener constructor(config: ProductListenerConfiguration) {
+
+    var processed: MutableList&lt;Product&gt; = mutableListOf()
+
+    @Topic("amazing-products")
+    fun receive(product: Product, ops: KafkaSeekOperations) { // <b class="conum">(1)</b>
+        processed.add(product)
+        ops.defer(KafkaSeekOperation.seekToBeginning(TopicPartition("amazing-products", 0))) // <b class="conum">(2)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">package io.micronaut.kafka.docs.seek.ops
 
 import io.micronaut.configuration.kafka.annotation.*
@@ -4287,30 +4300,6 @@ class ProductListener {
     void receive(Product product, KafkaSeekOperations ops) { // <b class="conum">(1)</b>
         processed &lt;&lt; product
         ops.defer(KafkaSeekOperation.seekToEnd(new TopicPartition("amazing-products", 0))); // <b class="conum">(2)</b>
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">package io.micronaut.kafka.docs.seek.ops
-
-import io.micronaut.configuration.kafka.annotation.*
-import io.micronaut.configuration.kafka.seek.*
-import io.micronaut.context.annotation.*
-import io.micronaut.kafka.docs.Product
-import org.apache.kafka.common.TopicPartition
-
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = [Property(name = "max.poll.records", value = "1")])
-@Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
-class ProductListener constructor(config: ProductListenerConfiguration) {
-
-    var processed: MutableList&lt;Product&gt; = mutableListOf()
-
-    @Topic("amazing-products")
-    fun receive(product: Product, ops: KafkaSeekOperations) { // <b class="conum">(1)</b>
-        processed.add(product)
-        ops.defer(KafkaSeekOperation.seekToBeginning(TopicPartition("amazing-products", 0))) // <b class="conum">(2)</b>
     }
 }</code></pre>
 </div>
@@ -4346,7 +4335,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 <h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>6.4.4 Creating Kafka Seek Operations</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSeek/creatingKafkaSeekOperations.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/creatingKafkaSeekOperations.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -4387,7 +4376,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 <h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>6.5 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -4431,28 +4420,6 @@ public void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
 <div class="listingblock multi-language-sample">
 <div class="title">Receiving a Batch of Records</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-import reactor.core.publisher.Flux
-
-@KafkaListener(batch = true) // <b class="conum">(1)</b>
-@Slf4j
-class BookListener {
-
-@Topic("all-the-books")
-void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
-    for (Book book : books) {
-        log.info("Got Book = {}", book.title) // <b class="conum">(3)</b>
-    }
-}
-
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Receiving a Batch of Records</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
@@ -4467,6 +4434,28 @@ class BookListener {
 fun receiveList(books: List&lt;Book&gt;) { // <b class="conum">(2)</b>
     for (book in books) {
         LOG.info("Got Book = {}", book.title) // <b class="conum">(3)</b>
+    }
+}
+
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Receiving a Batch of Records</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+import reactor.core.publisher.Flux
+
+@KafkaListener(batch = true) // <b class="conum">(1)</b>
+@Slf4j
+class BookListener {
+
+@Topic("all-the-books")
+void receiveList(List&lt;Book&gt; books) { // <b class="conum">(2)</b>
+    for (Book book : books) {
+        log.info("Got Book = {}", book.title) // <b class="conum">(3)</b>
     }
 }
 
@@ -4517,9 +4506,9 @@ public void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { /
 <div class="listingblock multi-language-sample">
 <div class="title">Committing a Batch of Offsets Manually with ack()</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
 @Topic("all-the-books")
-void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
+fun receive(books: List&lt;Book?&gt;?, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
 
     //process the books
 
@@ -4530,9 +4519,9 @@ void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { // <b cl
 <div class="listingblock multi-language-sample">
 <div class="title">Committing a Batch of Offsets Manually with ack()</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
 @Topic("all-the-books")
-fun receive(books: List&lt;Book?&gt;?, acknowledgement: Acknowledgement) { // <b class="conum">(2)</b>
+void receive(List&lt;Book&gt; books, Acknowledgement acknowledgement) { // <b class="conum">(2)</b>
 
     //process the books
 
@@ -4589,32 +4578,6 @@ public void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Cons
 <div class="listingblock multi-language-sample">
 <div class="title">Committing Offsets Manually with Batch</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
-@Topic("all-the-books")
-void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
-
-    for (int i = 0; i &lt; records.size(); i++) {
-        ConsumerRecord&lt;String, Book&gt; record = records.get(i) // <b class="conum">(3)</b>
-
-        // process the book
-        Book book = record.value()
-
-        // commit offsets
-        String topic = record.topic()
-        int partition = record.partition()
-        long offset = record.offset() // <b class="conum">(4)</b>
-
-        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(5)</b>
-                new TopicPartition(topic, partition),
-                new OffsetAndMetadata(offset + 1, "my metadata")
-        ))
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Committing Offsets Manually with Batch</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
 @Topic("all-the-books")
 fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(2)</b>
@@ -4634,6 +4597,32 @@ fun receive(records: List&lt;ConsumerRecord&lt;String?, Book?&gt;&gt;, kafkaCons
                 OffsetAndMetadata(offset + 1, "my metadata")
             )
         )
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Committing Offsets Manually with Batch</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+void receive(List&lt;ConsumerRecord&lt;String, Book&gt;&gt; records, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+
+    for (int i = 0; i &lt; records.size(); i++) {
+        ConsumerRecord&lt;String, Book&gt; record = records.get(i) // <b class="conum">(3)</b>
+
+        // process the book
+        Book book = record.value()
+
+        // commit offsets
+        String topic = record.topic()
+        int partition = record.partition()
+        long offset = record.offset() // <b class="conum">(4)</b>
+
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(5)</b>
+                new TopicPartition(topic, partition),
+                new OffsetAndMetadata(offset + 1, "my metadata")
+        ))
     }
 }</code></pre>
 </div>
@@ -4704,31 +4693,6 @@ public void receiveConsumerRecords(ConsumerRecords&lt;String, Book&gt; consumerR
 <div class="listingblock multi-language-sample">
 <div class="title">Commit only once for each partition</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
-@Topic("all-the-books")
-void receiveConsumerRecords(ConsumerRecords&lt;String, Book&gt; consumerRecords, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
-    for (TopicPartition partition : consumerRecords.partitions()) { // <b class="conum">(3)</b>
-        long offset = Long.MIN_VALUE;
-        // process partition records
-        for (ConsumerRecord&lt;String, Book&gt; record : consumerRecords.records(partition)) { // <b class="conum">(4)</b>
-            // process the book
-            Book book = record.value();
-            // keep last offset
-            offset = record.offset(); // <b class="conum">(5)</b>
-        }
-
-        // commit partition offset
-        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(6)</b>
-                partition,
-                new OffsetAndMetadata(offset + 1, "my metadata")
-        ));
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Commit only once for each partition</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST, offsetStrategy = OffsetStrategy.DISABLED, batch = true) // <b class="conum">(1)</b>
 @Topic("all-the-books")
 fun receiveConsumerRecords(consumerRecords: ConsumerRecords&lt;String?, Book?&gt;, kafkaConsumer: Consumer&lt;*, *&gt;) { // <b class="conum">(2)</b>
@@ -4749,6 +4713,31 @@ fun receiveConsumerRecords(consumerRecords: ConsumerRecords&lt;String?, Book?&gt
                 OffsetAndMetadata(offset + 1, "my metadata")
             )
         )
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Commit only once for each partition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = EARLIEST, offsetStrategy = DISABLED, batch = true) // <b class="conum">(1)</b>
+@Topic("all-the-books")
+void receiveConsumerRecords(ConsumerRecords&lt;String, Book&gt; consumerRecords, Consumer kafkaConsumer) { // <b class="conum">(2)</b>
+    for (TopicPartition partition : consumerRecords.partitions()) { // <b class="conum">(3)</b>
+        long offset = Long.MIN_VALUE;
+        // process partition records
+        for (ConsumerRecord&lt;String, Book&gt; record : consumerRecords.records(partition)) { // <b class="conum">(4)</b>
+            // process the book
+            Book book = record.value();
+            // keep last offset
+            offset = record.offset(); // <b class="conum">(5)</b>
+        }
+
+        // commit partition offset
+        kafkaConsumer.commitSync(Collections.singletonMap( // <b class="conum">(6)</b>
+                partition,
+                new OffsetAndMetadata(offset + 1, "my metadata")
+        ));
     }
 }</code></pre>
 </div>
@@ -4809,22 +4798,22 @@ public Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 <div class="listingblock multi-language-sample">
 <div class="title">Reactive Processing of Batch Records</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("all-the-books")
-Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
-    books.doOnNext(book -&gt;
-        log.info("Got Book = {}", book.title)
-    )
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("all-the-books")
+fun receiveFlux(books: Flux&lt;Book&gt;): Flux&lt;Book&gt; {
+    return books.doOnNext { book: Book -&gt;
+        LOG.info("Got Book = {}", book.title)
+    }
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Reactive Processing of Batch Records</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("all-the-books")
-fun receiveFlux(books: Flux&lt;Book&gt;): Flux&lt;Book&gt; {
-    return books.doOnNext { book: Book -&gt;
-        LOG.info("Got Book = {}", book.title)
-    }
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("all-the-books")
+Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
+    books.doOnNext(book -&gt;
+        log.info("Got Book = {}", book.title)
+    )
 }</code></pre>
 </div>
 </div>
@@ -4840,7 +4829,7 @@ fun receiveFlux(books: Flux&lt;Book&gt;): Flux&lt;Book&gt; {
 <h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>6.6 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -4866,22 +4855,22 @@ public int receive(@KafkaKey String brand, Product product) {
 <div class="listingblock multi-language-sample">
 <div class="title">Forwarding with @SendTo</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("sendto-products") // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("sendto-products") // <b class="conum">(1)</b>
 @SendTo("product-quantities") // <b class="conum">(2)</b>
-int receive(@KafkaKey String brand, Product product) {
-    log.info("Got Product - {} by {}", product.name, brand)
-    product.quantity // <b class="conum">(3)</b>
+fun receive(@KafkaKey brand: String?, product: Product): Int {
+    LOG.info("Got Product - {} by {}", product.name, brand)
+    return product.quantity // <b class="conum">(3)</b>
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Forwarding with @SendTo</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("sendto-products") // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("sendto-products") // <b class="conum">(1)</b>
 @SendTo("product-quantities") // <b class="conum">(2)</b>
-fun receive(@KafkaKey brand: String?, product: Product): Int {
-    LOG.info("Got Product - {} by {}", product.name, brand)
-    return product.quantity // <b class="conum">(3)</b>
+int receive(@KafkaKey String brand, Product product) {
+    log.info("Got Product - {} by {}", product.name, brand)
+    product.quantity // <b class="conum">(3)</b>
 }</code></pre>
 </div>
 </div>
@@ -4922,11 +4911,11 @@ public Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand,
 <div class="listingblock multi-language-sample">
 <div class="title">Forwarding Reactively with @SendTo</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("sendto-products") // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("sendto-products") // <b class="conum">(1)</b>
 @SendTo("product-quantities") // <b class="conum">(2)</b>
-Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand, Mono&lt;Product&gt; productSingle) {
-    productSingle.map(product -&gt; {
-        log.info("Got Product - {} by {}", product.name, brand)
+fun receiveProduct(@KafkaKey brand: String?, productSingle: Mono&lt;Product&gt;): Mono&lt;Int&gt; {
+    return productSingle.map(Function&lt;Product, Int&gt; { product: Product -&gt;
+        LOG.info("Got Product - {} by {}", product.name, brand)
         product.quantity // <b class="conum">(3)</b>
     })
 }</code></pre>
@@ -4935,11 +4924,11 @@ Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand, Mono&lt;Product&gt; p
 <div class="listingblock multi-language-sample">
 <div class="title">Forwarding Reactively with @SendTo</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("sendto-products") // <b class="conum">(1)</b>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic("sendto-products") // <b class="conum">(1)</b>
 @SendTo("product-quantities") // <b class="conum">(2)</b>
-fun receiveProduct(@KafkaKey brand: String?, productSingle: Mono&lt;Product&gt;): Mono&lt;Int&gt; {
-    return productSingle.map(Function&lt;Product, Int&gt; { product: Product -&gt;
-        LOG.info("Got Product - {} by {}", product.name, brand)
+Mono&lt;Integer&gt; receiveProduct(@KafkaKey String brand, Mono&lt;Product&gt; productSingle) {
+    productSingle.map(product -&gt; {
+        log.info("Got Product - {} by {}", product.name, brand)
         product.quantity // <b class="conum">(3)</b>
     })
 }</code></pre>
@@ -4995,6 +4984,27 @@ public class WordCounter {
 <div class="listingblock multi-language-sample">
 <div class="title">Transactional consumer-producer</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
+    offsetReset = OffsetReset.EARLIEST,
+    producerClientId = "word-counter-producer", // <b class="conum">(1)</b>
+    producerTransactionalId = "tx-word-counter-id", // <b class="conum">(2)</b>
+    offsetStrategy = OffsetStrategy.SEND_TO_TRANSACTION, // <b class="conum">(3)</b>
+    isolation = IsolationLevel.READ_COMMITTED // <b class="conum">(4)</b>
+)
+class WordCounter {
+
+    @Topic("tx-incoming-strings")
+    @SendTo("my-words-count")
+    fun wordsCounter(string: String) = string
+        .split(Regex("\\s+"))
+        .groupBy { it }
+        .map { KafkaMessage.Builder.withBody&lt;ByteArray, Int&gt;(it.value.size).key(it.key.toByteArray()).build() }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Transactional consumer-producer</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
         offsetReset = OffsetReset.EARLIEST,
         producerClientId = 'word-counter-producer', // <b class="conum">(1)</b>
@@ -5013,27 +5023,6 @@ class WordCounter {
                 KafkaMessage.Builder.withBody(instanceList.size()).key(key.bytes).build()
             }
     }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Transactional consumer-producer</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
-    offsetReset = OffsetReset.EARLIEST,
-    producerClientId = "word-counter-producer", // <b class="conum">(1)</b>
-    producerTransactionalId = "tx-word-counter-id", // <b class="conum">(2)</b>
-    offsetStrategy = OffsetStrategy.SEND_TO_TRANSACTION, // <b class="conum">(3)</b>
-    isolation = IsolationLevel.READ_COMMITTED // <b class="conum">(4)</b>
-)
-class WordCounter {
-
-    @Topic("tx-incoming-strings")
-    @SendTo("my-words-count")
-    fun wordsCounter(string: String) = string
-        .split(Regex("\\s+"))
-        .groupBy { it }
-        .map { KafkaMessage.Builder.withBody&lt;ByteArray, Int&gt;(it.value.size).key(it.key.toByteArray()).build() }
 }</code></pre>
 </div>
 </div>
@@ -5061,7 +5050,7 @@ class WordCounter {
 <h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>6.7 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5088,12 +5077,12 @@ class WordCounter {
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying an error strategy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
-    value = 'myGroup',
-    errorStrategy = @ErrorStrategy(
-            value = ErrorStrategyValue.RETRY_ON_ERROR,
-            retryDelay = '50ms',
-            retryCount = 3
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
+    value = "myGroup",
+    errorStrategy = ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_ON_ERROR,
+        retryDelay = "50ms",
+        retryCount = 3
     )
 )</code></pre>
 </div>
@@ -5101,12 +5090,12 @@ class WordCounter {
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying an error strategy</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
-    value = "myGroup",
-    errorStrategy = ErrorStrategy(
-        value = ErrorStrategyValue.RETRY_ON_ERROR,
-        retryDelay = "50ms",
-        retryCount = 3
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'myGroup',
+    errorStrategy = @ErrorStrategy(
+            value = ErrorStrategyValue.RETRY_ON_ERROR,
+            retryDelay = '50ms',
+            retryCount = 3
     )
 )</code></pre>
 </div>
@@ -5181,11 +5170,11 @@ When using retry error strategies in combination with reactive consumer methods,
 <div class="listingblock multi-language-sample">
 <div class="title">Dynamically Configuring Retries</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
-    value = 'myGroup',
-    errorStrategy = @ErrorStrategy(
-            value = ErrorStrategyValue.RETRY_ON_ERROR,
-            retryCountValue = '${my.retry.count}'
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
+    value = "myGroup",
+    errorStrategy = ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_ON_ERROR,
+        retryCountValue = "\${my.retry.count}"
     )
 )</code></pre>
 </div>
@@ -5193,11 +5182,11 @@ When using retry error strategies in combination with reactive consumer methods,
 <div class="listingblock multi-language-sample">
 <div class="title">Dynamically Configuring Retries</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
-    value = "myGroup",
-    errorStrategy = ErrorStrategy(
-        value = ErrorStrategyValue.RETRY_ON_ERROR,
-        retryCountValue = "\${my.retry.count}"
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'myGroup',
+    errorStrategy = @ErrorStrategy(
+            value = ErrorStrategyValue.RETRY_ON_ERROR,
+            retryCountValue = '${my.retry.count}'
     )
 )</code></pre>
 </div>
@@ -5236,20 +5225,6 @@ When using retry error strategies in combination with reactive consumer methods,
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying exceptions to retry</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
-    value = 'myGroup',
-    errorStrategy = @ErrorStrategy(
-            value = ErrorStrategyValue.RETRY_ON_ERROR,
-            retryDelay = '50ms',
-            retryCount = 3,
-            exceptionTypes = [ MyException, MySecondException ]
-    )
-)</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Specifying exceptions to retry</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
     value = "myGroup",
     errorStrategy = ErrorStrategy(
@@ -5257,6 +5232,20 @@ When using retry error strategies in combination with reactive consumer methods,
         retryDelay = "50ms",
         retryCount = 3,
         exceptionTypes = [MyException::class, MySecondException::class]
+    )
+)</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying exceptions to retry</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'myGroup',
+    errorStrategy = @ErrorStrategy(
+            value = ErrorStrategyValue.RETRY_ON_ERROR,
+            retryDelay = '50ms',
+            retryCount = 3,
+            exceptionTypes = [ MyException, MySecondException ]
     )
 )</code></pre>
 </div>
@@ -5301,24 +5290,6 @@ public class ConditionalRetryListener implements ConditionalRetryBehaviourHandle
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying conditional retry behaviour on the listener</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
-    value = 'myGroup',
-    errorStrategy = @ErrorStrategy(
-            value = ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
-    )
-)
-class ConditionalRetryListener implements ConditionalRetryBehaviourHandler {
-    @Override
-    ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
-        return shouldRetry(exception) ? ConditionalRetryBehaviour.RETRY : ConditionalRetryBehaviour.SKIP
-    }
-
-    // ...</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Specifying conditional retry behaviour on the listener</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
     value = "myGroup",
     errorStrategy = ErrorStrategy(
@@ -5333,6 +5304,24 @@ class ConditionalRetryListener :
         } else {
             ConditionalRetryBehaviour.SKIP
         }
+    }
+
+    // ...</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Specifying conditional retry behaviour on the listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'myGroup',
+    errorStrategy = @ErrorStrategy(
+            value = ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
+    )
+)
+class ConditionalRetryListener implements ConditionalRetryBehaviourHandler {
+    @Override
+    ConditionalRetryBehaviour conditionalRetryBehaviour(KafkaListenerException exception) {
+        return shouldRetry(exception) ? ConditionalRetryBehaviour.RETRY : ConditionalRetryBehaviour.SKIP
     }
 
     // ...</code></pre>
@@ -5412,7 +5401,7 @@ Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</
 <h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>7 Running Kafka Applications</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5436,7 +5425,7 @@ Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</
 <h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>7.1 Kafka Health Checks</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5515,7 +5504,7 @@ By default, the details visible above are only shown to authenticated users. See
 <h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>7.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5532,7 +5521,7 @@ In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binder
 <h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>7.3 Kafka Distributed Tracing</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5545,7 +5534,7 @@ In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binder
 <h2 id="kafkaNewTopics"><a class="anchor" href="#kafkaNewTopics"></a>7.4 Creating New Topics</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications/kafkaNewTopics.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaNewTopics.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5588,37 +5577,6 @@ public class MyTopicFactory {
 <div class="listingblock multi-language-sample">
 <div class="title">Creating New Kafka Topics with Options</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.context.annotation.Bean
-import io.micronaut.context.annotation.Factory
-import io.micronaut.context.annotation.Requires
-import org.apache.kafka.clients.admin.AdminClient
-import org.apache.kafka.clients.admin.CreateTopicsOptions
-import org.apache.kafka.clients.admin.NewTopic
-
-@Requires(bean = AdminClient)
-@Factory
-class MyTopicFactory {
-
-    @Bean
-    CreateTopicsOptions options() {
-        new CreateTopicsOptions().timeoutMs(5000).validateOnly(true).retryOnQuotaViolation(false)
-    }
-
-    @Bean
-    NewTopic topic1() {
-        new NewTopic("my-new-topic-1", 1, (short) 1)
-    }
-
-    @Bean
-    NewTopic topic2() {
-        new NewTopic("my-new-topic-2", 2, (short) 1)
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Creating New Kafka Topics with Options</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Requires
@@ -5643,6 +5601,37 @@ class MyTopicFactory {
     @Bean
     fun topic2(): NewTopic {
         return NewTopic("my-new-topic-2", 2, 1)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating New Kafka Topics with Options</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.context.annotation.Bean
+import io.micronaut.context.annotation.Factory
+import io.micronaut.context.annotation.Requires
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.CreateTopicsOptions
+import org.apache.kafka.clients.admin.NewTopic
+
+@Requires(bean = AdminClient)
+@Factory
+class MyTopicFactory {
+
+    @Bean
+    CreateTopicsOptions options() {
+        new CreateTopicsOptions().timeoutMs(5000).validateOnly(true).retryOnQuotaViolation(false)
+    }
+
+    @Bean
+    NewTopic topic1() {
+        new NewTopic("my-new-topic-1", 1, (short) 1)
+    }
+
+    @Bean
+    NewTopic topic2() {
+        new NewTopic("my-new-topic-2", 2, (short) 1)
     }
 }</code></pre>
 </div>
@@ -5673,16 +5662,16 @@ Creating topics is not a transactional operation, so it may succeed for some top
 <div class="listingblock multi-language-sample">
 <div class="title">Checking if Topic Creation is Done</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    boolean areNewTopicsDone(KafkaNewTopics newTopics) {
-        newTopics.result.all().done
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    fun areNewTopicsDone(newTopics: KafkaNewTopics): Boolean {
+        return newTopics.result.all().isDone
     }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Checking if Topic Creation is Done</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">    fun areNewTopicsDone(newTopics: KafkaNewTopics): Boolean {
-        return newTopics.result.all().isDone
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">    boolean areNewTopicsDone(KafkaNewTopics newTopics) {
+        newTopics.result.all().done
     }</code></pre>
 </div>
 </div>
@@ -5690,7 +5679,7 @@ Creating topics is not a transactional operation, so it may succeed for some top
 <h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>7.5 Disabling Micronaut-Kafka</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaApplications/kafkaDisabled.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaDisabled.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5728,6 +5717,25 @@ public class MessageClientFallback implements MessageClient { // <b class="conum
 <div class="listingblock multi-language-sample">
 <div class="title">Creating Replacement KafkaClient Implementations</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.context.annotation.Replaces
+import io.micronaut.context.annotation.Requires
+import io.micronaut.core.util.StringUtils
+import jakarta.inject.Singleton
+
+@Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <b class="conum">(1)</b>
+@Replaces(MessageClient::class) // <b class="conum">(2)</b>
+@Singleton
+class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
+
+    override fun send(message: String) {
+        throw UnsupportedOperationException() // <b class="conum">(4)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Creating Replacement KafkaClient Implementations</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.context.annotation.Replaces
 import io.micronaut.context.annotation.Requires
 import io.micronaut.core.util.StringUtils
@@ -5741,25 +5749,6 @@ class MessageClientFallback implements MessageClient { // <b class="conum">(3)</
     @Override
     void send(String message) {
         throw new UnsupportedOperationException() // <b class="conum">(4)</b>
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Creating Replacement KafkaClient Implementations</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.context.annotation.Replaces
-import io.micronaut.context.annotation.Requires
-import io.micronaut.core.util.StringUtils
-import jakarta.inject.Singleton
-
-@Requires(property = "kafka.enabled", notEquals = StringUtils.TRUE, defaultValue = StringUtils.TRUE) // <b class="conum">(1)</b>
-@Replaces(MessageClient::class) // <b class="conum">(2)</b>
-@Singleton
-class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
-
-    override fun send(message: String) {
-        throw UnsupportedOperationException() // <b class="conum">(4)</b>
     }
 }</code></pre>
 </div>
@@ -5788,7 +5777,7 @@ class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
 <h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>8 Kafka Streams</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaStreams.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -5843,7 +5832,8 @@ class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
     &lt;artifactId&gt;micronaut-kafka-streams&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
-</div></p>
+</div>
+</p>
 </div>
 <div class="paragraph">
 <p>The minimum configuration required is to set the Kafka bootstrap servers:</p>
@@ -5904,7 +5894,19 @@ class MessageClientFallback : MessageClient { // <b class="conum">(3)</b>
 </div>
 </div>
 <div class="paragraph">
-<p>You should then define a <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that return a <code>KStream</code>. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+<p>You should then define an <a href="../api/io/micronaut/context/annotation/Factory.html">@Factory</a> for your streams that defines beans that register topology components against the injected <code>ConfiguredStreamBuilder</code>. These beans can return a <code>KStream</code>, <code>KTable</code>, or <code>GlobalKTable</code>, depending on the topology you are building. For example to implement the Word Count example from the Kafka Streams documentation:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If a stream topology is composed only of a <code>KTable</code> or <code>GlobalKTable</code>, make that bean eager (for example with <a href="../api/io/micronaut/context/annotation/Context.html">@Context</a>) so Micronaut initializes the topology before the corresponding <code>KafkaStreams</code> bean is resolved.
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Kafka Streams Word Count</div>
@@ -5961,54 +5963,6 @@ public class WordCountStream {
 <div class="listingblock multi-language-sample">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder
-import io.micronaut.context.annotation.Factory
-import io.micronaut.context.annotation.Requires
-import jakarta.inject.Named
-import jakarta.inject.Singleton
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.kstream.Grouped
-import org.apache.kafka.streams.kstream.KStream
-import org.apache.kafka.streams.kstream.KTable
-import org.apache.kafka.streams.kstream.Materialized
-import org.apache.kafka.streams.kstream.Produced
-
-@Factory
-class WordCountStream {
-
-    @Singleton
-    @Named('word-count')
-    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { // <b class="conum">(1)</b>
-        // set default serdes
-        Properties props = builder.getConfiguration();
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName())
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName())
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, 'earliest')
-        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, '500')
-
-        KStream&lt;String, String&gt; source = builder.stream('streams-plaintext-input') // <b class="conum">(2)</b>
-
-        KTable&lt;String, Long&gt; groupedByWord = source
-            .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
-            .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
-            //Store the result in a store for lookup later
-            .count(Materialized.as('word-count-store-groovy')) // <b class="conum">(3)</b>
-
-        groupedByWord
-            //convert to stream
-            .toStream()
-            //send to output using specific serdes
-            .to("streams-wordcount-output", Produced.with(Serdes.String(), Serdes.Long())) // <b class="conum">(4)</b>
-
-        return source
-    }</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Kafka Streams Word Count</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Requires
@@ -6053,6 +6007,54 @@ class WordCountStream {
             .toStream()
             //send to output using specific serdes
             .to("streams-wordcount-output", Produced.with(Serdes.String(), Serdes.Long())) // <b class="conum">(4)</b>
+        return source
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Kafka Streams Word Count</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder
+import io.micronaut.context.annotation.Factory
+import io.micronaut.context.annotation.Requires
+import jakarta.inject.Named
+import jakarta.inject.Singleton
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.streams.StreamsConfig
+import org.apache.kafka.streams.kstream.Grouped
+import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.KTable
+import org.apache.kafka.streams.kstream.Materialized
+import org.apache.kafka.streams.kstream.Produced
+
+@Factory
+class WordCountStream {
+
+    @Singleton
+    @Named('word-count')
+    KStream&lt;String, String&gt; wordCountStream(ConfiguredStreamBuilder builder) { // <b class="conum">(1)</b>
+        // set default serdes
+        Properties props = builder.getConfiguration();
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName())
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName())
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, 'earliest')
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, '500')
+
+        KStream&lt;String, String&gt; source = builder.stream('streams-plaintext-input') // <b class="conum">(2)</b>
+
+        KTable&lt;String, Long&gt; groupedByWord = source
+            .flatMapValues(value -&gt; Arrays.asList(value.toLowerCase().split("\\W+")))
+            .groupBy((key, word) -&gt; word, Grouped.with(Serdes.String(), Serdes.String()))
+            //Store the result in a store for lookup later
+            .count(Materialized.as('word-count-store-groovy')) // <b class="conum">(3)</b>
+
+        groupedByWord
+            //convert to stream
+            .toStream()
+            //send to output using specific serdes
+            .to("streams-wordcount-output", Produced.with(Serdes.String(), Serdes.Long())) // <b class="conum">(4)</b>
+
         return source
     }</code></pre>
 </div>
@@ -6110,21 +6112,6 @@ public interface WordCountClient {
 <div class="listingblock multi-language-sample">
 <div class="title">Defining a Kafka Client</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-
-@KafkaClient
-interface WordCountClient {
-
-    @Topic("streams-plaintext-input")
-    void publishSentence(String sentence)
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Defining a Kafka Client</div>
-<div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
@@ -6134,6 +6121,21 @@ interface WordCountClient {
 
     @Topic("streams-plaintext-input")
     fun publishSentence(sentence: String?)
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Defining a Kafka Client</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+
+@KafkaClient
+interface WordCountClient {
+
+    @Topic("streams-plaintext-input")
+    void publishSentence(String sentence)
 }</code></pre>
 </div>
 </div>
@@ -6178,6 +6180,38 @@ public class WordCountListener {
 <div class="listingblock multi-language-sample">
 <div class="title">Defining a Kafka Listener</div>
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaKey
+import io.micronaut.configuration.kafka.annotation.KafkaListener
+import io.micronaut.configuration.kafka.annotation.OffsetReset
+import io.micronaut.configuration.kafka.annotation.Topic
+import io.micronaut.context.annotation.Requires
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
+class WordCountListener {
+
+    private val wordCounts: MutableMap&lt;String, Long&gt; = ConcurrentHashMap()
+
+    @Topic("streams-wordcount-output")
+    fun count(@KafkaKey word: String, count: Long) {
+        wordCounts[word] = count
+    }
+
+    fun getCount(word: String): Long {
+        val num = wordCounts[word]
+        return num ?: 0
+    }
+
+    fun getWordCounts(): Map&lt;String, Long&gt; {
+        return Collections.unmodifiableMap(wordCounts)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Defining a Kafka Listener</div>
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -6204,38 +6238,6 @@ class WordCountListener {
 
     Map&lt;String, Long&gt; getWordCounts() {
         Collections.unmodifiableMap(wordCounts)
-    }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock multi-language-sample">
-<div class="title">Defining a Kafka Listener</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.annotation.KafkaKey
-import io.micronaut.configuration.kafka.annotation.KafkaListener
-import io.micronaut.configuration.kafka.annotation.OffsetReset
-import io.micronaut.configuration.kafka.annotation.Topic
-import io.micronaut.context.annotation.Requires
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-
-@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = "WordCountListener")
-class WordCountListener {
-
-    private val wordCounts: MutableMap&lt;String, Long&gt; = ConcurrentHashMap()
-
-    @Topic("streams-wordcount-output")
-    fun count(@KafkaKey word: String, count: Long) {
-        wordCounts[word] = count
-    }
-
-    fun getCount(word: String): Long {
-        val num = wordCounts[word]
-        return num ?: 0
-    }
-
-    fun getWordCounts(): Map&lt;String, Long&gt; {
-        return Collections.unmodifiableMap(wordCounts)
     }
 }</code></pre>
 </div>
@@ -6522,19 +6524,19 @@ KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
-@Named('my-other-stream')
-KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
-    return builder.stream('my-other-stream')
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
+@Named("my-other-stream")
+fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {
+    return builder.stream("my-other-stream")
 }</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
-@Named("my-other-stream")
-fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {
-    return builder.stream("my-other-stream")
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
+@Named('my-other-stream')
+KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
+    return builder.stream('my-other-stream')
 }</code></pre>
 </div>
 </div>
@@ -6545,7 +6547,7 @@ fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> you have multiple KStreams defined that share the default configurations like client id, application id, etc. It is advisable when using multiple streams in a single app to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> and you have multiple topology beans defined, they share the default configurations such as client id and application id. When using multiple streams in a single app, it is advisable to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
 </td>
 </tr>
 </table>
@@ -6561,17 +6563,17 @@ KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code>
 <div class="listingblock multi-language-sample">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
-@Named('my-stream')
-KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
+@Named("my-stream")
+fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Kafka Streams Word Count</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
-@Named("my-stream")
-fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
+@Named('my-stream')
+KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -6649,7 +6651,7 @@ fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {<
 <h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>8.1 Interactive Query Service</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -6732,6 +6734,63 @@ public class InteractiveQueryServiceExample {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.streams.InteractiveQueryService
+import io.micronaut.context.annotation.Requires
+import jakarta.inject.Singleton
+import org.apache.kafka.streams.state.QueryableStoreTypes
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore
+
+/**
+ * Example service that uses the InteractiveQueryService in a reusable way.  This is only intended as an example.
+ */
+@Singleton
+class InteractiveQueryServiceExample(private val interactiveQueryService: InteractiveQueryService) {
+    /**
+     * Method to get the word state store and word count from the store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "foo-store"
+     * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
+     * @return the Long count of the word in the store
+     */
+    fun getWordCount(stateStore: String, word: String): Long {
+        val queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.keyValueStore&lt;String, Long&gt;())
+        return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;String, Long&gt; -&gt;
+            kvReadOnlyKeyValueStore[word] }.orElse(0L)
+    }
+
+    /**
+     * Method to get byte array from a state store using the interactive query service.
+     *
+     * @param stateStore the name of the state store ie "bar-store"
+     * @param blobName   the key to get, in this case the name of the blob
+     * @return the byte[] stored in the state store
+     */
+    fun getBytes(stateStore: String, blobName: String): ByteArray? {
+        val queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.keyValueStore&lt;String, ByteArray&gt;())
+        return queryableStore.map { stringReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;String, ByteArray&gt; -&gt;
+            stringReadOnlyKeyValueStore[blobName] }.orElse(null)
+    }
+
+    /**
+     * Method to get value V by key K.
+     *
+     * @param stateStore the name of the state store ie "baz-store"
+     * @param name       the key to get
+     * @return the value of type V stored in the state store
+     */
+    fun &lt;K, V&gt; getGenericKeyValue(stateStore: String, name: K): V {
+        val queryableStore = interactiveQueryService.getQueryableStore(
+            stateStore, QueryableStoreTypes.keyValueStore&lt;K, V&gt;())
+        return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;K, V&gt; -&gt;
+            kvReadOnlyKeyValueStore[name] }.orElse(null)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">import io.micronaut.configuration.kafka.streams.InteractiveQueryService
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;
@@ -6794,68 +6853,11 @@ class InteractiveQueryServiceExample {
 }</code></pre>
 </div>
 </div>
-<div class="listingblock multi-language-sample">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.micronaut.configuration.kafka.streams.InteractiveQueryService
-import io.micronaut.context.annotation.Requires
-import jakarta.inject.Singleton
-import org.apache.kafka.streams.state.QueryableStoreTypes
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore
-
-/**
- * Example service that uses the InteractiveQueryService in a reusable way.  This is only intended as an example.
- */
-@Singleton
-class InteractiveQueryServiceExample(private val interactiveQueryService: InteractiveQueryService) {
-    /**
-     * Method to get the word state store and word count from the store using the interactive query service.
-     *
-     * @param stateStore the name of the state store ie "foo-store"
-     * @param word       the key to get, in this case the word as the stream and ktable have been grouped by word
-     * @return the Long count of the word in the store
-     */
-    fun getWordCount(stateStore: String, word: String): Long {
-        val queryableStore = interactiveQueryService.getQueryableStore(
-            stateStore, QueryableStoreTypes.keyValueStore&lt;String, Long&gt;())
-        return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;String, Long&gt; -&gt;
-            kvReadOnlyKeyValueStore[word] }.orElse(0L)
-    }
-
-    /**
-     * Method to get byte array from a state store using the interactive query service.
-     *
-     * @param stateStore the name of the state store ie "bar-store"
-     * @param blobName   the key to get, in this case the name of the blob
-     * @return the byte[] stored in the state store
-     */
-    fun getBytes(stateStore: String, blobName: String): ByteArray? {
-        val queryableStore = interactiveQueryService.getQueryableStore(
-            stateStore, QueryableStoreTypes.keyValueStore&lt;String, ByteArray&gt;())
-        return queryableStore.map { stringReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;String, ByteArray&gt; -&gt;
-            stringReadOnlyKeyValueStore[blobName] }.orElse(null)
-    }
-
-    /**
-     * Method to get value V by key K.
-     *
-     * @param stateStore the name of the state store ie "baz-store"
-     * @param name       the key to get
-     * @return the value of type V stored in the state store
-     */
-    fun &lt;K, V&gt; getGenericKeyValue(stateStore: String, name: K): V {
-        val queryableStore = interactiveQueryService.getQueryableStore(
-            stateStore, QueryableStoreTypes.keyValueStore&lt;K, V&gt;())
-        return queryableStore.map { kvReadOnlyKeyValueStore: ReadOnlyKeyValueStore&lt;K, V&gt; -&gt;
-            kvReadOnlyKeyValueStore[name] }.orElse(null)
-    }
-}</code></pre>
-</div>
-</div>
 
 <h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>8.2 Kafka Stream Health Checks</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -6978,7 +6980,7 @@ By default, the details visible above are only shown to authenticated users. See
 <h2 id="kafkaStreamExceptions"><a class="anchor" href="#kafkaStreamExceptions"></a>8.3 Handling Uncaught Exceptions</h2>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaStreams/kafkaStreamExceptions.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamExceptions.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -7104,10 +7106,45 @@ public class MyStreamsUncaughtExceptionHandler
 </div>
 </div>
 
-<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>9 Guides</h1>
+<h1 id="controlPanel"><a class="anchor" href="#controlPanel"></a>9 Control Panel</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/kafkaGuides.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/controlPanel.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>The Micronaut Control Panel module has support for Kafka by adding the following dependency:</p>
+</div>
+<div class="paragraph">
+<p>        <div class="listingblock multi-language-sample">
+<div class="title"></div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="gradle">developmentOnly(<span class="hljs-string">"io.micronaut.controlpanel:micronaut-control-panel-kafka")</span></code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="maven">&lt;dependency&gt;
+    &lt;groupId&gt;io.micronaut.controlpanel&lt;/groupId&gt;
+    &lt;artifactId&gt;micronaut-control-panel-kafka&lt;/artifactId&gt;
+    &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</p>
+</div>
+<div class="paragraph">
+<p>Check
+<a href="https://micronaut-projects.github.io/micronaut-control-panel/latest/guide/#kafka">the documentation</a> for more information.</p>
+</div>
+
+<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>10 Guides</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaGuides.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
@@ -7120,10 +7157,10 @@ public class MyStreamsUncaughtExceptionHandler
 <p><a href="https://guides.micronaut.io/latest/tag-kafka.html" class="bare">https://guides.micronaut.io/latest/tag-kafka.html</a></p>
 </div>
 
-<h1 id="repository"><a class="anchor" href="#repository"></a>10 Repository</h1>
+<h1 id="repository"><a class="anchor" href="#repository"></a>11 Repository</h1>
 
 <div class='contribute-btn'>
-    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/5.10.x/src/main/docs/guide/repository.adoc"'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/repository.adoc"'>
         <i class='fa fa-pencil-square-o'></i> Improve this doc
     </button>
 </div>
