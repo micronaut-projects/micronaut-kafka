@@ -62,6 +62,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#RETRY_ON_ERROR" tabindex="0">RETRY_ON_ERROR</a></li>
 <li><a href="#RETRY_EXPONENTIALLY_ON_ERROR" tabindex="0">RETRY_EXPONENTIALLY_ON_ERROR</a></li>
 <li><a href="#RESUME_AT_NEXT_RECORD" tabindex="0">RESUME_AT_NEXT_RECORD</a></li>
+<li><a href="#LOG_AND_RESUME_AT_NEXT_RECORD" tabindex="0">LOG_AND_RESUME_AT_NEXT_RECORD</a></li>
 <li><a href="#RETRY_CONDITIONALLY_ON_ERROR" tabindex="0">RETRY_CONDITIONALLY_ON_ERROR</a></li>
 <li><a href="#RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR" tabindex="0">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</a></li>
 <li><a href="#NONE" tabindex="0">NONE</a></li>
@@ -127,37 +128,42 @@ after the error handling strategy has been run.</div>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Enum Constant</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code><a href="#NONE" class="member-name-link">NONE</a></code></div>
+<div class="col-first even-row-color"><code><a href="#LOG_AND_RESUME_AT_NEXT_RECORD" class="member-name-link">LOG_AND_RESUME_AT_NEXT_RECORD</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">This strategy will publish the failed record to the configured dead letter topic, invoke the
+exception handler, and then resume at the next offset.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#NONE" class="member-name-link">NONE</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><span class="deprecated-label">Deprecated.</span>
 <div class="deprecation-comment">maintain broken, but consistent behaviour with previous versions of micronaut-kafka that
 do not support error strategy.</div>
 </div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#RESUME_AT_NEXT_RECORD" class="member-name-link">RESUME_AT_NEXT_RECORD</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#RESUME_AT_NEXT_RECORD" class="member-name-link">RESUME_AT_NEXT_RECORD</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">This strategy will ignore the current error and will resume at the next offset.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
-attempt to re-consume or skip the current according to the behaviour defined by the
-<a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="#RETRY_CONDITIONALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_ON_ERROR</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
 attempt to re-consume or skip the current according to the behaviour defined by the
 <a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#RETRY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_EXPONENTIALLY_ON_ERROR</a></code></div>
+<div class="col-first even-row-color"><code><a href="#RETRY_CONDITIONALLY_ON_ERROR" class="member-name-link">RETRY_CONDITIONALLY_ON_ERROR</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">This strategy will stop consuming subsequent records in the case of an error and will
+attempt to re-consume or skip the current according to the behaviour defined by the
+<a href="../retry/ConditionalRetryBehaviourHandler.html" title="interface in io.micronaut.configuration.kafka.retry"><code>ConditionalRetryBehaviourHandler</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#RETRY_EXPONENTIALLY_ON_ERROR" class="member-name-link">RETRY_EXPONENTIALLY_ON_ERROR</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
 attempt to re-consume the current record with exponentially growing time breaks between
 consumption attempts.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#RETRY_ON_ERROR" class="member-name-link">RETRY_ON_ERROR</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#RETRY_ON_ERROR" class="member-name-link">RETRY_ON_ERROR</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
 attempt to re-consume the current record indefinitely.</div>
 </div>
@@ -246,6 +252,16 @@ where n is the initial delay, and k is the number of retries.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></span>&nbsp;<span class="element-name">RESUME_AT_NEXT_RECORD</span></div>
 <div class="block">This strategy will ignore the current error and will resume at the next offset.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LOG_AND_RESUME_AT_NEXT_RECORD">
+<h3>LOG_AND_RESUME_AT_NEXT_RECORD</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></span>&nbsp;<span class="element-name">LOG_AND_RESUME_AT_NEXT_RECORD</span></div>
+<div class="block">This strategy will publish the failed record to the configured dead letter topic, invoke the
+exception handler, and then resume at the next offset.</div>
 </div>
 </section>
 </li>

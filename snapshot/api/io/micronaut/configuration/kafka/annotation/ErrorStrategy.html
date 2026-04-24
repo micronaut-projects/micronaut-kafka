@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#retryCountValue()" tabindex="0">retryCountValue</a></li>
 <li><a href="#handleAllExceptions()" tabindex="0">handleAllExceptions</a></li>
 <li><a href="#value()" tabindex="0">value</a></li>
+<li><a href="#dlq()" tabindex="0">dlq</a></li>
 <li><a href="#exceptionTypes()" tabindex="0">exceptionTypes</a></li>
 </ol>
 </li>
@@ -139,41 +140,47 @@ as well as set the error strategy.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Optional Element</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&gt;[]</code></div>
-<div class="col-second even-row-color"><code><a href="#exceptionTypes()" class="member-name-link">exceptionTypes</a></code></div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#dlq()" class="member-name-link">dlq</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">The dead letter topic to publish failed records to when using
+<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&gt;[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#exceptionTypes()" class="member-name-link">exceptionTypes</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
 see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#handleAllExceptions()" class="member-name-link">handleAllExceptions</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#handleAllExceptions()" class="member-name-link">handleAllExceptions</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#retryCount()" class="member-name-link">retryCount</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
 RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#retryCountValue()" class="member-name-link">retryCountValue</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#retryCountValue()" class="member-name-link">retryCountValue</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The dynamic retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#retryDelay()" class="member-name-link">retryDelay</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
 RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
+<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The strategy to use when an error occurs, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 </div>
@@ -355,6 +362,26 @@ By default, only the last failed attempt will be handed over to the exception ha
 <dl class="notes">
 <dt>Default:</dt>
 <dd><code>NONE</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dlq()">
+<h3>dlq</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">dlq</span></div>
+<div class="block">The dead letter topic to publish failed records to when using
+<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The dead letter topic name</dd>
+<dt>Since:</dt>
+<dd>5.8</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>""</code></dd>
 </dl>
 </div>
 </section>

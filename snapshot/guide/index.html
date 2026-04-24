@@ -5124,6 +5124,9 @@ class WordCounter {
 <p><code>RESUME_AT_NEXT_RECORD</code> - This strategy will ignore the current error and will resume at the next offset, in this case it&#8217;s recommended to have a custom exception handler that moves the failed message into an error queue.</p>
 </li>
 <li>
+<p><code>LOG_AND_RESUME_AT_NEXT_RECORD</code> - This strategy will publish the failed record to a dead letter topic, invoke the exception handler, and resume at the next offset. You must configure the target topic with <code>dlq</code>.</p>
+</li>
+<li>
 <p><code>NONE</code> - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.</p>
 </li>
 </ul>
@@ -5135,7 +5138,7 @@ class WordCounter {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The error strategies apply only for non-batch messages processing.
+For batch listeners, <code>LOG_AND_RESUME_AT_NEXT_RECORD</code> is supported. The other error strategies apply only to non-batch message processing.
 </td>
 </tr>
 </table>
@@ -5151,6 +5154,28 @@ When using retry error strategies in combination with reactive consumer methods,
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>When <code>LOG_AND_RESUME_AT_NEXT_RECORD</code> publishes a failed record to the dead letter topic, the original key, value, and headers are preserved. Micronaut also adds the following headers so the downstream consumer can inspect the failure context:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>micronaut-kafka-exception-class</code></p>
+</li>
+<li>
+<p><code>micronaut-kafka-exception-message</code></p>
+</li>
+<li>
+<p><code>micronaut-kafka-original-topic</code></p>
+</li>
+<li>
+<p><code>micronaut-kafka-original-partition</code></p>
+</li>
+<li>
+<p><code>micronaut-kafka-original-offset</code></p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>You can also make the number of retries configurable by using <code>retryCountValue</code>:</p>

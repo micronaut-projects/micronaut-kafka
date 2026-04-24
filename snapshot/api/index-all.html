@@ -550,6 +550,11 @@ fails to process a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka
 <dd>
 <div class="block">Do not commit offsets.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#dlq()" class="member-name-link">dlq()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
+<dd>
+<div class="block">The dead letter topic to publish failed records to when using
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
 <dl class="index">
@@ -1270,6 +1275,11 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html#LATEST" class="member-name-link">LATEST</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></dt>
 <dd>
 <div class="block">Latest means that a consumer will start reading the latest consumer records.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD" class="member-name-link">LOG_AND_RESUME_AT_NEXT_RECORD</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>
+<div class="block">This strategy will publish the failed record to the configured dead letter topic, invoke the
+exception handler, and then resume at the next offset.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:M">M</h2>
