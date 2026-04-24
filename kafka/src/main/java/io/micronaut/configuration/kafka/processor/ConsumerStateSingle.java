@@ -147,6 +147,7 @@ final class ConsumerStateSingle extends ConsumerState {
             topicPartitionRetries.remove(topicPartition);
         }
         // Skip the failing record
+        publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
     }

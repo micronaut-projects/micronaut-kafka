@@ -50,6 +50,12 @@ public enum ErrorStrategyValue {
     RESUME_AT_NEXT_RECORD,
 
     /**
+     * This strategy will publish the failed record to the configured dead letter topic, invoke the
+     * exception handler, and then resume at the next offset.
+     */
+    LOG_AND_RESUME_AT_NEXT_RECORD,
+
+    /**
      * This strategy will stop consuming subsequent records in the case of an error and will
      * attempt to re-consume or skip the current according to the behaviour defined by the
      * {@link ConditionalRetryBehaviourHandler}.

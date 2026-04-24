@@ -17,6 +17,9 @@ package io.micronaut.configuration.kafka.streams.metrics;
 
 import io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter;
 import jakarta.annotation.PreDestroy;
+import org.apache.kafka.common.metrics.KafkaMetric;
+
+import java.util.Set;
 
 
 /**
@@ -24,9 +27,24 @@ import jakarta.annotation.PreDestroy;
  */
 public class KafkaStreamsMetricsReporter extends AbstractKafkaMetricsReporter {
 
+    private static final Set<String> GROUP_PREFIXED_METRIC_GROUPS = Set.of(
+            "stream-processor-node-metrics",
+            "stream-task-metrics",
+            "stream-thread-metrics"
+    );
+
     @Override
     protected String getMetricPrefix() {
         return "kafka-streams";
+    }
+
+    @Override
+    protected String getMetricName(KafkaMetric metric) {
+        String group = metric.metricName().group();
+        if (group != null && GROUP_PREFIXED_METRIC_GROUPS.contains(group)) {
+            return group + "." + metric.metricName().name();
+        }
+        return super.getMetricName(metric);
     }
 
     /**

@@ -103,6 +103,11 @@ public @interface KafkaClient {
 
     /**
      * The executor to use to enable non-blocking producer methods.
+     * <p>
+     * For {@link java.util.concurrent.CompletableFuture} return types, each client invocation is submitted to this
+     * executor independently. Multi-threaded executors, including per-task executors such as virtual-thread
+     * executors, therefore do not preserve invocation order before calling Kafka's producer API. If producer
+     * ordering must match the order of client method calls, use a single-threaded executor or a synchronous method.
      *
      * @return The name of the executor to use
      */
