@@ -16,8 +16,6 @@ dependencies {
     api libs.managed.kafka.clients
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
-    testImplementation("org.apache.kafka:kafka_2.13:${libs.versions.managed.kafka.get()}")
-    testImplementation("org.apache.kafka:kafka-server:${libs.versions.managed.kafka.get()}")
     compileOnly mnMicrometer.micronaut.micrometer.core
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
