@@ -19,80 +19,98 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.core.type.Argument;
 import jakarta.inject.Singleton;
-import kafka.server.KafkaConfig;
-import kafka.server.KafkaRaftServer;
-import kafka.tools.StorageTool;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.Uuid;
-import org.apache.kafka.common.utils.Time;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.testcontainers.kafka.KafkaContainer;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class TransactionalProducerExpirationReproducerTest {
     private static final String CLIENT_ID = "issue-542";
-    private static final String TOPIC = "issue-542-topic";
+    private static final int TRANSACTIONAL_ID_EXPIRATION_MS = 3_000;
+    private static final int TRANSACTION_CLEANUP_INTERVAL_MS = 500;
     private static final String TRANSACTIONAL_ID = "issue-542-tx";
 
     @Test
-    @Timeout(90)
+    @Timeout(180)
     void transactionalProducerShouldRecoverAfterTransactionalIdExpires() throws Exception {
-        try (EmbeddedKafkaBroker broker = new EmbeddedKafkaBroker(3_000, 500);
-             ApplicationContext context = ApplicationContext.run(Map.of(
-                 "kafka.bootstrap.servers", broker.bootstrapServers()
-             ))) {
-            broker.createTopic(TOPIC);
+        String topic = "issue-542-topic-" + UUID.randomUUID();
+        String transactionalId = TRANSACTIONAL_ID + "-registry-" + UUID.randomUUID();
+        try (KafkaContainer kafka = createKafkaContainer()) {
+            kafka.start();
+            try (ApplicationContext context = ApplicationContext.run(Map.of(
+                "kafka.bootstrap.servers", kafka.getBootstrapServers()
+            ))) {
+                createTopic(kafka.getBootstrapServers(), topic);
 
-            TransactionalProducerRegistry registry = context.getBean(TransactionalProducerRegistry.class);
-            Producer<String, String> producer = registry.getTransactionalProducer(
-                CLIENT_ID,
-                TRANSACTIONAL_ID,
-                Argument.of(String.class),
-                Argument.of(String.class)
-            );
+                TransactionalProducerRegistry registry = context.getBean(TransactionalProducerRegistry.class);
+                Producer<String, String> producer = registry.getTransactionalProducer(
+                    CLIENT_ID,
+                    transactionalId,
+                    Argument.of(String.class),
+                    Argument.of(String.class)
+                );
 
-            sendTransaction(producer, "first");
-            Thread.sleep(12_000);
+                sendTransaction(producer, topic, "first");
+                Thread.sleep(12_000);
 
-            assertDoesNotThrow(() -> sendTransaction(producer, "second"));
+                assertDoesNotThrow(() -> sendTransaction(producer, topic, "second"));
+            }
         }
     }
 
     @Test
-    @Timeout(90)
+    @Timeout(180)
     void injectedTransactionalProducerShouldRecoverAfterTransactionalIdExpires() throws Exception {
-        try (EmbeddedKafkaBroker broker = new EmbeddedKafkaBroker(3_000, 500);
-             ApplicationContext context = ApplicationContext.run(Map.of(
-                 "kafka.bootstrap.servers", broker.bootstrapServers()
-             ))) {
-            broker.createTopic(TOPIC);
+        String topic = "issue-542-topic-" + UUID.randomUUID();
+        try (KafkaContainer kafka = createKafkaContainer()) {
+            kafka.start();
+            try (ApplicationContext context = ApplicationContext.run(Map.of(
+                "kafka.bootstrap.servers", kafka.getBootstrapServers()
+            ))) {
+                createTopic(kafka.getBootstrapServers(), topic);
 
-            InjectedTransactionalSender sender = context.getBean(InjectedTransactionalSender.class);
-            sender.send(TOPIC, "first").get();
-            Thread.sleep(12_000);
+                InjectedTransactionalSender sender = context.getBean(InjectedTransactionalSender.class);
+                sender.send(topic, "first").get();
+                Thread.sleep(12_000);
 
-            assertDoesNotThrow(() -> sender.send(TOPIC, "second").get());
+                assertDoesNotThrow(() -> sender.send(topic, "second").get());
+            }
         }
     }
 
-    private static void sendTransaction(Producer<String, String> producer, String value) throws Exception {
+    private static void sendTransaction(Producer<String, String> producer, String topic, String value) throws Exception {
         producer.beginTransaction();
-        producer.send(new ProducerRecord<>(TOPIC, value)).get();
+        producer.send(new ProducerRecord<>(topic, value)).get();
         producer.commitTransaction();
+    }
+
+    private static KafkaContainer createKafkaContainer() {
+        return new KafkaContainer("apache/kafka:4.2.0")
+            .withEnv("KAFKA_TRANSACTIONAL_ID_EXPIRATION_MS", Integer.toString(TRANSACTIONAL_ID_EXPIRATION_MS))
+            .withEnv("KAFKA_TRANSACTION_REMOVE_EXPIRED_TRANSACTION_CLEANUP_INTERVAL_MS", Integer.toString(TRANSACTION_CLEANUP_INTERVAL_MS))
+            .withEnv("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
+            .withEnv("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
+            .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
+            .withEnv("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
+            .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+    }
+
+    private static void createTopic(String bootstrapServers, String topic) throws Exception {
+        try (AdminClient admin = AdminClient.create(Map.of(
+            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers
+        ))) {
+            admin.createTopics(List.of(new NewTopic(topic, 1, (short) 1))).all().get();
+        }
     }
 
     @Singleton
@@ -110,140 +128,6 @@ public class TransactionalProducerExpirationReproducerTest {
                 producer.send(new ProducerRecord<>(topic, value));
             producer.commitTransaction();
             return future;
-        }
-    }
-
-    private static final class EmbeddedKafkaBroker implements AutoCloseable {
-        private final KafkaRaftServer server;
-        private final Path baseDir;
-        private final String bootstrapServers;
-
-        private EmbeddedKafkaBroker(int expirationMs, int cleanupIntervalMs) throws Exception {
-            int brokerPort = freePort();
-            int controllerPort = freePort();
-            baseDir = Files.createTempDirectory("issue-542-kafka-");
-            Path dataDir = Files.createDirectory(baseDir.resolve("data"));
-            Path metadataDir = Files.createDirectory(baseDir.resolve("metadata"));
-            Path configFile = baseDir.resolve("server.properties");
-            bootstrapServers = "127.0.0.1:" + brokerPort;
-
-            Files.writeString(configFile, """
-                process.roles=broker,controller
-                node.id=1
-                controller.quorum.voters=1@127.0.0.1:%d
-                listeners=PLAINTEXT://127.0.0.1:%d,CONTROLLER://127.0.0.1:%d
-                advertised.listeners=PLAINTEXT://127.0.0.1:%d
-                listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-                inter.broker.listener.name=PLAINTEXT
-                controller.listener.names=CONTROLLER
-                log.dirs=%s
-                metadata.log.dir=%s
-                num.partitions=1
-                offsets.topic.replication.factor=1
-                transaction.state.log.replication.factor=1
-                transaction.state.log.min.isr=1
-                transaction.remove.expired.transaction.cleanup.interval.ms=%d
-                group.initial.rebalance.delay.ms=0
-                transactional.id.expiration.ms=%d
-                auto.create.topics.enable=false
-                """.formatted(
-                controllerPort,
-                brokerPort,
-                controllerPort,
-                brokerPort,
-                dataDir,
-                metadataDir,
-                cleanupIntervalMs,
-                expirationMs
-            ));
-
-            int formatExit = StorageTool.execute(
-                new String[]{"format", "--config", configFile.toString(), "--cluster-id", Uuid.randomUuid().toString()},
-                System.out
-            );
-            if (formatExit != 0) {
-                throw new IllegalStateException("Kafka storage format failed with exit code " + formatExit);
-            }
-
-            server = new KafkaRaftServer(KafkaConfig.fromProps(load(configFile)), Time.SYSTEM);
-            server.startup();
-            waitForBroker();
-        }
-
-        private String bootstrapServers() {
-            return bootstrapServers;
-        }
-
-        private void createTopic(String name) throws Exception {
-            try (AdminClient admin = adminClient()) {
-                admin.createTopics(List.of(new NewTopic(name, 1, (short) 1))).all().get();
-            }
-        }
-
-        private void waitForBroker() throws Exception {
-            long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
-            Exception last = null;
-            while (System.nanoTime() < deadline) {
-                try (AdminClient admin = adminClient()) {
-                    admin.describeCluster().clusterId().get();
-                    return;
-                } catch (Exception e) {
-                    last = e;
-                    Thread.sleep(500);
-                }
-            }
-            throw new IllegalStateException("Broker did not become ready", last);
-        }
-
-        private AdminClient adminClient() {
-            return AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers
-            ));
-        }
-
-        @Override
-        public void close() throws Exception {
-            try {
-                server.shutdown();
-                server.awaitShutdown();
-            } finally {
-                deleteRecursively(baseDir);
-            }
-        }
-
-        private static Properties load(Path configFile) throws IOException {
-            Properties properties = new Properties();
-            try (var input = Files.newInputStream(configFile)) {
-                properties.load(input);
-            }
-            return properties;
-        }
-
-        private static void deleteRecursively(Path path) throws IOException {
-            if (!Files.exists(path)) {
-                return;
-            }
-            try (var walk = Files.walk(path)) {
-                walk.sorted((a, b) -> b.getNameCount() - a.getNameCount())
-                    .forEach(current -> {
-                        try {
-                            Files.deleteIfExists(current);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-            } catch (RuntimeException e) {
-                if (e.getCause() instanceof IOException ioException) {
-                    throw ioException;
-                }
-                throw e;
-            }
-        }
-
-        private static int freePort() throws IOException {
-            try (ServerSocket socket = new ServerSocket(0)) {
-                return socket.getLocalPort();
-            }
         }
     }
 }
