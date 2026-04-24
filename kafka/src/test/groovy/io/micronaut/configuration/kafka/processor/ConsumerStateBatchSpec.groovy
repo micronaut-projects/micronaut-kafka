@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.Collections
+import java.util.Properties
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
@@ -192,6 +193,7 @@ class ConsumerStateBatchSpec extends Specification {
                 'group',
                 OffsetStrategy.DISABLED,
                 kafkaListener,
+                new Properties(),
                 executableMethod()
         )
         new ConsumerStateBatch(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
@@ -214,7 +216,7 @@ class ConsumerStateBatchSpec extends Specification {
             stringValues(_) >> null
             getReturnType() >> returnType
         }
-        return new ConsumerInfo("test-client", null, offsetStrategy, kafkaListener, method)
+        return new ConsumerInfo("test-client", null, offsetStrategy, kafkaListener, new Properties(), method)
     }
 
     private static Object invokePrivateMethod(Object target, String name, Class[] parameterTypes, Object[] arguments) {

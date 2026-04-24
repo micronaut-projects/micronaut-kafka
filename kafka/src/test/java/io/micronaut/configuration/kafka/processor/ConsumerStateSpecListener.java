@@ -18,9 +18,11 @@ package io.micronaut.configuration.kafka.processor;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;
 
 @Singleton
+@Requires(property = "spec.name", value = "ConsumerStateSpec")
 @KafkaListener(offsetStrategy = OffsetStrategy.ASYNC_PER_RECORD)
 final class ConsumerStateSpecListener {
 
