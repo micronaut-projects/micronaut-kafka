@@ -197,12 +197,16 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
                 properties.putAll(props);
             }
 
-            Producer producer = beanContext.createBean(Producer.class, newConfig);
             if (transactional) {
+                Producer producer = new RecoveringTransactionalProducer<>(
+                    () -> beanContext.createBean(Producer.class, newConfig),
+                    transactionalId
+                );
                 producer.initTransactions();
+                return producer;
             }
 
-            return producer;
+            return beanContext.createBean(Producer.class, newConfig);
         });
     }
 
@@ -236,6 +240,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         for (Map.Entry<ClientKey, Producer> e : clients.entrySet()) {
             if (e.getValue() == producer) {
                 clients.remove(e.getKey());
+                producer.close();
                 break;
             }
         }

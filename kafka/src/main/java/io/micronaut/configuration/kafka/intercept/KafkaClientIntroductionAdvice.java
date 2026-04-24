@@ -19,6 +19,7 @@ import io.micronaut.aop.InterceptedMethod;
 import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
+import io.micronaut.configuration.kafka.RecoveringTransactionalProducer;
 import io.micronaut.configuration.kafka.annotation.*;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
@@ -727,9 +728,16 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                 }
             }
 
-            Producer<?, ?> producer = beanContext.createBean(Producer.class, newConfiguration);
-
             boolean transactional = StringUtils.isNotEmpty(transactionalId);
+            Producer<?, ?> producer;
+            if (transactional) {
+                producer = new RecoveringTransactionalProducer<>(
+                    () -> beanContext.createBean(Producer.class, newConfiguration),
+                    transactionalId
+                );
+            } else {
+                producer = beanContext.createBean(Producer.class, newConfiguration);
+            }
             timestampSupplier = context.isTrue(KafkaClient.class, "timestamp") ? ctx -> System.currentTimeMillis() : timestampSupplier;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class).orElse(null);
 

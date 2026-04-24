@@ -15,8 +15,10 @@
  */
 package io.micronaut.configuration.kafka;
 
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.core.type.Argument;
+import jakarta.inject.Singleton;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaRaftServer;
 import kafka.tools.StorageTool;
@@ -70,10 +72,45 @@ public class TransactionalProducerExpirationReproducerTest {
         }
     }
 
+    @Test
+    @Timeout(90)
+    void injectedTransactionalProducerShouldRecoverAfterTransactionalIdExpires() throws Exception {
+        try (EmbeddedKafkaBroker broker = new EmbeddedKafkaBroker(3_000, 500);
+             ApplicationContext context = ApplicationContext.run(Map.of(
+                 "kafka.bootstrap.servers", broker.bootstrapServers()
+             ))) {
+            broker.createTopic(TOPIC);
+
+            InjectedTransactionalSender sender = context.getBean(InjectedTransactionalSender.class);
+            sender.send(TOPIC, "first").get();
+            Thread.sleep(12_000);
+
+            assertDoesNotThrow(() -> sender.send(TOPIC, "second").get());
+        }
+    }
+
     private static void sendTransaction(Producer<String, String> producer, String value) throws Exception {
         producer.beginTransaction();
         producer.send(new ProducerRecord<>(TOPIC, value)).get();
         producer.commitTransaction();
+    }
+
+    @Singleton
+    static final class InjectedTransactionalSender {
+        private final Producer<String, String> producer;
+
+        InjectedTransactionalSender(@KafkaClient(id = CLIENT_ID, transactionalId = TRANSACTIONAL_ID) Producer<String, String> producer) {
+            this.producer = producer;
+            this.producer.initTransactions();
+        }
+
+        java.util.concurrent.Future<org.apache.kafka.clients.producer.RecordMetadata> send(String topic, String value) {
+            producer.beginTransaction();
+            java.util.concurrent.Future<org.apache.kafka.clients.producer.RecordMetadata> future =
+                producer.send(new ProducerRecord<>(topic, value));
+            producer.commitTransaction();
+            return future;
+        }
     }
 
     private static final class EmbeddedKafkaBroker implements AutoCloseable {
