@@ -798,7 +798,7 @@ client.sendProduct("Nike", "Blue Trainers")</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can specify an executor and return either a <code>CompletableFuture</code> or <a href="https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery.</p>
+<p>Note that since the <code>sendProduct</code> method returns <code>void</code> this means the method will send the <code>ProducerRecord</code> and block until the response is received. You can specify an executor and return either a <code>CompletableFuture</code> or <a href="https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/org/reactivestreams/Publisher.html">Publisher</a> to support non-blocking message delivery. When using <code>CompletableFuture</code>, a multi-threaded or per-task executor does not preserve invocation order between client method calls, so use a single-threaded executor if producer call ordering matters.</p>
 </div>
 </div>
 </div>
@@ -1157,6 +1157,9 @@ The KafkaProducer used internally to implement <a href="../api/io/micronaut/conf
 <h4 id="_configuring_an_executor">Configuring An Executor</h4>
 <div class="paragraph">
 <p>As the <code>send</code> method of <code>KafkaProducer</code> can block the calling thread, it is recommended that you specify an executor to be used when returning either reactive types or <code>CompletableFuture</code>. This will ensure that the <code>send</code> logic is executed on a separate thread from that of the caller, and avoid undesirable conditions such as blocking of the Micronaut server&#8217;s event loop.</p>
+</div>
+<div class="paragraph">
+<p>When using <code>CompletableFuture</code>, each <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaClient.html">@KafkaClient</a> method invocation is submitted to the configured executor independently. If that executor can run multiple tasks concurrently, for example a fixed thread pool with more than one thread or a virtual-thread-per-task executor, the order in which your client methods are called is not guaranteed to match the order in which <code>KafkaProducer.send</code> is invoked. If producer call ordering matters, use a single-threaded executor or a synchronous method instead.</p>
 </div>
 <div class="paragraph">
 <p>The executor to be used may be specified via configuration properties as in the following example:</p>

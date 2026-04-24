@@ -333,7 +333,12 @@ send each record in the the array or list as an individual <a href="https://kafk
 <h3>executor</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">executor</span></div>
-<div class="block">The executor to use to enable non-blocking producer methods.</div>
+<div class="block">The executor to use to enable non-blocking producer methods.
+<p>
+For <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link"><code>CompletableFuture</code></a> return types, each client invocation is submitted to this
+executor independently. Multi-threaded executors, including per-task executors such as virtual-thread
+executors, therefore do not preserve invocation order before calling Kafka's producer API. If producer
+ordering must match the order of client method calls, use a single-threaded executor or a synchronous method.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The name of the executor to use</dd>
