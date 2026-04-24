@@ -36,8 +36,36 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.meters.size() == 2
 
         def scrape = meterRegistry.scrape()
-        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id=""}')
-        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id="node--1"}')
+        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id="",partition="",topic=""}')
+        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id="node--1",partition="",topic=""}')
+    }
+
+    void "consumer metrics keep stable topic and partition tag sets for prometheus"() {
+        given:
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createRecordsConsumedMetric([
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1"
+        ]))
+        reporter.metricChange(createRecordsConsumedMetric([
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1"
+        ]))
+        reporter.metricChange(createRecordsConsumedMetric([
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
+                (ConsumerKafkaMetricsReporter.PARTITION_TAG): "0"
+        ]))
+
+        then:
+        meterRegistry.meters.size() == 3
+
+        def scrape = meterRegistry.scrape()
+        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="",topic=""}')
+        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="",topic="topic-1"}')
+        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="0",topic="topic-1"}')
     }
 
     void "metric removal removes meters from registry"() {
@@ -110,6 +138,21 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         new KafkaMetric(
                 new Object(),
                 new MetricName(name, "consumer-metrics", "description", tags),
+                new WindowedCount(),
+                new MetricConfig(),
+                Time.SYSTEM
+        )
+    }
+
+    private static KafkaMetric createRecordsConsumedMetric(Map<String, String> tags) {
+        new KafkaMetric(
+                new Object(),
+                new MetricName(
+                        "records-consumed-total",
+                        "consumer-fetch-manager-metrics",
+                        "description",
+                        tags
+                ),
                 new WindowedCount(),
                 new MetricConfig(),
                 Time.SYSTEM
