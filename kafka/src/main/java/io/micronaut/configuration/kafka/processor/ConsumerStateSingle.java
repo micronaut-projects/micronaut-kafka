@@ -18,6 +18,7 @@ package io.micronaut.configuration.kafka.processor;
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.core.annotation.Internal;
@@ -164,8 +165,8 @@ final class ConsumerStateSingle extends ConsumerState {
         if (consumerBean instanceof OffsetCommitCallback occ) {
             occ.onComplete(offsets, exception);
         } else if (exception != null) {
-            LOG.error("Error asynchronously committing Kafka offsets [{}]: {}", offsets,
-                exception.getMessage(), exception);
+            OffsetCommitExceptionLogger.log(LOG, info.cooperativeStickyAssignmentStrategy,
+                "Error asynchronously committing Kafka offsets [{}]: {}", exception, offsets, exception.getMessage());
         }
     }
 

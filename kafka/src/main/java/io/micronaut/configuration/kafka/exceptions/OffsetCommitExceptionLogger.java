@@ -43,22 +43,28 @@ public final class OffsetCommitExceptionLogger {
         if (assignmentStrategy instanceof CharSequence value) {
             return Arrays.stream(value.toString().split(","))
                 .map(String::trim)
-                .anyMatch(OffsetCommitExceptionLogger::isCooperativeStickyAssignorName);
+                .findFirst()
+                .map(OffsetCommitExceptionLogger::isCooperativeStickyAssignorName)
+                .orElse(false);
         }
         if (assignmentStrategy instanceof Class<?> clazz) {
             return isCooperativeStickyAssignorName(clazz.getName()) || isCooperativeStickyAssignorName(clazz.getSimpleName());
         }
         if (assignmentStrategy instanceof Collection<?> collection) {
-            return collection.stream().anyMatch(OffsetCommitExceptionLogger::isCooperativeStickyAssignor);
+            return collection.stream().findFirst().map(OffsetCommitExceptionLogger::isCooperativeStickyAssignor).orElse(false);
         }
         if (assignmentStrategy instanceof Object[] array) {
-            return Arrays.stream(array).anyMatch(OffsetCommitExceptionLogger::isCooperativeStickyAssignor);
+            return Arrays.stream(array).findFirst().map(OffsetCommitExceptionLogger::isCooperativeStickyAssignor).orElse(false);
         }
         return isCooperativeStickyAssignorName(assignmentStrategy.toString());
     }
 
+    public static boolean shouldLogAtWarn(boolean cooperativeStickyAssignmentStrategy, @Nullable Throwable exception) {
+        return cooperativeStickyAssignmentStrategy && exception instanceof org.apache.kafka.clients.consumer.CommitFailedException;
+    }
+
     public static void log(Logger logger, boolean cooperativeStickyAssignmentStrategy, String message, Throwable exception, Object... arguments) {
-        if (cooperativeStickyAssignmentStrategy) {
+        if (shouldLogAtWarn(cooperativeStickyAssignmentStrategy, exception)) {
             if (!logger.isWarnEnabled()) {
                 return;
             }
