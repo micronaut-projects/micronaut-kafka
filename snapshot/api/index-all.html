@@ -918,6 +918,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#isConditionalRetry()" class="member-name-link">isConditionalRetry()</a> - Method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#isCooperativeStickyAssignmentStrategy()" class="member-name-link">isCooperativeStickyAssignmentStrategy()</a> - Method in exception class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#isCooperativeStickyAssignor(java.lang.Object)" class="member-name-link">isCooperativeStickyAssignor(Object)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isEnabled()" class="member-name-link">isEnabled()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#isolation()" class="member-name-link">isolation()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
@@ -1114,6 +1118,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">Creates a new exception.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable,java.lang.Object,org.apache.kafka.clients.consumer.Consumer,org.apache.kafka.clients.consumer.ConsumerRecords,org.apache.kafka.clients.consumer.ConsumerRecord,boolean)" class="member-name-link">KafkaListenerException(String, Throwable, Object, Consumer, ConsumerRecords, ConsumerRecord, boolean)</a> - Constructor for exception class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
+<dd>
+<div class="block">Creates a new exception.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable,java.lang.Object,org.apache.kafka.clients.consumer.Consumer,org.apache.kafka.clients.consumer.ConsumerRecord)" class="member-name-link">KafkaListenerException(String, Throwable, Object, Consumer, ConsumerRecord)</a> - Constructor for exception class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/KafkaListenerException.html" title="class in io.micronaut.configuration.kafka.exceptions">KafkaListenerException</a></dt>
 <dd>
 <div class="block">Creates a new exception.</div>
@@ -1276,6 +1284,8 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">Latest means that a consumer will start reading the latest consumer records.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#log(org.slf4j.Logger,boolean,java.lang.String,java.lang.Throwable,java.lang.Object...)" class="member-name-link">log(Logger, boolean, String, Throwable, Object...)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD" class="member-name-link">LOG_AND_RESUME_AT_NEXT_RECORD</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>
 <div class="block">This strategy will publish the failed record to the configured dead letter topic, invoke the
@@ -1359,6 +1369,10 @@ See https://github.com/micronaut-projects/micronaut-kafka/issues/372</div>
 <dl class="index">
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offset()" class="member-name-link">offset()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a> - Class in <a href="io/micronaut/configuration/kafka/exceptions/package-summary.html">io.micronaut.configuration.kafka.exceptions</a></dt>
+<dd>
+<div class="block">Helper for handling Kafka offset commit failures that can be expected during cooperative rebalancing.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#offsetReset()" class="member-name-link">offsetReset()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a> - Enum Class in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
@@ -1689,6 +1703,8 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dd>
 <div class="block">Sets the default value serializer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#shouldLogAtWarn(boolean,java.lang.Throwable)" class="member-name-link">shouldLogAtWarn(boolean, Throwable)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#SKIP" class="member-name-link">SKIP</a> - Enum constant in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html#stop()" class="member-name-link">stop()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaProducerFactory.html" title="class in io.micronaut.configuration.kafka">KafkaProducerFactory</a></dt>
