@@ -20,6 +20,7 @@ import io.micronaut.configuration.kafka.config.DefaultKafkaListenerExceptionHand
 import io.micronaut.context.annotation.Primary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -47,6 +48,7 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     private static final Logger LOG = LoggerFactory.getLogger(KafkaListenerExceptionHandler.class);
     private static final Pattern SERIALIZATION_EXCEPTION_MESSAGE_PATTERN = Pattern.compile(".+ for partition (.+)-(\\d+) at offset (\\d+)\\..+");
 
+    private final Logger logger;
     private boolean skipRecordOnDeserializationFailure;
     private boolean commitRecordOnDeserializationFailure;
 
@@ -57,6 +59,11 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
      */
     @Inject
     public DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config) {
+        this(config, LOG);
+    }
+
+    DefaultKafkaListenerExceptionHandler(DefaultKafkaListenerExceptionHandlerConfiguration config, Logger logger) {
+        this.logger = logger;
         skipRecordOnDeserializationFailure = config.isSkipRecordOnDeserializationFailure();
         commitRecordOnDeserializationFailure = config.isCommitRecordOnDeserializationFailure();
     }
@@ -74,19 +81,29 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
         final Throwable cause = exception.getCause();
         final Object consumerBean = exception.getKafkaListener();
         if (cause instanceof SerializationException) {
-            LOG.error("Kafka consumer [{}] failed to deserialize value: {}", consumerBean, cause.getMessage(), cause);
+            logger.error("Kafka consumer [{}] failed to deserialize value: {}", consumerBean, cause.getMessage(), cause);
 
             if (skipRecordOnDeserializationFailure) {
                 final Consumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
                 seekPastDeserializationError((SerializationException) cause, consumerBean, kafkaConsumer);
             }
+        } else if (cause instanceof CommitFailedException) {
+            Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
+            if (consumerRecord.isPresent()) {
+                OffsetCommitExceptionLogger.log(logger, exception.isCooperativeStickyAssignmentStrategy(),
+                    "Error processing record [{}] for Kafka consumer [{}] produced error: {}",
+                    cause, consumerRecord.get(), consumerBean, cause.getMessage());
+            } else {
+                OffsetCommitExceptionLogger.log(logger, exception.isCooperativeStickyAssignmentStrategy(),
+                    "Kafka consumer [{}] produced error: {}", cause, consumerBean, cause.getMessage());
+            }
         } else {
-            if (LOG.isErrorEnabled()) {
+            if (logger.isErrorEnabled()) {
                 Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
                 if (consumerRecord.isPresent()) {
-                    LOG.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord, consumerBean, cause.getMessage(), cause);
+                    logger.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord.get(), consumerBean, cause.getMessage(), cause);
                 } else {
-                    LOG.error("Kafka consumer [{}] produced error: {}", consumerBean, cause.getMessage(), cause);
+                    logger.error("Kafka consumer [{}] produced error: {}", consumerBean, cause.getMessage(), cause);
                 }
             }
         }

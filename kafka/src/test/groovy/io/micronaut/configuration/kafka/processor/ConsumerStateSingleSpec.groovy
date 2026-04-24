@@ -21,6 +21,7 @@ import java.lang.reflect.Proxy
 import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.Optional
+import java.util.Properties
 import java.util.concurrent.CompletableFuture
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD
@@ -113,6 +114,7 @@ class ConsumerStateSingleSpec extends Specification {
             'group',
             OffsetStrategy.DISABLED,
             kafkaListenerAnnotation(null),
+            new Properties(),
             executableMethod()
         )
 
@@ -184,7 +186,7 @@ class ConsumerStateSingleSpec extends Specification {
             }
         ) as ExecutableMethod<?, ?>
         AnnotationValue<KafkaListener> annotation = AnnotationValue.builder(KafkaListener).build()
-        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, executableMethod)
+        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, new Properties(), executableMethod)
     }
 
     private ConsumerStateSingle newConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, Consumer<?, ?> kafkaConsumer) {
@@ -193,6 +195,7 @@ class ConsumerStateSingleSpec extends Specification {
             'group',
             OffsetStrategy.DISABLED,
             kafkaListenerAnnotation(),
+            new Properties(),
             executableMethod()
         )
         new ConsumerStateSingle(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())

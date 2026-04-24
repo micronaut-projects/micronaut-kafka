@@ -35,6 +35,7 @@ public class KafkaListenerException extends MessageListenerException {
     private final transient Consumer<?, ?> kafkaConsumer;
     private final transient ConsumerRecords<?, ?> consumerRecords;
     private final transient ConsumerRecord<?, ?> consumerRecord;
+    private final boolean cooperativeStickyAssignmentStrategy;
 
     /**
      * Creates a new exception.
@@ -91,11 +92,35 @@ public class KafkaListenerException extends MessageListenerException {
         @Nullable ConsumerRecords<?, ?> consumerRecords,
         @Nullable ConsumerRecord<?, ?> consumerRecord
     ) {
+        this(message, cause, listener, kafkaConsumer, consumerRecords, consumerRecord, false);
+    }
+
+    /**
+     * Creates a new exception.
+     *
+     * @param message The message
+     * @param cause The cause
+     * @param listener The listener
+     * @param kafkaConsumer The consumer
+     * @param consumerRecords The batch of consumer records
+     * @param consumerRecord The consumer record
+     * @param cooperativeStickyAssignmentStrategy Whether the consumer uses the CooperativeSticky assignment strategy
+     */
+    public KafkaListenerException(
+        String message,
+        Throwable cause,
+        Object listener,
+        Consumer<?, ?> kafkaConsumer,
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord,
+        boolean cooperativeStickyAssignmentStrategy
+    ) {
         super(message, cause);
         this.listener = listener;
         this.kafkaConsumer = kafkaConsumer;
         this.consumerRecords = consumerRecords;
         this.consumerRecord = consumerRecord;
+        this.cooperativeStickyAssignmentStrategy = cooperativeStickyAssignmentStrategy;
     }
 
     /**
@@ -128,5 +153,13 @@ public class KafkaListenerException extends MessageListenerException {
     @SuppressWarnings("java:S1452") // Remove usage of generic wildcard type
     public Optional<ConsumerRecords<?, ?>> getConsumerRecords() {
         return Optional.ofNullable(consumerRecords);
+    }
+
+    /**
+     * @return Whether the consumer used the CooperativeSticky assignment strategy
+     * @since 5.4
+     */
+    public boolean isCooperativeStickyAssignmentStrategy() {
+        return cooperativeStickyAssignmentStrategy;
     }
 }

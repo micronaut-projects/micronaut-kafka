@@ -20,6 +20,7 @@ import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
 import io.micronaut.core.annotation.*;
 import io.micronaut.core.reflect.ReflectionUtils;
@@ -30,12 +31,14 @@ import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.messaging.Acknowledgement;
 import io.micronaut.messaging.annotation.SendTo;
 import io.micronaut.messaging.exceptions.MessagingSystemException;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.Consumer;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 /**
  * Internal consumer info.
@@ -72,6 +75,7 @@ final class ConsumerInfo {
     final boolean shouldSendOffsetsToTransaction;
     final boolean returnsOneKafkaMessage;
     final boolean returnsManyKafkaMessages;
+    final boolean cooperativeStickyAssignmentStrategy;
 
     @SuppressWarnings("unchecked")
     ConsumerInfo(
@@ -79,6 +83,7 @@ final class ConsumerInfo {
         String groupId,
         OffsetStrategy offsetStrategy,
         AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
         ExecutableMethod<?, ?> method
     ) {
         this.clientId = clientId;
@@ -114,6 +119,7 @@ final class ConsumerInfo {
             .map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
         this.returnsManyKafkaMessages = Iterable.class.isAssignableFrom(method.getReturnType().getType()) && method.getReturnType().getFirstTypeVariable()
             .map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
+        this.cooperativeStickyAssignmentStrategy = OffsetCommitExceptionLogger.isCooperativeStickyAssignor(properties.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
 
         if (shouldSendOffsetsToTransaction) {
             if (!isTransactional || !method.hasAnnotation(SendTo.class)) {
