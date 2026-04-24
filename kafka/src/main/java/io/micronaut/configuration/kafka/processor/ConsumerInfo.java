@@ -50,6 +50,7 @@ final class ConsumerInfo {
     final boolean shouldRedeliver;
     final OffsetStrategy offsetStrategy;
     final ErrorStrategyValue errorStrategy;
+    @Nullable final String dlq;
     final @Nullable Duration retryDelay;
     final int retryCount;
     final boolean shouldHandleAllExceptions;
@@ -86,6 +87,10 @@ final class ConsumerInfo {
         this.offsetStrategy = offsetStrategy;
         final Optional<AnnotationValue<ErrorStrategy>> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class);
         this.errorStrategy = errorStrategyAnnotation.map(a -> a.getRequiredValue(ErrorStrategyValue.class)).orElse(ErrorStrategyValue.NONE); // NOSONAR
+        this.dlq = errorStrategyAnnotation.flatMap(a -> a.stringValue("dlq")).filter(StringUtils::isNotEmpty).orElse(null);
+        if (this.errorStrategy == ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD && this.dlq == null) {
+            throw new MessagingSystemException("Error strategy 'LOG_AND_RESUME_AT_NEXT_RECORD' requires setting a non-empty dead letter topic with 'dlq'");
+        }
         this.retryDelay = errorStrategyAnnotation.flatMap(a -> a.get("retryDelay", Duration.class)).filter(d -> !d.isZero() && !d.isNegative()).orElse(null);
         this.retryCount = errorStrategyAnnotation.map(a -> a.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT)).orElse(0);
         this.shouldHandleAllExceptions = errorStrategyAnnotation.flatMap(a -> a.booleanValue("handleAllExceptions")).orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);

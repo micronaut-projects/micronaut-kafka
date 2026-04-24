@@ -106,6 +106,15 @@ public @interface ErrorStrategy {
     ErrorStrategyValue value() default ErrorStrategyValue.NONE;
 
     /**
+     * The dead letter topic to publish failed records to when using
+     * {@link ErrorStrategyValue#LOG_AND_RESUME_AT_NEXT_RECORD}.
+     *
+     * @return The dead letter topic name
+     * @since 5.8
+     */
+    String dlq() default "";
+
+    /**
      * The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
      * see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.
      * When used with RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR,

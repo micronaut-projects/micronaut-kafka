@@ -76,7 +76,7 @@ final class ConsumerStateBatch extends ConsumerState {
                 kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             }
             // The error strategy and the exception handler can still decide what to do about this record
-            resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), ex);
+            resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), makeConsumerRecord(ex), ex);
             // By now, it's been decided whether this record should be retried and the exception may have been handled
             return null;
         }
@@ -95,7 +95,7 @@ final class ConsumerStateBatch extends ConsumerState {
             handleResult(normalizeResult(result), consumerRecords);
             failed = false;
         } catch (Exception e) {
-            failed = resolveWithErrorStrategy(consumerRecords, currentOffsets, e);
+            failed = resolveWithErrorStrategy(consumerRecords, currentOffsets, null, e);
         }
     }
 
@@ -146,7 +146,7 @@ final class ConsumerStateBatch extends ConsumerState {
 
     @SuppressWarnings("java:S1874") // ErrorStrategyValue.NONE is deprecated
     private boolean resolveWithErrorStrategy(@Nullable ConsumerRecords<?, ?> consumerRecords,
-        Map<TopicPartition, OffsetAndMetadata> currentOffsets, Throwable e) {
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets, @Nullable ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
             if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
@@ -169,7 +169,8 @@ final class ConsumerStateBatch extends ConsumerState {
             partitions.forEach(topicPartitionRetries::remove);
         }
         // Skip the failing batch of records
-        handleException(e, consumerRecords, null);
+        publishToDlq(e, consumerRecords, consumerRecord);
+        handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
     }
 
@@ -223,5 +224,10 @@ final class ConsumerStateBatch extends ConsumerState {
             }
         }
         return changed ? reconstructedOffsets : currentOffsets;
+    }
+
+    private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
+        final TopicPartition tp = ex.topicPartition();
+        return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
     }
 }

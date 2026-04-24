@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.errors
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaClient
+import io.micronaut.configuration.kafka.annotation.KafkaKey
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.retry.DefaultConditionalRetryBehaviourHandler
@@ -13,6 +14,7 @@ import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Value
 import io.micronaut.core.annotation.Blocking
+import io.micronaut.messaging.MessageHeaders
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.TopicPartition
@@ -27,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_CONDITIONALLY_ON_ERROR
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
@@ -69,6 +72,28 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         conditions.eventually {
             myConsumer.received == ["One", "Two"]
             myConsumer.count.get() == 2
+        }
+    }
+
+    void "test when the error strategy is 'log and resume at next offset' the failed record is sent to the DLQ"() {
+        when: "A consumer throws an exception"
+        LogAndResumeErrorClient myClient = context.getBean(LogAndResumeErrorClient)
+        myClient.sendMessage("k1", "One")
+        myClient.sendMessage("k2", "Two")
+
+        LogAndResumeAtNextRecordErrorCausingConsumer myConsumer = context.getBean(LogAndResumeAtNextRecordErrorCausingConsumer)
+        DlqConsumer dlqConsumer = context.getBean(DlqConsumer)
+
+        then: "The failed record is published to the DLQ and the next message is consumed"
+        conditions.eventually {
+            myConsumer.received == ["k1:One", "k2:Two"]
+            myConsumer.count.get() == 2
+            dlqConsumer.received == ["k1:One"]
+            dlqConsumer.errorClasses == [RuntimeException.name]
+            dlqConsumer.errorMessages == ["Won't handle first"]
+            dlqConsumer.originalTopics == ["errors-log-resume"]
+            dlqConsumer.originalPartitions == ["0"]
+            dlqConsumer.originalOffsets == ["0"]
         }
     }
 
@@ -397,6 +422,46 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
             if (count.getAndIncrement() == 0) {
                 throw new RuntimeException("Won't handle first")
             }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        errorStrategy = @ErrorStrategy(value = LOG_AND_RESUME_AT_NEXT_RECORD, dlq = "errors-log-resume-dlq")
+    )
+    static class LogAndResumeAtNextRecordErrorCausingConsumer {
+        AtomicInteger count = new AtomicInteger(0)
+        List<String> received = []
+
+        @Topic("errors-log-resume")
+        void handleMessage(@KafkaKey String key, String message) {
+            received << "$key:$message"
+            if (count.getAndIncrement() == 0) {
+                throw new RuntimeException("Won't handle first")
+            }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(offsetReset = EARLIEST)
+    static class DlqConsumer {
+        List<String> received = []
+        List<String> errorClasses = []
+        List<String> errorMessages = []
+        List<String> originalTopics = []
+        List<String> originalPartitions = []
+        List<String> originalOffsets = []
+
+        @Topic("errors-log-resume-dlq")
+        void handleMessage(@KafkaKey String key, String message, MessageHeaders headers) {
+            received << "$key:$message"
+            errorClasses << headers.get("micronaut-kafka-exception-class")
+            errorMessages << headers.get("micronaut-kafka-exception-message")
+            originalTopics << headers.get("micronaut-kafka-original-topic")
+            originalPartitions << headers.get("micronaut-kafka-original-partition")
+            originalOffsets << headers.get("micronaut-kafka-original-offset")
         }
     }
 
@@ -870,6 +935,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     static interface ResumeErrorClient {
         @Topic("errors-resume")
         void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface LogAndResumeErrorClient {
+        @Topic("errors-log-resume")
+        void sendMessage(@KafkaKey String key, String message)
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
