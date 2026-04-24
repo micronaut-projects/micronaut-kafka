@@ -24,14 +24,20 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.TransactionalIdNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class TransactionalProducerExpirationReproducerTest {
@@ -61,7 +67,7 @@ public class TransactionalProducerExpirationReproducerTest {
                 );
 
                 sendTransaction(producer, topic, "first");
-                Thread.sleep(12_000);
+                waitForTransactionalIdExpiration(kafka.getBootstrapServers(), transactionalId);
 
                 assertDoesNotThrow(() -> sendTransaction(producer, topic, "second"));
             }
@@ -81,7 +87,7 @@ public class TransactionalProducerExpirationReproducerTest {
 
                 InjectedTransactionalSender sender = context.getBean(InjectedTransactionalSender.class);
                 sender.send(topic, "first").get();
-                Thread.sleep(12_000);
+                waitForTransactionalIdExpiration(kafka.getBootstrapServers(), TRANSACTIONAL_ID);
 
                 assertDoesNotThrow(() -> sender.send(topic, "second").get());
             }
@@ -95,7 +101,7 @@ public class TransactionalProducerExpirationReproducerTest {
     }
 
     private static KafkaContainer createKafkaContainer() {
-        return new KafkaContainer("apache/kafka:4.2.0")
+        return new KafkaContainer(DockerImageName.parse("apache/kafka:4.2.0"))
             .withEnv("KAFKA_TRANSACTIONAL_ID_EXPIRATION_MS", Integer.toString(TRANSACTIONAL_ID_EXPIRATION_MS))
             .withEnv("KAFKA_TRANSACTION_REMOVE_EXPIRED_TRANSACTION_CLEANUP_INTERVAL_MS", Integer.toString(TRANSACTION_CLEANUP_INTERVAL_MS))
             .withEnv("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
@@ -103,6 +109,28 @@ public class TransactionalProducerExpirationReproducerTest {
             .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
             .withEnv("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
             .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+    }
+
+    private static void waitForTransactionalIdExpiration(String bootstrapServers, String transactionalId) {
+        try (AdminClient admin = AdminClient.create(Map.of(
+            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers
+        ))) {
+            await()
+                .atMost(30, TimeUnit.SECONDS)
+                .pollInterval(Duration.ofMillis(TRANSACTION_CLEANUP_INTERVAL_MS))
+                .until(() -> {
+                    try {
+                        admin.describeTransactions(List.of(transactionalId))
+                            .description(transactionalId)
+                            .get(2, TimeUnit.SECONDS);
+                        return false;
+                    } catch (ExecutionException e) {
+                        return e.getCause() instanceof TransactionalIdNotFoundException;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+        }
     }
 
     private static void createTopic(String bootstrapServers, String topic) throws Exception {

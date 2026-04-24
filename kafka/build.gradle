@@ -26,6 +26,7 @@ dependencies {
     testImplementation mnMicrometer.micronaut.micrometer.registry.prometheus
     testImplementation(projects.testSuiteKafkaUtils)
     testImplementation(mnTest.junit.jupiter.api)
+    testImplementation libs.awaitility
 
     testRuntimeOnly mnMicrometer.micronaut.micrometer.registry.statsd
     testRuntimeOnly mnTracing.micronaut.tracing.core

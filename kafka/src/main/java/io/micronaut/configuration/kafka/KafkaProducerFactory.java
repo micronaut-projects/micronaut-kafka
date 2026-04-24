@@ -198,12 +198,12 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             }
 
             if (transactional) {
-                Producer producer = new RecoveringTransactionalProducer<>(
+                Producer<?, ?> recovering = new RecoveringTransactionalProducer<>(
                     () -> beanContext.createBean(Producer.class, newConfig),
                     transactionalId
                 );
-                producer.initTransactions();
-                return producer;
+                recovering.initTransactions();
+                return recovering;
             }
 
             return beanContext.createBean(Producer.class, newConfig);

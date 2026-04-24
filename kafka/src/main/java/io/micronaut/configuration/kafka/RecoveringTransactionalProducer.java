@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
@@ -56,6 +58,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
     private final Supplier<Producer<K, V>> producerSupplier;
     private final @Nullable String transactionalId;
     private final List<PendingSend<K, V>> pendingSends = new ArrayList<>();
+    private @Nullable ExecutorService recoveryExecutor;
     private @Nullable Producer<K, V> producer;
     private boolean closed;
     private boolean inTransaction;
@@ -187,6 +190,9 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
             return;
         }
         closed = true;
+        if (recoveryExecutor != null) {
+            recoveryExecutor.shutdownNow();
+        }
         closeProducer(producer, timeout);
         producer = null;
         pendingSends.clear();
@@ -222,12 +228,9 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
                 return;
             }
             if (exception != null && isTransactionalIdExpired(exception)) {
-                try {
-                    replayTransaction();
-                    return;
-                } catch (RuntimeException replayException) {
-                    callbackException = replayException;
-                }
+                long gen = generation;
+                recoveryExecutor().execute(() -> recoverAndReplay(gen));
+                return;
             }
             callbackToInvoke = pendingSend.complete(callbackMetadata, callbackException);
         }
@@ -243,12 +246,9 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
                 return;
             }
             if (isTransactionalIdExpired(exception)) {
-                try {
-                    replayTransaction();
-                    return;
-                } catch (RuntimeException replayException) {
-                    exception = replayException;
-                }
+                long gen = generation;
+                recoveryExecutor().execute(() -> recoverAndReplay(gen));
+                return;
             }
             callbackToInvoke = pendingSend.complete(null, exception);
         }
@@ -264,6 +264,34 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
         replayTransaction();
         retry.run(currentProducer());
         return true;
+    }
+
+    private void recoverAndReplay(long callbackGeneration) {
+        synchronized (this) {
+            if (closed || callbackGeneration != generation || !inTransaction) {
+                return;
+            }
+            try {
+                replayTransaction();
+            } catch (RuntimeException e) {
+                LOG.warn("Failed to recover transactional producer [{}] after transactional id expiration: {}", transactionalId, e.getMessage(), e);
+                for (PendingSend<K, V> ps : new ArrayList<>(pendingSends)) {
+                    ps.complete(null, e);
+                }
+                completeTransaction();
+            }
+        }
+    }
+
+    private ExecutorService recoveryExecutor() {
+        if (recoveryExecutor == null) {
+            recoveryExecutor = Executors.newSingleThreadExecutor(r -> {
+                var t = new Thread(r, "kafka-transactional-recovery");
+                t.setDaemon(true);
+                return t;
+            });
+        }
+        return recoveryExecutor;
     }
 
     private void replayTransaction() {
@@ -320,9 +348,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
             }
             current = current.getCause();
         }
-        return throwable instanceof KafkaException kafkaException
-            && kafkaException.getMessage() != null
-            && kafkaException.getMessage().contains("error state");
+        return false;
     }
 
     private static void closeProducer(@Nullable Producer<?, ?> producer, Duration timeout) {
