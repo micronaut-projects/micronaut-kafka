@@ -16,6 +16,8 @@ dependencies {
     api libs.managed.kafka.clients
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
+    testImplementation("org.apache.kafka:kafka_2.13:${libs.versions.managed.kafka.get()}")
+    testImplementation("org.apache.kafka:kafka-server:${libs.versions.managed.kafka.get()}")
     compileOnly mnMicrometer.micronaut.micrometer.core
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
@@ -25,7 +27,9 @@ dependencies {
     testImplementation mn.micronaut.http.client
     testImplementation mnMicrometer.micronaut.micrometer.registry.prometheus
     testImplementation(projects.testSuiteKafkaUtils)
+    testImplementation(mnTest.junit.jupiter.api)
 
     testRuntimeOnly mnMicrometer.micronaut.micrometer.registry.statsd
     testRuntimeOnly mnTracing.micronaut.tracing.core
+    testRuntimeOnly(mnTest.junit.jupiter.engine)
 }
