@@ -57,6 +57,8 @@ The following sections, which use Micronaut Reactor, cover advised configuration
 ==== Configuring An Executor
 As the `send` method of `KafkaProducer` can block the calling thread, it is recommended that you specify an executor to be used when returning either reactive types or `CompletableFuture`. This will ensure that the `send` logic is executed on a separate thread from that of the caller, and avoid undesirable conditions such as blocking of the Micronaut server's event loop.
 
+When using `CompletableFuture`, each ann:configuration.kafka.annotation.KafkaClient[] method invocation is submitted to the configured executor independently. If that executor can run multiple tasks concurrently, for example a fixed thread pool with more than one thread or a virtual-thread-per-task executor, the order in which your client methods are called is not guaranteed to match the order in which `KafkaProducer.send` is invoked. If producer call ordering matters, use a single-threaded executor or a synchronous method instead.
+
 The executor to be used may be specified via configuration properties as in the following example:
 [configuration]
 ----
