@@ -35,9 +35,14 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         then:
         meterRegistry.meters.size() == 2
 
-        def scrape = meterRegistry.scrape()
-        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id="",partition="",topic=""}')
-        scrape.contains('kafka_consumer_request_total_requests{client_id="consumer-1",node_id="node--1",partition="",topic=""}')
+        def tagMaps = meterRegistry.meters.collect { meter ->
+            meter.id.tags.collectEntries { tag -> [tag.key, tag.value] }
+        }
+        tagMaps.every { it.keySet() == ["client-id", "node-id", "partition", "topic"] as Set }
+        tagMaps.containsAll([
+                ["client-id": "consumer-1", "node-id": "", "partition": "", "topic": ""],
+                ["client-id": "consumer-1", "node-id": "node--1", "partition": "", "topic": ""]
+        ])
     }
 
     void "consumer metrics keep stable topic and partition tag sets for prometheus"() {
@@ -62,10 +67,15 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         then:
         meterRegistry.meters.size() == 3
 
-        def scrape = meterRegistry.scrape()
-        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="",topic=""}')
-        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="",topic="topic-1"}')
-        scrape.contains('kafka_consumer_records_consumed_total_records_total{client_id="consumer-1",node_id="",partition="0",topic="topic-1"}')
+        def tagMaps = meterRegistry.meters.collect { meter ->
+            meter.id.tags.collectEntries { tag -> [tag.key, tag.value] }
+        }
+        tagMaps.every { it.keySet() == ["client-id", "node-id", "partition", "topic"] as Set }
+        tagMaps.containsAll([
+                ["client-id": "consumer-1", "node-id": "", "partition": "", "topic": ""],
+                ["client-id": "consumer-1", "node-id": "", "partition": "", "topic": "topic-1"],
+                ["client-id": "consumer-1", "node-id": "", "partition": "0", "topic": "topic-1"]
+        ])
     }
 
     void "metric removal removes meters from registry"() {

@@ -19,9 +19,9 @@ import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.micronaut.configuration.kafka.metrics.builder.KafkaMetricMeterTypeBuilder;
 import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.reflect.ClassUtils;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
@@ -140,8 +140,10 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
             return;
         }
 
+        List<String> sortedIncludedTags = getIncludedTags().stream().sorted().toList();
+        boolean includeEmptyTags = isPrometheusRegistry(meterRegistry);
         String meterName = getMetricPrefix() + "." + metric.metricName().name();
-        Set<Tag> expectedTags = Set.copyOf(getTags(metric.metricName(), meterRegistry));
+        Set<Tag> expectedTags = Set.copyOf(getTags(metric.metricName(), sortedIncludedTags, includeEmptyTags));
         for (var iterator = meters.entrySet().iterator(); iterator.hasNext(); ) {
             var meterEntry = iterator.next();
             Meter meter = meterEntry.getValue();
@@ -170,31 +172,32 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private Function<MetricName, List<Tag>> getTagFunction(MeterRegistry meterRegistry) {
-        return metricName -> getTags(metricName, meterRegistry);
+        List<String> sortedIncludedTags = getIncludedTags().stream().sorted().toList();
+        boolean includeEmptyTags = isPrometheusRegistry(meterRegistry);
+        return metricName -> getTags(metricName, sortedIncludedTags, includeEmptyTags);
     }
 
-    private List<Tag> getTags(MetricName metricName, MeterRegistry meterRegistry) {
-        Set<String> includedTags = getIncludedTags();
-        List<Tag> tags = new ArrayList<>(includedTags.size());
-        boolean includeEmptyTags = shouldIncludeEmptyIncludedTags(meterRegistry);
-        for (String tagName : includedTags.stream().sorted().toList()) {
+    private static List<Tag> getTags(MetricName metricName, List<String> sortedIncludedTags, boolean includeEmptyTags) {
+        List<Tag> tags = new ArrayList<>(sortedIncludedTags.size());
+        for (String tagName : sortedIncludedTags) {
             String tagValue = metricName.tags().get(tagName);
             if (tagValue != null) {
                 tags.add(Tag.of(tagName, tagValue));
-            } else if (includeEmptyTags || shouldIncludeEmptyNodeIdTag(metricName, tagName, includedTags)) {
+            } else if (includeEmptyTags || shouldIncludeEmptyNodeIdTag(metricName, tagName)) {
                 tags.add(Tag.of(tagName, EMPTY_OPTIONAL_TAG_VALUE));
             }
         }
         return tags;
     }
 
-    private boolean shouldIncludeEmptyIncludedTags(MeterRegistry meterRegistry) {
-        return meterRegistry instanceof PrometheusMeterRegistry;
+    private static boolean isPrometheusRegistry(MeterRegistry meterRegistry) {
+        return ClassUtils.forName("io.micrometer.prometheusmetrics.PrometheusMeterRegistry", null)
+                .map(cls -> cls.isInstance(meterRegistry))
+                .orElse(false);
     }
 
-    private boolean shouldIncludeEmptyNodeIdTag(MetricName metricName, String tagName, Set<String> includedTags) {
+    private static boolean shouldIncludeEmptyNodeIdTag(MetricName metricName, String tagName) {
         return NODE_ID_TAG.equals(tagName)
-                && includedTags.contains(NODE_ID_TAG)
                 && !metricName.tags().containsKey(tagName)
                 && NODE_ID_OPTIONAL_METRICS.contains(metricName.name());
     }
