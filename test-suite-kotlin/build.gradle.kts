@@ -4,6 +4,17 @@ plugins {
     id("io.micronaut.build.internal.kotlin-kapt")
 }
 
+tasks.withType<Test>().configureEach {
+    doFirst {
+        delete(
+            sourceSets.test.get().output.classesDirs.asFileTree.matching {
+                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
+                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
+            }
+        )
+    }
+}
+
 dependencies {
     kaptTest(platform(mn.micronaut.core.bom))
     kaptTest(mn.micronaut.inject.java)
