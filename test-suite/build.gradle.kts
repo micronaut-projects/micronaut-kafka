@@ -2,15 +2,18 @@ plugins {
     id("io.micronaut.internal.build.kafka-testsuite")
 }
 
+val filteredTestRuntimeOutput = tasks.register<Sync>("filteredTestRuntimeOutput") {
+    from(sourceSets.test.get().output)
+    into(layout.buildDirectory.dir("filtered-test-runtime/test"))
+    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
+    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
+}
+
 tasks.withType<Test>().configureEach {
-    doFirst {
-        delete(
-            sourceSets.test.get().output.classesDirs.asFileTree.matching {
-                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
-                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
-            }
-        )
-    }
+    dependsOn(filteredTestRuntimeOutput)
+    classpath =
+        files(filteredTestRuntimeOutput.map { it.destinationDir }) +
+            (classpath - sourceSets.test.get().output)
 }
 
 dependencies {

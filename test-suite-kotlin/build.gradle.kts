@@ -4,15 +4,20 @@ plugins {
     id("io.micronaut.build.internal.kotlin-kapt")
 }
 
+val filteredTestClassesDir = layout.buildDirectory.dir("filtered-test-classes")
+
+val filteredTestClasses by tasks.registering(org.gradle.api.tasks.Sync::class) {
+    from(sourceSets.test.get().output.classesDirs)
+    into(filteredTestClassesDir)
+    includeEmptyDirs = false
+    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
+    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
+}
+
 tasks.withType<Test>().configureEach {
-    doFirst {
-        delete(
-            sourceSets.test.get().output.classesDirs.asFileTree.matching {
-                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
-                include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
-            }
-        )
-    }
+    dependsOn(filteredTestClasses)
+    testClassesDirs = files(filteredTestClassesDir)
+    classpath = files(filteredTestClassesDir) + (classpath - sourceSets.test.get().output.classesDirs)
 }
 
 dependencies {

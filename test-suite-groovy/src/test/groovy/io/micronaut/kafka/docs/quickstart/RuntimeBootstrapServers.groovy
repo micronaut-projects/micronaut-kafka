@@ -16,9 +16,9 @@ class RuntimeBootstrapServers implements ApplicationContextConfigurer {
             'kafka.bootstrap.servers': resolveBootstrapServers()
         ])
     }
-// end::clazz[]
 
     private static String resolveBootstrapServers() {
         'localhost:9092'
     }
 }
+// end::clazz[]

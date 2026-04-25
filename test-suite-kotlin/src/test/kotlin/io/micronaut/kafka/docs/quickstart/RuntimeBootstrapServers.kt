@@ -16,7 +16,7 @@ class RuntimeBootstrapServers : ApplicationContextConfigurer {
             )
         )
     }
-// end::clazz[]
 
     private fun resolveBootstrapServers(): String = "localhost:9092"
 }
+// end::clazz[]
