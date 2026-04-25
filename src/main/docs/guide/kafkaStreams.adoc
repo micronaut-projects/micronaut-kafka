@@ -88,7 +88,8 @@ kafka:
 .Configuring multiple Stream definitions on the same Micronaut Service.
 You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
 To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`.
-Assuming you have 2 or more Kafka Streams definitions on a single service, you will need to use the `default` key for at least one of them and then define `kafka.streams.[STREAM-NAME]` for the rest.
+Assuming you have 2 or more Kafka Streams definitions on a single service, you must use the `default` key for one of them and then define `kafka.streams.[STREAM-NAME]` for the rest.
+Each stream definition should also set its own unique `application.id`.
 
 For example in `application.yml`:
 
@@ -97,22 +98,24 @@ For example in `application.yml`:
 kafka:
     streams:
         default:
+          application.id: my-app-default-stream
           num:
             stream:
               threads: 1
         my-other-stream:
+          application.id: my-app-other-stream
           num:
             stream:
               threads: 10
 ----
 
-The above configuration sets the `num.stream.threads` setting of the Kafka `StreamsConfig` to `1` for the `default` stream, and the same setting to `10` for a stream named `my-stream`.
+The above configuration sets the `application.id` to `my-app-default-stream` and `num.stream.threads` to `1` for the `default` stream. It also configures a second stream named `my-other-stream` with its own `application.id` and `num.stream.threads` value of `10`.
 
 You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specifically for the above configuration using `jakarta.inject.Named`:
 
 snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="myOtherStream", indent=0]
 
-NOTE: If you do not provide a `@Named` on the `ConfiguredStreamBuilder` and you have multiple topology beans defined, they share the default configurations such as client id and application id. When using multiple streams in a single app, it is advisable to provide a `@Named` instance of `ConfiguredStreamBuilder` for each stream.
+NOTE: The `@Named` qualifier must be applied to the injected `ConfiguredStreamBuilder` parameter so Micronaut can bind that topology to the matching `kafka.streams.*` configuration. If you have multiple topology beans and do not qualify the `ConfiguredStreamBuilder`, they share the default configuration such as client id and application id.
 
 .Kafka Streams Word Count
 
