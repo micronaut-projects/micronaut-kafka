@@ -191,7 +191,8 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private static boolean isPrometheusRegistry(MeterRegistry meterRegistry) {
-        return ClassUtils.forName("io.micrometer.prometheusmetrics.PrometheusMeterRegistry", null)
+        return ClassUtils.forName("io.micrometer.prometheusmetrics.PrometheusMeterRegistry",
+                        AbstractKafkaMetricsReporter.class.getClassLoader())
                 .map(cls -> cls.isInstance(meterRegistry))
                 .orElse(false);
     }
