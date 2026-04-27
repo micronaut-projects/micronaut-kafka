@@ -76,10 +76,10 @@ abstract class ConsumerState {
     protected boolean failed;
     final ConsumerInfo info;
     final Consumer<?, ?> kafkaConsumer;
-    private final Object consumerAccessMonitor = new Object();
     final Consumer<?, ?> synchronizedKafkaConsumer;
     final Set<String> subscriptions;
     Set<TopicPartition> assignments;
+    private final Object consumerAccessMonitor = new Object();
     private Set<TopicPartition> pausedTopicPartitions;
     private Set<TopicPartition> pauseRequests;
     private CountDownLatch startupLatch;
