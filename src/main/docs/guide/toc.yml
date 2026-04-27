@@ -2,6 +2,7 @@ introduction: Introduction
 releaseHistory: Release History
 kafkaCli: Using the Micronaut CLI
 kafkaQuickStart: Kafka Quick Start
+kafkaSerialization: Serializing Messages with Avro and Protobuf
 kafkaClient:
   title: Kafka Producers Using @KafkaClient
   kafkaClientMethods: Defining @KafkaClient Methods
