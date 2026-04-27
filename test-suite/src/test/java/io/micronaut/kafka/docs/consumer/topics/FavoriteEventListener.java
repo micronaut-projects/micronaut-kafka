@@ -12,19 +12,13 @@ public class FavoriteEventListener {
     // tag::commonSupertype[]
     @Topic("favorites-events")
     public void receive(@KafkaKey String customerId, FavoriteEvent event) {
-        if (event instanceof FavoriteSaved favoriteSaved) {
-            handleSaved(customerId, favoriteSaved);
-        } else if (event instanceof FavoriteDeleted favoriteDeleted) {
-            handleDeleted(customerId, favoriteDeleted);
+        if (event instanceof FavoriteSaved) {
+            // process the save event for this customer
+        } else if (event instanceof FavoriteDeleted) {
+            // process the delete event for this customer
         }
     }
     // end::commonSupertype[]
-
-    private void handleSaved(String customerId, FavoriteSaved favoriteSaved) {
-    }
-
-    private void handleDeleted(String customerId, FavoriteDeleted favoriteDeleted) {
-    }
 
     abstract static class FavoriteEvent {
     }

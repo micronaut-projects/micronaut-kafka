@@ -13,17 +13,15 @@ class FavoriteEventListener {
     @Topic("favorites-events")
     fun receive(@KafkaKey customerId: String, event: FavoriteEvent) {
         when (event) {
-            is FavoriteSaved -> handleSaved(customerId, event)
-            is FavoriteDeleted -> handleDeleted(customerId, event)
+            is FavoriteSaved -> {
+                // process the save event for this customer
+            }
+            is FavoriteDeleted -> {
+                // process the delete event for this customer
+            }
         }
     }
     // end::commonSupertype[]
-
-    private fun handleSaved(customerId: String, favoriteSaved: FavoriteSaved) {
-    }
-
-    private fun handleDeleted(customerId: String, favoriteDeleted: FavoriteDeleted) {
-    }
 }
 
 sealed interface FavoriteEvent
