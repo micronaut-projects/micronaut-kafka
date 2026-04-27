@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,14 @@ final class ConsumerStateSingle extends ConsumerState {
     protected ConsumerRecords<?, ?> pollRecords(@Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         // Deserialization errors can happen while polling
         try {
-            return kafkaConsumer.poll(info.pollTimeout);
+            return synchronizedKafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
             // Try to honor the configured error strategy
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
             }
             // By default, seek past the record to continue consumption
-            kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
+            synchronizedKafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
             resolveWithErrorStrategy(null, makeConsumerRecord(ex), ex);
             // By now, it's been decided whether this record should be retried and the exception may have been handled
@@ -117,8 +117,8 @@ final class ConsumerStateSingle extends ConsumerState {
             boundArguments.put(seekArgument, seek);
         }
         Optional.ofNullable(info.ackArg(topic))
-            .ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
-        Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+            .ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> synchronizedKafkaConsumer.commitSync(currentOffsets)));
+        Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, synchronizedKafkaConsumer));
         return seek;
     }
 
@@ -144,7 +144,7 @@ final class ConsumerStateSingle extends ConsumerState {
         if (info.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
             commitSync(consumerRecords, consumerRecord, currentOffsets);
         } else if (info.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-            kafkaConsumer.commitAsync(currentOffsets, this::resolveCommitCallback);
+            synchronizedKafkaConsumer.commitAsync(currentOffsets, this::resolveCommitCallback);
         }
     }
 
@@ -188,7 +188,7 @@ final class ConsumerStateSingle extends ConsumerState {
                         handleException(e, consumerRecords, consumerRecord);
                     }
                     // Move back to the previous position
-                    kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+                    synchronizedKafkaConsumer.seek(topicPartition, consumerRecord.offset());
                     // Decide how long should we wait to retry this batch again
                     delayRetry(currentRetryCount, Collections.singleton(topicPartition));
                     return true;
@@ -205,7 +205,7 @@ final class ConsumerStateSingle extends ConsumerState {
 
     private void commitSync(ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            kafkaConsumer.commitSync(currentOffsets);
+            synchronizedKafkaConsumer.commitSync(currentOffsets);
         } catch (CommitFailedException e) {
             handleException(e, consumerRecords, consumerRecord);
         }
@@ -229,7 +229,7 @@ final class ConsumerStateSingle extends ConsumerState {
             if (!processedPartitions.add(topicPartition)) {
                 continue;
             }
-            kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+            synchronizedKafkaConsumer.seek(topicPartition, consumerRecord.offset());
         }
     }
 
