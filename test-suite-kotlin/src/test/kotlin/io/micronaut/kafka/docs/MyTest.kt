@@ -7,9 +7,10 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 @Property(name = "spec.name", value = "MyTest")
@@ -21,7 +22,7 @@ internal class MyTest : AbstractKafkaTest() {
     fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
         val message = "hello"
         producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
+        assertEquals(message, consumer.awaitMessage(15, TimeUnit.SECONDS))
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -34,11 +35,13 @@ internal class MyTest : AbstractKafkaTest() {
     @Requires(property = "spec.name", value = "MyTest")
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     class MyConsumer {
-        var consumed: String? = null
+        private val consumedMessages = LinkedBlockingQueue<String>()
 
         @Topic("my-topic")
         fun consume(message: String) {
-            consumed = message
+            consumedMessages.offer(message)
         }
+
+        fun awaitMessage(timeout: Long, timeUnit: TimeUnit): String? = consumedMessages.poll(timeout, timeUnit)
     }
 }
