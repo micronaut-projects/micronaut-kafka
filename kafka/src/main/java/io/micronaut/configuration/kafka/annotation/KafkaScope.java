@@ -1,0 +1,43 @@
+/*
+ * Copyright 2017-2024 original authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.micronaut.configuration.kafka.annotation;
+
+import io.micronaut.runtime.context.scope.ScopedProxy;
+import jakarta.inject.Scope;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+/**
+ * A custom scope that binds a bean to the current Kafka listener invocation.
+ *
+ * <p>For listeners in single-record mode the scope is active for one consumed record.
+ * For listeners in batch mode the scope is active for the entire batch.</p>
+ *
+ * @author graemerocher
+ * @since 5.5.0
+ */
+@ScopedProxy
+@Documented
+@Retention(RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Scope
+public @interface KafkaScope {
+}

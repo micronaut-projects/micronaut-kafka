@@ -88,12 +88,18 @@ final class ConsumerStateSingle extends ConsumerState {
             updateCurrentOffsets(consumerRecord, currentOffsets);
             final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);
 
-            if (processRecord(consumerRecord, consumerRecords, iterator)) {
+            final boolean[] stopProcessing = new boolean[1];
+            withKafkaScope(() -> {
+                if (processRecord(consumerRecord, consumerRecords, iterator)) {
+                    stopProcessing[0] = true;
+                    return;
+                }
+                commitOffsets(consumerRecords, consumerRecord, currentOffsets);
+                performDeferredSeek(seek);
+            });
+            if (stopProcessing[0]) {
                 return;
             }
-
-            commitOffsets(consumerRecords, consumerRecord, currentOffsets);
-            performDeferredSeek(seek);
         }
         failed = false;
     }

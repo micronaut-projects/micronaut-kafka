@@ -1,0 +1,16 @@
+If you need a bean instance that is scoped to a Kafka listener invocation, annotate that bean with ann:configuration.kafka.annotation.KafkaScope[].
+
+The scope is active on the Kafka consumer thread while a listener method is executing:
+
+- For regular listeners, a new scoped bean is created for each consumed record.
+- For batch listeners, a new scoped bean is created for each consumed batch.
+
+Any collaborators resolved within the same listener invocation share the same scoped bean instance.
+
+.Declaring a Kafka-scoped bean
+snippet::io.micronaut.kafka.docs.consumer.scope.ProductListener[tags="imports,scope", indent=0]
+
+.Injecting the scoped bean into a listener
+snippet::io.micronaut.kafka.docs.consumer.scope.ProductListener[tags="listener", indent=0]
+
+The scoped bean is destroyed when the listener invocation completes, which makes it suitable for per-message state such as derived metadata, correlation data, or values that should stay stable for the duration of a single listener execution.

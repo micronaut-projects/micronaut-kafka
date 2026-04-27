@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
+import io.micronaut.configuration.kafka.scope.KafkaCustomScope;
 import io.micronaut.core.annotation.Internal;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -111,6 +112,17 @@ abstract class ConsumerState {
 
     @Nullable
     protected abstract Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets();
+
+    protected final void withKafkaScope(Runnable action) {
+        KafkaCustomScope kafkaScope = kafkaConsumerProcessor == null ? null : kafkaConsumerProcessor.getKafkaScope();
+        if (kafkaScope == null) {
+            action.run();
+            return;
+        }
+        try (KafkaCustomScope.Scope ignored = kafkaScope.open()) {
+            action.run();
+        }
+    }
 
     void pause() {
         pause(assignments);

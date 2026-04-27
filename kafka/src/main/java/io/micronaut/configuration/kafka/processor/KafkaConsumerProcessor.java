@@ -39,6 +39,7 @@ import io.micronaut.configuration.kafka.retry.ConditionalRetryBehaviourHandler;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanProvider;
+import io.micronaut.configuration.kafka.scope.KafkaCustomScope;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventPublisher;
@@ -426,6 +427,11 @@ class KafkaConsumerProcessor
 
     BatchConsumerRecordsBinderRegistry getBatchBinderRegistry() {
         return batchBinderRegistry;
+    }
+
+    @Nullable
+    KafkaCustomScope getKafkaScope() {
+        return beanContext.findBean(KafkaCustomScope.class).orElse(null);
     }
 
     private static List<ExecutableMethod<?, ?>> resolveConsumerMethods(
