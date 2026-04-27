@@ -3,13 +3,22 @@ plugins {
     id("io.micronaut.internal.build.kafka-testsuite")
 }
 
-val testApplicationContextConfigurerMetadata = sourceSets.test.get().output.classesDirs.asFileTree.matching {
-    include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
-    include("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
+val applicationContextConfigurerMetadata = listOf(
+    "META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer",
+    "META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**"
+)
+
+val filteredTestRuntimeOutput = tasks.register<Sync>("filteredTestRuntimeOutput") {
+    from(sourceSets.test.get().output)
+    into(layout.buildDirectory.dir("filtered-test-runtime/test"))
+    applicationContextConfigurerMetadata.forEach(::exclude)
 }
 
 tasks.withType<Test>().configureEach {
-    classpath = classpath.minus(testApplicationContextConfigurerMetadata)
+    dependsOn(filteredTestRuntimeOutput)
+    classpath =
+        files(filteredTestRuntimeOutput.map { it.destinationDir }) +
+            (classpath - sourceSets.test.get().output)
 }
 
 dependencies {

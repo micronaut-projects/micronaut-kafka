@@ -4,20 +4,27 @@ plugins {
     id("io.micronaut.build.internal.kotlin-kapt")
 }
 
-val filteredTestClassesDir = layout.buildDirectory.dir("filtered-test-classes")
+val applicationContextConfigurerMetadata = listOf(
+    "META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer",
+    "META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**"
+)
+val kaptTestClassesDir = layout.buildDirectory.dir("tmp/kapt3/classes/test")
+val filteredTestRuntimeDir = layout.buildDirectory.dir("filtered-test-runtime/test")
 
-val filteredTestClasses by tasks.registering(org.gradle.api.tasks.Sync::class) {
-    from(sourceSets.test.get().output.classesDirs)
-    into(filteredTestClassesDir)
+val filteredTestRuntimeOutput by tasks.registering(Sync::class) {
+    from(sourceSets.test.get().output)
+    from(kaptTestClassesDir)
+    into(filteredTestRuntimeDir)
     includeEmptyDirs = false
-    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer")
-    exclude("META-INF/micronaut/io.micronaut.context.ApplicationContextConfigurer/**")
+    applicationContextConfigurerMetadata.forEach(::exclude)
 }
 
 tasks.withType<Test>().configureEach {
-    dependsOn(filteredTestClasses)
-    testClassesDirs = files(filteredTestClassesDir)
-    classpath = files(filteredTestClassesDir) + (classpath - sourceSets.test.get().output.classesDirs)
+    dependsOn(filteredTestRuntimeOutput)
+    testClassesDirs = files(filteredTestRuntimeDir)
+    classpath =
+        files(filteredTestRuntimeDir) +
+            (classpath - sourceSets.test.get().output - files(kaptTestClassesDir))
 }
 
 dependencies {
