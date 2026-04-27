@@ -143,7 +143,11 @@ class ConsumerStateBatchSpec extends Specification {
         1 * kafkaConsumerProcessor.handleException(_, {
             it instanceof KafkaListenerException &&
                     it.cause.is(exception) &&
-                    it.kafkaConsumer.is(kafkaConsumer)
+                    it.kafkaConsumer.is(kafkaConsumer) &&
+                    it.consumerRecord.present &&
+                    it.consumerRecord.get().topic() == 'books' &&
+                    it.consumerRecord.get().partition() == 1 &&
+                    it.consumerRecord.get().offset() == 4L
         })
     }
 
@@ -170,7 +174,15 @@ class ConsumerStateBatchSpec extends Specification {
         then:
         records == null
         1 * kafkaConsumer.seek(topicPartition, 5L)
-        1 * kafkaConsumerProcessor.handleException(_, _ as KafkaListenerException)
+        1 * kafkaConsumerProcessor.handleException(_, {
+            it instanceof KafkaListenerException &&
+                    it.cause.is(exception) &&
+                    it.kafkaConsumer.is(kafkaConsumer) &&
+                    it.consumerRecord.present &&
+                    it.consumerRecord.get().topic() == 'books' &&
+                    it.consumerRecord.get().partition() == 1 &&
+                    it.consumerRecord.get().offset() == 4L
+        })
     }
 
     private ConsumerStateBatch newConsumerStateBatch() {
