@@ -3339,6 +3339,56 @@ void receivePatternTopics(@KafkaKey String brand, String name) {
 </div>
 </div>
 <div class="sect1">
+<h2 id="_handling_multiple_payload_types_on_one_topic">Handling Multiple Payload Types on One Topic</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kafka does not route records by <code>@MessageBody</code> type. If a topic intentionally carries multiple event types, prefer a single listener method that consumes a common supertype and branches on the concrete payload in application code.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Consuming a common supertype</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Topic("favorites-events")
+public void receive(@KafkaKey String customerId, FavoriteEvent event) {
+    if (event instanceof FavoriteSaved) {
+        // process the save event for this customer
+    } else if (event instanceof FavoriteDeleted) {
+        // process the delete event for this customer
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Consuming a common supertype</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("favorites-events")
+fun receive(@KafkaKey customerId: String, event: FavoriteEvent) {
+    when (event) {
+        is FavoriteSaved -&gt; {
+            // process the save event for this customer
+        }
+        is FavoriteDeleted -&gt; {
+            // process the delete event for this customer
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Consuming a common supertype</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Topic('favorites-events')
+void receive(@KafkaKey String customerId, FavoriteEvent event) {
+    if (event instanceof FavoriteSaved) {
+        // process the save event for this customer
+    } else if (event instanceof FavoriteDeleted) {
+        // process the delete event for this customer
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_available_annotations">Available Annotations</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -3734,6 +3784,18 @@ Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; 
 <div class="paragraph">
 <p>The above examples will run the consumer within a consumer group called <code>myGroup</code>.
 In this case, each record will be consumed by one consumer instance of the consumer group.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Kafka delivers records per consumer group before Micronaut binds listener method arguments. If multiple <code>@KafkaListener</code> methods subscribe to the same topic with different group IDs, each group receives every record published to that topic.
+</td>
+</tr>
+</table>
 </div>
 <div class="admonitionblock tip">
 <table>
