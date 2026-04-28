@@ -135,6 +135,21 @@ class KafkaConfigurationSpec extends Specification {
         consumer.close()
     }
 
+    void "test configure bootstrap servers programmatically at startup"() {
+        given:
+        applicationContext = ApplicationContext.builder()
+                .properties(
+                        ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): 'localhost:1111'
+                )
+                .start()
+
+        when:
+        AbstractKafkaConsumerConfiguration config = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+
+        then:
+        config.config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:1111'
+    }
+
     void "test null kafka property reports the failing property path"() {
         when:
         applicationContext = ApplicationContext.run(
