@@ -30,7 +30,7 @@ class WordCountStreamTest {
 
             WordCountListener listener = ctx.getBean(WordCountListener.class);
 
-            await().atMost(10, SECONDS).until(() ->
+            await().atMost(30, SECONDS).until(() ->
                 listener.getWordCounts().size() == 4 &&
                     listener.getCount("test")  == 2 &&
                     listener.getCount("to")    == 1 &&

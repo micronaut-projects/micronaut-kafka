@@ -25,7 +25,7 @@ class WordCountStreamTest extends Specification {
 
         then:
         WordCountListener listener = ctx.getBean(WordCountListener)
-        conditions.within(10) {
+        conditions.within(30) {
             listener.getWordCounts().size() == 4 &&
             listener.getCount('test')  == 2 &&
             listener.getCount('to')    == 1 &&

@@ -25,6 +25,7 @@ import org.apache.kafka.common.TopicPartition
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+import java.util.Properties
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -114,14 +115,14 @@ class KafkaScopeConsumerStateSpec extends Specification {
         BeanDefinition<SingleScopedListener> beanDefinition = context.getBeanDefinition(SingleScopedListener)
         ExecutableMethod<SingleScopedListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
         AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
-        new ConsumerInfo('client', 'group', OffsetStrategy.DISABLED, kafkaListener, method)
+        new ConsumerInfo('client', 'group', OffsetStrategy.DISABLED, kafkaListener, new Properties(), method)
     }
 
     private ConsumerInfo batchConsumerInfo() {
         BeanDefinition<BatchScopedListener> beanDefinition = context.getBeanDefinition(BatchScopedListener)
         ExecutableMethod<BatchScopedListener, Object> method = beanDefinition.getRequiredMethod('receive', List)
         AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
-        new ConsumerInfo('client', 'group', OffsetStrategy.DISABLED, kafkaListener, method)
+        new ConsumerInfo('client', 'group', OffsetStrategy.DISABLED, kafkaListener, new Properties(), method)
     }
 
     private static ConsumerRecords<String, String> records(ConsumerRecord<String, String>... records) {

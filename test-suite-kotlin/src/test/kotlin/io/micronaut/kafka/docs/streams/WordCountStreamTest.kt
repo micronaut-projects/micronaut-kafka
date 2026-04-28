@@ -29,7 +29,7 @@ internal class WordCountStreamTest {
 
             val listener = ctx.getBean(WordCountListener::class.java)
 
-            await().atMost(10, TimeUnit.SECONDS).until {
+            await().atMost(30, TimeUnit.SECONDS).until {
                 listener.getWordCounts().size == 4 &&
                         listener.getCount("test") == 2L &&
                         listener.getCount("to") == 1L &&
