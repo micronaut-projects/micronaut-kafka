@@ -54,19 +54,21 @@
                                 
                                 <div class="toc-item" style="margin-left:0"><a href="#kafkaQuickStart"><strong>4</strong><span>Kafka Quick Start</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaClient"><strong>5</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaSerialization"><strong>5</strong><span>Serializing Messages with Avro and Protobuf</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaClient"><strong>6</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaListener"><strong>7</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaApplications"><strong>8</strong><span>Running Kafka Applications</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaStreams"><strong>9</strong><span>Kafka Streams</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#controlPanel"><strong>10</strong><span>Control Panel</span></a></div>
                                 
-                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
+                                <div class="toc-item" style="margin-left:0"><a href="#kafkaGuides"><strong>11</strong><span>Guides</span></a></div>
+                                
+                                <div class="toc-item" style="margin-left:0"><a href="#repository"><strong>12</strong><span>Repository</span></a></div>
                                 
                             </div>
                         </div>
@@ -105,69 +107,71 @@
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaQuickStart"><a href="#kafkaQuickStart"><strong>4</strong><span>Kafka Quick Start</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaClient"><a href="#kafkaClient"><strong>5</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaSerialization"><a href="#kafkaSerialization"><strong>5</strong><span>Serializing Messages with Avro and Protobuf</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientMethods"><a href="#kafkaClientMethods"><strong>5.1</strong><span>Defining @KafkaClient Methods</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaClient"><a href="#kafkaClient"><strong>6</strong><span>Kafka Producers Using @KafkaClient</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientConfiguration"><a href="#kafkaClientConfiguration"><strong>5.2</strong><span>Configuring @KafkaClient beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientMethods"><a href="#kafkaClientMethods"><strong>6.1</strong><span>Defining @KafkaClient Methods</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientBatch"><a href="#kafkaClientBatch"><strong>5.3</strong><span>Sending Records in Batch</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientConfiguration"><a href="#kafkaClientConfiguration"><strong>6.2</strong><span>Configuring @KafkaClient beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientScope"><a href="#kafkaClientScope"><strong>5.4</strong><span>Injecting Kafka Producer Beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientBatch"><a href="#kafkaClientBatch"><strong>6.3</strong><span>Sending Records in Batch</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientTx"><a href="#kafkaClientTx"><strong>5.5</strong><span>Transactions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientScope"><a href="#kafkaClientScope"><strong>6.4</strong><span>Injecting Kafka Producer Beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDockerized"><a href="#kafkaDockerized"><strong>5.6</strong><span>Running Kafka while testing and developing</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaClientTx"><a href="#kafkaClientTx"><strong>6.5</strong><span>Transactions</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>6</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDockerized"><a href="#kafkaDockerized"><strong>6.6</strong><span>Running Kafka while testing and developing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerMethods"><a href="#kafkaListenerMethods"><strong>6.1</strong><span>Defining @KafkaListener Methods</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaListener"><a href="#kafkaListener"><strong>7</strong><span>Kafka Consumers Using @KafkaListener</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>6.2</strong><span>Configuring @KafkaListener beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerMethods"><a href="#kafkaListenerMethods"><strong>7.1</strong><span>Defining @KafkaListener Methods</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>6.3</strong><span>Commiting Kafka Offsets</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>7.2</strong><span>Configuring @KafkaListener beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSeek"><a href="#kafkaSeek"><strong>6.4</strong><span>Assigning Kafka Offsets</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>7.3</strong><span>Commiting Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsToAConsumerBean"><a href="#manuallyAssigningOffsetsToAConsumerBean"><strong>6.4.1</strong><span>Manually Assigning Offsets to a Consumer Bean</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSeek"><a href="#kafkaSeek"><strong>7.4</strong><span>Assigning Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manualOffsetsWithMultipleTopics"><a href="#manualOffsetsWithMultipleTopics"><strong>6.4.2</strong><span>Manual Offsets with Multiple Topics</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsToAConsumerBean"><a href="#manuallyAssigningOffsetsToAConsumerBean"><strong>7.4.1</strong><span>Manually Assigning Offsets to a Consumer Bean</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsFromAConsumerMethod"><a href="#manuallyAssigningOffsetsFromAConsumerMethod"><strong>6.4.3</strong><span>Manually Assigning Offsets from a Consumer Method</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manualOffsetsWithMultipleTopics"><a href="#manualOffsetsWithMultipleTopics"><strong>7.4.2</strong><span>Manual Offsets with Multiple Topics</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-creatingKafkaSeekOperations"><a href="#creatingKafkaSeekOperations"><strong>6.4.4</strong><span>Creating Kafka Seek Operations</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsFromAConsumerMethod"><a href="#manuallyAssigningOffsetsFromAConsumerMethod"><strong>7.4.3</strong><span>Manually Assigning Offsets from a Consumer Method</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>6.5</strong><span>Kafka Batch Processing</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-creatingKafkaSeekOperations"><a href="#creatingKafkaSeekOperations"><strong>7.4.4</strong><span>Creating Kafka Seek Operations</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>6.6</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>7.5</strong><span>Kafka Batch Processing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>6.7</strong><span>Handling Consumer Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>7.6</strong><span>Forwarding Messages with @SendTo</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>7</strong><span>Running Kafka Applications</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>7.7</strong><span>Handling Consumer Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaHealth"><a href="#kafkaHealth"><strong>7.1</strong><span>Kafka Health Checks</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>8</strong><span>Running Kafka Applications</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>7.2</strong><span>Kafka Metrics</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaHealth"><a href="#kafkaHealth"><strong>8.1</strong><span>Kafka Health Checks</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>7.3</strong><span>Kafka Distributed Tracing</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaMetrics"><a href="#kafkaMetrics"><strong>8.2</strong><span>Kafka Metrics</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaNewTopics"><a href="#kafkaNewTopics"><strong>7.4</strong><span>Creating New Topics</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaTracing"><a href="#kafkaTracing"><strong>8.3</strong><span>Kafka Distributed Tracing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDisabled"><a href="#kafkaDisabled"><strong>7.5</strong><span>Disabling Micronaut-Kafka</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaNewTopics"><a href="#kafkaNewTopics"><strong>8.4</strong><span>Creating New Topics</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>8</strong><span>Kafka Streams</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaDisabled"><a href="#kafkaDisabled"><strong>8.5</strong><span>Disabling Micronaut-Kafka</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamInteractiveQuery"><a href="#kafkaStreamInteractiveQuery"><strong>8.1</strong><span>Interactive Query Service</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaStreams"><a href="#kafkaStreams"><strong>9</strong><span>Kafka Streams</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>8.2</strong><span>Kafka Stream Health Checks</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamInteractiveQuery"><a href="#kafkaStreamInteractiveQuery"><strong>9.1</strong><span>Interactive Query Service</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>8.3</strong><span>Handling Uncaught Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamHealth"><a href="#kafkaStreamHealth"><strong>9.2</strong><span>Kafka Stream Health Checks</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-controlPanel"><a href="#controlPanel"><strong>9</strong><span>Control Panel</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaStreamExceptions"><a href="#kafkaStreamExceptions"><strong>9.3</strong><span>Handling Uncaught Exceptions</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>10</strong><span>Guides</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-controlPanel"><a href="#controlPanel"><strong>10</strong><span>Control Panel</span></a></div>
         
-        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>11</strong><span>Repository</span></a></div>
+        <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaGuides"><a href="#kafkaGuides"><strong>11</strong><span>Guides</span></a></div>
+        
+        <div class="toc-item" style="margin-left:0px" id="toc-item-repository"><a href="#repository"><strong>12</strong><span>Repository</span></a></div>
         
         </div>
     </div>
@@ -1021,7 +1025,476 @@ class ProductListener {
 </div>
 </div>
 
-<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>5 Kafka Producers Using @KafkaClient</h1>
+<h1 id="kafkaSerialization"><a class="anchor" href="#kafkaSerialization"></a>5 Serializing Messages with Avro and Protobuf</h1>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaSerialization.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>Micronaut can work with schema-based message formats such as Avro and Protocol Buffers in the same way it works with <code>String</code>, <code>byte[]</code>, and JSON payloads. The <code>@KafkaClient</code> and <code>@KafkaListener</code> APIs do not change. The main difference is that you configure Kafka with serializer and deserializer implementations that understand your generated message types.</p>
+</div>
+<div class="paragraph">
+<p>This section uses the Confluent Schema Registry serializers because they are a common choice for Avro and Protobuf deployments. If you use another serializer library, keep the Micronaut code the same and replace the Kafka serializer and deserializer classes with the equivalents from your chosen library.</p>
+</div>
+<div class="sect1">
+<h2 id="_what_you_need">What You Need</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before configuring Micronaut Kafka, make sure your application build also:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Generates Java, Groovy, or Kotlin classes from your Avro or Protobuf schemas</p>
+</li>
+<li>
+<p>Adds the serializer library for the schema format you use</p>
+</li>
+<li>
+<p>Provides a schema registry URL for development, testing, and production</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once those pieces are in place, use the generated message type directly in your <code>@KafkaClient</code> and <code>@KafkaListener</code> methods.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_avro_producer_and_consumer_configuration">Avro Producer and Consumer Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following example configures a producer called <code>books</code> and a consumer group called <code>book-group</code> to publish and consume Avro messages through Schema Registry:</p>
+</div>
+<div class="openblock">
+<div class="title">Configuring Avro serialization</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.schema.registry.url=http://localhost:8081
+kafka.producers.books.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+kafka.producers.books.value.serializer=io.confluent.kafka.serializers.KafkaAvroSerializer
+kafka.consumers.book-group.key.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+kafka.consumers.book-group.value.deserializer=io.confluent.kafka.serializers.KafkaAvroDeserializer
+kafka.consumers.book-group.specific.avro.reader=true</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  schema.registry.url: http://localhost:8081
+  producers:
+    books:
+      key:
+        serializer: org.apache.kafka.common.serialization.StringSerializer
+      value:
+        serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+  consumers:
+    book-group:
+      key:
+        deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value:
+        deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      specific:
+        avro:
+          reader: true</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  "schema.registry.url"="http://localhost:8081"
+  [kafka.producers]
+    [kafka.producers.books]
+      [kafka.producers.books.key]
+        serializer="org.apache.kafka.common.serialization.StringSerializer"
+      [kafka.producers.books.value]
+        serializer="io.confluent.kafka.serializers.KafkaAvroSerializer"
+  [kafka.consumers]
+    [kafka.consumers.book-group]
+      [kafka.consumers.book-group.key]
+        deserializer="org.apache.kafka.common.serialization.StringDeserializer"
+      [kafka.consumers.book-group.value]
+        deserializer="io.confluent.kafka.serializers.KafkaAvroDeserializer"
+      [kafka.consumers.book-group.specific]
+        [kafka.consumers.book-group.specific.avro]
+          reader=true</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  schema.registry.url = "http://localhost:8081"
+  producers {
+    books {
+      key {
+        serializer = "org.apache.kafka.common.serialization.StringSerializer"
+      }
+      value {
+        serializer = "io.confluent.kafka.serializers.KafkaAvroSerializer"
+      }
+    }
+  }
+  consumers {
+    bookGroup {
+      key {
+        deserializer = "org.apache.kafka.common.serialization.StringDeserializer"
+      }
+      value {
+        deserializer = "io.confluent.kafka.serializers.KafkaAvroDeserializer"
+      }
+      specific {
+        avro {
+          reader = true
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    "schema.registry.url" = "http://localhost:8081"
+    producers {
+      books {
+        key {
+          serializer = "org.apache.kafka.common.serialization.StringSerializer"
+        }
+        value {
+          serializer = "io.confluent.kafka.serializers.KafkaAvroSerializer"
+        }
+      }
+    }
+    consumers {
+      book-group {
+        key {
+          deserializer = "org.apache.kafka.common.serialization.StringDeserializer"
+        }
+        value {
+          deserializer = "io.confluent.kafka.serializers.KafkaAvroDeserializer"
+        }
+        specific {
+          avro {
+            reader = true
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "schema.registry.url": "http://localhost:8081",
+    "producers": {
+      "books": {
+        "key": {
+          "serializer": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        "value": {
+          "serializer": "io.confluent.kafka.serializers.KafkaAvroSerializer"
+        }
+      }
+    },
+    "consumers": {
+      "book-group": {
+        "key": {
+          "deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        "value": {
+          "deserializer": "io.confluent.kafka.serializers.KafkaAvroDeserializer"
+        },
+        "specific": {
+          "avro": {
+            "reader": true
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>specific.avro.reader</code> setting tells the Avro deserializer to return your generated specific record type instead of a generic Avro record.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_protobuf_producer_and_consumer_configuration">Protobuf Producer and Consumer Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For Protocol Buffers, the serializer configuration is similar. The main additional setting is the generated message type that the deserializer should produce:</p>
+</div>
+<div class="openblock">
+<div class="title">Configuring Protobuf serialization</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.schema.registry.url=http://localhost:8081
+kafka.producers.documents.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+kafka.producers.documents.value.serializer=io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
+kafka.consumers.document-group.key.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+kafka.consumers.document-group.value.deserializer=io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+kafka.consumers.document-group.specific.protobuf.value.type=example.DocumentEvent</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  schema.registry.url: http://localhost:8081
+  producers:
+    documents:
+      key:
+        serializer: org.apache.kafka.common.serialization.StringSerializer
+      value:
+        serializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
+  consumers:
+    document-group:
+      key:
+        deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value:
+        deserializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+      specific:
+        protobuf:
+          value:
+            type: example.DocumentEvent</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  "schema.registry.url"="http://localhost:8081"
+  [kafka.producers]
+    [kafka.producers.documents]
+      [kafka.producers.documents.key]
+        serializer="org.apache.kafka.common.serialization.StringSerializer"
+      [kafka.producers.documents.value]
+        serializer="io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"
+  [kafka.consumers]
+    [kafka.consumers.document-group]
+      [kafka.consumers.document-group.key]
+        deserializer="org.apache.kafka.common.serialization.StringDeserializer"
+      [kafka.consumers.document-group.value]
+        deserializer="io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"
+      [kafka.consumers.document-group.specific]
+        [kafka.consumers.document-group.specific.protobuf]
+          [kafka.consumers.document-group.specific.protobuf.value]
+            type="example.DocumentEvent"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  schema.registry.url = "http://localhost:8081"
+  producers {
+    documents {
+      key {
+        serializer = "org.apache.kafka.common.serialization.StringSerializer"
+      }
+      value {
+        serializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"
+      }
+    }
+  }
+  consumers {
+    documentGroup {
+      key {
+        deserializer = "org.apache.kafka.common.serialization.StringDeserializer"
+      }
+      value {
+        deserializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"
+      }
+      specific {
+        protobuf {
+          value {
+            type = "example.DocumentEvent"
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    "schema.registry.url" = "http://localhost:8081"
+    producers {
+      documents {
+        key {
+          serializer = "org.apache.kafka.common.serialization.StringSerializer"
+        }
+        value {
+          serializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"
+        }
+      }
+    }
+    consumers {
+      document-group {
+        key {
+          deserializer = "org.apache.kafka.common.serialization.StringDeserializer"
+        }
+        value {
+          deserializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"
+        }
+        specific {
+          protobuf {
+            value {
+              type = "example.DocumentEvent"
+            }
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "schema.registry.url": "http://localhost:8081",
+    "producers": {
+      "documents": {
+        "key": {
+          "serializer": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        "value": {
+          "serializer": "io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"
+        }
+      }
+    },
+    "consumers": {
+      "document-group": {
+        "key": {
+          "deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        "value": {
+          "deserializer": "io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"
+        },
+        "specific": {
+          "protobuf": {
+            "value": {
+              "type": "example.DocumentEvent"
+            }
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>example.DocumentEvent</code> with the fully qualified name of the generated Protobuf message class that should be returned to your listener method.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_the_generated_types_in_clients_and_listeners">Using the Generated Types in Clients and Listeners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After the serializers are configured, the Micronaut APIs stay the same:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In <code>@KafkaClient</code>, send the generated Avro or Protobuf type as the message body</p>
+</li>
+<li>
+<p>In <code>@KafkaListener</code>, declare the same generated type in the listener method argument</p>
+</li>
+<li>
+<p>Use producer ids and consumer group ids to scope serializer settings when different topics use different formats</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This means you can mix <code>String</code>, JSON, Avro, and Protobuf clients in the same Micronaut application as long as each producer and consumer is configured with matching Kafka properties.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_avro_and_protobuf_clients">Testing Avro and Protobuf Clients</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For broker integration tests, prefer the same local-development approach described in <a href="#kafkaDockerized">Running Kafka while testing and developing</a>. Micronaut Test Resources can start Kafka automatically, and plain Testcontainers setups also work well.</p>
+</div>
+<div class="paragraph">
+<p>If your tests do not need a real Schema Registry service, you can point the serializer to Confluent&#8217;s mock registry while still using a real Kafka broker:</p>
+</div>
+<div class="openblock">
+<div class="title">Configuring a mock schema registry for tests</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.schema.registry.url=mock://test-schema-registry</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  schema.registry.url: mock://test-schema-registry</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  "schema.registry.url"="mock://test-schema-registry"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  schema.registry.url = "mock://test-schema-registry"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    "schema.registry.url" = "mock://test-schema-registry"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "schema.registry.url": "mock://test-schema-registry"
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>That setup is often enough for tests that verify producer and listener wiring with generated Avro or Protobuf types. If you also want to validate registry compatibility rules or schema lifecycle behavior, run a real Schema Registry alongside Kafka in your integration tests.</p>
+</div>
+</div>
+</div>
+
+<h1 id="kafkaClient"><a class="anchor" href="#kafkaClient"></a>6 Kafka Producers Using @KafkaClient</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient.adoc"'>
@@ -1032,7 +1505,7 @@ class ProductListener {
 
 
 
-<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>5.1 Defining @KafkaClient Methods</h2>
+<h2 id="kafkaClientMethods"><a class="anchor" href="#kafkaClientMethods"></a>6.1 Defining @KafkaClient Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientMethods.adoc"'>
@@ -1438,7 +1911,7 @@ public interface BookClient {</code></pre>
 </div>
 </div>
 
-<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>5.2 Configuring @KafkaClient beans</h2>
+<h2 id="kafkaClientConfiguration"><a class="anchor" href="#kafkaClientConfiguration"></a>6.2 Configuring @KafkaClient beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientConfiguration.adoc"'>
@@ -1813,9 +2286,12 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="paragraph">
 <p>You may want to do this if for example you choose an alternative serialization format such as Avro or Protobuf.</p>
 </div>
+<div class="paragraph">
+<p>See the <a href="#kafkaSerialization">section on serializing messages with Avro and Protobuf</a> for complete producer, consumer, and test configuration examples.</p>
+</div>
 </div>
 
-<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>5.3 Sending Records in Batch</h2>
+<h2 id="kafkaClientBatch"><a class="anchor" href="#kafkaClientBatch"></a>6.3 Sending Records in Batch</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientBatch.adoc"'>
@@ -1963,7 +2439,7 @@ interface BookClient {
 </div>
 </div>
 
-<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>5.4 Injecting Kafka Producer Beans</h2>
+<h2 id="kafkaClientScope"><a class="anchor" href="#kafkaClientScope"></a>6.4 Injecting Kafka Producer Beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientScope.adoc"'>
@@ -2156,7 +2632,7 @@ fun testBookSender() {
 <p>By using the <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/producer/KafkaProducer.html">KafkaProducer</a> API directly you open up even more options if you require transactions (exactly-once delivery) or want control over when records are flushed etc.</p>
 </div>
 
-<h2 id="kafkaClientTx"><a class="anchor" href="#kafkaClientTx"></a>5.5 Transactions</h2>
+<h2 id="kafkaClientTx"><a class="anchor" href="#kafkaClientTx"></a>6.5 Transactions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaClientTx.adoc"'>
@@ -2253,7 +2729,7 @@ interface RandomTransactionalIdClient {
 </table>
 </div>
 
-<h2 id="kafkaDockerized"><a class="anchor" href="#kafkaDockerized"></a>5.6 Running Kafka while testing and developing</h2>
+<h2 id="kafkaDockerized"><a class="anchor" href="#kafkaDockerized"></a>6.6 Running Kafka while testing and developing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaClient/kafkaDockerized.adoc"'>
@@ -2501,7 +2977,7 @@ class MyTest extends AbstractKafkaTest {
 </div>
 </div>
 
-<h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>6 Kafka Consumers Using @KafkaListener</h1>
+<h1 id="kafkaListener"><a class="anchor" href="#kafkaListener"></a>7 Kafka Consumers Using @KafkaListener</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener.adoc"'>
@@ -2764,7 +3240,7 @@ See the guide for <a href="https://guides.micronaut.io/latest/testing-micronaut-
 </table>
 </div>
 
-<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>6.1 Defining @KafkaListener Methods</h2>
+<h2 id="kafkaListenerMethods"><a class="anchor" href="#kafkaListenerMethods"></a>7.1 Defining @KafkaListener Methods</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerMethods.adoc"'>
@@ -3202,7 +3678,7 @@ Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; 
 </div>
 </div>
 
-<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>6.2 Configuring @KafkaListener beans</h2>
+<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>7.2 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
@@ -3654,6 +4130,9 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <div class="paragraph">
 <p>You may want to do this if for example you choose an alternative deserialization format such as Avro or Protobuf.</p>
 </div>
+<div class="paragraph">
+<p>See <a href="#kafkaSerialization">the section on serializing messages with Avro and Protobuf</a> for complete producer, consumer, and test configuration examples.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_transactional_properties">Transactional properties</h3>
@@ -3674,7 +4153,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>6.3 Commiting Kafka Offsets</h2>
+<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>7.3 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
@@ -3947,7 +4426,7 @@ class ProductListener {
 </div>
 </div>
 
-<h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>6.4 Assigning Kafka Offsets</h2>
+<h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>7.4 Assigning Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek.adoc"'>
@@ -3958,7 +4437,7 @@ class ProductListener {
 
 
 
-<h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>6.4.1 Manually Assigning Offsets to a Consumer Bean</h2>
+<h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>7.4.1 Manually Assigning Offsets to a Consumer Bean</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsToAConsumerBean.adoc"'>
@@ -4279,7 +4758,7 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 </table>
 </div>
 
-<h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>6.4.2 Manual Offsets with Multiple Topics</h2>
+<h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>7.4.2 Manual Offsets with Multiple Topics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manualOffsetsWithMultipleTopics.adoc"'>
@@ -4307,7 +4786,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 </table>
 </div>
 
-<h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>6.4.3 Manually Assigning Offsets from a Consumer Method</h2>
+<h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>7.4.3 Manually Assigning Offsets from a Consumer Method</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsFromAConsumerMethod.adoc"'>
@@ -4431,7 +4910,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 </table>
 </div>
 
-<h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>6.4.4 Creating Kafka Seek Operations</h2>
+<h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>7.4.4 Creating Kafka Seek Operations</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/creatingKafkaSeekOperations.adoc"'>
@@ -4472,7 +4951,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 </ul>
 </div>
 
-<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>6.5 Kafka Batch Processing</h2>
+<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>7.5 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
@@ -4925,7 +5404,7 @@ Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 </div>
 
-<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>6.6 Forwarding Messages with @SendTo</h2>
+<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>7.6 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
@@ -5146,7 +5625,7 @@ class WordCounter {
 </table>
 </div>
 
-<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>6.7 Handling Consumer Exceptions</h2>
+<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>7.7 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>
@@ -5522,7 +6001,7 @@ Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</
 </div>
 </div>
 
-<h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>7 Running Kafka Applications</h1>
+<h1 id="kafkaApplications"><a class="anchor" href="#kafkaApplications"></a>8 Running Kafka Applications</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications.adoc"'>
@@ -5546,7 +6025,7 @@ Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</
 <p>No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the <code>KafkaConsumer</code> instances are closed correctly when the server is shutdown.</p>
 </div>
 
-<h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>7.1 Kafka Health Checks</h2>
+<h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>8.1 Kafka Health Checks</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaHealth.adoc"'>
@@ -5625,7 +6104,7 @@ By default, the details visible above are only shown to authenticated users. See
 </tbody>
 </table>
 
-<h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>7.2 Kafka Metrics</h2>
+<h2 id="kafkaMetrics"><a class="anchor" href="#kafkaMetrics"></a>8.2 Kafka Metrics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaMetrics.adoc"'>
@@ -5642,7 +6121,7 @@ By default, the details visible above are only shown to authenticated users. See
 In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binders.kafka.streams.enabled</code> instead.</p>
 </div>
 
-<h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>7.3 Kafka Distributed Tracing</h2>
+<h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>8.3 Kafka Distributed Tracing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaTracing.adoc"'>
@@ -5655,7 +6134,7 @@ In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binder
 <p>Distributed tracing is supported via the <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide">Micronaut Tracing</a> module <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka">using Open Telemetry</a>.</p>
 </div>
 
-<h2 id="kafkaNewTopics"><a class="anchor" href="#kafkaNewTopics"></a>7.4 Creating New Topics</h2>
+<h2 id="kafkaNewTopics"><a class="anchor" href="#kafkaNewTopics"></a>8.4 Creating New Topics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaNewTopics.adoc"'>
@@ -5800,7 +6279,7 @@ Creating topics is not a transactional operation, so it may succeed for some top
 </div>
 </div>
 
-<h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>7.5 Disabling Micronaut-Kafka</h2>
+<h2 id="kafkaDisabled"><a class="anchor" href="#kafkaDisabled"></a>8.5 Disabling Micronaut-Kafka</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaApplications/kafkaDisabled.adoc"'>
@@ -5898,7 +6377,7 @@ class MessageClientFallback implements MessageClient { // <b class="conum">(3)</
 </table>
 </div>
 
-<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>8 Kafka Streams</h1>
+<h1 id="kafkaStreams"><a class="anchor" href="#kafkaStreams"></a>9 Kafka Streams</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams.adoc"'>
@@ -6772,7 +7251,7 @@ KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code>
 </div>
 </div>
 
-<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>8.1 Interactive Query Service</h2>
+<h2 id="kafkaStreamInteractiveQuery"><a class="anchor" href="#kafkaStreamInteractiveQuery"></a>9.1 Interactive Query Service</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamInteractiveQuery.adoc"'>
@@ -6978,7 +7457,7 @@ class InteractiveQueryServiceExample {
 </div>
 </div>
 
-<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>8.2 Kafka Stream Health Checks</h2>
+<h2 id="kafkaStreamHealth"><a class="anchor" href="#kafkaStreamHealth"></a>9.2 Kafka Stream Health Checks</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamHealth.adoc"'>
@@ -7101,7 +7580,7 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 </div>
 
-<h2 id="kafkaStreamExceptions"><a class="anchor" href="#kafkaStreamExceptions"></a>8.3 Handling Uncaught Exceptions</h2>
+<h2 id="kafkaStreamExceptions"><a class="anchor" href="#kafkaStreamExceptions"></a>9.3 Handling Uncaught Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaStreams/kafkaStreamExceptions.adoc"'>
@@ -7230,7 +7709,7 @@ public class MyStreamsUncaughtExceptionHandler
 </div>
 </div>
 
-<h1 id="controlPanel"><a class="anchor" href="#controlPanel"></a>9 Control Panel</h1>
+<h1 id="controlPanel"><a class="anchor" href="#controlPanel"></a>10 Control Panel</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/controlPanel.adoc"'>
@@ -7265,7 +7744,7 @@ public class MyStreamsUncaughtExceptionHandler
 <a href="https://micronaut-projects.github.io/micronaut-control-panel/latest/guide/#kafka">the documentation</a> for more information.</p>
 </div>
 
-<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>10 Guides</h1>
+<h1 id="kafkaGuides"><a class="anchor" href="#kafkaGuides"></a>11 Guides</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaGuides.adoc"'>
@@ -7281,7 +7760,7 @@ public class MyStreamsUncaughtExceptionHandler
 <p><a href="https://guides.micronaut.io/latest/tag-kafka.html" class="bare">https://guides.micronaut.io/latest/tag-kafka.html</a></p>
 </div>
 
-<h1 id="repository"><a class="anchor" href="#repository"></a>11 Repository</h1>
+<h1 id="repository"><a class="anchor" href="#repository"></a>12 Repository</h1>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/repository.adoc"'>
