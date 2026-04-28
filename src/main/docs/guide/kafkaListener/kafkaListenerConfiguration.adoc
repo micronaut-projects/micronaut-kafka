@@ -91,7 +91,7 @@ kafka:
 
 You may want to do this if for example you choose an alternative deserialization format such as Avro or Protobuf.
 
-See the section on serializing messages with Avro and Protobuf for complete producer, consumer, and test configuration examples.
+See xref:kafkaSerialization[the section on serializing messages with Avro and Protobuf] for complete producer, consumer, and test configuration examples.
 
 === Transactional properties
 
