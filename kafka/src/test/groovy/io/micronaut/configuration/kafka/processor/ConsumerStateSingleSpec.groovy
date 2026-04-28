@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
+import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.core.type.Argument
 import io.micronaut.core.type.ReturnType
@@ -16,6 +17,7 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.errors.RecordDeserializationException
 import spock.lang.Specification
 
 import java.lang.reflect.Method
@@ -127,6 +129,39 @@ class ConsumerStateSingleSpec extends Specification {
         def ex = thrown(MessagingSystemException)
         ex.message.contains('LOG_AND_RESUME_AT_NEXT_RECORD')
         ex.message.contains('dlq')
+    }
+
+    void "poll-time deserialization failures expose a synthetic consumer record to the exception handler"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('books', 1)
+        RecordDeserializationException exception = new RecordDeserializationException(
+            topicPartition,
+            4L,
+            'boom',
+            new IllegalStateException('deserialization failed')
+        )
+        Consumer<?, ?> kafkaConsumer = Mock() {
+            subscription() >> Collections.emptySet()
+            poll(_ as Duration) >> { throw exception }
+        }
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock()
+        ConsumerStateSingle state = newConsumerStateSingle(kafkaConsumerProcessor, kafkaConsumer)
+
+        when:
+        ConsumerRecords<?, ?> records = state.pollRecords(null)
+
+        then:
+        records == null
+        1 * kafkaConsumer.seek(topicPartition, 5L)
+        1 * kafkaConsumerProcessor.handleException(_, {
+            it instanceof KafkaListenerException &&
+                it.cause.is(exception) &&
+                it.kafkaConsumer.is(kafkaConsumer) &&
+                it.consumerRecord.present &&
+                it.consumerRecord.get().topic() == 'books' &&
+                it.consumerRecord.get().partition() == 1 &&
+                it.consumerRecord.get().offset() == 4L
+        })
     }
 
     void "sync per record commits the failed record offset when the error strategy resumes"() {
