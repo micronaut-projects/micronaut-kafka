@@ -88,7 +88,7 @@ kafka:
 .Configuring multiple Stream definitions on the same Micronaut Service.
 You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
 To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`.
-Assuming you have 2 or more Kafka Streams definitions on a single service, you must use the `default` key for one of them and then define `kafka.streams.[STREAM-NAME]` for the rest.
+If you want to configure the primary, unqualified stream explicitly, use the `default` key and then define `kafka.streams.[STREAM-NAME]` for any additional named streams.
 Each stream definition should also set its own unique `application.id`.
 
 For example in `application.yml`:
@@ -102,6 +102,11 @@ kafka:
           num:
             stream:
               threads: 1
+        my-stream:
+          application.id: my-app-my-stream
+          num:
+            stream:
+              threads: 2
         my-other-stream:
           application.id: my-app-other-stream
           num:
@@ -109,7 +114,7 @@ kafka:
               threads: 10
 ----
 
-The above configuration sets the `application.id` to `my-app-default-stream` and `num.stream.threads` to `1` for the `default` stream. It also configures a second stream named `my-other-stream` with its own `application.id` and `num.stream.threads` value of `10`.
+The above configuration sets the `application.id` to `my-app-default-stream` and `num.stream.threads` to `1` for the `default` stream. It also configures a named stream `my-stream` and a second named stream `my-other-stream`, each with their own `application.id` and `num.stream.threads` settings.
 
 You can then inject an `api:configuration.kafka.streams.ConfiguredStreamBuilder[]` specifically for the above configuration using `jakarta.inject.Named`:
 
