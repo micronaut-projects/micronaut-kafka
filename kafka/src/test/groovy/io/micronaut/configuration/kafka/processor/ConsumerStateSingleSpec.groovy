@@ -1,5 +1,6 @@
 package io.micronaut.configuration.kafka.processor
 
+import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
@@ -11,6 +12,7 @@ import io.micronaut.messaging.exceptions.MessagingSystemException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
@@ -24,7 +26,10 @@ import java.util.Optional
 import java.util.Properties
 import java.util.concurrent.CompletableFuture
 
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
 
 class ConsumerStateSingleSpec extends Specification {
 
@@ -113,7 +118,7 @@ class ConsumerStateSingleSpec extends Specification {
             'client',
             'group',
             OffsetStrategy.DISABLED,
-            kafkaListenerAnnotation(null),
+            kafkaListenerAnnotation(LOG_AND_RESUME_AT_NEXT_RECORD, null),
             new Properties(),
             executableMethod()
         )
@@ -122,6 +127,127 @@ class ConsumerStateSingleSpec extends Specification {
         def ex = thrown(MessagingSystemException)
         ex.message.contains('LOG_AND_RESUME_AT_NEXT_RECORD')
         ex.message.contains('dlq')
+    }
+
+    void "sync per record commits the failed record offset when the error strategy resumes"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SYNC_PER_RECORD,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD),
+            executableMethod { throw new IllegalStateException('boom') }
+        )
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets = [:]
+
+        when:
+        consumerState.processRecords(consumerRecords, currentOffsets)
+
+        then:
+        currentOffsets[topicPartition].offset() == 8L
+        1 * kafkaConsumer.commitSync({
+            Map<TopicPartition, OffsetAndMetadata> offsets ->
+                offsets[topicPartition]?.offset() == 8L
+        })
+        1 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "sync per record does not commit the failed record offset while a retry is scheduled"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SYNC_PER_RECORD,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1),
+            executableMethod { throw new IllegalStateException('boom') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * kafkaConsumer.seek(topicPartition, 7L)
+        0 * kafkaConsumer.commitSync(_)
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "sync per record commits the failed record offset once retries are exhausted"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SYNC_PER_RECORD,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1),
+            executableMethod { throw new IllegalStateException('boom') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * kafkaConsumer.seek(topicPartition, 7L)
+        1 * kafkaConsumer.commitSync({
+            Map<TopicPartition, OffsetAndMetadata> offsets ->
+                offsets[topicPartition]?.offset() == 8L
+        })
+        1 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "sync per record does not commit the failed record offset for none error strategy"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SYNC_PER_RECORD,
+            kafkaListenerAnnotation(NONE),
+            executableMethod { throw new IllegalStateException('boom') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        0 * kafkaConsumer.commitSync(_)
+        1 * kafkaConsumerProcessor.handleException(_, _)
     }
 
     private static Consumer createConsumer(List<TopicPartition> seeks, List<Long> offsets) {
@@ -190,13 +316,29 @@ class ConsumerStateSingleSpec extends Specification {
     }
 
     private ConsumerStateSingle newConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, Consumer<?, ?> kafkaConsumer) {
+        newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(),
+            executableMethod()
+        )
+    }
+
+    private ConsumerStateSingle newConsumerStateSingle(
+        KafkaConsumerProcessor kafkaConsumerProcessor,
+        Consumer<?, ?> kafkaConsumer,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        ExecutableMethod<?, ?> executableMethod
+    ) {
         ConsumerInfo consumerInfo = new ConsumerInfo(
             'client',
             'group',
-            OffsetStrategy.DISABLED,
-            kafkaListenerAnnotation(),
+            offsetStrategy,
+            kafkaListener,
             new Properties(),
-            executableMethod()
+            executableMethod
         )
         new ConsumerStateSingle(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
     }
@@ -207,33 +349,58 @@ class ConsumerStateSingleSpec extends Specification {
         method.invoke(target, arguments)
     }
 
-    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(String dlq = 'errors-dlq') {
-        def errorStrategy = AnnotationValue.builder(ErrorStrategy)
-            .member('value', LOG_AND_RESUME_AT_NEXT_RECORD)
+    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(def errorStrategy = LOG_AND_RESUME_AT_NEXT_RECORD, String dlq = 'errors-dlq', Integer retryCount = null) {
+        def errorStrategyAnnotation = AnnotationValue.builder(ErrorStrategy)
+            .member('value', errorStrategy)
         if (dlq != null) {
-            errorStrategy.member('dlq', dlq)
+            errorStrategyAnnotation.member('dlq', dlq)
+        }
+        if (retryCount != null) {
+            errorStrategyAnnotation.member('retryCount', retryCount)
         }
         AnnotationValue.builder(KafkaListener)
-            .member('errorStrategy', errorStrategy.build())
+            .member('errorStrategy', errorStrategyAnnotation.build())
             .build()
     }
 
     private ExecutableMethod<?, ?> executableMethod() {
+        executableMethod { null }
+    }
+
+    private ExecutableMethod<?, ?> executableMethod(Closure<?> invocation) {
         ReturnType<?> returnType = Stub() {
             getType() >> void
             isAsyncOrReactive() >> false
             getFirstTypeVariable() >> Optional.empty()
         }
-        Stub(ExecutableMethod) {
-            getDeclaringType() >> TestListener
-            getName() >> 'receive'
-            isTrue(KafkaListener, 'batch') >> false
-            hasAnnotation(_ as Class) >> false
-            getValue(KafkaListener, 'pollTimeout', Duration) >> Optional.of(Duration.ofMillis(100))
-            getArguments() >> Argument.ZERO_ARGUMENTS
-            stringValues(_ as Class) >> ([] as String[])
-            getReturnType() >> returnType
-        }
+        Proxy.newProxyInstance(
+            ConsumerStateSingleSpec.classLoader,
+            [ExecutableMethod] as Class<?>[],
+            { _, method, _ ->
+                switch (method.name) {
+                    case 'getDeclaringType':
+                        return TestListener
+                    case 'getName':
+                        return 'receive'
+                    case 'isTrue':
+                        return false
+                    case 'hasAnnotation':
+                        return false
+                    case 'getValue':
+                        return Optional.of(Duration.ofMillis(100))
+                    case 'getArguments':
+                        return Argument.ZERO_ARGUMENTS
+                    case 'stringValues':
+                        return [] as String[]
+                    case 'getReturnType':
+                        return returnType
+                    case 'invoke':
+                        return invocation.call()
+                    default:
+                        return defaultValue(method.returnType)
+                }
+            }
+        ) as ExecutableMethod<?, ?>
     }
 
     private static String headerValue(ProducerRecord<?, ?> record, String name) {
