@@ -14,6 +14,10 @@ class WordCountStreamTest extends Specification {
         def config = new HashMap<>(Kafka.getProperties());
         config.put("kafka.enabled", "true");
         config.put("spec.name", "WordCountStreamTest");
+        config.put("kafka.streams.my-stream.application.id", "test-suite-groovy-my-stream");
+        config.put("kafka.streams.my-stream.start-kafka-streams", "false");
+        config.put("kafka.streams.my-other-stream.application.id", "test-suite-groovy-my-other-stream");
+        config.put("kafka.streams.my-other-stream.start-kafka-streams", "false");
         ApplicationContext ctx = ApplicationContext.run(config)
         when:
         WordCountClient client = ctx.getBean(WordCountClient)

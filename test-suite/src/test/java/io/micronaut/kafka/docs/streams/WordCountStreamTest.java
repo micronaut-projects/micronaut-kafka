@@ -19,6 +19,10 @@ class WordCountStreamTest {
         Map<String, Object> config = new HashMap<>(kafkaProps);
         config.put("kafka.enabled", StringUtils.TRUE);
         config.put("spec.name", "WordCountStreamTest");
+        config.put("kafka.streams.my-stream.application.id", "test-suite-java-my-stream");
+        config.put("kafka.streams.my-stream.start-kafka-streams", StringUtils.FALSE);
+        config.put("kafka.streams.my-other-stream.application.id", "test-suite-java-my-other-stream");
+        config.put("kafka.streams.my-other-stream.start-kafka-streams", StringUtils.FALSE);
 
         try (ApplicationContext ctx = ApplicationContext.run(config)) {
             WordCountClient client = ctx.getBean(WordCountClient.class);

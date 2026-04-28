@@ -13,7 +13,16 @@ internal class WordCountStreamTest {
     @Suppress("UNCHECKED_CAST")
     fun testWordCounter() {
         val props = Kafka.getProperties() as MutableMap<String, Any>
-        props.putAll(mapOf("kafka.enabled" to StringUtils.TRUE, "spec.name" to "WordCountStreamTest"))
+        props.putAll(
+            mapOf(
+                "kafka.enabled" to StringUtils.TRUE,
+                "spec.name" to "WordCountStreamTest",
+                "kafka.streams.my-stream.application.id" to "test-suite-kotlin-my-stream",
+                "kafka.streams.my-stream.start-kafka-streams" to StringUtils.FALSE,
+                "kafka.streams.my-other-stream.application.id" to "test-suite-kotlin-my-other-stream",
+                "kafka.streams.my-other-stream.start-kafka-streams" to StringUtils.FALSE
+            )
+        )
         ApplicationContext.run(props).use { ctx ->
             val client = ctx.getBean(WordCountClient::class.java)
             client.publishSentence("test to test for words")
