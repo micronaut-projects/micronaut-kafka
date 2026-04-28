@@ -17,6 +17,7 @@ dependencies {
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
     compileOnly mnMicrometer.micronaut.micrometer.core
+    compileOnly mnMicrometer.micronaut.micrometer.registry.prometheus
     compileOnly libs.zipkin.brave.kafka.clients
     compileOnly mn.micronaut.graal
 

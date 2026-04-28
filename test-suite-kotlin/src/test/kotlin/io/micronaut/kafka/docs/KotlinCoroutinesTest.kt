@@ -7,11 +7,12 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.delay
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 @Property(name = "spec.name", value = "KotlinCoroutinesTest")
 @MicronautTest
@@ -22,7 +23,7 @@ internal class KotlinCoroutinesTest : AbstractKafkaTest() {
     fun testSuspendConsumer(producer: MyProducer, suspendConsumer: SuspendConsumer) {
         val message = "hello"
         producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS).until { suspendConsumer.consumed == message }
+        assertEquals(message, suspendConsumer.awaitMessage(15, TimeUnit.SECONDS))
     }
 
     @Requires(property = "spec.name", value = "KotlinCoroutinesTest")
@@ -35,12 +36,14 @@ internal class KotlinCoroutinesTest : AbstractKafkaTest() {
     @Requires(property = "spec.name", value = "KotlinCoroutinesTest")
     @KafkaListener(groupId = "suspend-group",offsetReset = OffsetReset.EARLIEST)
     class SuspendConsumer {
-        var consumed: String? = null
+        private val consumedMessages = LinkedBlockingQueue<String>()
 
         @Topic("my-topic")
         suspend fun consume(message: String) {
-            consumed = message
+            consumedMessages.offer(message)
             delay(10)
         }
+
+        fun awaitMessage(timeout: Long, timeUnit: TimeUnit): String? = consumedMessages.poll(timeout, timeUnit)
     }
 }
