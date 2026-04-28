@@ -2879,9 +2879,10 @@ import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Property
 import io.micronaut.context.annotation.Requires
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 @Property(name = "spec.name", value = "MyTest")
@@ -2893,7 +2894,7 @@ internal class MyTest : AbstractKafkaTest() {
     fun testKafkaRunning(producer: MyProducer, consumer: MyConsumer) {
         val message = "hello"
         producer.produce(message)
-        await().atMost(5, TimeUnit.SECONDS).until { consumer.consumed == message }
+        assertEquals(message, consumer.awaitMessage(15, TimeUnit.SECONDS))
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -2906,12 +2907,14 @@ internal class MyTest : AbstractKafkaTest() {
     @Requires(property = "spec.name", value = "MyTest")
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     class MyConsumer {
-        var consumed: String? = null
+        private val consumedMessages = LinkedBlockingQueue&lt;String&gt;()
 
         @Topic("my-topic")
         fun consume(message: String) {
-            consumed = message
+            consumedMessages.offer(message)
         }
+
+        fun awaitMessage(timeout: Long, timeUnit: TimeUnit): String? = consumedMessages.poll(timeout, timeUnit)
     }
 }</code></pre>
 </div>
@@ -7059,7 +7062,8 @@ kafka.streams.default.auto.offset.reset=earliest</code></pre>
 <div class="title">Configuring multiple Stream definitions on the same Micronaut Service.</div>
 <p>You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
 To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>.
-Assuming you have 2 or more Kafka Streams definitions on a single service, you will need to use the <code>default</code> key for at least one of them and then define <code>kafka.streams.[STREAM-NAME]</code> for the rest.</p>
+If you want to configure the primary, unqualified stream explicitly, use the <code>default</code> key and then define <code>kafka.streams.[STREAM-NAME]</code> for any additional named streams.
+Each stream definition should also set its own unique <code>application.id</code>.</p>
 </div>
 <div class="paragraph">
 <p>For example in <code>application.yml</code>:</p>
@@ -7068,7 +7072,11 @@ Assuming you have 2 or more Kafka Streams definitions on a single service, you w
 <div class="content">
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.num.stream.threads=1
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.default.application.id=my-app-default-stream
+kafka.streams.default.num.stream.threads=1
+kafka.streams.my-stream.application.id=my-app-my-stream
+kafka.streams.my-stream.num.stream.threads=2
+kafka.streams.my-other-stream.application.id=my-app-other-stream
 kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 </div>
 </div>
@@ -7077,10 +7085,17 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
     streams:
         default:
+          application.id: my-app-default-stream
           num:
             stream:
               threads: 1
+        my-stream:
+          application.id: my-app-my-stream
+          num:
+            stream:
+              threads: 2
         my-other-stream:
+          application.id: my-app-other-stream
           num:
             stream:
               threads: 10</code></pre>
@@ -7091,10 +7106,17 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 <pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
   [kafka.streams]
     [kafka.streams.default]
+      "application.id"="my-app-default-stream"
       [kafka.streams.default.num]
         [kafka.streams.default.num.stream]
           threads=1
+    [kafka.streams.my-stream]
+      "application.id"="my-app-my-stream"
+      [kafka.streams.my-stream.num]
+        [kafka.streams.my-stream.num.stream]
+          threads=2
     [kafka.streams.my-other-stream]
+      "application.id"="my-app-other-stream"
       [kafka.streams.my-other-stream.num]
         [kafka.streams.my-other-stream.num.stream]
           threads=10</code></pre>
@@ -7105,13 +7127,23 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 <pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
   streams {
     'default' {
+      application.id = "my-app-default-stream"
       num {
         stream {
           threads = 1
         }
       }
     }
+    myStream {
+      application.id = "my-app-my-stream"
+      num {
+        stream {
+          threads = 2
+        }
+      }
+    }
     myOtherStream {
+      application.id = "my-app-other-stream"
       num {
         stream {
           threads = 10
@@ -7128,13 +7160,23 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
   kafka {
     streams {
       default {
+        "application.id" = "my-app-default-stream"
         num {
           stream {
             threads = 1
           }
         }
       }
+      my-stream {
+        "application.id" = "my-app-my-stream"
+        num {
+          stream {
+            threads = 2
+          }
+        }
+      }
       my-other-stream {
+        "application.id" = "my-app-other-stream"
         num {
           stream {
             threads = 10
@@ -7152,13 +7194,23 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
   "kafka": {
     "streams": {
       "default": {
+        "application.id": "my-app-default-stream",
         "num": {
           "stream": {
             "threads": 1
           }
         }
       },
+      "my-stream": {
+        "application.id": "my-app-my-stream",
+        "num": {
+          "stream": {
+            "threads": 2
+          }
+        }
+      },
       "my-other-stream": {
+        "application.id": "my-app-other-stream",
         "num": {
           "stream": {
             "threads": 10
@@ -7173,7 +7225,7 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The above configuration sets the <code>num.stream.threads</code> setting of the Kafka <code>StreamsConfig</code> to <code>1</code> for the <code>default</code> stream, and the same setting to <code>10</code> for a stream named <code>my-stream</code>.</p>
+<p>The above configuration sets the <code>application.id</code> to <code>my-app-default-stream</code> and <code>num.stream.threads</code> to <code>1</code> for the <code>default</code> stream. It also configures a named stream <code>my-stream</code> and a second named stream <code>my-other-stream</code>, each with their own <code>application.id</code> and <code>num.stream.threads</code> settings.</p>
 </div>
 <div class="paragraph">
 <p>You can then inject an <code><a href="../api/io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html">ConfiguredStreamBuilder</a></code> specifically for the above configuration using <code>jakarta.inject.Named</code>:</p>
@@ -7182,7 +7234,7 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
 @Named("my-other-stream")
-KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
+KStream&lt;String, String&gt; myOtherKStream(@Named("my-other-stream") ConfiguredStreamBuilder builder)  {
     return builder.stream("my-other-stream");
 }</code></pre>
 </div>
@@ -7191,7 +7243,7 @@ KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
 @Named("my-other-stream")
-fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {
+fun myOtherKStream(@Named("my-other-stream") builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {
     return builder.stream("my-other-stream")
 }</code></pre>
 </div>
@@ -7200,7 +7252,7 @@ fun myOtherKStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
 @Named('my-other-stream')
-KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
+KStream&lt;String, String&gt; myOtherKStream(@Named('my-other-stream') ConfiguredStreamBuilder builder)  {
     return builder.stream('my-other-stream')
 }</code></pre>
 </div>
@@ -7212,7 +7264,7 @@ KStream&lt;String, String&gt; myOtherKStream(ConfiguredStreamBuilder builder)  {
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder</code> and you have multiple topology beans defined, they share the default configurations such as client id and application id. When using multiple streams in a single app, it is advisable to provide a <code>@Named</code> instance of <code>ConfiguredStreamBuilder</code> for each stream.
+The <code>@Named</code> qualifier must be applied to the injected <code>ConfiguredStreamBuilder</code> parameter so Micronaut can bind that topology to the matching <code>kafka.streams.*</code> configuration. If you have multiple topology beans and do not qualify the <code>ConfiguredStreamBuilder</code>, they share the default configuration such as client id and application id.
 </td>
 </tr>
 </table>
@@ -7222,7 +7274,7 @@ If you do not provide a <code>@Named</code> on the <code>ConfiguredStreamBuilder
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
 @Named("my-stream")
-KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code></pre>
+KStream&lt;String, String&gt; myStream(@Named("my-stream") ConfiguredStreamBuilder builder) {</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7230,7 +7282,7 @@ KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Singleton
 @Named("my-stream")
-fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {</code></pre>
+fun myStream(@Named("my-stream") builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7238,7 +7290,7 @@ fun myStream(builder: ConfiguredStreamBuilder): KStream&lt;String, String&gt; {<
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@Singleton
 @Named('my-stream')
-KStream&lt;String, String&gt; myStream(ConfiguredStreamBuilder builder) {</code></pre>
+KStream&lt;String, String&gt; myStream(@Named('my-stream') ConfiguredStreamBuilder builder) {</code></pre>
 </div>
 </div>
 <div class="paragraph">
