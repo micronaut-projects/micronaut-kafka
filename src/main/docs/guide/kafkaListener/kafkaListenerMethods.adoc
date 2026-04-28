@@ -22,6 +22,13 @@ You can also specify one or many regular expressions to listen for:
 
 snippet::io.micronaut.kafka.docs.consumer.topics.ProductListener[tags=patternTopics, indent=0]
 
+== Handling Multiple Payload Types on One Topic
+
+Kafka does not route records by `@MessageBody` type. If a topic intentionally carries multiple event types, prefer a single listener method that consumes a common supertype and branches on the concrete payload in application code.
+
+.Consuming a common supertype
+
+snippet::io.micronaut.kafka.docs.consumer.topics.FavoriteEventListener[tags=commonSupertype, indent=0]
 
 == Available Annotations
 

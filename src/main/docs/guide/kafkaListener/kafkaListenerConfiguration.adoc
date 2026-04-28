@@ -15,6 +15,8 @@ snippet::io.micronaut.kafka.docs.consumer.config.ConsumerGroupIdListener[tags=an
 The above examples will run the consumer within a consumer group called `myGroup`.
 In this case, each record will be consumed by one consumer instance of the consumer group.
 
+NOTE: Kafka delivers records per consumer group before Micronaut binds listener method arguments. If multiple `@KafkaListener` methods subscribe to the same topic with different group IDs, each group receives every record published to that topic.
+
 TIP: You can make the consumer group configurable using a placeholder: `@KafkaListener("${my.consumer.group:myGroup}")`
 
 To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), `uniqueGroupId` can be set to `true`:
