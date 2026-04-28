@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +190,26 @@ class RecoveringTransactionalProducerTest {
         KafkaException kafkaException = assertThrows(KafkaException.class, checkedFailureProducer::commitTransaction);
         assertTrue(kafkaException.getMessage().contains("Transactional send failed"));
         assertInstanceOf(Exception.class, kafkaException.getCause());
+    }
+
+    @Test
+    void notifiesCallbacksWhenReplayRecoveryFails() {
+        StubProducer first = new StubProducer().enqueueSend(SendBehavior.callbackFailure(new InvalidPidMappingException("expired")));
+        StubProducer second = new StubProducer().enqueueBeginException(new KafkaException("recovery failed"));
+        RecoveringTransactionalProducer<String, String> recoveringProducer =
+            new RecoveringTransactionalProducer<>(supplier(first, second), "tx");
+        AtomicReference<Exception> callbackException = new AtomicReference<>();
+
+        recoveringProducer.initTransactions();
+        recoveringProducer.beginTransaction();
+        Future<RecordMetadata> future = recoveringProducer.send(RECORD, (metadata, exception) -> callbackException.set(exception));
+
+        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
+
+        assertInstanceOf(KafkaException.class, exception.getCause());
+        assertTrue(exception.getCause().getMessage().contains("recovery failed"));
+        assertInstanceOf(KafkaException.class, callbackException.get());
+        assertTrue(callbackException.get().getMessage().contains("recovery failed"));
     }
 
     private static java.util.function.Supplier<Producer<String, String>> supplier(StubProducer... producers) {

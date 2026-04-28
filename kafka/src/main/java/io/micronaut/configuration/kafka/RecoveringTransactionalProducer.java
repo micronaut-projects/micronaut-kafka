@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,6 +267,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
     }
 
     private void recoverAndReplay(long callbackGeneration) {
+        List<FailedCallback<K, V>> failedCallbacks = new ArrayList<>();
         synchronized (this) {
             if (closed || callbackGeneration != generation || !inTransaction) {
                 return;
@@ -276,10 +277,16 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
             } catch (RuntimeException e) {
                 LOG.warn("Failed to recover transactional producer [{}] after transactional id expiration: {}", transactionalId, e.getMessage(), e);
                 for (PendingSend<K, V> ps : new ArrayList<>(pendingSends)) {
-                    ps.complete(null, e);
+                    Callback callback = ps.complete(null, e);
+                    if (callback != null) {
+                        failedCallbacks.add(new FailedCallback<>(callback, e));
+                    }
                 }
                 completeTransaction();
             }
+        }
+        for (FailedCallback<K, V> failedCallback : failedCallbacks) {
+            failedCallback.callback().onCompletion(null, failedCallback.exception());
         }
     }
 
@@ -380,6 +387,9 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
             }
             return callback;
         }
+    }
+
+    private record FailedCallback<K, V>(Callback callback, Exception exception) {
     }
 
     @FunctionalInterface

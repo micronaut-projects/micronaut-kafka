@@ -34,6 +34,7 @@ import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.reflect.InstantiationUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.type.ReturnType;
 import io.micronaut.core.util.StringUtils;
@@ -701,42 +702,50 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
 
             LOG.debug("Creating new KafkaProducer.");
 
-            if (!newProperties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> keySerializer = newConfiguration.getKeySerializer().orElse(null);
-                if (keySerializer == null) {
-                    if (keyArgument != null) {
-                        keySerializer = serdeRegistry.pickSerializer(keyArgument);
-                    } else {
-                        keySerializer = new ByteArraySerializer();
+            boolean isBatchSend = context.isTrue(KafkaClient.class, "batch");
+            boolean transactional = StringUtils.isNotEmpty(transactionalId);
+            Argument<?> finalKeyArgument = keyArgument;
+            Argument<?> finalBodyArgument = bodyArgument;
+            Argument<?> finalValueArgument = isBatchSend ? finalBodyArgument.getFirstTypeVariable().orElse(finalBodyArgument) : finalBodyArgument;
+            ProducerSupplier producerSupplier = () -> {
+                DefaultKafkaProducerConfiguration<?, ?> producerConfiguration = new DefaultKafkaProducerConfiguration(configuration);
+                Properties producerProperties = producerConfiguration.getConfig();
+                producerProperties.putAll(newProperties);
+
+                if (!producerProperties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
+                    Serializer<?> keySerializer = recreateSerializer((Serializer<?>) configuration.getKeySerializer().orElse(null));
+                    if (keySerializer == null) {
+                        keySerializer = finalKeyArgument != null ? serdeRegistry.pickSerializer(finalKeyArgument) : new ByteArraySerializer();
                     }
 
                     LOG.debug("Using Kafka key serializer: {}", keySerializer);
-                    newConfiguration.setKeySerializer((Serializer) keySerializer);
+                    producerConfiguration.setKeySerializer((Serializer) keySerializer);
+                } else {
+                    producerConfiguration.setKeySerializer(null);
                 }
-            }
 
-            boolean isBatchSend = context.isTrue(KafkaClient.class, "batch");
-
-            if (!newProperties.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> valueSerializer = newConfiguration.getValueSerializer().orElse(null);
-
-                if (valueSerializer == null) {
-                    valueSerializer = serdeRegistry.pickSerializer(isBatchSend ? bodyArgument.getFirstTypeVariable().orElse(bodyArgument) : bodyArgument);
+                if (!producerProperties.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
+                    Serializer<?> valueSerializer = recreateSerializer((Serializer<?>) configuration.getValueSerializer().orElse(null));
+                    if (valueSerializer == null) {
+                        valueSerializer = serdeRegistry.pickSerializer((Argument) finalValueArgument);
+                    }
 
                     LOG.debug("Using Kafka value serializer: {}", valueSerializer);
-                    newConfiguration.setValueSerializer((Serializer) valueSerializer);
+                    producerConfiguration.setValueSerializer((Serializer) valueSerializer);
+                } else {
+                    producerConfiguration.setValueSerializer(null);
                 }
-            }
 
-            boolean transactional = StringUtils.isNotEmpty(transactionalId);
+                return beanContext.createBean(Producer.class, producerConfiguration);
+            };
             Producer<?, ?> producer;
             if (transactional) {
                 producer = new RecoveringTransactionalProducer<>(
-                    () -> beanContext.createBean(Producer.class, newConfiguration),
+                    producerSupplier::create,
                     transactionalId
                 );
             } else {
-                producer = beanContext.createBean(Producer.class, newConfiguration);
+                producer = producerSupplier.create();
             }
             timestampSupplier = context.isTrue(KafkaClient.class, "timestamp") ? ctx -> System.currentTimeMillis() : timestampSupplier;
             Duration maxBlock = context.getValue(KafkaClient.class, "maxBlock", Duration.class).orElse(null);
@@ -787,6 +796,21 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     @SuppressWarnings("rawtypes")
     private AbstractKafkaProducerConfiguration getDefaultConfigBean() {
         return beanContext.getBean(AbstractKafkaProducerConfiguration.class);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private @Nullable Serializer<?> recreateSerializer(@Nullable Serializer<?> serializer) {
+        if (serializer == null) {
+            return null;
+        }
+        Class<? extends Serializer> serializerType = serializer.getClass();
+        return InstantiationUtils.tryInstantiate(serializerType)
+            .orElseThrow(() -> new MessagingClientException("Unable to instantiate Kafka serializer [" + serializerType.getName() + "] for producer recovery"));
+    }
+
+    @FunctionalInterface
+    private interface ProducerSupplier {
+        Producer<?, ?> create();
     }
 
     private static String logMethod(ExecutableMethod<?, ?> method) {

@@ -34,6 +34,7 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.AnnotationMetadata;
+import io.micronaut.core.reflect.InstantiationUtils;
 import org.jspecify.annotations.Nullable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
@@ -51,6 +52,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.Supplier;
 
 /**
  * A registry class for Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
@@ -172,42 +175,75 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
             AbstractKafkaProducerConfiguration config = clientId.flatMap(this::findConfigBean)
                 .or(() -> clientId.flatMap(this::findHyphenatedConfigBean))
                 .orElseGet(this::getDefaultConfigBean);
-
-            DefaultKafkaProducerConfiguration newConfig = new DefaultKafkaProducerConfiguration(config);
-
-            Properties properties = newConfig.getConfig();
-            if (!properties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> keySerializer = serdeRegistry.pickSerializer(keyType);
-                newConfig.setKeySerializer(keySerializer);
-            }
-
-            if (!properties.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
-                Serializer<?> valueSerializer = serdeRegistry.pickSerializer(valueType);
-                newConfig.setValueSerializer(valueSerializer);
-            }
-
-            if (StringUtils.isNotEmpty(transactionalId)) {
-                properties.putIfAbsent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);
-                properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-            }
-
-            clientId.ifPresent(x -> properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, x));
-
-            if (CollectionUtils.isNotEmpty(props)) {
-                properties.putAll(props);
-            }
+            Supplier<Producer<?, ?>> producerSupplier = () -> createConfiguredProducer(config, clientId.orElse(null), transactionalId, keyType, valueType, props);
 
             if (transactional) {
                 Producer<?, ?> recovering = new RecoveringTransactionalProducer<>(
-                    () -> beanContext.createBean(Producer.class, newConfig),
+                    producerSupplier::get,
                     transactionalId
                 );
                 recovering.initTransactions();
                 return recovering;
             }
 
-            return beanContext.createBean(Producer.class, newConfig);
+            return producerSupplier.get();
         });
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private Producer<?, ?> createConfiguredProducer(AbstractKafkaProducerConfiguration config,
+                                                    @Nullable String clientId,
+                                                    @Nullable String transactionalId,
+                                                    Argument<?> keyType,
+                                                    Argument<?> valueType,
+                                                    @Nullable Map<String, String> props) {
+        DefaultKafkaProducerConfiguration producerConfiguration = new DefaultKafkaProducerConfiguration(config);
+        Properties properties = producerConfiguration.getConfig();
+
+        if (StringUtils.isNotEmpty(transactionalId)) {
+            properties.putIfAbsent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);
+            properties.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        }
+
+        if (StringUtils.isNotEmpty(clientId)) {
+            properties.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, clientId);
+        }
+
+        if (CollectionUtils.isNotEmpty(props)) {
+            properties.putAll(props);
+        }
+
+        if (!properties.containsKey(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG)) {
+            Serializer<?> keySerializer = recreateSerializer((Serializer<?>) config.getKeySerializer().orElse(null));
+            if (keySerializer == null) {
+                keySerializer = serdeRegistry.pickSerializer(keyType);
+            }
+            producerConfiguration.setKeySerializer(keySerializer);
+        } else {
+            producerConfiguration.setKeySerializer(null);
+        }
+
+        if (!properties.containsKey(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG)) {
+            Serializer<?> valueSerializer = recreateSerializer((Serializer<?>) config.getValueSerializer().orElse(null));
+            if (valueSerializer == null) {
+                valueSerializer = serdeRegistry.pickSerializer(valueType);
+            }
+            producerConfiguration.setValueSerializer(valueSerializer);
+        } else {
+            producerConfiguration.setValueSerializer(null);
+        }
+
+        return beanContext.createBean(Producer.class, producerConfiguration);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private @Nullable Serializer<?> recreateSerializer(@Nullable Serializer<?> serializer) {
+        if (serializer == null) {
+            return null;
+        }
+        Class<? extends Serializer> serializerType = serializer.getClass();
+        return InstantiationUtils.tryInstantiate(serializerType)
+            .orElseThrow(() -> new ConfigurationException("Unable to instantiate Kafka serializer [" + serializerType.getName() + "] for producer recovery"));
     }
 
     /**
