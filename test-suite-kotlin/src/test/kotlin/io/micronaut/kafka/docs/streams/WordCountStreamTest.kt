@@ -5,6 +5,7 @@ import io.micronaut.core.util.StringUtils
 import io.micronaut.testcontainers.kafka.Kafka
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
+import org.apache.kafka.streams.KafkaStreams
 import java.util.concurrent.TimeUnit
 
 internal class WordCountStreamTest {
@@ -24,6 +25,10 @@ internal class WordCountStreamTest {
             )
         )
         ApplicationContext.run(props).use { ctx ->
+            await().atMost(30, TimeUnit.SECONDS).until {
+                ctx.getBeansOfType(KafkaStreams::class.java).all { stream -> stream.state().isRunningOrRebalancing }
+            }
+
             val client = ctx.getBean(WordCountClient::class.java)
             client.publishSentence("test to test for words")
 

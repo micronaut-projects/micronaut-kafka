@@ -2,6 +2,7 @@ package io.micronaut.kafka.docs.streams
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.testcontainers.kafka.Kafka
+import org.apache.kafka.streams.KafkaStreams
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -20,6 +21,9 @@ class WordCountStreamTest extends Specification {
         config.put("kafka.streams.my-other-stream.start-kafka-streams", "false");
         ApplicationContext ctx = ApplicationContext.run(config)
         when:
+        conditions.within(30) {
+            ctx.getBeansOfType(KafkaStreams).every { stream -> stream.state().isRunningOrRebalancing() }
+        }
         WordCountClient client = ctx.getBean(WordCountClient)
         client.publishSentence('test to test for words')
 

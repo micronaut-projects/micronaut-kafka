@@ -4,6 +4,7 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
+import org.apache.kafka.streams.KafkaStreams;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,10 @@ class WordCountStreamTest {
         config.put("kafka.streams.my-other-stream.start-kafka-streams", StringUtils.FALSE);
 
         try (ApplicationContext ctx = ApplicationContext.run(config)) {
+            await().atMost(30, SECONDS).until(() ->
+                ctx.getBeansOfType(KafkaStreams.class).stream().allMatch(stream -> stream.state().isRunningOrRebalancing())
+            );
+
             WordCountClient client = ctx.getBean(WordCountClient.class);
             client.publishSentence("test to test for words");
 
