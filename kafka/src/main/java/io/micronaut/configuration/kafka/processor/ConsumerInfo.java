@@ -238,7 +238,11 @@ final class ConsumerInfo {
     private List<PatternMethod> resolveTopicMethods(List<ExecutableMethod<Object, ?>> methods) {
         List<PatternMethod> patterns = new java.util.ArrayList<>();
         for (ExecutableMethod<Object, ?> executableMethod : methods) {
-            for (AnnotationValue<Topic> topicAnnotation : executableMethod.getDeclaredAnnotationValuesByType(Topic.class)) {
+            List<AnnotationValue<Topic>> topicAnnotations = executableMethod.getDeclaredAnnotationValuesByType(Topic.class);
+            if (topicAnnotations == null) {
+                continue;
+            }
+            for (AnnotationValue<Topic> topicAnnotation : topicAnnotations) {
                 for (String topic : topicAnnotation.stringValues()) {
                     ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
                     if (previous != null && previous != executableMethod) {
