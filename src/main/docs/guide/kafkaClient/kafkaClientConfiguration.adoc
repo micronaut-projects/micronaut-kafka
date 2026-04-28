@@ -68,4 +68,5 @@ kafka:
 
 You may want to do this if for example you choose an alternative serialization format such as Avro or Protobuf.
 
+See the xref:kafkaSerialization[section on serializing messages with Avro and Protobuf] for complete producer, consumer, and test configuration examples.
 

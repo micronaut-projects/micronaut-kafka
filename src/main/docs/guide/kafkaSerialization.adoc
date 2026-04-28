@@ -1,0 +1,95 @@
+Micronaut can work with schema-based message formats such as Avro and Protocol Buffers in the same way it works with `String`, `byte[]`, and JSON payloads. The `@KafkaClient` and `@KafkaListener` APIs do not change. The main difference is that you configure Kafka with serializer and deserializer implementations that understand your generated message types.
+
+This section uses the Confluent Schema Registry serializers because they are a common choice for Avro and Protobuf deployments. If you use another serializer library, keep the Micronaut code the same and replace the Kafka serializer and deserializer classes with the equivalents from your chosen library.
+
+== What You Need
+
+Before configuring Micronaut Kafka, make sure your application build also:
+
+* Generates Java, Groovy, or Kotlin classes from your Avro or Protobuf schemas
+* Adds the serializer library for the schema format you use
+* Provides a schema registry URL for development, testing, and production
+
+Once those pieces are in place, use the generated message type directly in your `@KafkaClient` and `@KafkaListener` methods.
+
+== Avro Producer and Consumer Configuration
+
+The following example configures a producer called `books` and a consumer group called `book-group` to publish and consume Avro messages through Schema Registry:
+
+.Configuring Avro serialization
+[configuration]
+----
+kafka:
+  schema.registry.url: http://localhost:8081
+  producers:
+    books:
+      key:
+        serializer: org.apache.kafka.common.serialization.StringSerializer
+      value:
+        serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+  consumers:
+    book-group:
+      key:
+        deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value:
+        deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      specific:
+        avro:
+          reader: true
+----
+
+The `specific.avro.reader` setting tells the Avro deserializer to return your generated specific record type instead of a generic Avro record.
+
+== Protobuf Producer and Consumer Configuration
+
+For Protocol Buffers, the serializer configuration is similar. The main additional setting is the generated message type that the deserializer should produce:
+
+.Configuring Protobuf serialization
+[configuration]
+----
+kafka:
+  schema.registry.url: http://localhost:8081
+  producers:
+    documents:
+      key:
+        serializer: org.apache.kafka.common.serialization.StringSerializer
+      value:
+        serializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
+  consumers:
+    document-group:
+      key:
+        deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value:
+        deserializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+      specific:
+        protobuf:
+          value:
+            type: example.DocumentEvent
+----
+
+Replace `example.DocumentEvent` with the fully qualified name of the generated Protobuf message class that should be returned to your listener method.
+
+== Using the Generated Types in Clients and Listeners
+
+After the serializers are configured, the Micronaut APIs stay the same:
+
+* In `@KafkaClient`, send the generated Avro or Protobuf type as the message body
+* In `@KafkaListener`, declare the same generated type in the listener method argument
+* Use producer ids and consumer group ids to scope serializer settings when different topics use different formats
+
+This means you can mix `String`, JSON, Avro, and Protobuf clients in the same Micronaut application as long as each producer and consumer is configured with matching Kafka properties.
+
+== Testing Avro and Protobuf Clients
+
+For broker integration tests, prefer the same local-development approach described in <<kafkaDockerized,Running Kafka while testing and developing>>. Micronaut Test Resources can start Kafka automatically, and plain Testcontainers setups also work well.
+
+If your tests do not need a real Schema Registry service, you can point the serializer to Confluent's mock registry while still using a real Kafka broker:
+
+.Configuring a mock schema registry for tests
+[configuration]
+----
+kafka:
+  schema.registry.url: mock://test-schema-registry
+----
+
+That setup is often enough for tests that verify producer and listener wiring with generated Avro or Protobuf types. If you also want to validate registry compatibility rules or schema lifecycle behavior, run a real Schema Registry alongside Kafka in your integration tests.
