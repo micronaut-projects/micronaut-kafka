@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka;
 
+import org.awaitility.Awaitility;
 import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.Callback;
@@ -208,7 +209,7 @@ class RecoveringTransactionalProducerTest {
 
         assertInstanceOf(KafkaException.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("recovery failed"));
-        assertInstanceOf(KafkaException.class, callbackException.get());
+        Awaitility.await().untilAsserted(() -> assertInstanceOf(KafkaException.class, callbackException.get()));
         assertTrue(callbackException.get().getMessage().contains("recovery failed"));
     }
 

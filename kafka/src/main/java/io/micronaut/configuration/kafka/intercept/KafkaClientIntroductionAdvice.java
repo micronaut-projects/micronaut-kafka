@@ -707,8 +707,8 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             Argument<?> finalKeyArgument = keyArgument;
             Argument<?> finalBodyArgument = bodyArgument;
             Argument<?> finalValueArgument = isBatchSend ? finalBodyArgument.getFirstTypeVariable().orElse(finalBodyArgument) : finalBodyArgument;
-            ProducerSupplier producerSupplier = () -> {
-                DefaultKafkaProducerConfiguration<?, ?> producerConfiguration = new DefaultKafkaProducerConfiguration(configuration);
+            ProducerSupplier<Object, Object> producerSupplier = () -> {
+                DefaultKafkaProducerConfiguration<Object, Object> producerConfiguration = new DefaultKafkaProducerConfiguration<>(configuration);
                 Properties producerProperties = producerConfiguration.getConfig();
                 producerProperties.putAll(newProperties);
 
@@ -719,7 +719,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     }
 
                     LOG.debug("Using Kafka key serializer: {}", keySerializer);
-                    producerConfiguration.setKeySerializer((Serializer) keySerializer);
+                    producerConfiguration.setKeySerializer((Serializer<Object>) keySerializer);
                 } else {
                     producerConfiguration.setKeySerializer(null);
                 }
@@ -731,14 +731,14 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                     }
 
                     LOG.debug("Using Kafka value serializer: {}", valueSerializer);
-                    producerConfiguration.setValueSerializer((Serializer) valueSerializer);
+                    producerConfiguration.setValueSerializer((Serializer<Object>) valueSerializer);
                 } else {
                     producerConfiguration.setValueSerializer(null);
                 }
 
-                return beanContext.createBean(Producer.class, producerConfiguration);
+                return (Producer<Object, Object>) beanContext.createBean(Producer.class, producerConfiguration);
             };
-            Producer<?, ?> producer;
+            Producer<Object, Object> producer;
             if (transactional) {
                 producer = new RecoveringTransactionalProducer<>(
                     producerSupplier::create,
@@ -808,11 +808,6 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             .orElseThrow(() -> new MessagingClientException("Unable to instantiate Kafka serializer [" + serializerType.getName() + "] for producer recovery"));
     }
 
-    @FunctionalInterface
-    private interface ProducerSupplier {
-        Producer<?, ?> create();
-    }
-
     private static String logMethod(ExecutableMethod<?, ?> method) {
         return method.getDeclaringType().getSimpleName() + "#" + method.getName();
     }
@@ -839,6 +834,11 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             return apply(ctx);
         }
 
+    }
+
+    @FunctionalInterface
+    private interface ProducerSupplier<K, V> {
+        Producer<K, V> create();
     }
 
     /**

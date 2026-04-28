@@ -267,7 +267,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
     }
 
     private void recoverAndReplay(long callbackGeneration) {
-        List<FailedCallback<K, V>> failedCallbacks = new ArrayList<>();
+        List<FailedCallback> failedCallbacks = new ArrayList<>();
         synchronized (this) {
             if (closed || callbackGeneration != generation || !inTransaction) {
                 return;
@@ -279,13 +279,13 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
                 for (PendingSend<K, V> ps : new ArrayList<>(pendingSends)) {
                     Callback callback = ps.complete(null, e);
                     if (callback != null) {
-                        failedCallbacks.add(new FailedCallback<>(callback, e));
+                        failedCallbacks.add(new FailedCallback(callback, e));
                     }
                 }
                 completeTransaction();
             }
         }
-        for (FailedCallback<K, V> failedCallback : failedCallbacks) {
+        for (FailedCallback failedCallback : failedCallbacks) {
             failedCallback.callback().onCompletion(null, failedCallback.exception());
         }
     }
@@ -389,7 +389,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
         }
     }
 
-    private record FailedCallback<K, V>(Callback callback, Exception exception) {
+    private record FailedCallback(Callback callback, Exception exception) {
     }
 
     @FunctionalInterface
