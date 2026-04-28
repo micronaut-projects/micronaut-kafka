@@ -3651,11 +3651,11 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SYNC_PER_RECORD">SYNC_PER_RECORD</a></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets manually after each <code>ConsumerRecord</code> is processed. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets manually after each <code>ConsumerRecord</code> completes processing. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#ASYNC_PER_RECORD">ASYNC_PER_RECORD</a></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets asynchronously after each <code>ConsumerRecord</code> is processed. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commits offsets asynchronously after each <code>ConsumerRecord</code> completes processing. Sets <code>enable.auto.commit</code> to <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="../api/io/micronaut/configuration/kafka/annotation/OffsetStrategy.html#SEND_TO_TRANSACTION">SEND_TO_TRANSACTION</a></p></td>
@@ -3665,6 +3665,31 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </table>
 <div class="paragraph">
 <p>Depending on the your level of paranoia or durability requirements you can choose to tune how and when offsets are committed.</p>
+</div>
+<div class="paragraph">
+<p>For <code>SYNC_PER_RECORD</code> and <code>ASYNC_PER_RECORD</code>, Micronaut tracks the next offset before invoking the listener and commits it only after the current record&#8217;s processing flow finishes.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If the listener completes normally, the current record is committed immediately.</p>
+</li>
+<li>
+<p>If the listener throws and the error strategy resumes at the next record (<code>RESUME_AT_NEXT_RECORD</code> or <code>LOG_AND_RESUME_AT_NEXT_RECORD</code>), Micronaut handles the exception and then commits the failed record&#8217;s offset so consumption continues at the next offset.</p>
+</li>
+<li>
+<p>If the listener throws and a retry strategy schedules another attempt, Micronaut seeks back to the failed offset and does not commit it while retries remain.</p>
+</li>
+<li>
+<p>If the listener throws and a retry strategy exhausts its retries, Micronaut stops retrying that record and the current attempt commits past it.</p>
+</li>
+<li>
+<p>If the listener throws and the deprecated <code>NONE</code> strategy is used, Micronaut stops the current <code>poll()</code> loop and does not perform an additional per-record commit for the failing record.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See the <a href="kafkaErrors.html">error strategy</a> section for the meaning of each error strategy.</p>
 </div>
 </div>
 <div class="sect2">
