@@ -21,7 +21,6 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micronaut.configuration.kafka.metrics.builder.KafkaMetricMeterTypeBuilder;
 import io.micronaut.core.annotation.Internal;
-import io.micronaut.core.reflect.ClassUtils;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
@@ -191,10 +190,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     }
 
     private static boolean isPrometheusRegistry(MeterRegistry meterRegistry) {
-        return ClassUtils.forName("io.micrometer.prometheusmetrics.PrometheusMeterRegistry",
-                        AbstractKafkaMetricsReporter.class.getClassLoader())
-                .map(cls -> cls.isInstance(meterRegistry))
-                .orElse(false);
+        return PrometheusRegistryUtils.isPrometheusRegistry(meterRegistry);
     }
 
     private static boolean shouldIncludeEmptyNodeIdTag(MetricName metricName, String tagName) {
