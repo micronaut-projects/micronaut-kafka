@@ -87,8 +87,11 @@ final class ConsumerStateSingle extends ConsumerState {
                 currentOffsets.put(topicPartition, offsetAndMetadata);
             }
 
-            final KafkaSeekOperations seek = Optional.ofNullable(info.seekArg(topic)).map(x -> KafkaSeekOperations.newInstance()).orElse(null);
-            Optional.ofNullable(info.seekArg(topic)).ifPresent(argument -> boundArguments.put(argument, seek));
+            final Argument seekArgument = info.seekArg(topic);
+            final KafkaSeekOperations seek = seekArgument == null ? null : KafkaSeekOperations.newInstance();
+            if (seekArgument != null) {
+                boundArguments.put(seekArgument, seek);
+            }
             Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
             Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
 
