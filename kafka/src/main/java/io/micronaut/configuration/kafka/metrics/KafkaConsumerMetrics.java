@@ -42,8 +42,10 @@ public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaCons
     /**
      * Default constructor.
      * @param beanLocator The bean locator
+     * @param kafkaMetricsConfiguration The Kafka metrics configuration
      */
-    public KafkaConsumerMetrics(BeanLocator beanLocator) {
+    public KafkaConsumerMetrics(BeanLocator beanLocator, KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {
+        super(kafkaMetricsConfiguration);
         this.beanLocator = beanLocator;
     }
 

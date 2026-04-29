@@ -124,11 +124,12 @@ public class KafkaMetricMeterTypeBuilder {
             return Optional.empty();
         }
 
+        String kafkaMetricName = kafkaMetric.metricName().name();
         if (StringUtils.isEmpty(name)) {
-            name = kafkaMetric.metricName().name();
+            name = kafkaMetricName;
         }
 
-        KafkaMetricMeterType kafkaMetricMeterType = KAFKA_METRIC_METER_TYPE_REGISTRY.lookup(this.name);
+        KafkaMetricMeterType kafkaMetricMeterType = KAFKA_METRIC_METER_TYPE_REGISTRY.lookup(kafkaMetricName);
         List<Tag> tags = tagFunction.apply(kafkaMetric.metricName());
 
         if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {

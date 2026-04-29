@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.TypeHint;
 import jakarta.annotation.PreDestroy;
+import org.apache.kafka.common.metrics.KafkaMetric;
 
 /**
  * A {@link org.apache.kafka.common.metrics.MetricsReporter} class for producer metrics.
@@ -27,14 +28,25 @@ import jakarta.annotation.PreDestroy;
 @TypeHint(ProducerKafkaMetricsReporter.class)
 public class ProducerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
-    private static final String PRODUCER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".producer";
+    private static final String LEGACY_PRODUCER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".producer";
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected String getMetricPrefix() {
-        return PRODUCER_PREFIX;
+        if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
+            return LEGACY_PRODUCER_PREFIX;
+        }
+        return AbstractKafkaConfiguration.PREFIX;
+    }
+
+    @Override
+    protected String getMetricName(KafkaMetric metric) {
+        if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
+            return super.getMetricName(metric);
+        }
+        return getMicrometerMetricName(metric);
     }
 
     /**

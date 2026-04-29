@@ -38,6 +38,14 @@ import java.util.Properties;
 public abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractKafkaMetrics.class);
+    private final KafkaMetricsConfigurationProperties kafkaMetricsConfiguration;
+
+    /**
+     * @param kafkaMetricsConfiguration The Kafka metrics configuration
+     */
+    protected AbstractKafkaMetrics(KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {
+        this.kafkaMetricsConfiguration = kafkaMetricsConfiguration;
+    }
 
     /**
      * Method to add a default metric reporter if not otherwise defined.
@@ -67,6 +75,7 @@ public abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration>
         if (meterRegistry != null) {
             props.put("meter.registry", meterRegistry);
         }
+        props.put(AbstractKafkaMetricsReporter.METRIC_NAME_STYLE_CONFIG, kafkaMetricsConfiguration.getMetricNameStyle().name());
         return event.getBean();
     }
 }

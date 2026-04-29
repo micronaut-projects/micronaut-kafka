@@ -45,8 +45,10 @@ public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProd
     /**
      * Default constructor.
      * @param beanLocator The bean locator
+     * @param kafkaMetricsConfiguration The Kafka metrics configuration
      */
-    protected KafkaProducerMetrics(BeanLocator beanLocator) {
+    protected KafkaProducerMetrics(BeanLocator beanLocator, KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {
+        super(kafkaMetricsConfiguration);
         this.beanLocator = beanLocator;
     }
 

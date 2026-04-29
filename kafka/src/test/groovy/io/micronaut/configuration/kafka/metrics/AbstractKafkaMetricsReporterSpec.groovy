@@ -78,6 +78,98 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         ])
     }
 
+    void "consumer metrics use boot aligned names"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createConsumerMetric("bytes-consumed-total", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
+                (ConsumerKafkaMetricsReporter.PARTITION_TAG): "0",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.consumer.fetch.manager.bytes.consumed.total").meter() != null
+        meterRegistry.find("kafka.consumer.bytes-consumed-total").meter() == null
+    }
+
+    void "consumer node metrics use boot aligned names"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createMetric("request-rate", "consumer-node-metrics", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.NODE_ID_TAG)  : "node-1",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.consumer.node.request.rate").meter() != null
+        meterRegistry.find("kafka.consumer.request-rate").meter() == null
+    }
+
+    void "producer metrics use boot aligned names"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ProducerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createProducerMetric("record-send-total", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "producer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.producer.record.send.total").meter() != null
+        meterRegistry.find("kafka.producer.record-send-total").meter() == null
+    }
+
+    void "legacy metric style preserves consumer metric names"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+        reporter.configure([
+                (AbstractKafkaMetricsReporter.METRIC_NAME_STYLE_CONFIG): MetricNameStyle.LEGACY.name()
+        ])
+
+        when:
+        reporter.metricChange(createConsumerMetric("bytes-consumed-total", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
+                (ConsumerKafkaMetricsReporter.PARTITION_TAG): "0",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.consumer.bytes-consumed-total").meter() != null
+        meterRegistry.find("kafka.consumer.fetch.manager.bytes.consumed.total").meter() == null
+    }
+
+    void "consumer metric removal removes boot aligned meters from registry"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+        def metric = createConsumerMetric("records-lag", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
+                (ConsumerKafkaMetricsReporter.PARTITION_TAG): "0",
+        ])
+
+        when:
+        reporter.metricChange(metric)
+        reporter.metricRemoval(metric)
+
+        then:
+        meterRegistry.meters.isEmpty()
+    }
+
     void "metric removal removes meters from registry"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
@@ -170,17 +262,40 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
     }
 
     private static KafkaMetric createMetric(int partition) {
+        return createConsumerMetric("records-lag", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+                (AbstractKafkaMetricsReporter.TOPIC_TAG): "topic-${partition}".toString(),
+                (ConsumerKafkaMetricsReporter.PARTITION_TAG): Integer.toString(partition),
+        ])
+    }
+
+    private static KafkaMetric createConsumerMetric(String name, Map<String, String> tags) {
+        return createMetric(name, "consumer-fetch-manager-metrics", tags)
+    }
+
+    private static KafkaMetric createMetric(String name, String group, Map<String, String> tags) {
         new KafkaMetric(
                 new Object(),
                 new MetricName(
-                        "records-lag",
-                        "consumer-fetch-manager-metrics",
+                        name,
+                        group,
                         "description",
-                        [
-                                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
-                                (AbstractKafkaMetricsReporter.TOPIC_TAG): "topic-${partition}".toString(),
-                                (ConsumerKafkaMetricsReporter.PARTITION_TAG): Integer.toString(partition),
-                        ]
+                        tags
+                ),
+                new Avg(),
+                new MetricConfig(),
+                Time.SYSTEM
+        )
+    }
+
+    private static KafkaMetric createProducerMetric(String name, Map<String, String> tags) {
+        new KafkaMetric(
+                new Object(),
+                new MetricName(
+                        name,
+                        "producer-metrics",
+                        "description",
+                        tags
                 ),
                 new Avg(),
                 new MetricConfig(),
