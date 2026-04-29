@@ -1,6 +1,6 @@
 === @KafkaListener and Consumer Groups
 
-Kafka consumers created with `@KafkaListener` will by default run within a consumer group that is the value of `micronaut.application.name` unless you explicitly specify a value to the `@KafkaListener` annotation. For example:
+Kafka consumers created with `@KafkaListener` will by default run within a consumer group that is the value of `micronaut.application.name` unless you explicitly specify `groupId` or `value`, or provide an `id` to use as the group fallback. For example:
 
 .Specifying a Consumer Group
 
@@ -18,6 +18,10 @@ In this case, each record will be consumed by one consumer instance of the consu
 NOTE: Kafka delivers records per consumer group before Micronaut binds listener method arguments. If multiple `@KafkaListener` methods subscribe to the same topic with different group IDs, each group receives every record published to that topic.
 
 TIP: You can make the consumer group configurable using a placeholder: `@KafkaListener("${my.consumer.group:myGroup}")`
+
+The `id` member is used to resolve consumer-specific configuration from `kafka.consumers.*`.
+If `id` is not specified, Micronaut falls back to `groupId`.
+If `groupId` is not specified, Micronaut uses `id` as the Kafka consumer group unless `group.id` is already defined in configuration.
 
 To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), `uniqueGroupId` can be set to `true`:
 
@@ -50,7 +54,7 @@ kafka:
 
 The above example will set the default `session.timeout.ms` that Kafka uses to decide whether a consumer is alive or not and applies it to all created `KafkaConsumer` instances.
 
-You can also provide configuration specific to a consumer group. For example consider the following configuration:
+You can also provide configuration specific to a listener id. For example consider the following configuration:
 
 .Applying Consumer Group Specific config
 [configuration]
@@ -63,7 +67,7 @@ kafka:
                     ms: 30000
 ----
 
-The above configuration will pass properties to only the `@KafkaListener` beans that apply to the consumer group `myGroup`.
+The above configuration will pass properties to only the `@KafkaListener` beans with `id = "myGroup"`, or listeners whose `groupId` is `myGroup` when `id` is not specified.
 
 Finally, the ann:configuration.kafka.annotation.KafkaListener[] annotation itself provides a `properties` member that you can use to set consumer specific properties:
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public @interface KafkaListener {
 
     /**
      * Sets the consumer group id of the Kafka consumer. If not specified the group id is configured
-     * to be the value of {@link io.micronaut.runtime.ApplicationConfiguration#getName()} otherwise
-     * the name of the class is used.
+     * from {@link #id()} when present, otherwise to the value of
+     * {@link io.micronaut.runtime.ApplicationConfiguration#getName()} and finally the name of the class.
      *
      * @return The group id
      */
@@ -56,6 +56,14 @@ public @interface KafkaListener {
      */
     @AliasFor(member = "value")
     String groupId() default "";
+
+    /**
+     * Sets the listener identifier used to resolve consumer configuration from {@code kafka.consumers.*}.
+     * If not specified, the {@link #groupId()} is used.
+     *
+     * @return The listener identifier
+     */
+    String id() default "";
 
     /**
      * A unique string (UUID) can be appended to the group ID.
