@@ -113,21 +113,53 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.find("kafka.consumer.request-rate").meter() == null
     }
 
-    void "producer metrics use boot aligned names"() {
+    void "consumer count metric keeps the consumer prefix"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ConsumerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createMetric("count", "kafka-metrics-count", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "consumer-1",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.consumer.count").meter() != null
+        meterRegistry.find("kafka.kafka.count.count").meter() == null
+    }
+
+    void "producer topic metrics use boot aligned names"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
         def reporter = new ProducerKafkaMetricsReporter()
         reporter.bindTo(meterRegistry)
 
         when:
-        reporter.metricChange(createProducerMetric("record-send-total", [
+        reporter.metricChange(createMetric("record-send-total", "producer-topic-metrics", [
                 (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "producer-1",
                 (AbstractKafkaMetricsReporter.TOPIC_TAG)    : "topic-1",
         ]))
 
         then:
-        meterRegistry.find("kafka.producer.record.send.total").meter() != null
+        meterRegistry.find("kafka.producer.topic.record.send.total").meter() != null
         meterRegistry.find("kafka.producer.record-send-total").meter() == null
+    }
+
+    void "producer count metric keeps the producer prefix"() {
+        given:
+        def meterRegistry = new SimpleMeterRegistry()
+        def reporter = new ProducerKafkaMetricsReporter()
+        reporter.bindTo(meterRegistry)
+
+        when:
+        reporter.metricChange(createMetric("count", "kafka-metrics-count", [
+                (AbstractKafkaMetricsReporter.CLIENT_ID_TAG): "producer-1",
+        ]))
+
+        then:
+        meterRegistry.find("kafka.producer.count").meter() != null
+        meterRegistry.find("kafka.kafka.count.count").meter() == null
     }
 
     void "legacy metric style preserves consumer metric names"() {
@@ -287,22 +319,6 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
                 Time.SYSTEM
         )
     }
-
-    private static KafkaMetric createProducerMetric(String name, Map<String, String> tags) {
-        new KafkaMetric(
-                new Object(),
-                new MetricName(
-                        name,
-                        "producer-metrics",
-                        "description",
-                        tags
-                ),
-                new Avg(),
-                new MetricConfig(),
-                Time.SYSTEM
-        )
-    }
-
     private static final class TestKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
         @Override

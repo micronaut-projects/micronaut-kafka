@@ -46,6 +46,9 @@ public class ProducerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
         if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
             return super.getMetricName(metric);
         }
+        if (isClientCountMetric(metric)) {
+            return "producer.count";
+        }
         return getMicrometerMetricName(metric);
     }
 

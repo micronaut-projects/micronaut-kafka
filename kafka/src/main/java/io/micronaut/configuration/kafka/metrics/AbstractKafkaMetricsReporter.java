@@ -208,6 +208,15 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         return metricNameStyle;
     }
 
+    /**
+     * @param metric The Kafka metric
+     * @return Whether the metric is the generic Kafka client count metric
+     */
+    protected final boolean isClientCountMetric(KafkaMetric metric) {
+        return "count".equals(metric.metricName().name())
+                && "kafka-metrics-count".equals(metric.metricName().group());
+    }
+
     private static List<Tag> getTags(MetricName metricName, List<String> sortedIncludedTags, boolean includeEmptyTags) {
         List<Tag> tags = new ArrayList<>(sortedIncludedTags.size());
         for (String tagName : sortedIncludedTags) {

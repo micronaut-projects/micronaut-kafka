@@ -59,7 +59,7 @@ class KafkaProducerMetricsSpec extends AbstractEmbeddedServerSpec {
             !result.names.contains("kafka.producer.bytes.consumed.total")
             !result.names.contains("kafka.count")
 
-            def recordSendTotal = Mono.from(httpClient.exchange("/metrics/kafka.producer.record.send.total", Map)).block()
+            def recordSendTotal = Mono.from(httpClient.exchange("/metrics/kafka.producer.topic.record.send.total", Map)).block()
             Map metricBody = recordSendTotal.body()
             metricBody.availableTags.size() == 2
             metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]

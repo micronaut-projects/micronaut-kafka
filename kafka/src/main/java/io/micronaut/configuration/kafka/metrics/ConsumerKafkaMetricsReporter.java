@@ -50,6 +50,9 @@ public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
         if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
             return super.getMetricName(metric);
         }
+        if (isClientCountMetric(metric)) {
+            return "consumer.count";
+        }
         return getMicrometerMetricName(metric);
     }
 
