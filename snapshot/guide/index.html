@@ -3649,8 +3649,10 @@ public Mono&lt;Product&gt; receive(@KafkaKey String brand,  // <b class="conum">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Topic("reactive-products")
 fun receive(@KafkaKey brand: String,  // <b class="conum">(1)</b>
     product: Mono&lt;Product&gt;): Mono&lt;Product&gt; { // <b class="conum">(2)</b>
-    return product.doOnSuccess { (name): Product -&gt;
-        LOG.info("Got Product - {} by {}", name, brand) // <b class="conum">(3)</b>
+    return product.doOnSuccess { receivedProduct -&gt;
+        receivedProduct?.let {
+            LOG.info("Got Product - {} by {}", it.name, brand) // <b class="conum">(3)</b>
+        }
     }
 }</code></pre>
 </div>
@@ -3710,8 +3712,10 @@ public Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Produ
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@Blocking
 @Topic("reactive-products")
 fun receiveBlocking(@KafkaKey brand: String, product: Mono&lt;Product&gt;): Mono&lt;Product&gt; {
-    return product.doOnSuccess { (name): Product -&gt;
-        LOG.info("Got Product - {} by {}", name, brand)
+    return product.doOnSuccess { receivedProduct -&gt;
+        receivedProduct?.let {
+            LOG.info("Got Product - {} by {}", it.name, brand)
+        }
     }
 }</code></pre>
 </div>
