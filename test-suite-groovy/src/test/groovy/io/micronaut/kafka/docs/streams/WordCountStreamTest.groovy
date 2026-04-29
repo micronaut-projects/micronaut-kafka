@@ -24,8 +24,9 @@ class WordCountStreamTest extends Specification {
         when:
         conditions.within(30) {
             def states = ctx.getBeansOfType(KafkaStreams)*.state()
-            states.any { state -> state.isRunningOrRebalancing() } &&
-                states.findAll { state -> state != State.CREATED }.every { state -> state.isRunningOrRebalancing() }
+            states.size() == 3 &&
+                states.count { state -> state.isRunningOrRebalancing() } == 1 &&
+                states.count { state -> state == State.CREATED } == 2
         }
         WordCountClient client = ctx.getBean(WordCountClient)
         client.publishSentence('test to test for words')

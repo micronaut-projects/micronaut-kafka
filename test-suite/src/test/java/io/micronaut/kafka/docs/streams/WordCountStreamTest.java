@@ -29,8 +29,9 @@ class WordCountStreamTest {
         try (ApplicationContext ctx = ApplicationContext.run(config)) {
             await().atMost(30, SECONDS).until(() -> {
                 var states = ctx.getBeansOfType(KafkaStreams.class).stream().map(KafkaStreams::state).toList();
-                return states.stream().anyMatch(State::isRunningOrRebalancing)
-                    && states.stream().filter(state -> state != State.CREATED).allMatch(State::isRunningOrRebalancing);
+                return states.size() == 3
+                    && states.stream().filter(State::isRunningOrRebalancing).count() == 1
+                    && states.stream().filter(state -> state == State.CREATED).count() == 2;
             });
 
             WordCountClient client = ctx.getBean(WordCountClient.class);

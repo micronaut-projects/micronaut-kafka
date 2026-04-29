@@ -28,8 +28,9 @@ internal class WordCountStreamTest {
         ApplicationContext.run(props).use { ctx ->
             await().atMost(30, TimeUnit.SECONDS).until {
                 val states = ctx.getBeansOfType(KafkaStreams::class.java).map(KafkaStreams::state)
-                states.any(State::isRunningOrRebalancing) &&
-                        states.filter { state -> state != State.CREATED }.all(State::isRunningOrRebalancing)
+                states.size == 3 &&
+                        states.count(State::isRunningOrRebalancing) == 1 &&
+                        states.count { state -> state == State.CREATED } == 2
             }
 
             val client = ctx.getBean(WordCountClient::class.java)
