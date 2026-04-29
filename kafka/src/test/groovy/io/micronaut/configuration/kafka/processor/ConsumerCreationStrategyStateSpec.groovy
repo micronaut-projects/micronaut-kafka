@@ -15,6 +15,8 @@ import org.apache.kafka.common.TopicPartition
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.util.Properties
+
 class ConsumerCreationStrategyStateSpec extends Specification {
 
     @Shared
@@ -71,6 +73,29 @@ class ConsumerCreationStrategyStateSpec extends Specification {
         listener.barValues == ['five', 'six']
     }
 
+    void 'batch state keeps single-method multi-topic listeners as one callback per poll'() {
+        given:
+        def listener = new TestBatchMultiTopicListener()
+        def processor = Stub(KafkaConsumerProcessor) {
+            getBatchBinderRegistry() >> batchBinderRegistry
+        }
+        def kafkaConsumer = Stub(Consumer) {
+            subscription() >> ([] as Set)
+        }
+        def state = new ConsumerStateBatch(processor, consumerInfo(TestBatchMultiTopicListener), kafkaConsumer, listener)
+        def records = consumerRecords(
+            foo: ['one'],
+            bar: ['two']
+        )
+
+        when:
+        state.processRecords(records, [:] as Map<TopicPartition, OffsetAndMetadata>)
+
+        then:
+        listener.invocations == 1
+        listener.values == ['one', 'two']
+    }
+
     private ConsumerInfo consumerInfo(Class<?> beanType) {
         def definitionType = Class.forName("${beanType.packageName}.\$${beanType.simpleName}\$Definition")
         def beanDefinition = ((BeanDefinitionReference<?>) definitionType.getDeclaredConstructor().newInstance()).load()
@@ -82,6 +107,7 @@ class ConsumerCreationStrategyStateSpec extends Specification {
             'test-group',
             OffsetStrategy.AUTO,
             methods[0].getAnnotation(KafkaListener),
+            new Properties(),
             methods
         )
     }
@@ -90,9 +116,11 @@ class ConsumerCreationStrategyStateSpec extends Specification {
         Map<TopicPartition, List<ConsumerRecord<String, String>>> records = [:]
         valuesByTopic.each { topic, values ->
             def topicPartition = new TopicPartition(topic, 0)
-            records[topicPartition] = values.indexed().collect { index, value ->
-                new ConsumerRecord<>(topic, 0, index as long, null, value)
+            List<ConsumerRecord<String, String>> topicRecords = []
+            for (int index = 0; index < values.size(); index++) {
+                topicRecords.add(new ConsumerRecord<>(topic, 0, index as long, null, values.get(index)))
             }
+            records[topicPartition] = topicRecords
         }
         new ConsumerRecords<>(records)
     }

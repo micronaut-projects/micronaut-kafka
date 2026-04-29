@@ -331,9 +331,13 @@ abstract class ConsumerState {
 
         if (isBlocking) {
             List<RecordMetadata> listRecords = recordMetadataProducer.collectList().block();
-            LOG.trace("Method [{}] produced record metadata: {}", info.logMethod(topic), listRecords);
-        } else {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Method [{}] produced record metadata: {}", info.logMethod(topic), listRecords);
+            }
+        } else if (LOG.isTraceEnabled()) {
             recordMetadataProducer.subscribe(recordMetadata -> LOG.trace("Method [{}] produced record metadata: {}", info.logMethod(topic), recordMetadata));
+        } else {
+            recordMetadataProducer.subscribe();
         }
     }
 

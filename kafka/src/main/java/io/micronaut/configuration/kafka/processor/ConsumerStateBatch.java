@@ -73,7 +73,9 @@ final class ConsumerStateBatch extends ConsumerState {
         try {
             return kafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
-            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
+            }
             if (info.offsetStrategy != OffsetStrategy.DISABLED) {
                 kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             }
@@ -85,7 +87,7 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            for (ConsumerRecords<?, ?> topicRecords : splitByTopic(consumerRecords)) {
+            for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(consumerRecords)) {
                 final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
                 final ExecutableMethod<Object, ?> method = info.method(topic);
                 Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
@@ -231,6 +233,13 @@ final class ConsumerStateBatch extends ConsumerState {
     private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
         final TopicPartition tp = ex.topicPartition();
         return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
+    }
+
+    private java.util.List<ConsumerRecords<?, ?>> recordsByTopic(ConsumerRecords<?, ?> consumerRecords) {
+        if (!info.routesByTopic()) {
+            return java.util.List.of(consumerRecords);
+        }
+        return splitByTopic(consumerRecords);
     }
 
     private static java.util.List<ConsumerRecords<?, ?>> splitByTopic(ConsumerRecords<?, ?> consumerRecords) {

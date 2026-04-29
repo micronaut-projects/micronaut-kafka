@@ -18,8 +18,7 @@ package io.micronaut.configuration.kafka.annotation;
 /**
  * Defines how Kafka consumers are created for listener methods.
  *
- * @author Micronaut Framework Team
- * @since 4.9.0
+ * @since 6.0
  */
 public enum ConsumerCreationStrategy {
 

@@ -61,7 +61,9 @@ final class ConsumerStateSingle extends ConsumerState {
             return kafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
             // Try to honor the configured error strategy
-            LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
+            }
             // By default, seek past the record to continue consumption
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
@@ -79,7 +81,9 @@ final class ConsumerStateSingle extends ConsumerState {
             final ConsumerRecord<?, ?> consumerRecord = iterator.next();
             final String topic = consumerRecord.topic();
 
-            LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
+            }
 
             updateCurrentOffsets(consumerRecord, currentOffsets);
             final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);

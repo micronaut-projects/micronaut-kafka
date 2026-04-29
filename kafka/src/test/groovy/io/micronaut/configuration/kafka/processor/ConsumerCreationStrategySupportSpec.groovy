@@ -150,6 +150,7 @@ class ConsumerCreationStrategySupportSpec extends Specification {
             'test-group',
             OffsetStrategy.AUTO,
             methods[0].getAnnotation(KafkaListener),
+            new Properties(),
             methods
         )
     }

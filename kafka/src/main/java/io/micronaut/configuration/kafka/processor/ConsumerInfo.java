@@ -99,16 +99,6 @@ final class ConsumerInfo {
         this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method));
     }
 
-    ConsumerInfo(
-        String clientId,
-        String groupId,
-        OffsetStrategy offsetStrategy,
-        AnnotationValue<KafkaListener> kafkaListener,
-        List<ExecutableMethod<?, ?>> methods
-    ) {
-        this(clientId, groupId, offsetStrategy, kafkaListener, new Properties(), methods);
-    }
-
     @SuppressWarnings("unchecked")
     ConsumerInfo(
         String clientId,
@@ -157,6 +147,10 @@ final class ConsumerInfo {
                 throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
             }
         }
+    }
+
+    boolean routesByTopic() {
+        return listenerMethods.size() > 1;
     }
 
     ExecutableMethod<Object, ?> method(String topic) {
