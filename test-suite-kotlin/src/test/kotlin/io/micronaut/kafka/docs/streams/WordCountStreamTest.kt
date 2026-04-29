@@ -6,6 +6,7 @@ import io.micronaut.testcontainers.kafka.Kafka
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.streams.KafkaStreams.State
 import java.util.concurrent.TimeUnit
 
 internal class WordCountStreamTest {
@@ -26,7 +27,9 @@ internal class WordCountStreamTest {
         )
         ApplicationContext.run(props).use { ctx ->
             await().atMost(30, TimeUnit.SECONDS).until {
-                ctx.getBeansOfType(KafkaStreams::class.java).all { stream -> stream.state().isRunningOrRebalancing }
+                val states = ctx.getBeansOfType(KafkaStreams::class.java).map(KafkaStreams::state)
+                states.any(State::isRunningOrRebalancing) &&
+                        states.filter { state -> state != State.CREATED }.all(State::isRunningOrRebalancing)
             }
 
             val client = ctx.getBean(WordCountClient::class.java)
