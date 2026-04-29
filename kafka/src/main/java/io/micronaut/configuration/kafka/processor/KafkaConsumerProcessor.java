@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,32 +288,40 @@ class KafkaConsumerProcessor
             return; // No topics to consume
         }
         final Class<?> beanType = beanDefinition.getBeanType();
-        final Optional<String> groupId = consumerAnnotation.stringValue("groupId")
-                .filter(StringUtils::isNotEmpty);
-
+        final Optional<String> listenerId = consumerAnnotation.stringValue("id")
+            .filter(StringUtils::isNotEmpty);
+        final Optional<String> annotationGroupId = consumerAnnotation.stringValue("groupId")
+            .filter(StringUtils::isNotEmpty);
         final String clientId = consumerAnnotation.stringValue("clientId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final Optional<String> id =  consumerAnnotation.stringValue("id")
-            .filter(StringUtils::isNotEmpty)
-            .or(() -> groupId);
-
-        final String configId = id.orElseGet(() -> this.groupIdFallback(beanType));
+        final String fallbackGroupId = annotationGroupId
+            .or(() -> listenerId)
+            .orElseGet(() -> this.groupIdFallback(beanType));
+        final String configId = listenerId
+            .or(() -> annotationGroupId)
+            .orElseGet(() -> this.groupIdFallback(beanType));
         final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(configId);
-
         boolean uniqueGroupIdDeleteOnShutdown = false;
-        String effectiveGroupId = groupId.orElseGet(() -> this.groupIdFallback(beanType));
-
+        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
+        final Properties properties = createConsumerProperties(
+            consumerAnnotation,
+            consumerConfiguration,
+            clientId,
+            fallbackGroupId,
+            annotationGroupId.isPresent(),
+            offsetStrategy
+        );
+        String effectiveGroupId = properties.getProperty(ConsumerConfig.GROUP_ID_CONFIG, fallbackGroupId);
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             effectiveGroupId = effectiveGroupId + "_" + UUID.randomUUID();
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, effectiveGroupId);
             if (consumerAnnotation.isTrue("uniqueGroupIdDeleteOnShutdown")) {
                 uniqueGroupIdDeleteOnShutdown = true;
             }
         }
-        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
-        final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId,  effectiveGroupId, groupId.isPresent(), offsetStrategy);
         configureDeserializers(method, consumerConfiguration);
         submitConsumerThreads(method, clientId, effectiveGroupId, offsetStrategy, topicAnnotations,
             consumerAnnotation, consumerConfiguration, properties, beanType, uniqueGroupIdDeleteOnShutdown);
@@ -454,8 +462,7 @@ class KafkaConsumerProcessor
 
         if (overrideGroupId) {
             properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        }
-        else {
+        } else {
             properties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         }
 
