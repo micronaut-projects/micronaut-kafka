@@ -81,43 +81,76 @@ final class ConsumerStateSingle extends ConsumerState {
 
             LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
 
-            if (info.trackPartitions) {
-                final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-                final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
-                currentOffsets.put(topicPartition, offsetAndMetadata);
+            updateCurrentOffsets(consumerRecord, currentOffsets);
+            final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);
+
+            if (processRecord(consumerRecord, consumerRecords, iterator)) {
+                return;
             }
 
-            final Argument seekArgument = info.seekArg(topic);
-            final KafkaSeekOperations seek = seekArgument == null ? null : KafkaSeekOperations.newInstance();
-            if (seekArgument != null) {
-                boundArguments.put(seekArgument, seek);
-            }
-            Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
-            Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
-
-            try {
-                process(consumerRecord, consumerRecords);
-            } catch (Exception e) {
-                if (resolveWithErrorStrategy(consumerRecords, consumerRecord, e)) {
-                    resetTheFollowingPartitions(consumerRecord, iterator);
-                    failed = true;
-                    return;
-                }
-            }
-
-            if (info.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
-                commitSync(consumerRecords, consumerRecord, currentOffsets);
-            } else if (info.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
-                kafkaConsumer.commitAsync(currentOffsets, this::resolveCommitCallback);
-            }
-
-            if (seek != null) {
-                // Performs seek operations that were deferred by the user
-                final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
-                seek.forEach(seeker::perform);
-            }
+            commitOffsets(consumerRecords, consumerRecord, currentOffsets);
+            performDeferredSeek(seek);
         }
         failed = false;
+    }
+
+    private void updateCurrentOffsets(ConsumerRecord<?, ?> consumerRecord,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+        if (!info.trackPartitions) {
+            return;
+        }
+        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+        final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
+        currentOffsets.put(topicPartition, offsetAndMetadata);
+    }
+
+    @Nullable
+    private KafkaSeekOperations bindRecordArguments(String topic,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+        final Argument<?> seekArgument = info.seekArg(topic);
+        final KafkaSeekOperations seek = seekArgument == null ? null : KafkaSeekOperations.newInstance();
+        if (seekArgument != null) {
+            boundArguments.put(seekArgument, seek);
+        }
+        Optional.ofNullable(info.ackArg(topic))
+            .ifPresent(argument -> boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(currentOffsets)));
+        Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+        return seek;
+    }
+
+    private boolean processRecord(ConsumerRecord<?, ?> consumerRecord,
+        ConsumerRecords<?, ?> consumerRecords,
+        Iterator<? extends ConsumerRecord<?, ?>> iterator) {
+        try {
+            process(consumerRecord, consumerRecords);
+            return false;
+        } catch (Exception e) {
+            if (!resolveWithErrorStrategy(consumerRecords, consumerRecord, e)) {
+                return false;
+            }
+            resetTheFollowingPartitions(consumerRecord, iterator);
+            failed = true;
+            return true;
+        }
+    }
+
+    private void commitOffsets(ConsumerRecords<?, ?> consumerRecords,
+        ConsumerRecord<?, ?> consumerRecord,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+        if (info.offsetStrategy == OffsetStrategy.SYNC_PER_RECORD) {
+            commitSync(consumerRecords, consumerRecord, currentOffsets);
+        } else if (info.offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD) {
+            kafkaConsumer.commitAsync(currentOffsets, this::resolveCommitCallback);
+        }
+    }
+
+    private void performDeferredSeek(@Nullable KafkaSeekOperations seek) {
+        if (seek == null) {
+            return;
+        }
+        // Performs seek operations that were deferred by the user
+        final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
+        seek.forEach(seeker::perform);
     }
 
     private void process(ConsumerRecord<?, ?> consumerRecord,
