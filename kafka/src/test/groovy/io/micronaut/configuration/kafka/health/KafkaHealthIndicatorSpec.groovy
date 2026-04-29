@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.health
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.core.io.socket.SocketUtils
+import io.micronaut.core.util.StringUtils
 import io.micronaut.management.health.indicator.HealthResult
 import io.micronaut.testcontainers.kafka.Kafka
 import org.apache.kafka.clients.admin.Config
@@ -50,6 +51,26 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         then:
         result.status == DOWN
+
+        cleanup:
+        ctx.close()
+    }
+
+    void "test kafka health indicator reports missing admin client when disabled"() {
+        given:
+        Map config = [
+            "kafka.bootstrap.servers": "localhost:${SocketUtils.findAvailableTcpPort()}",
+            "kafka.admin.enabled": StringUtils.FALSE
+        ]
+        ApplicationContext ctx = ApplicationContext.run(config)
+
+        when:
+        KafkaHealthIndicator healthIndicator = ctx.getBean(KafkaHealthIndicator)
+        HealthResult result = healthIndicator.result.next().block()
+
+        then:
+        result.status == DOWN
+        result.details.error.contains("AdminClient")
 
         cleanup:
         ctx.close()
