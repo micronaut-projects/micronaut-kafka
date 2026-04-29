@@ -22,6 +22,7 @@ import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.runtime.ApplicationConfiguration;
 
 import java.util.Properties;
@@ -37,12 +38,18 @@ import static io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration
 @EachProperty(value = PREFIX, primary = "default")
 @ConfigurationProperties(PREFIX)
 @Requires(beans = KafkaDefaultConfiguration.class)
+@Requires(property = KafkaStreamsConfiguration.ENABLED, notEquals = StringUtils.FALSE, defaultValue = StringUtils.TRUE)
 public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfiguration<K, V> {
 
     /**
      * The default streams configuration.
      */
     public static final String PREFIX = "kafka.streams";
+
+    /**
+     * Global property used to disable Kafka Streams bean creation.
+     */
+    public static final String ENABLED = PREFIX + ".enabled";
 
     /**
      * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.

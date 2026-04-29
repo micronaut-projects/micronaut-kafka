@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.runtime.ApplicationConfiguration;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -36,6 +37,7 @@ import java.util.Properties;
 @Requires(missingProperty = KafkaStreamsConfiguration.PREFIX + ".default")
 @Singleton
 @Requires(beans = KafkaDefaultConfiguration.class)
+@Requires(property = KafkaStreamsConfiguration.ENABLED, notEquals = StringUtils.FALSE, defaultValue = StringUtils.TRUE)
 @Named(AbstractKafkaStreamsConfiguration.DEFAULT_NAME)
 @Primary
 public class DefaultKafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfiguration<K, V> {
