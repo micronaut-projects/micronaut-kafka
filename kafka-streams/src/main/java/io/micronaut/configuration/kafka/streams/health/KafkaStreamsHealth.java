@@ -151,7 +151,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param kafkaStreams The stream to build details for
      * @return Map of details
      */
-    private Map<String, Object> buildDetails(KafkaStreams kafkaStreams) {
+    Map<String, Object> buildDetails(KafkaStreams kafkaStreams) {
         final Map<String, Object> streamDetails = new HashMap<>();
 
         if (kafkaStreams.state().isRunningOrRebalancing()) {
@@ -217,19 +217,15 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param taskMetadataSet the task metadata
      * @return map of details
      */
-    private static Map<String, Object> taskDetails(Set<TaskMetadata> taskMetadataSet) {
-        final Map<String, Object> details = new HashMap<>();
-        for (TaskMetadata taskMetadata : taskMetadataSet) {
-            details.put("taskId", taskMetadata.taskId());
-            if (details.containsKey(METADATA_PARTITIONS)) {
-                @SuppressWarnings("unchecked")
-                List<String> partitionsInfo = (List<String>) details.get(METADATA_PARTITIONS);
-                partitionsInfo.addAll(addPartitionsInfo(taskMetadata));
-            } else {
-                details.put(METADATA_PARTITIONS, addPartitionsInfo(taskMetadata));
-            }
-        }
-        return details;
+    private static List<Map<String, Object>> taskDetails(Set<TaskMetadata> taskMetadataSet) {
+        return taskMetadataSet.stream()
+                .map(taskMetadata -> {
+                    final Map<String, Object> taskDetails = new HashMap<>();
+                    taskDetails.put("taskId", taskMetadata.taskId().toString());
+                    taskDetails.put(METADATA_PARTITIONS, addPartitionsInfo(taskMetadata));
+                    return taskDetails;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
