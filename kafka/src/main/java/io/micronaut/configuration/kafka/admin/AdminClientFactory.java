@@ -15,10 +15,12 @@
  */
 package io.micronaut.configuration.kafka.admin;
 
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 
 import jakarta.inject.Singleton;
@@ -31,6 +33,7 @@ import jakarta.inject.Singleton;
  */
 @Factory
 @Requires(beans = KafkaDefaultConfiguration.class)
+@Requires(property = AbstractKafkaConfiguration.PREFIX + ".admin.enabled", notEquals = StringUtils.FALSE, defaultValue = StringUtils.TRUE)
 public class AdminClientFactory {
 
     /**

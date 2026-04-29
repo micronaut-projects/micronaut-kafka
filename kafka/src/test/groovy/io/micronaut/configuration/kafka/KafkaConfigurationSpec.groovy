@@ -14,6 +14,7 @@ import io.micronaut.context.exceptions.BeanInstantiationException
 import io.micronaut.context.exceptions.ConfigurationException
 import io.micronaut.context.exceptions.NoSuchBeanException
 import io.micronaut.inject.qualifiers.Qualifiers
+import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.CommonClientConfigs
@@ -148,6 +149,18 @@ class KafkaConfigurationSpec extends Specification {
 
         then:
         config.config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] == 'localhost:1111'
+    }
+
+    void "test admin client can be disabled"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                'kafka.admin.enabled': false,
+                'kafka.consumers.primary.bootstrap.servers': 'localhost:1111',
+                'kafka.producers.secondary.bootstrap.servers': 'localhost:2222'
+        )
+
+        expect:
+        applicationContext.findBean(AdminClient).isEmpty()
     }
 
     void "test null kafka property reports the failing property path"() {

@@ -68,7 +68,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
     private static final String DETAILS_BROKER_ID = "brokerId";
     private static final String DETAILS_CLUSTER_ID = "clusterId";
     private static final String DETAILS_NODES = "nodes";
-    private final Supplier<AdminClient> adminClientSupplier;
+    private final Supplier<Optional<AdminClient>> adminClientSupplier;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
     private final Supplier<NetworkClient> networkClientSupplier;
@@ -90,7 +90,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
                                 KafkaDefaultConfiguration defaultConfiguration,
                                 NetworkClientCreator networkClientCreator,
                                 KafkaHealthConfiguration kafkaHealthConfiguration) {
-        this.adminClientSupplier = SupplierUtil.memoized(() -> beanContext.getBean(AdminClient.class));
+        this.adminClientSupplier = SupplierUtil.memoized(() -> beanContext.findBean(AdminClient.class));
         this.defaultConfiguration = defaultConfiguration;
         this.networkClientSupplier = SupplierUtil.memoized(() -> networkClientCreator.create(this));
         this.kafkaHealthConfiguration = kafkaHealthConfiguration;
@@ -106,7 +106,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
     @Deprecated(forRemoval = true)
     public KafkaHealthIndicator(AdminClient adminClient,
                                 KafkaDefaultConfiguration defaultConfiguration) {
-        this.adminClientSupplier = () -> adminClient;
+        this.adminClientSupplier = () -> Optional.of(adminClient);
         this.defaultConfiguration = defaultConfiguration;
         this.networkClientSupplier = SupplierUtil.memoized(() -> new DefaultNetworkClientCreator(defaultConfiguration).create(this));
         this.kafkaHealthConfiguration = new KafkaHealthConfigurationProperties();
@@ -153,8 +153,13 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
             }
         }
 
-        AdminClient adminClient = adminClientSupplier.get();
-        DescribeClusterResult result = adminClient.describeCluster(
+        Optional<AdminClient> adminClient = adminClientSupplier.get();
+        if (adminClient.isEmpty()) {
+            return Flux.just(failure(new IllegalStateException(
+                "Kafka health indicator requires an AdminClient bean. Enable kafka.admin.enabled or set kafka.health.restricted=true."
+            ), Collections.emptyMap()));
+        }
+        DescribeClusterResult result = adminClient.get().describeCluster(
                 new DescribeClusterOptions().timeoutMs(
                         (int) defaultConfiguration.getHealthTimeout().toMillis()
                 )
@@ -167,7 +172,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
         return controller.flux().switchMap(node -> {
             String brokerId = node.idString();
             ConfigResource configResource = new ConfigResource(ConfigResource.Type.BROKER, brokerId);
-            DescribeConfigsResult configResult = adminClient.describeConfigs(Collections.singletonList(configResource));
+            DescribeConfigsResult configResult = adminClient.get().describeConfigs(Collections.singletonList(configResource));
             Mono<Map<ConfigResource, Config>> configs = KafkaReactorUtil.fromKafkaFuture(configResult::all);
             return configs.flux().switchMap(resources -> {
                 Config config = resources.get(configResource);
