@@ -59,36 +59,13 @@ final class TopicRouter<T> {
     T resolve(String topic, String purpose) {
         T direct = directRoutes.get(topic);
         if (direct != null) {
-            List<String> patternMatches = new ArrayList<>(2);
-            for (Route<T> route : routes) {
-                if (!route.matchesPattern(topic)) {
-                    continue;
-                }
-                if (route.value() != direct) {
-                    patternMatches.add(route.source());
-                }
-            }
-            if (!patternMatches.isEmpty()) {
-                throw new MessagingSystemException("Topic [" + topic + "] has a direct " + purpose + " route and also matches pattern " + purpose + " routes: " + String.join(", ", patternMatches));
+            List<String> conflictingPatterns = findConflictingPatterns(topic, direct);
+            if (!conflictingPatterns.isEmpty()) {
+                throw new MessagingSystemException("Topic [" + topic + "] has a direct " + purpose + " route and also matches pattern " + purpose + " routes: " + String.join(", ", conflictingPatterns));
             }
             return direct;
         }
-        T resolved = null;
-        List<String> matches = new ArrayList<>(2);
-        for (Route<T> route : routes) {
-            if (!route.matchesPattern(topic)) {
-                continue;
-            }
-            matches.add(route.source());
-            if (resolved != null && resolved != route.value()) {
-                throw new MessagingSystemException("Topic [" + topic + "] matches multiple " + purpose + " routes: " + String.join(", ", matches));
-            }
-            resolved = route.value();
-        }
-        if (resolved == null) {
-            throw new MessagingSystemException("No " + purpose + " route found for topic [" + topic + "]");
-        }
-        return resolved;
+        return resolvePatternRoute(topic, purpose);
     }
 
     Collection<String> topics() {
@@ -117,6 +94,35 @@ final class TopicRouter<T> {
 
     List<Route<T>> routes() {
         return Collections.unmodifiableList(routes);
+    }
+
+    private List<String> findConflictingPatterns(String topic, T direct) {
+        List<String> conflictingPatterns = new ArrayList<>(2);
+        for (Route<T> route : routes) {
+            if (route.matchesPattern(topic) && route.value() != direct) {
+                conflictingPatterns.add(route.source());
+            }
+        }
+        return conflictingPatterns;
+    }
+
+    private T resolvePatternRoute(String topic, String purpose) {
+        T resolved = null;
+        List<String> matches = new ArrayList<>(2);
+        for (Route<T> route : routes) {
+            if (!route.matchesPattern(topic)) {
+                continue;
+            }
+            matches.add(route.source());
+            if (resolved != null && resolved != route.value()) {
+                throw new MessagingSystemException("Topic [" + topic + "] matches multiple " + purpose + " routes: " + String.join(", ", matches));
+            }
+            resolved = route.value();
+        }
+        if (resolved == null) {
+            throw new MessagingSystemException("No " + purpose + " route found for topic [" + topic + "]");
+        }
+        return resolved;
     }
 
     record Route<T>(List<String> topics, List<String> patternStrings, List<Pattern> patterns, T value, String source) {

@@ -160,7 +160,7 @@ final class ConsumerStateSingle extends ConsumerState {
     private void process(ConsumerRecord<?, ?> consumerRecord,
         ConsumerRecords<?, ?> consumerRecords) {
         final String topic = consumerRecord.topic();
-        final ExecutableMethod<Object, ?> method = info.method(topic);
+        final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
         if (method.isSuspend()) {
             Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
             boundArguments.put(lastArgument, null);

@@ -454,14 +454,14 @@ abstract class ConsumerState {
     }
 
     private Publisher<RecordMetadata> handleSendToError(String topic, Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
-        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method(topic) + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
+        handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.methodForTopic(topic) + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
 
         if (!info.shouldRedeliver) {
             return Flux.empty();
         }
 
         return redeliver(consumerRecord)
-            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.method(topic) + "]: " + error.getMessage(), ex, consumerRecords, consumerRecord));
+            .doOnError(ex -> handleException("Redelivery failed for record [" + consumerRecord + "] with Kafka reactive consumer [" + info.methodForTopic(topic) + "]: " + error.getMessage(), ex, consumerRecords, consumerRecord));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

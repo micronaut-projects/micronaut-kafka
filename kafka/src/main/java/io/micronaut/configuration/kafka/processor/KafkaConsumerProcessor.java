@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
-import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
@@ -439,7 +438,7 @@ class KafkaConsumerProcessor
             final List<ExecutableMethod<?, ?>> methods = beanDefinition.getExecutableMethods().stream()
                 .filter(executableMethod -> !CollectionUtils.isEmpty(executableMethod.getDeclaredAnnotationValuesByType(Topic.class)))
                 .<ExecutableMethod<?, ?>>map(executableMethod -> executableMethod)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
             if (CollectionUtils.isNotEmpty(methods)) {
                 return methods;
             }
@@ -742,7 +741,7 @@ class KafkaConsumerProcessor
                 .filter(KafkaConsumerProcessor::isConsumerRecord)
                 .flatMap(b -> b.getTypeVariable("K")))
             .map(argument -> (Deserializer<Object>) serdeRegistry.pickDeserializer(argument));
-        return deserializer.orElseGet(() -> (Deserializer<Object>) (Deserializer) DEFAULT_KEY_DESERIALIZER);
+        return deserializer.orElseGet(KafkaConsumerProcessor::defaultKeyDeserializer);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -752,12 +751,22 @@ class KafkaConsumerProcessor
             .flatMap(b -> b.getTypeVariable("V"))
             .or(() -> body)
             .map(argument -> (Deserializer<Object>) serdeRegistry.pickDeserializer(argument));
-        return deserializer.orElseGet(() -> (Deserializer<Object>) (Deserializer) DEFAULT_VALUE_DESERIALIZER);
+        return deserializer.orElseGet(KafkaConsumerProcessor::defaultValueDeserializer);
     }
 
     private static boolean isConsumerRecord(@NonNull Argument<?> body) {
         return ConsumerRecord.class.isAssignableFrom(body.getType()) ||
             ConsumerRecords.class.isAssignableFrom(body.getType());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Deserializer<Object> defaultKeyDeserializer() {
+        return (Deserializer<Object>) (Deserializer<?>) DEFAULT_KEY_DESERIALIZER;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Deserializer<Object> defaultValueDeserializer() {
+        return (Deserializer<Object>) (Deserializer<?>) DEFAULT_VALUE_DESERIALIZER;
     }
 
     private static Argument<?> getComponentType(final Argument<?> argument) {

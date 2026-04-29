@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,11 +126,11 @@ final class ConsumerInfo {
         this.producerTransactionalId = kafkaListener.stringValue("producerTransactionalId").filter(StringUtils::isNotEmpty).orElse(null);
         this.isTransactional = producerTransactionalId != null;
         this.cooperativeStickyAssignmentStrategy = OffsetCommitExceptionLogger.isCooperativeStickyAssignor(properties.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
-        java.util.ArrayList<ExecutableMethod<Object, ?>> listenerMethods = new java.util.ArrayList<>(methods.size());
+        java.util.ArrayList<ExecutableMethod<Object, ?>> resolvedListenerMethods = new java.util.ArrayList<>(methods.size());
         for (ExecutableMethod<?, ?> executableMethod : methods) {
-            listenerMethods.add((ExecutableMethod<Object, ?>) executableMethod);
+            resolvedListenerMethods.add((ExecutableMethod<Object, ?>) executableMethod);
         }
-        this.listenerMethods = List.copyOf(listenerMethods);
+        this.listenerMethods = List.copyOf(resolvedListenerMethods);
         this.method = this.listenerMethods.get(0);
         this.patternMethods = resolveTopicMethods(this.listenerMethods);
         this.autoStartup = kafkaListener.booleanValue("autoStartup").orElse(true);
@@ -140,7 +140,7 @@ final class ConsumerInfo {
         this.shouldSendOffsetsToTransaction = offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION;
 
         if (shouldSendOffsetsToTransaction) {
-            if (!isTransactional || !listenerMethods.stream().allMatch(executableMethod -> executableMethod.hasAnnotation(SendTo.class))) {
+            if (!this.listenerMethods.stream().allMatch(executableMethod -> executableMethod.hasAnnotation(SendTo.class)) || !isTransactional) {
                 throw new MessagingSystemException("Offset strategy 'SEND_TO_TRANSACTION' can only be used when transaction is enabled and @SendTo is used");
             }
             if (shouldRedeliver) {
@@ -153,7 +153,8 @@ final class ConsumerInfo {
         return listenerMethods.size() > 1;
     }
 
-    ExecutableMethod<Object, ?> method(String topic) {
+    @SuppressWarnings("java:S1452")
+    ExecutableMethod<Object, ?> methodForTopic(String topic) {
         if (topicMethods.isEmpty() && patternMethods.isEmpty()) {
             return method;
         }
@@ -161,16 +162,16 @@ final class ConsumerInfo {
     }
 
     String logMethod(String topic) {
-        ExecutableMethod<Object, ?> executableMethod = method(topic);
+        ExecutableMethod<Object, ?> executableMethod = methodForTopic(topic);
         return executableMethod.getDeclaringType().getSimpleName() + "#" + executableMethod.getName();
     }
 
     boolean isBlocking(String topic) {
-        return method(topic).hasAnnotation(Blocking.class);
+        return methodForTopic(topic).hasAnnotation(Blocking.class);
     }
 
     List<String> sendToTopics(String topic) {
-        return sendToTopicsCache.computeIfAbsent(method(topic), executableMethod ->
+        return sendToTopicsCache.computeIfAbsent(methodForTopic(topic), executableMethod ->
             Optional.ofNullable(executableMethod.stringValues(SendTo.class))
                 .filter(ArrayUtils::isNotEmpty)
                 .stream()
@@ -180,7 +181,7 @@ final class ConsumerInfo {
     }
 
     boolean returnsOneKafkaMessage(String topic) {
-        return returnsOneKafkaMessageCache.computeIfAbsent(method(topic), executableMethod -> {
+        return returnsOneKafkaMessageCache.computeIfAbsent(methodForTopic(topic), executableMethod -> {
             var returnType = executableMethod.getReturnType();
             return returnType.getType().isAssignableFrom(KafkaMessage.class) ||
                 (returnType.isAsyncOrReactive() && returnType.getFirstTypeVariable()
@@ -190,7 +191,7 @@ final class ConsumerInfo {
     }
 
     boolean returnsManyKafkaMessages(String topic) {
-        return returnsManyKafkaMessagesCache.computeIfAbsent(method(topic), executableMethod -> {
+        return returnsManyKafkaMessagesCache.computeIfAbsent(methodForTopic(topic), executableMethod -> {
             var returnType = executableMethod.getReturnType();
             return Iterable.class.isAssignableFrom(returnType.getType()) &&
                 returnType.getFirstTypeVariable().map(t -> t.getType().isAssignableFrom(KafkaMessage.class)).orElse(false);
@@ -198,8 +199,9 @@ final class ConsumerInfo {
     }
 
     @Nullable
+    @SuppressWarnings("java:S1452")
     Argument<?> consumerArg(String topic) {
-        return consumerArgCache.computeIfAbsent(method(topic), executableMethod ->
+        return consumerArgCache.computeIfAbsent(methodForTopic(topic), executableMethod ->
             Arrays.stream(executableMethod.getArguments())
                 .filter(arg -> Consumer.class.isAssignableFrom(arg.getType()))
                 .findFirst()
@@ -207,8 +209,9 @@ final class ConsumerInfo {
     }
 
     @Nullable
+    @SuppressWarnings("java:S1452")
     Argument<?> seekArg(String topic) {
-        return seekArgCache.computeIfAbsent(method(topic), executableMethod ->
+        return seekArgCache.computeIfAbsent(methodForTopic(topic), executableMethod ->
             Arrays.stream(executableMethod.getArguments())
                 .filter(arg -> KafkaSeekOperations.class.isAssignableFrom(arg.getType()))
                 .findFirst()
@@ -216,8 +219,9 @@ final class ConsumerInfo {
     }
 
     @Nullable
+    @SuppressWarnings("java:S1452")
     Argument<?> ackArg(String topic) {
-        return ackArgCache.computeIfAbsent(method(topic), executableMethod ->
+        return ackArgCache.computeIfAbsent(methodForTopic(topic), executableMethod ->
             Arrays.stream(executableMethod.getArguments())
                 .filter(arg -> Acknowledgement.class.isAssignableFrom(arg.getType()))
                 .findFirst()
@@ -232,28 +236,13 @@ final class ConsumerInfo {
     private List<PatternMethod> resolveTopicMethods(List<ExecutableMethod<Object, ?>> methods) {
         List<PatternMethod> patterns = new java.util.ArrayList<>();
         for (ExecutableMethod<Object, ?> executableMethod : methods) {
-            for (AnnotationValue<Topic> topicAnnotation : topicAnnotations(executableMethod)) {
-                for (String topic : topicAnnotation.stringValues()) {
-                    ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
-                    if (previous != null && previous != executableMethod) {
-                        throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
-                    }
-                }
-                for (String pattern : topicAnnotation.stringValues("patterns")) {
-                    try {
-                        patterns.add(new PatternMethod(Pattern.compile(pattern), executableMethod));
-                    } catch (PatternSyntaxException e) {
-                        throw new MessagingSystemException("Invalid @Topic pattern [" + pattern + "] for listener method [" + executableMethod.getDeclaringType().getName() + "#" + executableMethod.getName() + "]: " + e.getMessage(), e);
-                    }
-                }
-            }
+            registerTopicMethods(patterns, executableMethod);
         }
         return List.copyOf(patterns);
     }
 
     private static List<AnnotationValue<Topic>> topicAnnotations(ExecutableMethod<Object, ?> executableMethod) {
-        List<AnnotationValue<Topic>> topicAnnotations = executableMethod.getDeclaredAnnotationValuesByType(Topic.class);
-        return topicAnnotations == null ? List.of() : topicAnnotations;
+        return executableMethod.getDeclaredAnnotationValuesByType(Topic.class);
     }
 
     private ExecutableMethod<Object, ?> resolveMethod(String topic) {
@@ -277,6 +266,32 @@ final class ConsumerInfo {
             return method;
         }
         throw new MessagingSystemException("No @Topic method found for consumed topic [" + topic + "] in listener [" + method.getDeclaringType().getName() + "]");
+    }
+
+    private void registerTopicMethods(List<PatternMethod> patterns, ExecutableMethod<Object, ?> executableMethod) {
+        for (AnnotationValue<Topic> topicAnnotation : topicAnnotations(executableMethod)) {
+            registerDirectTopics(executableMethod, topicAnnotation);
+            registerPatterns(patterns, executableMethod, topicAnnotation);
+        }
+    }
+
+    private void registerDirectTopics(ExecutableMethod<Object, ?> executableMethod, AnnotationValue<Topic> topicAnnotation) {
+        for (String topic : topicAnnotation.stringValues()) {
+            ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
+            if (previous != null && previous != executableMethod) {
+                throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
+            }
+        }
+    }
+
+    private static void registerPatterns(List<PatternMethod> patterns, ExecutableMethod<Object, ?> executableMethod, AnnotationValue<Topic> topicAnnotation) {
+        for (String pattern : topicAnnotation.stringValues("patterns")) {
+            try {
+                patterns.add(new PatternMethod(Pattern.compile(pattern), executableMethod));
+            } catch (PatternSyntaxException e) {
+                throw new MessagingSystemException("Invalid @Topic pattern [" + pattern + "] for listener method [" + executableMethod.getDeclaringType().getName() + "#" + executableMethod.getName() + "]: " + e.getMessage(), e);
+            }
+        }
     }
 
     private record PatternMethod(Pattern pattern, ExecutableMethod<Object, ?> method) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -89,7 +90,7 @@ final class ConsumerStateBatch extends ConsumerState {
         try {
             for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(consumerRecords)) {
                 final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
-                final ExecutableMethod<Object, ?> method = info.method(topic);
+                final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
                 Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
                     final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
                     boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
@@ -254,7 +255,7 @@ final class ConsumerStateBatch extends ConsumerState {
         }
         java.util.List<ConsumerRecords<?, ?>> splitRecords = new ArrayList<>(byTopic.size());
         for (Map<TopicPartition, java.util.List<ConsumerRecord<?, ?>>> topicRecords : byTopic.values()) {
-            splitRecords.add(new ConsumerRecords<>((Map) topicRecords));
+            splitRecords.add(new ConsumerRecords<>((Map) topicRecords, Collections.emptyMap()));
         }
         return splitRecords;
     }
