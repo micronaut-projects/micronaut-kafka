@@ -1,5 +1,6 @@
 package io.micronaut.configuration.kafka.processor
 
+import io.micronaut.configuration.kafka.annotation.ConsumerCreationStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
@@ -54,6 +55,18 @@ class ConsumerCreationStrategySupportSpec extends Specification {
                 !it.matcher('baz').matches()
         })
         0 * _
+    }
+
+    void 'method topics override class topics for per-topic listeners'() {
+        given:
+        def beanDefinition = loadBeanDefinition(MethodTopicOverridesClassTopicListener)
+        def method = beanDefinition.executableMethods.find { it.name == 'receive' }
+
+        when:
+        def topicAnnotations = invokeResolveTopicAnnotations(beanDefinition, method, [method])
+
+        then:
+        topicAnnotations*.stringValues().flatten() == ['method-topic']
     }
 
     void 'topic aware deserializer delegates by topic'() {
@@ -128,8 +141,7 @@ class ConsumerCreationStrategySupportSpec extends Specification {
     }
 
     private ConsumerInfo consumerInfo(Class<?> beanType) {
-        def definitionType = Class.forName("${beanType.packageName}.\$${beanType.simpleName}\$Definition")
-        def beanDefinition = ((BeanDefinitionReference<?>) definitionType.getDeclaredConstructor().newInstance()).load()
+        def beanDefinition = loadBeanDefinition(beanType)
         def methods = beanDefinition.executableMethods.findAll {
             !it.getDeclaredAnnotationValuesByType(Topic).isEmpty()
         }
@@ -138,6 +150,37 @@ class ConsumerCreationStrategySupportSpec extends Specification {
             'test-group',
             OffsetStrategy.AUTO,
             methods[0].getAnnotation(KafkaListener),
+            methods
+        )
+    }
+
+    private def loadBeanDefinition(Class<?> beanType) {
+        loadBeanDefinitionReference(beanType).load()
+    }
+
+    private BeanDefinitionReference<?> loadBeanDefinitionReference(Class<?> beanType) {
+        def definitionType = Class.forName("${beanType.packageName}.\$${beanType.simpleName}\$Definition")
+        return (BeanDefinitionReference<?>) definitionType.getDeclaredConstructor().newInstance()
+    }
+
+    private List<AnnotationValue<Topic>> invokeResolveTopicAnnotations(
+        def beanDefinition,
+        ExecutableMethod<?, ?> method,
+        List<ExecutableMethod<?, ?>> methods
+    ) {
+        Method reflectedMethod = KafkaConsumerProcessor.getDeclaredMethod(
+            'resolveTopicAnnotations',
+            io.micronaut.inject.BeanDefinition,
+            ExecutableMethod,
+            ConsumerCreationStrategy,
+            List
+        )
+        reflectedMethod.accessible = true
+        return (List<AnnotationValue<Topic>>) reflectedMethod.invoke(
+            null,
+            beanDefinition,
+            method,
+            ConsumerCreationStrategy.PER_TOPIC,
             methods
         )
     }

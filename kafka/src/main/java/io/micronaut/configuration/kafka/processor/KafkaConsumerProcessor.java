@@ -453,16 +453,16 @@ class KafkaConsumerProcessor
         ConsumerCreationStrategy consumerCreationStrategy,
         List<ExecutableMethod<?, ?>> methods
     ) {
-        final List<AnnotationValue<Topic>> beanTopics = beanDefinition.getDeclaredAnnotationValuesByType(Topic.class);
-        if (CollectionUtils.isNotEmpty(beanTopics)) {
-            return beanTopics;
-        }
         if (consumerCreationStrategy == ConsumerCreationStrategy.PER_CLASS && methods.size() > 1) {
             return methods.stream()
                 .flatMap(executableMethod -> executableMethod.getDeclaredAnnotationValuesByType(Topic.class).stream())
                 .toList();
         }
-        return method.getDeclaredAnnotationValuesByType(Topic.class);
+        final List<AnnotationValue<Topic>> methodTopics = method.getDeclaredAnnotationValuesByType(Topic.class);
+        if (CollectionUtils.isNotEmpty(methodTopics)) {
+            return methodTopics;
+        }
+        return beanDefinition.getDeclaredAnnotationValuesByType(Topic.class);
     }
 
     @SuppressWarnings("rawtypes")
