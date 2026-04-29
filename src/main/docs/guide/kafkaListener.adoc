@@ -48,6 +48,6 @@ kafka:
               servers: localhost:9098
 ----
 
-Any property in the link:{kafkaapi}\/org/apache/kafka/clients/consumer/ConsumerConfig.html[ConsumerConfig] class can be set for all `@KafkaListener` beans based on the listener `id`, or `groupId` when `id` is not set. The above example will enable the consumer to create a topic if it doesn't exist for the `default` listener and set a custom bootstrap server for a listener declared with `@KafkaListener(id = "product")`.
+Properties under `kafka.consumers.default` serve as shared defaults applied to all link:{kafkaapi}/org/apache/kafka/clients/consumer/ConsumerConfig.html[ConsumerConfig]-compatible consumers, while properties under `kafka.consumers.<id>` apply only to the consumer whose `id` matches (falling back to `groupId` when `id` is not set). The above example enables topic auto-creation for all consumers via the `default` key and sets a custom bootstrap server only for a listener declared with `@KafkaListener(id = "product")`.
 
 TIP: See the guide for https://guides.micronaut.io/latest/testing-micronaut-kafka-listener-using-testcontainers.html[Testing Kafka Listener using Testcontainers with the Micronaut Framework] to learn more.

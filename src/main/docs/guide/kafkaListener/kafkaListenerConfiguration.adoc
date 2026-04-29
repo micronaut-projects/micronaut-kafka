@@ -56,7 +56,7 @@ The above example will set the default `session.timeout.ms` that Kafka uses to d
 
 You can also provide configuration specific to a listener id. For example consider the following configuration:
 
-.Applying Consumer Group Specific config
+.Applying Listener-Specific Config
 [configuration]
 ----
 kafka:

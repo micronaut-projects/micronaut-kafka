@@ -26,7 +26,8 @@ class KafkaListenerIdSpec extends Specification {
             ('kafka.consumers.with-id-and-group.' + ConsumerConfig.GROUP_ID_CONFIG): 'CONFIGURED_GROUP_1',
             ('kafka.consumers.with-id.' + ConsumerConfig.GROUP_ID_CONFIG): 'CONFIGURED_GROUP_2',
             ('kafka.consumers.group-id-only.' + ConsumerConfig.GROUP_ID_CONFIG): 'CONFIGURED_GROUP_3',
-            ('kafka.consumers.test-app.' + ConsumerConfig.GROUP_ID_CONFIG): 'CONFIGURED_GROUP_4'
+            ('kafka.consumers.test-app.' + ConsumerConfig.GROUP_ID_CONFIG): 'CONFIGURED_GROUP_4',
+            ('kafka.consumers.VALUE_AS_GROUP.' + ConsumerConfig.GROUP_ID_CONFIG): 'SHOULD_NOT_BE_USED'
         )
 
         expect:
@@ -35,6 +36,8 @@ class KafkaListenerIdSpec extends Specification {
         applicationContext.getBean(ConsumerWithIdFallbackGroupId).kafkaConsumer.groupMetadata().groupId() == 'ID_FALLBACK_GROUP'
         applicationContext.getBean(ConsumerWithGroupId).kafkaConsumer.groupMetadata().groupId() == 'GROUP_ID_ONLY'
         applicationContext.getBean(ConsumerWithFallbackGroupId).kafkaConsumer.groupMetadata().groupId() == 'CONFIGURED_GROUP_4'
+        // @KafkaListener("VALUE_AS_GROUP") uses the value alias for groupId; annotation value must win over configured group.id
+        applicationContext.getBean(ConsumerWithValueGroupId).kafkaConsumer.groupMetadata().groupId() == 'VALUE_AS_GROUP'
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerIdSpec')
@@ -80,6 +83,16 @@ class KafkaListenerIdSpec extends Specification {
     @Requires(property = 'spec.name', value = 'KafkaListenerIdSpec')
     @KafkaListener(autoStartup = false)
     static class ConsumerWithFallbackGroupId implements ConsumerAware<String, String> {
+        Consumer<String, String> kafkaConsumer
+
+        @Topic('foo')
+        void consume(String value) {
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaListenerIdSpec')
+    @KafkaListener(value = 'VALUE_AS_GROUP', autoStartup = false)
+    static class ConsumerWithValueGroupId implements ConsumerAware<String, String> {
         Consumer<String, String> kafkaConsumer
 
         @Topic('foo')
