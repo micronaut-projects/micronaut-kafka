@@ -88,7 +88,14 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(consumerRecords)) {
+            final ConsumerRecords<?, ?> interceptedConsumerRecords = kafkaConsumerProcessor.interceptRecords(info, consumerRecords);
+            if (interceptedConsumerRecords.isEmpty()) {
+                final String topic = consumerRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
+                handleResult(normalizeResult(null), consumerRecords, topic);
+                failed = false;
+                return;
+            }
+            for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(interceptedConsumerRecords)) {
                 withKafkaScope(() -> {
                     final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
                     final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);

@@ -1,0 +1,15 @@
+To inspect, filter, or wrap consumed records before Micronaut binds them to a ann:configuration.kafka.annotation.KafkaListener[] method, define a bean that implements api:configuration.kafka.ConsumerRecordInterceptor[].
+
+Interceptors run before argument binding for single-record listeners and before Micronaut builds the batch arguments for batch listeners. If multiple interceptor beans are present, Micronaut applies them in order.
+
+Override the `matches(..)` method to limit an interceptor to specific listener beans or methods. The `intercept(..)` method receives an `InterceptionContext` that exposes the current `ConsumerRecord` together with listener metadata such as the client id, group id, topic, partition, and offset.
+
+An interceptor can:
+
+* return the same `ConsumerRecord`
+* return a wrapped `ConsumerRecord`
+* return `null` to skip listener invocation for that consumed record
+
+When Micronaut manages commits, returning `null` still allows the configured offset strategy to advance for the consumed record. This makes the interceptor API suitable for header-based filtering without relying on Kafka consumer interceptors that can interfere with per-record commit handling.
+
+If you need to instrument the underlying Kafka client itself, you can still use a `BeanCreatedEventListener<Consumer<?, ?>>`. Prefer api:configuration.kafka.ConsumerRecordInterceptor[] when the goal is to change what the listener sees before binding.

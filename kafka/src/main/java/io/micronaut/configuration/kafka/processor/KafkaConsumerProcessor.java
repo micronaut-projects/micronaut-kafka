@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
+import io.micronaut.configuration.kafka.ConsumerRecordInterceptor;
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.ConsumerSeekAware;
@@ -51,6 +52,7 @@ import org.jspecify.annotations.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
+import io.micronaut.core.order.OrderUtil;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
 import io.micronaut.core.util.CollectionUtils;
@@ -84,9 +86,11 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -130,6 +134,7 @@ class KafkaConsumerProcessor
     private final Set<Class<?>> perClassConsumers = ConcurrentHashMap.newKeySet();
 
     private final ConsumerRecordBinderRegistry binderRegistry;
+    private final List<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors;
     private final SerdeRegistry serdeRegistry;
     private final KafkaListenerExceptionHandler exceptionHandler;
     private final TaskScheduler taskScheduler;
@@ -152,6 +157,7 @@ class KafkaConsumerProcessor
      * @param beanContext                   The bean context
      * @param defaultConsumerConfiguration  The default consumer config
      * @param binderRegistry                The {@link ConsumerRecordBinderRegistry}
+     * @param consumerRecordInterceptors    Interceptors applied to consumed records before listener binding
      * @param batchBinderRegistry           The {@link BatchConsumerRecordsBinderRegistry}
      * @param serdeRegistry                 The {@link org.apache.kafka.common.serialization.Serde} registry
      * @param producerRegistry              The {@link ProducerRegistry}
@@ -169,6 +175,7 @@ class KafkaConsumerProcessor
             BeanContext beanContext,
             AbstractKafkaConsumerConfiguration defaultConsumerConfiguration,
             ConsumerRecordBinderRegistry binderRegistry,
+            List<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors,
             BatchConsumerRecordsBinderRegistry batchBinderRegistry,
             SerdeRegistry serdeRegistry,
             ProducerRegistry producerRegistry,
@@ -184,6 +191,8 @@ class KafkaConsumerProcessor
         this.beanContext = beanContext;
         this.defaultConsumerConfiguration = defaultConsumerConfiguration;
         this.binderRegistry = binderRegistry;
+        this.consumerRecordInterceptors = new ArrayList<>(consumerRecordInterceptors);
+        OrderUtil.sort(this.consumerRecordInterceptors);
         this.batchBinderRegistry = batchBinderRegistry;
         this.serdeRegistry = serdeRegistry;
         this.producerRegistry = producerRegistry;
@@ -346,7 +355,7 @@ class KafkaConsumerProcessor
         }
         final ExecutableMethod<?, ?> primaryMethod = methods.get(0);
         configureDeserializers(methods, consumerConfiguration);
-        submitConsumerThreads(primaryMethod, clientId, groupId, offsetStrategy, topicAnnotations,
+        submitConsumerThreads(beanDefinition, primaryMethod, clientId, groupId, offsetStrategy, topicAnnotations,
             consumerAnnotation, consumerConfiguration, properties, beanType, methods, uniqueGroupIdDeleteOnShutdown);
     }
 
@@ -445,6 +454,74 @@ class KafkaConsumerProcessor
 
     ConsumerRecordBinderRegistry getBinderRegistry() {
         return binderRegistry;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    <K, V> ConsumerRecord<K, V> interceptRecord(@NonNull ConsumerInfo consumerInfo, @NonNull ConsumerRecord<K, V> consumerRecord) {
+        List<ConsumerRecordInterceptor<?, ?>> applicableInterceptors = consumerInfo.consumerRecordInterceptors(consumerRecord.topic());
+        if (applicableInterceptors.isEmpty()) {
+            return consumerRecord;
+        }
+        ConsumerRecord<K, V> intercepted = consumerRecord;
+        for (ConsumerRecordInterceptor<?, ?> consumerRecordInterceptor : applicableInterceptors) {
+            ConsumerRecordInterceptor.InterceptionContext<K, V> interceptionContext = new ConsumerRecordInterceptor.InterceptionContext<>(
+                intercepted,
+                intercepted.topic(),
+                intercepted.partition(),
+                intercepted.offset(),
+                consumerInfo.clientId,
+                consumerInfo.groupId
+            );
+            intercepted = ((ConsumerRecordInterceptor<K, V>) consumerRecordInterceptor).intercept(interceptionContext);
+            if (intercepted == null) {
+                return null;
+            }
+        }
+        return intercepted;
+    }
+
+    @NonNull
+    @SuppressWarnings("unchecked")
+    <K, V> ConsumerRecords<K, V> interceptRecords(@NonNull ConsumerInfo consumerInfo, @NonNull ConsumerRecords<K, V> consumerRecords) {
+        if (consumerRecords.isEmpty()) {
+            return consumerRecords;
+        }
+        Map<TopicPartition, List<ConsumerRecord<K, V>>> interceptedRecords = new LinkedHashMap<>();
+        for (ConsumerRecord<K, V> consumerRecord : consumerRecords) {
+            ConsumerRecord<K, V> intercepted = interceptRecord(consumerInfo, consumerRecord);
+            if (intercepted != null) {
+                TopicPartition topicPartition = new TopicPartition(intercepted.topic(), intercepted.partition());
+                interceptedRecords.computeIfAbsent(topicPartition, ignored -> new ArrayList<>()).add(intercepted);
+            }
+        }
+        if (interceptedRecords.isEmpty()) {
+            return ConsumerRecords.empty();
+        }
+        return new ConsumerRecords<>(interceptedRecords);
+    }
+
+    List<ConsumerRecordInterceptor<?, ?>> matchingInterceptors(@NonNull BeanDefinition<?> beanDefinition, @NonNull ExecutableMethod<?, ?> method) {
+        if (consumerRecordInterceptors.isEmpty()) {
+            return List.of();
+        }
+        return consumerRecordInterceptors.stream()
+            .filter(interceptor -> interceptor.matches(beanDefinition, method))
+            .toList();
+    }
+
+    Map<ExecutableMethod<?, ?>, List<ConsumerRecordInterceptor<?, ?>>> matchingInterceptors(
+        @NonNull BeanDefinition<?> beanDefinition,
+        @NonNull List<ExecutableMethod<?, ?>> methods
+    ) {
+        if (methods.isEmpty()) {
+            return Map.of();
+        }
+        Map<ExecutableMethod<?, ?>, List<ConsumerRecordInterceptor<?, ?>>> matches = new LinkedHashMap<>(methods.size());
+        for (ExecutableMethod<?, ?> executableMethod : methods) {
+            matches.put(executableMethod, matchingInterceptors(beanDefinition, executableMethod));
+        }
+        return Map.copyOf(matches);
     }
 
     BatchConsumerRecordsBinderRegistry getBatchBinderRegistry() {
@@ -572,7 +649,8 @@ class KafkaConsumerProcessor
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void submitConsumerThreads(final ExecutableMethod<?, ?> method,
+    private void submitConsumerThreads(final BeanDefinition<?> beanDefinition,
+                                       final ExecutableMethod<?, ?> method,
                                        final String clientId,
                                        final String groupId,
                                        final OffsetStrategy offsetStrategy,
@@ -604,7 +682,15 @@ class KafkaConsumerProcessor
             }
             setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
             kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
-            final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, properties, methods);
+            final ConsumerInfo consumerInfo = new ConsumerInfo(
+                finalClientId,
+                groupId,
+                offsetStrategy,
+                consumerAnnotation,
+                properties,
+                methods,
+                matchingInterceptors(beanDefinition, methods)
+            );
             final ConsumerState consumerState = consumerInfo.isBatch ?
                 new ConsumerStateBatch(this, consumerInfo, kafkaConsumer, consumerBean) :
                 new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);

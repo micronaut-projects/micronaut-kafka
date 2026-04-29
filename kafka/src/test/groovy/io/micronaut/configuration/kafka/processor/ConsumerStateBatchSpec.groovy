@@ -185,6 +185,31 @@ class ConsumerStateBatchSpec extends Specification {
         })
     }
 
+    void "filtered batches skip listener invocation"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 1)
+        ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>('source-topic', 1, 3L, 'key', 'value')
+        ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            interceptRecords(_, consumerRecords) >> ConsumerRecords.empty()
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateBatch consumerState = newConsumerStateBatch(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            kafkaListenerAnnotation(LOG_AND_RESUME_AT_NEXT_RECORD, 'errors-dlq'),
+            executableMethod([Argument.of(ConsumerRecords)] as Argument[]) { throw new AssertionError('listener should not be invoked') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
     private ConsumerStateBatch newConsumerStateBatch() {
         newConsumerStateBatch(Mock(KafkaConsumerProcessor), Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -200,13 +225,23 @@ class ConsumerStateBatchSpec extends Specification {
         Consumer<?, ?> kafkaConsumer,
         AnnotationValue<KafkaListener> kafkaListener
     ) {
+        newConsumerStateBatch(kafkaConsumerProcessor, kafkaConsumer, kafkaListener, executableMethod())
+    }
+
+    private ConsumerStateBatch newConsumerStateBatch(
+        KafkaConsumerProcessor kafkaConsumerProcessor,
+        Consumer<?, ?> kafkaConsumer,
+        AnnotationValue<KafkaListener> kafkaListener,
+        ExecutableMethod<?, ?> executableMethod
+    ) {
         ConsumerInfo consumerInfo = new ConsumerInfo(
                 'client',
                 'group',
                 OffsetStrategy.DISABLED,
                 kafkaListener,
                 new Properties(),
-                executableMethod()
+                executableMethod,
+                []
         )
         new ConsumerStateBatch(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
     }
@@ -228,7 +263,7 @@ class ConsumerStateBatchSpec extends Specification {
             stringValues(_) >> null
             getReturnType() >> returnType
         }
-        return new ConsumerInfo("test-client", null, offsetStrategy, kafkaListener, new Properties(), method)
+        return new ConsumerInfo("test-client", null, offsetStrategy, kafkaListener, new Properties(), method, [])
     }
 
     private static Object invokePrivateMethod(Object target, String name, Class[] parameterTypes, Object[] arguments) {
@@ -257,6 +292,10 @@ class ConsumerStateBatchSpec extends Specification {
     }
 
     private ExecutableMethod<?, ?> executableMethod() {
+        executableMethod(Argument.ZERO_ARGUMENTS) { null }
+    }
+
+    private ExecutableMethod<?, ?> executableMethod(Argument[] arguments, Closure<?> invocation) {
         ReturnType<?> returnType = Stub() {
             getType() >> void
             isAsyncOrReactive() >> false
@@ -268,9 +307,15 @@ class ConsumerStateBatchSpec extends Specification {
             isTrue(KafkaListener, 'batch') >> true
             hasAnnotation(_ as Class) >> false
             getValue(KafkaListener, 'pollTimeout', Duration) >> Optional.of(Duration.ofMillis(100))
-            getArguments() >> Argument.ZERO_ARGUMENTS
+            getArguments() >> arguments
             stringValues(_ as Class) >> ([] as String[])
             getReturnType() >> returnType
+            invoke(_, _ as Object[]) >> { Object instance, Object[] args ->
+                invocation.call(([instance] + args) as Object[])
+            }
+            invoke(_) >> { Object instance ->
+                invocation.call(([instance]) as Object[])
+            }
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
+import io.micronaut.configuration.kafka.ConsumerRecordInterceptor;
 import io.micronaut.configuration.kafka.KafkaMessage;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
@@ -87,6 +88,7 @@ final class ConsumerInfo {
     private final Map<ExecutableMethod<Object, ?>, List<String>> sendToTopicsCache = new ConcurrentHashMap<>();
     private final Map<ExecutableMethod<Object, ?>, Boolean> returnsOneKafkaMessageCache = new ConcurrentHashMap<>();
     private final Map<ExecutableMethod<Object, ?>, Boolean> returnsManyKafkaMessagesCache = new ConcurrentHashMap<>();
+    private final Map<ExecutableMethod<Object, ?>, List<ConsumerRecordInterceptor<?, ?>>> consumerRecordInterceptorsByMethod;
 
     ConsumerInfo(
         String clientId,
@@ -96,7 +98,27 @@ final class ConsumerInfo {
         Properties properties,
         ExecutableMethod<?, ?> method
     ) {
-        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method));
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method), Map.of());
+    }
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        ExecutableMethod<?, ?> method,
+        List<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors
+    ) {
+        this(
+            clientId,
+            groupId,
+            offsetStrategy,
+            kafkaListener,
+            properties,
+            List.of(method),
+            Map.of(method, List.copyOf(consumerRecordInterceptors))
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -106,7 +128,8 @@ final class ConsumerInfo {
         OffsetStrategy offsetStrategy,
         AnnotationValue<KafkaListener> kafkaListener,
         Properties properties,
-        List<ExecutableMethod<?, ?>> methods
+        List<ExecutableMethod<?, ?>> methods,
+        Map<ExecutableMethod<?, ?>, List<ConsumerRecordInterceptor<?, ?>>> consumerRecordInterceptorsByMethod
     ) {
         this.clientId = clientId;
         this.groupId = groupId;
@@ -127,15 +150,22 @@ final class ConsumerInfo {
         this.isTransactional = producerTransactionalId != null;
         this.cooperativeStickyAssignmentStrategy = OffsetCommitExceptionLogger.isCooperativeStickyAssignor(properties.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
         java.util.ArrayList<ExecutableMethod<Object, ?>> resolvedListenerMethods = new java.util.ArrayList<>(methods.size());
+        Map<ExecutableMethod<Object, ?>, List<ConsumerRecordInterceptor<?, ?>>> resolvedInterceptors = new HashMap<>(methods.size());
         for (ExecutableMethod<?, ?> executableMethod : methods) {
-            resolvedListenerMethods.add((ExecutableMethod<Object, ?>) executableMethod);
+            ExecutableMethod<Object, ?> resolvedMethod = (ExecutableMethod<Object, ?>) executableMethod;
+            resolvedListenerMethods.add(resolvedMethod);
+            resolvedInterceptors.put(
+                resolvedMethod,
+                List.copyOf(consumerRecordInterceptorsByMethod.getOrDefault(executableMethod, List.of()))
+            );
         }
         this.listenerMethods = List.copyOf(resolvedListenerMethods);
+        this.consumerRecordInterceptorsByMethod = Map.copyOf(resolvedInterceptors);
         this.method = this.listenerMethods.get(0);
         this.patternMethods = resolveTopicMethods(this.listenerMethods);
         this.autoStartup = kafkaListener.booleanValue("autoStartup").orElse(true);
-        this.isBatch = method.isTrue(KafkaListener.class, "batch");
-        this.pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class).orElseGet(() -> Duration.ofMillis(100));
+        this.isBatch = this.method.isTrue(KafkaListener.class, "batch");
+        this.pollTimeout = this.method.getValue(KafkaListener.class, "pollTimeout", Duration.class).orElseGet(() -> Duration.ofMillis(100));
         this.trackPartitions = anyMethodHasAckArg() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
         this.shouldSendOffsetsToTransaction = offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION;
 
@@ -168,6 +198,10 @@ final class ConsumerInfo {
 
     boolean isBlocking(String topic) {
         return methodForTopic(topic).hasAnnotation(Blocking.class);
+    }
+
+    List<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors(String topic) {
+        return consumerRecordInterceptorsByMethod.getOrDefault(methodForTopic(topic), List.of());
     }
 
     List<String> sendToTopics(String topic) {
