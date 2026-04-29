@@ -21,8 +21,10 @@ class ProductListener {
     @Topic("reactive-products")
     fun receive(@KafkaKey brand: String,  // <1>
         product: Mono<Product>): Mono<Product> { // <2>
-        return product.doOnSuccess { (name): Product ->
-            LOG.info("Got Product - {} by {}", name, brand) // <3>
+        return product.doOnSuccess { receivedProduct ->
+            receivedProduct?.let {
+                LOG.info("Got Product - {} by {}", it.name, brand) // <3>
+            }
         }
     }
     // end::method[]
@@ -31,8 +33,10 @@ class ProductListener {
     @Blocking
     @Topic("reactive-products")
     fun receiveBlocking(@KafkaKey brand: String, product: Mono<Product>): Mono<Product> {
-        return product.doOnSuccess { (name): Product ->
-            LOG.info("Got Product - {} by {}", name, brand)
+        return product.doOnSuccess { receivedProduct ->
+            receivedProduct?.let {
+                LOG.info("Got Product - {} by {}", it.name, brand)
+            }
         }
     }
     // end::blocking[]
