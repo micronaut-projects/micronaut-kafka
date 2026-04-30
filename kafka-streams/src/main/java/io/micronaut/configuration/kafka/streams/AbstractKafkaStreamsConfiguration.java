@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,8 +72,9 @@ public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfig
         if (environment.getActiveNames().contains(Environment.TEST)) {
             String tmpDir = System.getProperty("java.io.tmpdir");
             if (StringUtils.isNotEmpty(tmpDir)) {
-                if (new File(tmpDir, applicationName).mkdirs()) {
-                    config.putIfAbsent(StreamsConfig.STATE_DIR_CONFIG, tmpDir);
+                File stateDir = new File(tmpDir, applicationName);
+                if (stateDir.mkdirs() || stateDir.isDirectory()) {
+                    config.putIfAbsent(StreamsConfig.STATE_DIR_CONFIG, stateDir.getAbsolutePath());
                 }
             }
         }

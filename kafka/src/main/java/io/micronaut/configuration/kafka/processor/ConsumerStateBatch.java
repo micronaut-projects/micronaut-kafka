@@ -89,20 +89,22 @@ final class ConsumerStateBatch extends ConsumerState {
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
             for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(consumerRecords)) {
-                final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
-                final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
-                Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
-                    final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
-                    boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+                withKafkaScope(() -> {
+                    final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
+                    final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
+                    Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
+                        final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
+                        boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+                    });
+                    Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+                    if (method.isSuspend()) {
+                        Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
+                        boundArguments.put(lastArgument, null);
+                    }
+                    final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
+                    final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), topicRecords).invoke(consumerBean);
+                    handleResult(normalizeResult(result), topicRecords, topic);
                 });
-                Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
-                if (method.isSuspend()) {
-                    Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
-                    boundArguments.put(lastArgument, null);
-                }
-                final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
-                final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), topicRecords).invoke(consumerBean);
-                handleResult(normalizeResult(result), topicRecords, topic);
             }
             failed = false;
         } catch (Exception e) {

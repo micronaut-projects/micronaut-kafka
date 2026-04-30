@@ -14,6 +14,7 @@ kafkaClient:
 kafkaListener:
   title: Kafka Consumers Using @KafkaListener
   kafkaListenerMethods: Defining @KafkaListener Methods
+  kafkaListenerScope: Scoping Beans to a Kafka Listener Invocation
   kafkaListenerConfiguration: Configuring @KafkaListener beans
   kafkaOffsets: Commiting Kafka Offsets
   kafkaSeek:
