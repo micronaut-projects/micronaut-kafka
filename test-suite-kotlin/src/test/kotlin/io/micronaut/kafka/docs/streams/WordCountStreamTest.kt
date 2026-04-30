@@ -7,7 +7,9 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.KafkaStreams.State
+import java.nio.file.Files
 import java.util.concurrent.TimeUnit
+import java.util.UUID
 
 internal class WordCountStreamTest {
 
@@ -15,14 +17,20 @@ internal class WordCountStreamTest {
     @Suppress("UNCHECKED_CAST")
     fun testWordCounter() {
         val props = Kafka.getProperties() as MutableMap<String, Any>
+        val uniqueSuffix = UUID.randomUUID().toString()
+        val stateDir = Files.createTempDirectory("test-suite-kotlin-word-count-stream-").toFile().apply {
+            deleteOnExit()
+        }
         props.putAll(
             mapOf(
                 "kafka.enabled" to StringUtils.TRUE,
                 "micronaut.application.name" to "test-suite-kotlin-word-count-stream",
+                "kafka.streams.default.application.id" to "test-suite-kotlin-word-count-stream-$uniqueSuffix",
+                "kafka.streams.default.state.dir" to stateDir.absolutePath,
                 "spec.name" to "WordCountStreamTest",
-                "kafka.streams.my-stream.application.id" to "test-suite-kotlin-my-stream",
+                "kafka.streams.my-stream.application.id" to "test-suite-kotlin-my-stream-$uniqueSuffix",
                 "kafka.streams.my-stream.start-kafka-streams" to StringUtils.FALSE,
-                "kafka.streams.my-other-stream.application.id" to "test-suite-kotlin-my-other-stream",
+                "kafka.streams.my-other-stream.application.id" to "test-suite-kotlin-my-other-stream-$uniqueSuffix",
                 "kafka.streams.my-other-stream.start-kafka-streams" to StringUtils.FALSE
             )
         )
