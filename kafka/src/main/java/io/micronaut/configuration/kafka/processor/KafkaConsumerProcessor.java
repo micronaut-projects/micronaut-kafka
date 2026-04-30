@@ -142,6 +142,7 @@ class KafkaConsumerProcessor
     private final ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler;
 
     private final Supplier<Optional<KafkaCustomScope>> kafkaCustomScopeSupplier;
+
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
      *
