@@ -339,6 +339,8 @@ class ConsumerStateSingleSpec extends Specification {
                         return Argument.ZERO_ARGUMENTS
                     case "stringValues":
                         return [] as String[]
+                    case "getDeclaredAnnotationValuesByType":
+                        return []
                     case "getReturnType":
                         return returnType
                     default:
@@ -427,6 +429,8 @@ class ConsumerStateSingleSpec extends Specification {
                         return Argument.ZERO_ARGUMENTS
                     case 'stringValues':
                         return [] as String[]
+                    case 'getDeclaredAnnotationValuesByType':
+                        return []
                     case 'getReturnType':
                         return returnType
                     case 'invoke':

@@ -22,6 +22,8 @@ You can also specify one or many regular expressions to listen for:
 
 snippet::io.micronaut.kafka.docs.consumer.topics.ProductListener[tags=patternTopics, indent=0]
 
+By default, Micronaut creates one Kafka consumer per `@Topic`-annotated listener method, even when multiple methods live in the same ann:configuration.kafka.annotation.KafkaListener[] class. To create a single consumer for the whole listener and route records to methods by topic, set `consumerCreationStrategy = ConsumerCreationStrategy.PER_CLASS` on ann:configuration.kafka.annotation.KafkaListener[].
+
 == Handling Multiple Payload Types on One Topic
 
 Kafka does not route records by `@MessageBody` type. If a topic intentionally carries multiple event types, prefer a single listener method that consumes a common supertype and branches on the concrete payload in application code.

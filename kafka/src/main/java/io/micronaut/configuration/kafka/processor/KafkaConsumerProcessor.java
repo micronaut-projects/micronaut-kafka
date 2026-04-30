@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.ConsumerSeekAware;
 import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
+import io.micronaut.configuration.kafka.annotation.ConsumerCreationStrategy;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
@@ -51,7 +52,6 @@ import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
-import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.inject.BeanDefinition;
@@ -73,6 +73,7 @@ import org.apache.kafka.common.IsolationLevel;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -83,6 +84,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -122,6 +124,7 @@ class KafkaConsumerProcessor
     @SuppressWarnings("rawtypes")
     private final AbstractKafkaConsumerConfiguration defaultConsumerConfiguration;
     private final Map<String, ConsumerState> consumers = new ConcurrentHashMap<>();
+    private final Set<Class<?>> perClassConsumers = ConcurrentHashMap.newKeySet();
 
     private final ConsumerRecordBinderRegistry binderRegistry;
     private final SerdeRegistry serdeRegistry;
@@ -283,15 +286,23 @@ class KafkaConsumerProcessor
 
     @Override
     public <B> void process(BeanDefinition<B> beanDefinition, ExecutableMethod<B, ?> method) {
-        List<AnnotationValue<Topic>> topicAnnotations = method.getDeclaredAnnotationValuesByType(Topic.class);
         final AnnotationValue<KafkaListener> consumerAnnotation = method.getAnnotation(KafkaListener.class);
-        if (CollectionUtils.isEmpty(topicAnnotations)) {
-            topicAnnotations = beanDefinition.getDeclaredAnnotationValuesByType(Topic.class);
+        if (consumerAnnotation == null) {
+            return;
         }
-        if (consumerAnnotation == null || CollectionUtils.isEmpty(topicAnnotations)) {
+
+        final ConsumerCreationStrategy consumerCreationStrategy = consumerAnnotation.enumValue("consumerCreationStrategy", ConsumerCreationStrategy.class)
+            .orElse(ConsumerCreationStrategy.PER_TOPIC);
+        final Class<?> beanType = beanDefinition.getBeanType();
+        if (consumerCreationStrategy == ConsumerCreationStrategy.PER_CLASS && !perClassConsumers.add(beanType)) {
+            return;
+        }
+
+        final List<ExecutableMethod<?, ?>> methods = resolveConsumerMethods(beanDefinition, method, consumerCreationStrategy);
+        final List<AnnotationValue<Topic>> topicAnnotations = resolveTopicAnnotations(beanDefinition, method, consumerCreationStrategy, methods);
+        if (CollectionUtils.isEmpty(topicAnnotations)) {
             return; // No topics to consume
         }
-        final Class<?> beanType = beanDefinition.getBeanType();
         String groupId = consumerAnnotation.stringValue("groupId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
@@ -310,9 +321,10 @@ class KafkaConsumerProcessor
         }
         final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
         final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
-        configureDeserializers(method, consumerConfiguration);
-        submitConsumerThreads(method, clientId, groupId, offsetStrategy, topicAnnotations,
-            consumerAnnotation, consumerConfiguration, properties, beanType, uniqueGroupIdDeleteOnShutdown);
+        final ExecutableMethod<?, ?> primaryMethod = methods.get(0);
+        configureDeserializers(methods, consumerConfiguration);
+        submitConsumerThreads(primaryMethod, clientId, groupId, offsetStrategy, topicAnnotations,
+            consumerAnnotation, consumerConfiguration, properties, beanType, methods, uniqueGroupIdDeleteOnShutdown);
     }
 
     @Override
@@ -416,6 +428,42 @@ class KafkaConsumerProcessor
         return batchBinderRegistry;
     }
 
+    private static List<ExecutableMethod<?, ?>> resolveConsumerMethods(
+        BeanDefinition<?> beanDefinition,
+        ExecutableMethod<?, ?> method,
+        ConsumerCreationStrategy consumerCreationStrategy
+    ) {
+        if (consumerCreationStrategy == ConsumerCreationStrategy.PER_CLASS &&
+            CollectionUtils.isEmpty(beanDefinition.getDeclaredAnnotationValuesByType(Topic.class))) {
+            final List<ExecutableMethod<?, ?>> methods = beanDefinition.getExecutableMethods().stream()
+                .filter(executableMethod -> !CollectionUtils.isEmpty(executableMethod.getDeclaredAnnotationValuesByType(Topic.class)))
+                .<ExecutableMethod<?, ?>>map(executableMethod -> executableMethod)
+                .toList();
+            if (CollectionUtils.isNotEmpty(methods)) {
+                return methods;
+            }
+        }
+        return Collections.singletonList(method);
+    }
+
+    private static List<AnnotationValue<Topic>> resolveTopicAnnotations(
+        BeanDefinition<?> beanDefinition,
+        ExecutableMethod<?, ?> method,
+        ConsumerCreationStrategy consumerCreationStrategy,
+        List<ExecutableMethod<?, ?>> methods
+    ) {
+        if (consumerCreationStrategy == ConsumerCreationStrategy.PER_CLASS && methods.size() > 1) {
+            return methods.stream()
+                .flatMap(executableMethod -> executableMethod.getDeclaredAnnotationValuesByType(Topic.class).stream())
+                .toList();
+        }
+        final List<AnnotationValue<Topic>> methodTopics = method.getDeclaredAnnotationValuesByType(Topic.class);
+        if (CollectionUtils.isNotEmpty(methodTopics)) {
+            return methodTopics;
+        }
+        return beanDefinition.getDeclaredAnnotationValuesByType(Topic.class);
+    }
+
     @SuppressWarnings("rawtypes")
     private AbstractKafkaConsumerConfiguration getConsumerConfigurationDefaults(String groupId) {
         return findConfigurationBean(groupId)
@@ -500,6 +548,7 @@ class KafkaConsumerProcessor
                                        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration,
                                        final Properties properties,
                                        final Class<?> beanType,
+                                       final List<ExecutableMethod<?, ?>> methods,
                                        boolean uniqueGroupIdDeleteOnShutdown) {
         final int consumerThreads = consumerAnnotation.intValue("threads").orElse(1);
         for (int i = 0; i < consumerThreads; i++) {
@@ -520,9 +569,9 @@ class KafkaConsumerProcessor
                 //noinspection unchecked
                 ca.setKafkaConsumer(kafkaConsumer);
             }
-            topicAnnotations.forEach(a -> setupConsumerSubscription(method, a, consumerBean, kafkaConsumer));
+            setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
             kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
-            final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, properties, method);
+            final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, properties, methods);
             final ConsumerState consumerState = consumerInfo.isBatch ?
                 new ConsumerStateBatch(this, consumerInfo, kafkaConsumer, consumerBean) :
                 new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);
@@ -536,40 +585,60 @@ class KafkaConsumerProcessor
         }
     }
 
-    private static void setupConsumerSubscription(ExecutableMethod<?, ?> method, AnnotationValue<Topic> topicAnnotation, Object consumerBean, Consumer<?, ?> kafkaConsumer) {
-        final String[] topicNames = topicAnnotation.stringValues();
-        final String[] patterns = topicAnnotation.stringValues("patterns");
-        final boolean hasTopics = ArrayUtils.isNotEmpty(topicNames);
-        final boolean hasPatterns = ArrayUtils.isNotEmpty(patterns);
+    private static void setupConsumerSubscription(
+        ExecutableMethod<?, ?> method,
+        List<AnnotationValue<Topic>> topicAnnotations,
+        Object consumerBean,
+        Consumer<?, ?> kafkaConsumer
+    ) {
+        final List<String> topicNames = topicAnnotations.stream()
+            .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues()))
+            .collect(java.util.stream.Collectors.collectingAndThen(
+                java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+                List::copyOf
+            ));
+        final List<String> patterns = topicAnnotations.stream()
+            .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues("patterns")))
+            .collect(java.util.stream.Collectors.collectingAndThen(
+                java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+                List::copyOf
+            ));
+        final boolean hasTopics = !topicNames.isEmpty();
+        final boolean hasPatterns = !patterns.isEmpty();
         final String logMethod = LOG.isInfoEnabled() ? logMethod(method) : null;
 
         if (!hasTopics && !hasPatterns) {
-            throw new MessagingSystemException("Either a topic or a topic must be specified for method: " + method);
+            throw new MessagingSystemException("Either topics or topic patterns must be specified for method: " + method);
         }
 
         final Optional<ConsumerRebalanceListener> listener = getConsumerRebalanceListener(consumerBean, kafkaConsumer);
 
-        if (hasTopics) {
-            final List<String> topics = Arrays.asList(topicNames);
-            listener.ifPresentOrElse(
-                l -> kafkaConsumer.subscribe(topics, l),
-                () -> kafkaConsumer.subscribe(topics));
-            LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod, topics);
-        }
-
         if (hasPatterns) {
             try {
-                for (final String pattern : patterns) {
-                    final Pattern compiledPattern = Pattern.compile(pattern);
-                    listener.ifPresentOrElse(
-                        l -> kafkaConsumer.subscribe(compiledPattern, l),
-                        () -> kafkaConsumer.subscribe(compiledPattern));
-                    LOG.info("Kafka listener [{}] subscribed to topics pattern: {}", logMethod, pattern);
-                }
+                final Pattern compiledPattern = compileTopicPattern(topicNames, patterns);
+                listener.ifPresentOrElse(
+                    l -> kafkaConsumer.subscribe(compiledPattern, l),
+                    () -> kafkaConsumer.subscribe(compiledPattern));
+                LOG.info("Kafka listener [{}] subscribed to topics: {} and topic patterns: {}", logMethod, topicNames, patterns);
             } catch (PatternSyntaxException e) {
                 throw new MessagingSystemException("Invalid topic pattern [" + e.getPattern() + "] for method [" + method + "]: " + e.getMessage(), e);
             }
+            return;
         }
+
+        listener.ifPresentOrElse(
+            l -> kafkaConsumer.subscribe(topicNames, l),
+            () -> kafkaConsumer.subscribe(topicNames));
+        LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod, topicNames);
+    }
+
+    private static Pattern compileTopicPattern(List<String> topicNames, List<String> patterns) {
+        final String joinedPattern = java.util.stream.Stream.concat(
+                topicNames.stream().map(Pattern::quote),
+                patterns.stream().map(pattern -> "(?:" + pattern + ')')
+            )
+            .collect(java.util.stream.Collectors.joining("|"));
+        return Pattern.compile(joinedPattern);
     }
 
     private static Optional<ConsumerRebalanceListener> getConsumerRebalanceListener(Object consumerBean, Consumer<?, ?> kafkaConsumer) {
@@ -611,6 +680,20 @@ class KafkaConsumerProcessor
         return argument.equals(lastArgumentValue);
     }
 
+    private void configureDeserializers(final List<ExecutableMethod<?, ?>> methods, final DefaultKafkaConsumerConfiguration<?, ?> config) {
+        if (methods.size() == 1) {
+            configureDeserializers(methods.get(0), config);
+            return;
+        }
+        if (!config.getConfig().containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && config.getKeyDeserializer().isEmpty()) {
+            config.setKeyDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, true), "key"));
+        }
+        if (!config.getConfig().containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && config.getValueDeserializer().isEmpty()) {
+            config.setValueDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, false), "value"));
+        }
+        debugDeserializationConfiguration(methods.get(0), config);
+    }
+
     private void configureDeserializers(final ExecutableMethod<?, ?> method, final DefaultKafkaConsumerConfiguration<?, ?> config) {
         final boolean batch = method.isTrue(KafkaListener.class, "batch");
         final Argument<?> bodyArgument = findBodyArgument(batch, method);
@@ -620,18 +703,24 @@ class KafkaConsumerProcessor
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    private TopicRouter<Deserializer<Object>> buildDeserializerRouter(List<ExecutableMethod<?, ?>> methods, boolean key) {
+        TopicRouter<Deserializer<Object>> router = new TopicRouter<>();
+        for (ExecutableMethod<?, ?> method : methods) {
+            final boolean batch = method.isTrue(KafkaListener.class, "batch");
+            final Argument<?> bodyArgument = findBodyArgument(batch, method);
+            final Deserializer<Object> deserializer = key ? resolveKeyDeserializer(bodyArgument, method) : resolveValueDeserializer(bodyArgument);
+            for (AnnotationValue<Topic> topicAnnotation : method.getDeclaredAnnotationValuesByType(Topic.class)) {
+                router.register(topicAnnotation.stringValues(), topicAnnotation.stringValues("patterns"), deserializer, logMethod(method));
+            }
+        }
+        return router;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void configureKeyDeserializer(Argument<?> bodyArgument, ExecutableMethod<?, ?> method, DefaultKafkaConsumerConfiguration config) {
         if (!config.getConfig().containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && config.getKeyDeserializer().isEmpty()) {
             // figure out the Key deserializer
-            Arrays.stream(method.getArguments())
-                .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
-                .findFirst()
-                .or(() -> Optional.ofNullable(bodyArgument)
-                    .filter(KafkaConsumerProcessor::isConsumerRecord)
-                    .flatMap(b -> b.getTypeVariable("K")))
-                .map(serdeRegistry::pickDeserializer)
-                .ifPresentOrElse(config::setKeyDeserializer,
-                    () -> config.setKeyDeserializer(DEFAULT_KEY_DESERIALIZER));
+            config.setKeyDeserializer(resolveKeyDeserializer(bodyArgument, method));
         }
     }
 
@@ -639,19 +728,45 @@ class KafkaConsumerProcessor
     private void configureValueDeserializer(Argument<?> bodyArgument, DefaultKafkaConsumerConfiguration config) {
         if (!config.getConfig().containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && config.getValueDeserializer().isEmpty()) {
             // figure out the Value deserializer
-            final Optional<Argument<?>> body = Optional.ofNullable(bodyArgument);
-            body.filter(KafkaConsumerProcessor::isConsumerRecord)
-                .flatMap(b -> b.getTypeVariable("V"))
-                .or(() -> body)
-                .map(serdeRegistry::pickDeserializer)
-                .ifPresentOrElse(config::setValueDeserializer,
-                    () -> config.setValueDeserializer(DEFAULT_VALUE_DESERIALIZER));
+            config.setValueDeserializer(resolveValueDeserializer(bodyArgument));
         }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Deserializer<Object> resolveKeyDeserializer(Argument<?> bodyArgument, ExecutableMethod<?, ?> method) {
+        Optional<Deserializer<Object>> deserializer = Arrays.stream(method.getArguments())
+            .filter(arg -> arg.isAnnotationPresent(KafkaKey.class))
+            .findFirst()
+            .or(() -> Optional.ofNullable(bodyArgument)
+                .filter(KafkaConsumerProcessor::isConsumerRecord)
+                .flatMap(b -> b.getTypeVariable("K")))
+            .map(argument -> (Deserializer<Object>) serdeRegistry.pickDeserializer(argument));
+        return deserializer.orElseGet(KafkaConsumerProcessor::defaultKeyDeserializer);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Deserializer<Object> resolveValueDeserializer(Argument<?> bodyArgument) {
+        final Optional<Argument<?>> body = Optional.ofNullable(bodyArgument);
+        Optional<Deserializer<Object>> deserializer = body.filter(KafkaConsumerProcessor::isConsumerRecord)
+            .flatMap(b -> b.getTypeVariable("V"))
+            .or(() -> body)
+            .map(argument -> (Deserializer<Object>) serdeRegistry.pickDeserializer(argument));
+        return deserializer.orElseGet(KafkaConsumerProcessor::defaultValueDeserializer);
     }
 
     private static boolean isConsumerRecord(@NonNull Argument<?> body) {
         return ConsumerRecord.class.isAssignableFrom(body.getType()) ||
             ConsumerRecords.class.isAssignableFrom(body.getType());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Deserializer<Object> defaultKeyDeserializer() {
+        return (Deserializer<Object>) (Deserializer<?>) DEFAULT_KEY_DESERIALIZER;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Deserializer<Object> defaultValueDeserializer() {
+        return (Deserializer<Object>) (Deserializer<?>) DEFAULT_VALUE_DESERIALIZER;
     }
 
     private static Argument<?> getComponentType(final Argument<?> argument) {
