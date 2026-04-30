@@ -65,20 +65,20 @@ final class ConsumerStateBatch extends ConsumerState {
     @Nullable
     protected Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets() {
         return info.errorStrategy.isRetry() ?
-            kafkaConsumer.assignment().stream().collect(Collectors.toMap(identity(), this::getCurrentOffset)) : null;
+            synchronizedKafkaConsumer.assignment().stream().collect(Collectors.toMap(identity(), this::getCurrentOffset)) : null;
     }
 
     @Override
     protected ConsumerRecords<?, ?> pollRecords(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            return kafkaConsumer.poll(info.pollTimeout);
+            return synchronizedKafkaConsumer.poll(info.pollTimeout);
         } catch (RecordDeserializationException ex) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Kafka consumer [{}] failed to deserialize value while polling", info.logMethod(ex.topicPartition().topic()), ex);
             }
             if (info.offsetStrategy != OffsetStrategy.DISABLED) {
-                kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
+                synchronizedKafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             }
             resolveWithErrorStrategy(null, reconstructCurrentOffsetsIfAbsent(currentOffsets, ex), makeConsumerRecord(ex), ex);
             return null;
@@ -93,9 +93,9 @@ final class ConsumerStateBatch extends ConsumerState {
                 final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
                 Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
                     final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
-                    boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+                    boundArguments.put(argument, (KafkaAcknowledgement) () -> synchronizedKafkaConsumer.commitSync(batchOffsets));
                 });
-                Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+                Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, synchronizedKafkaConsumer));
                 if (method.isSuspend()) {
                     Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
                     boundArguments.put(lastArgument, null);
@@ -167,7 +167,7 @@ final class ConsumerStateBatch extends ConsumerState {
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, null);
                     }
-                    partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
+                    partitions.forEach(tp -> synchronizedKafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
                     delayRetry(currentRetryCount, partitions);
                     return true;
                 }
@@ -191,7 +191,7 @@ final class ConsumerStateBatch extends ConsumerState {
     }
 
     private OffsetAndMetadata getCurrentOffset(TopicPartition tp) {
-        return new OffsetAndMetadata(kafkaConsumer.position(tp), null);
+        return new OffsetAndMetadata(synchronizedKafkaConsumer.position(tp), null);
     }
 
     private Map<TopicPartition, OffsetAndMetadata> reconstructCurrentOffsetsIfAbsent(

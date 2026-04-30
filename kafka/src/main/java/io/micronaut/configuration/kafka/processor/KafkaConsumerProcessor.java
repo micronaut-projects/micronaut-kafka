@@ -219,7 +219,7 @@ class KafkaConsumerProcessor
     public <K, V> Consumer<K, V> getConsumer(@NonNull String id) {
         ArgumentUtils.requireNonNull("id", id);
         @SuppressWarnings("rawtypes")
-        final Consumer consumer = getConsumerState(id).kafkaConsumer;
+        final Consumer consumer = getConsumerState(id).getThreadSafeKafkaConsumer();
         if (consumer == null) {
             throw new IllegalArgumentException("No consumer found for ID: " + id);
         }

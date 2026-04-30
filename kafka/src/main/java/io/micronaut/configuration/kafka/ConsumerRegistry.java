@@ -32,8 +32,9 @@ import java.util.Set;
 public interface ConsumerRegistry {
 
     /**
-     * Returns a managed Consumer. Note that the consumer should not be interacted with directly from a
-     * different thread to the poll loop!
+     * Returns a managed Consumer. Access to the returned consumer is synchronized with Micronaut's poll loop so
+     * that consumer operations can be invoked from another thread without overlapping framework-managed access.
+     * Callers are still responsible for coordinating their own multi-step interactions with the consumer.
      *
      * @param id The id of the producer.
      * @param <K> The key generic type

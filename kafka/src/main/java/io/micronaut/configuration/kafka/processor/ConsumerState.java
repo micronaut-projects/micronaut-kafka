@@ -76,8 +76,10 @@ abstract class ConsumerState {
     protected boolean failed;
     final ConsumerInfo info;
     final Consumer<?, ?> kafkaConsumer;
+    final Consumer<?, ?> synchronizedKafkaConsumer;
     final Set<String> subscriptions;
     Set<TopicPartition> assignments;
+    private final Object consumerAccessMonitor = new Object();
     private Set<TopicPartition> pausedTopicPartitions;
     private Set<TopicPartition> pauseRequests;
     private CountDownLatch startupLatch;
@@ -96,6 +98,7 @@ abstract class ConsumerState {
         this.kafkaConsumerProcessor = kafkaConsumerProcessor;
         this.info = info;
         this.kafkaConsumer = consumer;
+        this.synchronizedKafkaConsumer = SynchronizedConsumer.wrap(consumer, consumerAccessMonitor);
         this.consumerBean = consumerBean;
         this.subscriptions = Collections.unmodifiableSet(kafkaConsumer.subscription());
         this.startupLatch = info.autoStartup ? null : new CountDownLatch(1);
@@ -150,7 +153,7 @@ abstract class ConsumerState {
     }
 
     void wakeUp() {
-        kafkaConsumer.wakeup();
+        synchronizedKafkaConsumer.wakeup();
         synchronized (this) {
             if (startupLatch != null) {
                 startupLatch.countDown();
@@ -191,7 +194,7 @@ abstract class ConsumerState {
     }
 
     void threadPollLoop() {
-        try (kafkaConsumer) {
+        try (Consumer<?, ?> ignored = synchronizedKafkaConsumer) {
             holdStartup();
             while (!shutdownRequested) {
                 refreshAssignmentsPollAndProcessRecords();
@@ -222,7 +225,7 @@ abstract class ConsumerState {
         } catch (WakeupException e) {
             try {
                 if (!failed && info.offsetStrategy != OffsetStrategy.DISABLED) {
-                    kafkaConsumer.commitSync();
+                    synchronizedKafkaConsumer.commitSync();
                 }
             } catch (Exception ex) {
                 LOG.warn("Error committing Kafka offsets on shutdown: {}", ex.getMessage(), ex);
@@ -234,7 +237,7 @@ abstract class ConsumerState {
     }
 
     private void refreshAssignments() {
-        final Set<TopicPartition> newAssignments = kafkaConsumer.assignment();
+        final Set<TopicPartition> newAssignments = synchronizedKafkaConsumer.assignment();
         if (!newAssignments.equals(assignments)) {
             LOG.info("Consumer [{}] assignments changed: {} -> {}", info.clientId, assignments, newAssignments);
             assignments = Collections.unmodifiableSet(newAssignments);
@@ -263,12 +266,12 @@ abstract class ConsumerState {
         }
         if (info.offsetStrategy == OffsetStrategy.SYNC) {
             try {
-                kafkaConsumer.commitSync();
+                synchronizedKafkaConsumer.commitSync();
             } catch (CommitFailedException e) {
                 handleException(e, consumerRecords, null);
             }
         } else if (info.offsetStrategy == OffsetStrategy.ASYNC) {
-            kafkaConsumer.commitAsync(resolveCommitCallback());
+            synchronizedKafkaConsumer.commitAsync(resolveCommitCallback());
         }
     }
 
@@ -294,8 +297,8 @@ abstract class ConsumerState {
             return;
         }
         LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, validPauseRequests);
-        kafkaConsumer.pause(validPauseRequests);
-        LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, kafkaConsumer.paused());
+        synchronizedKafkaConsumer.pause(validPauseRequests);
+        LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, synchronizedKafkaConsumer.paused());
         if (pausedTopicPartitions == null) {
             pausedTopicPartitions = new HashSet<>();
         }
@@ -303,7 +306,7 @@ abstract class ConsumerState {
     }
 
     private synchronized void resumeTopicPartitions() {
-        Set<TopicPartition> paused = kafkaConsumer.paused();
+        Set<TopicPartition> paused = synchronizedKafkaConsumer.paused();
         if (paused.isEmpty()) {
             return;
         }
@@ -312,7 +315,7 @@ abstract class ConsumerState {
             .toList();
         if (!toResume.isEmpty()) {
             LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, toResume);
-            kafkaConsumer.resume(toResume);
+            synchronizedKafkaConsumer.resume(toResume);
         }
         if (pausedTopicPartitions != null) {
             toResume.forEach(pausedTopicPartitions::remove);
@@ -522,6 +525,11 @@ abstract class ConsumerState {
     protected void handleException(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
         @Nullable ConsumerRecord<?, ?> consumerRecord) {
         handleException(e.getMessage(), e, consumerRecords, consumerRecord);
+    }
+
+    @SuppressWarnings("unchecked")
+    <K, V> Consumer<K, V> getThreadSafeKafkaConsumer() {
+        return (Consumer<K, V>) synchronizedKafkaConsumer;
     }
 
     protected void publishToDlq(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
