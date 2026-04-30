@@ -19,12 +19,12 @@ import io.micronaut.configuration.kafka.annotation.KafkaScope;
 import io.micronaut.context.scope.AbstractConcurrentCustomScope;
 import io.micronaut.context.scope.CreatedBean;
 import io.micronaut.core.annotation.Internal;
+import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.inject.BeanIdentifier;
 import jakarta.inject.Singleton;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -135,6 +135,6 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
     }
 
     private static final class ScopeEntry {
-        private final Map<BeanIdentifier, CreatedBean<?>> beans = new HashMap<>(2);
+        private final Map<BeanIdentifier, CreatedBean<?>> beans = CollectionUtils.newHashMap(2);
     }
 }

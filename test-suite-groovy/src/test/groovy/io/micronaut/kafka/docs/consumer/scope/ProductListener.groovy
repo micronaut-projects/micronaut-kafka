@@ -21,8 +21,7 @@ class ProductListener {
 
     @Topic('products')
     void receive(String product) {
-        String correlationId = productMetadata.correlationId
-        // use the same metadata instance throughout this listener invocation
+        println "Received ${product} with correlation ${productMetadata.correlationId}"
     }
 }
 // end::listener[]

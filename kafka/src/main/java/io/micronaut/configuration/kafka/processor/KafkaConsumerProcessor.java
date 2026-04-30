@@ -55,6 +55,7 @@ import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArgumentUtils;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.core.util.SupplierUtil;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
 import io.micronaut.inject.qualifiers.Qualifiers;
@@ -98,6 +99,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -139,6 +141,7 @@ class KafkaConsumerProcessor
     private final ApplicationEventPublisher<KafkaConsumerSubscribedEvent> kafkaConsumerSubscribedEventPublisher;
     private final ConditionalRetryBehaviourHandler conditionalRetryBehaviourHandler;
 
+    private final Supplier<Optional<KafkaCustomScope>> kafkaCustomScopeSupplier;
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
      *
@@ -189,6 +192,7 @@ class KafkaConsumerProcessor
         this.kafkaConsumerStartedPollingEventPublisher = startedEventPublisher;
         this.kafkaConsumerSubscribedEventPublisher = subscribedEventPublisher;
         this.conditionalRetryBehaviourHandler = conditionalRetryBehaviourHandler;
+        this.kafkaCustomScopeSupplier = SupplierUtil.memoized(() -> beanContext.findBean(KafkaCustomScope.class));
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -431,7 +435,7 @@ class KafkaConsumerProcessor
 
     @Nullable
     KafkaCustomScope getKafkaScope() {
-        return beanContext.findBean(KafkaCustomScope.class).orElse(null);
+        return kafkaCustomScopeSupplier.get().orElse(null);
     }
 
     private static List<ExecutableMethod<?, ?>> resolveConsumerMethods(
