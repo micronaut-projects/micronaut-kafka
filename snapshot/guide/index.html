@@ -127,25 +127,27 @@
         
         <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerMethods"><a href="#kafkaListenerMethods"><strong>7.1</strong><span>Defining @KafkaListener Methods</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>7.2</strong><span>Configuring @KafkaListener beans</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerScope"><a href="#kafkaListenerScope"><strong>7.2</strong><span>Scoping Beans to a Kafka Listener Invocation</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>7.3</strong><span>Commiting Kafka Offsets</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerConfiguration"><a href="#kafkaListenerConfiguration"><strong>7.3</strong><span>Configuring @KafkaListener beans</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSeek"><a href="#kafkaSeek"><strong>7.4</strong><span>Assigning Kafka Offsets</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaOffsets"><a href="#kafkaOffsets"><strong>7.4</strong><span>Commiting Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsToAConsumerBean"><a href="#manuallyAssigningOffsetsToAConsumerBean"><strong>7.4.1</strong><span>Manually Assigning Offsets to a Consumer Bean</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSeek"><a href="#kafkaSeek"><strong>7.5</strong><span>Assigning Kafka Offsets</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manualOffsetsWithMultipleTopics"><a href="#manualOffsetsWithMultipleTopics"><strong>7.4.2</strong><span>Manual Offsets with Multiple Topics</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsToAConsumerBean"><a href="#manuallyAssigningOffsetsToAConsumerBean"><strong>7.5.1</strong><span>Manually Assigning Offsets to a Consumer Bean</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsFromAConsumerMethod"><a href="#manuallyAssigningOffsetsFromAConsumerMethod"><strong>7.4.3</strong><span>Manually Assigning Offsets from a Consumer Method</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manualOffsetsWithMultipleTopics"><a href="#manualOffsetsWithMultipleTopics"><strong>7.5.2</strong><span>Manual Offsets with Multiple Topics</span></a></div>
         
-        <div class="toc-item" style="margin-left:20px" id="toc-item-creatingKafkaSeekOperations"><a href="#creatingKafkaSeekOperations"><strong>7.4.4</strong><span>Creating Kafka Seek Operations</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-manuallyAssigningOffsetsFromAConsumerMethod"><a href="#manuallyAssigningOffsetsFromAConsumerMethod"><strong>7.5.3</strong><span>Manually Assigning Offsets from a Consumer Method</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>7.5</strong><span>Kafka Batch Processing</span></a></div>
+        <div class="toc-item" style="margin-left:20px" id="toc-item-creatingKafkaSeekOperations"><a href="#creatingKafkaSeekOperations"><strong>7.5.4</strong><span>Creating Kafka Seek Operations</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>7.6</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaListenerBatch"><a href="#kafkaListenerBatch"><strong>7.6</strong><span>Kafka Batch Processing</span></a></div>
         
-        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>7.7</strong><span>Handling Consumer Exceptions</span></a></div>
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaSendTo"><a href="#kafkaSendTo"><strong>7.7</strong><span>Forwarding Messages with @SendTo</span></a></div>
+        
+        <div class="toc-item" style="margin-left:10px" id="toc-item-kafkaErrors"><a href="#kafkaErrors"><strong>7.8</strong><span>Handling Consumer Exceptions</span></a></div>
         
         <div class="toc-item" style="margin-left:0px" id="toc-item-kafkaApplications"><a href="#kafkaApplications"><strong>8</strong><span>Running Kafka Applications</span></a></div>
         
@@ -3738,7 +3740,144 @@ Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; 
 </div>
 </div>
 
-<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>7.2 Configuring @KafkaListener beans</h2>
+<h2 id="kafkaListenerScope"><a class="anchor" href="#kafkaListenerScope"></a>7.2 Scoping Beans to a Kafka Listener Invocation</h2>
+
+<div class='contribute-btn'>
+    <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerScope.adoc"'>
+        <i class='fa fa-pencil-square-o'></i> Improve this doc
+    </button>
+</div>
+
+
+<div class="paragraph">
+<p>If you need a bean instance that is scoped to a Kafka listener invocation, annotate that bean with <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaScope.html">@KafkaScope</a>.</p>
+</div>
+<div class="paragraph">
+<p>The scope is active on the Kafka consumer thread while a listener method is executing:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>For regular listeners, a new scoped bean is created for each consumed record.</p>
+</li>
+<li>
+<p>For batch listeners, a new scoped bean is created for each consumed batch.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Any collaborators resolved within the same listener invocation share the same scoped bean instance.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring a Kafka-scoped bean</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.KafkaScope;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import jakarta.inject.Inject;
+
+@KafkaScope
+static class ProductMetadata {
+    private final String correlationId = java.util.UUID.randomUUID().toString();
+
+    String getCorrelationId() {
+        return correlationId;
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring a Kafka-scoped bean</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaScope
+open class ProductMetadata {
+    private val correlationId: String = UUID.randomUUID().toString()
+
+    open fun correlationId(): String = correlationId
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Declaring a Kafka-scoped bean</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaScope
+static class ProductMetadata {
+    final String correlationId = UUID.randomUUID().toString()
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Injecting the scoped bean into a listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+public class ProductListener {
+
+    @KafkaScope
+    static class ProductMetadata {
+        private final String correlationId = java.util.UUID.randomUUID().toString();
+
+        String getCorrelationId() {
+            return correlationId;
+        }
+    }
+
+    @Inject ProductMetadata productMetadata;
+
+    @Topic("products")
+    void receive(String product) {
+        System.out.println("Received " + product + " with correlation " + productMetadata.getCorrelationId());
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Injecting the scoped bean into a listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+class ProductListener {
+
+    @KafkaScope
+    open class ProductMetadata {
+        private val correlationId: String = UUID.randomUUID().toString()
+
+        open fun correlationId(): String = correlationId
+    }
+
+    @Inject lateinit var productMetadata: ProductMetadata
+
+    @Topic("products")
+    fun receive(product: String) {
+        println("Received $product with correlation ${productMetadata.correlationId()}")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">Injecting the scoped bean into a listener</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(offsetReset = OffsetReset.EARLIEST)
+class ProductListener {
+
+    @KafkaScope
+    static class ProductMetadata {
+        final String correlationId = UUID.randomUUID().toString()
+    }
+
+    @Inject ProductMetadata productMetadata
+
+    @Topic('products')
+    void receive(String product) {
+        println "Received ${product} with correlation ${productMetadata.correlationId}"
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The scoped bean is destroyed when the listener invocation completes, which makes it suitable for per-message state such as derived metadata, correlation data, or values that should stay stable for the duration of a single listener execution.</p>
+</div>
+
+<h2 id="kafkaListenerConfiguration"><a class="anchor" href="#kafkaListenerConfiguration"></a>7.3 Configuring @KafkaListener beans</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerConfiguration.adoc"'>
@@ -4230,7 +4369,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 </div>
 
-<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>7.3 Commiting Kafka Offsets</h2>
+<h2 id="kafkaOffsets"><a class="anchor" href="#kafkaOffsets"></a>7.4 Commiting Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaOffsets.adoc"'>
@@ -4503,7 +4642,7 @@ class ProductListener {
 </div>
 </div>
 
-<h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>7.4 Assigning Kafka Offsets</h2>
+<h2 id="kafkaSeek"><a class="anchor" href="#kafkaSeek"></a>7.5 Assigning Kafka Offsets</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek.adoc"'>
@@ -4514,7 +4653,7 @@ class ProductListener {
 
 
 
-<h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>7.4.1 Manually Assigning Offsets to a Consumer Bean</h2>
+<h2 id="manuallyAssigningOffsetsToAConsumerBean"><a class="anchor" href="#manuallyAssigningOffsetsToAConsumerBean"></a>7.5.1 Manually Assigning Offsets to a Consumer Bean</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsToAConsumerBean.adoc"'>
@@ -4835,7 +4974,7 @@ class ProductListener implements ConsumerRebalanceListener, ConsumerAware {
 </table>
 </div>
 
-<h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>7.4.2 Manual Offsets with Multiple Topics</h2>
+<h2 id="manualOffsetsWithMultipleTopics"><a class="anchor" href="#manualOffsetsWithMultipleTopics"></a>7.5.2 Manual Offsets with Multiple Topics</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manualOffsetsWithMultipleTopics.adoc"'>
@@ -4863,7 +5002,7 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 </table>
 </div>
 
-<h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>7.4.3 Manually Assigning Offsets from a Consumer Method</h2>
+<h2 id="manuallyAssigningOffsetsFromAConsumerMethod"><a class="anchor" href="#manuallyAssigningOffsetsFromAConsumerMethod"></a>7.5.3 Manually Assigning Offsets from a Consumer Method</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/manuallyAssigningOffsetsFromAConsumerMethod.adoc"'>
@@ -4987,7 +5126,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 </table>
 </div>
 
-<h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>7.4.4 Creating Kafka Seek Operations</h2>
+<h2 id="creatingKafkaSeekOperations"><a class="anchor" href="#creatingKafkaSeekOperations"></a>7.5.4 Creating Kafka Seek Operations</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSeek/creatingKafkaSeekOperations.adoc"'>
@@ -5028,7 +5167,7 @@ These operations determine the next offset retrieved by <code>poll</code>. Take 
 </ul>
 </div>
 
-<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>7.5 Kafka Batch Processing</h2>
+<h2 id="kafkaListenerBatch"><a class="anchor" href="#kafkaListenerBatch"></a>7.6 Kafka Batch Processing</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaListenerBatch.adoc"'>
@@ -5481,7 +5620,7 @@ Flux&lt;Book&gt; receiveFlux(Flux&lt;Book&gt; books) {
 </div>
 </div>
 
-<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>7.6 Forwarding Messages with @SendTo</h2>
+<h2 id="kafkaSendTo"><a class="anchor" href="#kafkaSendTo"></a>7.7 Forwarding Messages with @SendTo</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaSendTo.adoc"'>
@@ -5702,7 +5841,7 @@ class WordCounter {
 </table>
 </div>
 
-<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>7.7 Handling Consumer Exceptions</h2>
+<h2 id="kafkaErrors"><a class="anchor" href="#kafkaErrors"></a>7.8 Handling Consumer Exceptions</h2>
 
 <div class='contribute-btn'>
     <button type='button' class='btn btn-default' onclick='window.location.href="https://github.com/micronaut-projects/micronaut-kafka/edit/6.0.x/src/main/docs/guide/kafkaListener/kafkaErrors.adoc"'>

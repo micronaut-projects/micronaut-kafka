@@ -289,6 +289,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html#close()" class="member-name-link">close()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html" title="class in io.micronaut.configuration.kafka">RecoveringTransactionalProducer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#close()" class="member-name-link">close()</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.Scope.html#close()" class="member-name-link">close()</a> - Method in interface io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.Scope.html" title="interface in io.micronaut.configuration.kafka.scope">KafkaCustomScope.Scope</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#close()" class="member-name-link">close()</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#close()" class="member-name-link">close()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
@@ -620,6 +624,14 @@ of error.</div>
 <div class="block">The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
 see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#execute(java.lang.Runnable)" class="member-name-link">execute(Runnable)</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>
+<div class="block">Executes an action within a Kafka scope.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#execute(java.util.function.Supplier)" class="member-name-link">execute(Supplier)</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>
+<div class="block">Executes an action within a Kafka scope.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html#executor()" class="member-name-link">executor()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaClient</a></dt>
 <dd>
 <div class="block">The executor to use to enable non-blocking producer methods.</div>
@@ -785,6 +797,8 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">Get the health result of the streams.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#getScopeMap(boolean)" class="member-name-link">getScopeMap(boolean)</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html#getSerde(java.lang.Class)" class="member-name-link">getSerde(Class)</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/CompositeSerdeRegistry.html" title="class in io.micronaut.configuration.kafka.serde">CompositeSerdeRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonSerdeRegistry.html#getSerde(java.lang.Class)" class="member-name-link">getSerde(Class)</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonSerdeRegistry.html" title="class in io.micronaut.configuration.kafka.serde">JsonSerdeRegistry</a></dt>
@@ -916,6 +930,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/retry/package-summary.html">io.micronaut.configuration.kafka.retry</a> - package io.micronaut.configuration.kafka.retry</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/package-summary.html">io.micronaut.configuration.kafka.scope</a> - package io.micronaut.configuration.kafka.scope</dt>
+<dd>
+<div class="block">Kafka scope support.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a> - package io.micronaut.configuration.kafka.seek</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/package-summary.html">io.micronaut.configuration.kafka.serde</a> - package io.micronaut.configuration.kafka.serde</dt>
@@ -971,6 +989,8 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isRestricted()" class="member-name-link">isRestricted()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#isRetry()" class="member-name-link">isRetry()</a> - Method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#isRunning()" class="member-name-link">isRunning()</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html#isSkipRecordOnDeserializationFailure()" class="member-name-link">isSkipRecordOnDeserializationFailure()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a></dt>
 <dd>&nbsp;</dd>
@@ -1051,6 +1071,16 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/event/KafkaConsumerSubscribedEvent.html#%3Cinit%3E(org.apache.kafka.clients.consumer.Consumer)" class="member-name-link">KafkaConsumerSubscribedEvent(Consumer)</a> - Constructor for class io.micronaut.configuration.kafka.event.<a href="io/micronaut/configuration/kafka/event/KafkaConsumerSubscribedEvent.html" title="class in io.micronaut.configuration.kafka.event">KafkaConsumerSubscribedEvent</a></dt>
 <dd>
 <div class="block">Constructs an event with a given Consumer source.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a> - Class in <a href="io/micronaut/configuration/kafka/scope/package-summary.html">io.micronaut.configuration.kafka.scope</a></dt>
+<dd>
+<div class="block">Stores <a href="io/micronaut/configuration/kafka/annotation/KafkaScope.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaScope</code></a> beans for the duration of a Kafka listener invocation.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#%3Cinit%3E()" class="member-name-link">KafkaCustomScope()</a> - Constructor for class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.Scope.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.scope">KafkaCustomScope.Scope</a> - Interface in <a href="io/micronaut/configuration/kafka/scope/package-summary.html">io.micronaut.configuration.kafka.scope</a></dt>
+<dd>
+<div class="block">Handle for an active Kafka scope.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.bind">KafkaDefaultBinder&lt;T&gt;</a> - Class in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
 <dd>
@@ -1244,6 +1274,10 @@ support Confluent Cloud hosted Kafka.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html#%3Cinit%3E()" class="member-name-link">KafkaReactorUtil()</a> - Constructor for class io.micronaut.configuration.kafka.reactor.<a href="io/micronaut/configuration/kafka/reactor/KafkaReactorUtil.html" title="class in io.micronaut.configuration.kafka.reactor">KafkaReactorUtil</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/KafkaScope.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaScope</a> - Annotation Interface in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
+<dd>
+<div class="block">A custom scope that binds a bean to the current Kafka listener invocation.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a> - Interface in <a href="io/micronaut/configuration/kafka/seek/package-summary.html">io.micronaut.configuration.kafka.seek</a></dt>
 <dd>
 <div class="block">Performs <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> on a target consumer.</div>
@@ -1444,6 +1478,10 @@ on completion of a successful partition re-assignment.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#onUpdate(org.apache.kafka.common.ClusterResource)" class="member-name-link">onUpdate(ClusterResource)</a> - Method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#open()" class="member-name-link">open()</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
+<dd>
+<div class="block">Activates the Kafka scope on the current thread.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">

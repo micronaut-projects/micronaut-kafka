@@ -267,6 +267,14 @@ of error.</div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">An event fired after a Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a> subscribes to a set of Kafka topics.</div>
 </div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Stores <a href="io/micronaut/configuration/kafka/annotation/KafkaScope.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaScope</code></a> beans for the duration of a Kafka listener invocation.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.Scope.html" title="interface in io.micronaut.configuration.kafka.scope">KafkaCustomScope.Scope</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="block">Handle for an active Kafka scope.</div>
+</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/bind/KafkaDefaultBinder.html" title="class in io.micronaut.configuration.kafka.bind">KafkaDefaultBinder&lt;T&gt;</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">The default binder that binds the Kafka value for a ConsumerRecord.</div>
@@ -369,110 +377,114 @@ of error.</div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Utility methods for working with Kafka and Reactor.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/KafkaScope.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaScope</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab6">
+<div class="block">A custom scope that binds a bean to the current Kafka listener invocation.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Performs <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> on a target consumer.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Represents a <code>seek</code> operation that may be performed on a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a>.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
 <div class="block">Determines the interpretation of the <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offset()"><code>KafkaSeekOperation.offset()</code></a> value.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperations</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperations.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperations</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Defines an interface that can be injected into <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> beans so that
 <a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek"><code>seek operations</code></a> can be eventually performed on a consumer.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsConfiguration&lt;K,<wbr>V&gt;</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsConfiguration&lt;K,<wbr>V&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">The default configuration passed to <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A factory that constructs the <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a> bean.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/health/KafkaStreamsHealth.html" title="class in io.micronaut.configuration.kafka.streams.health">KafkaStreamsHealth</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/health/KafkaStreamsHealth.html" title="class in io.micronaut.configuration.kafka.streams.health">KafkaStreamsHealth</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A <code>HealthIndicator</code> for Kafka Streams.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetrics</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetrics.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetrics</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Binds Kafka Metrics to Micrometer.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Kafka streams specific metrics reporter which prefixes all metrics with kafka-streams.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/KafkaTimestamp.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaTimestamp</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab6">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/KafkaTimestamp.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaTimestamp</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab6">
 <div class="block">Parameter level annotation to indicate which parameter is bound to the Kafka Producer timestamp.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html" title="enum class in io.micronaut.configuration.kafka.metrics.builder">MeterType</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html" title="enum class in io.micronaut.configuration.kafka.metrics.builder">MeterType</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
 <div class="block">Types of meters to be created for metrics.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/kafka/info/MicronautKafkaModuleInfo.html" title="class in io.micronaut.kafka.info">MicronautKafkaModuleInfo</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/kafka/info/MicronautKafkaStreamsModuleInfo.html" title="class in io.micronaut.kafka.info">MicronautKafkaStreamsModuleInfo</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/kafka/info/MicronautKafkaModuleInfo.html" title="class in io.micronaut.kafka.info">MicronautKafkaModuleInfo</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html" title="interface in io.micronaut.configuration.kafka.health">NetworkClientCreator</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/kafka/info/MicronautKafkaStreamsModuleInfo.html" title="class in io.micronaut.kafka.info">MicronautKafkaStreamsModuleInfo</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/health/NetworkClientCreator.html" title="interface in io.micronaut.configuration.kafka.health">NetworkClientCreator</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/FunctionalInterface.html" title="class or interface in java.lang" class="external-link"><code>FunctionalInterface</code></a> to instantiate a <code>NetworkClient</code>.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Helper for handling Kafka offset commit failures that can be expected during cooperative rebalancing.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/annotation/OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
 <div class="block">Sets the value of the <code>auto.offset.reset</code> property for a Kafka consumer.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/annotation/OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="io/micronaut/configuration/kafka/annotation/OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
 <div class="block">An enum representing different strategies for committing offsets to Kafka when using <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka">ProducerFactory</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/ProducerFactory.html" title="interface in io.micronaut.configuration.kafka">ProducerFactory</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">A factory class for creating Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>Producer</code></a> instances.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ProducerKafkaMetricsReporter</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ProducerKafkaMetricsReporter</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/MetricsReporter.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link"><code>MetricsReporter</code></a> class for producer metrics.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/ProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">ProducerRegistry</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">A registry of managed <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>Producer</code></a> instances key by id and type.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html" title="class in io.micronaut.configuration.kafka">RecoveringTransactionalProducer&lt;K,<wbr>V&gt;</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html" title="class in io.micronaut.configuration.kafka">RecoveringTransactionalProducer&lt;K,<wbr>V&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Wraps a transactional Kafka producer and recreates it when Kafka expires the transactional id.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/serde/SerdeRegistry.html" title="interface in io.micronaut.configuration.kafka.serde">SerdeRegistry</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">A registry of Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serde.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link"><code>Serde</code></a> instances.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="io/micronaut/configuration/kafka/streams/health/serde/TaskIdSerde.html" title="class in io.micronaut.configuration.kafka.streams.health.serde">TaskIdSerde</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A custom <code>Serde</code> implementation for serializing and deserializing
 <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/processor/TaskId.html" title="class or interface in org.apache.kafka.streams.processor" class="external-link"><code>TaskId</code></a>.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topic</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab6">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topic</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab6">
 <div class="block">Method level annotation used to specify which topics should be subscribed to.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/Topics.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topics</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab6">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab6"><a href="io/micronaut/configuration/kafka/annotation/Topics.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topics</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab6">
 <div class="block">Repeatable annotation for one or many <a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a> annotations.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/TransactionalProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">TransactionalProducerRegistry</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/TransactionalProducerRegistry.html" title="interface in io.micronaut.configuration.kafka">TransactionalProducerRegistry</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
 <div class="block">A registry of managed transactional <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/producer/Producer.html" title="class or interface in org.apache.kafka.clients.producer" class="external-link"><code>Producer</code></a> instances key by id and type.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/bind/TypedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">TypedConsumerRecordBinder&lt;T&gt;</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="io/micronaut/configuration/kafka/bind/TypedConsumerRecordBinder.html" title="interface in io.micronaut.configuration.kafka.bind">TypedConsumerRecordBinder&lt;T&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">
 <div class="block">Allows binding by type.</div>
 </div>
 </div>

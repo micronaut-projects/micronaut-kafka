@@ -67,6 +67,7 @@ loadScripts(document, 'script');</script>
 <li><a href="io/micronaut/configuration/kafka/metrics/builder/package-tree.html">io.micronaut.configuration.kafka.metrics.builder</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/reactor/package-tree.html">io.micronaut.configuration.kafka.reactor</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/retry/package-tree.html">io.micronaut.configuration.kafka.retry</a>, </li>
+<li><a href="io/micronaut/configuration/kafka/scope/package-tree.html">io.micronaut.configuration.kafka.scope</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/seek/package-tree.html">io.micronaut.configuration.kafka.seek</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/serde/package-tree.html">io.micronaut.configuration.kafka.serde</a>, </li>
 <li><a href="io/micronaut/configuration/kafka/streams/package-tree.html">io.micronaut.configuration.kafka.streams</a>, </li>
@@ -83,6 +84,11 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" class="type-name-link external-link" title="class or interface in java.lang">Object</a>
 <ul>
+<li class="circle">io.micronaut.context.scope.AbstractConcurrentCustomScope&lt;A&gt; (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a>, io.micronaut.context.scope.CustomScope&lt;A&gt;, io.micronaut.context.LifeCycle&lt;T&gt;)
+<ul>
+<li class="circle">io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></li>
+</ul>
+</li>
 <li class="circle">io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a>&lt;K,<wbr>V&gt; (implements io.micronaut.core.util.Toggleable)
 <ul>
 <li class="circle">io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConsumerConfiguration.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConsumerConfiguration</a>&lt;K,<wbr>V&gt;
@@ -239,6 +245,11 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+<li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/AutoCloseable.html" class="type-name-link external-link" title="class or interface in java.lang">AutoCloseable</a>
+<ul>
+<li class="circle">io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.Scope.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.scope">KafkaCustomScope.Scope</a></li>
+</ul>
+</li>
 <li class="circle">io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler</a></li>
 <li class="circle">io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerAware.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerAware</a>&lt;K,<wbr>V&gt;</li>
 <li class="circle">io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></li>
@@ -281,6 +292,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaPartition.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaPartition</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaPartitionKey.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaPartitionKey</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
+<li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaScope.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaScope</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaTimestamp.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaTimestamp</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/Topic.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topic</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
 <li class="circle">io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/Topics.html" class="type-name-link" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topics</a> (implements java.lang.annotation.<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/annotation/Annotation.html" title="class or interface in java.lang.annotation" class="external-link">Annotation</a>)</li>
