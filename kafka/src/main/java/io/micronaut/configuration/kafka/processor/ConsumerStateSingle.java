@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,38 +80,28 @@ final class ConsumerStateSingle extends ConsumerState {
         while (iterator.hasNext()) {
             final ConsumerRecord<?, ?> consumerRecord = iterator.next();
             final String topic = consumerRecord.topic();
-
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
-            }
-
-            updateCurrentOffsets(consumerRecord, currentOffsets);
+            logRecord(topic, consumerRecord);
+            trackCurrentOffset(consumerRecord, currentOffsets);
             final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);
-
-            final boolean[] stopProcessing = new boolean[1];
-            withKafkaScope(() -> {
-                if (processRecord(consumerRecord, consumerRecords, iterator)) {
-                    stopProcessing[0] = true;
-                    return;
-                }
-                commitOffsets(consumerRecords, consumerRecord, currentOffsets);
-                performDeferredSeek(seek);
-            });
-            if (stopProcessing[0]) {
+            if (withKafkaScope(() -> processRecord(topic, consumerRecords, currentOffsets, iterator, consumerRecord, seek))) {
                 return;
             }
         }
         failed = false;
     }
 
-    private void updateCurrentOffsets(ConsumerRecord<?, ?> consumerRecord,
+    private void logRecord(String topic, ConsumerRecord<?, ?> consumerRecord) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Kafka consumer [{}] received record: {}", info.logMethod(topic), consumerRecord);
+        }
+    }
+
+    private void trackCurrentOffset(ConsumerRecord<?, ?> consumerRecord,
         Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         if (!info.trackPartitions) {
             return;
         }
-        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-        final OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(consumerRecord.offset() + 1, null);
-        currentOffsets.put(topicPartition, offsetAndMetadata);
+        currentOffsets.put(getTopicPartition(consumerRecord), new OffsetAndMetadata(consumerRecord.offset() + 1, null));
     }
 
     @Nullable
@@ -128,20 +118,34 @@ final class ConsumerStateSingle extends ConsumerState {
         return seek;
     }
 
-    private boolean processRecord(ConsumerRecord<?, ?> consumerRecord,
+    private boolean processRecord(String topic,
         ConsumerRecords<?, ?> consumerRecords,
-        Iterator<? extends ConsumerRecord<?, ?>> iterator) {
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets,
+        Iterator<? extends ConsumerRecord<?, ?>> iterator,
+        ConsumerRecord<?, ?> consumerRecord,
+        @Nullable KafkaSeekOperations seek) {
         try {
-            process(consumerRecord, consumerRecords);
-            return false;
+            process(topic, consumerRecord, consumerRecords);
         } catch (Exception e) {
-            if (!resolveWithErrorStrategy(consumerRecords, consumerRecord, e)) {
-                return false;
+            if (handleRecordFailure(consumerRecords, iterator, consumerRecord, e)) {
+                return true;
             }
-            resetTheFollowingPartitions(consumerRecord, iterator);
-            failed = true;
-            return true;
         }
+        commitOffsets(consumerRecords, consumerRecord, currentOffsets);
+        performDeferredSeek(seek);
+        return false;
+    }
+
+    private boolean handleRecordFailure(ConsumerRecords<?, ?> consumerRecords,
+        Iterator<? extends ConsumerRecord<?, ?>> iterator,
+        ConsumerRecord<?, ?> consumerRecord,
+        Exception e) {
+        if (!resolveWithErrorStrategy(consumerRecords, consumerRecord, e)) {
+            return false;
+        }
+        resetTheFollowingPartitions(consumerRecord, iterator);
+        failed = true;
+        return true;
     }
 
     private void commitOffsets(ConsumerRecords<?, ?> consumerRecords,
@@ -155,17 +159,16 @@ final class ConsumerStateSingle extends ConsumerState {
     }
 
     private void performDeferredSeek(@Nullable KafkaSeekOperations seek) {
-        if (seek == null) {
-            return;
+        if (seek != null) {
+            // Performs seek operations that were deferred by the user
+            final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
+            seek.forEach(seeker::perform);
         }
-        // Performs seek operations that were deferred by the user
-        final KafkaSeeker seeker = KafkaSeeker.newInstance(kafkaConsumer);
-        seek.forEach(seeker::perform);
     }
 
-    private void process(ConsumerRecord<?, ?> consumerRecord,
+    private void process(String topic,
+        ConsumerRecord<?, ?> consumerRecord,
         ConsumerRecords<?, ?> consumerRecords) {
-        final String topic = consumerRecord.topic();
         final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
         if (method.isSuspend()) {
             Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];

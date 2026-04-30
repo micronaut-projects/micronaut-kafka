@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Stores {@link KafkaScope} beans for the duration of a Kafka listener invocation.
@@ -60,6 +61,31 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
         return () -> close(entry);
     }
 
+    /**
+     * Executes an action within a Kafka scope.
+     *
+     * @param action The action to execute
+     * @param <T> The result type
+     * @return The action result
+     */
+    public <T> T execute(Supplier<T> action) {
+        try (Scope scope = open()) {
+            return action.get();
+        }
+    }
+
+    /**
+     * Executes an action within a Kafka scope.
+     *
+     * @param action The action to execute
+     */
+    public void execute(Runnable action) {
+        execute(() -> {
+            action.run();
+            return null;
+        });
+    }
+
     @Override
     public boolean isRunning() {
         return true;
@@ -71,8 +97,7 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
     }
 
     @Override
-    @Nullable
-    protected Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
+    protected @Nullable Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
         Deque<ScopeEntry> stack = scopes.get();
         if (stack == null || stack.isEmpty()) {
             if (forCreation) {

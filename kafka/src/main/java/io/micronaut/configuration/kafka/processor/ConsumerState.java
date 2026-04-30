@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 /**
  * The internal state of the consumer.
@@ -113,15 +114,19 @@ abstract class ConsumerState {
     @Nullable
     protected abstract Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets();
 
-    protected final void withKafkaScope(Runnable action) {
+    protected final <T> T withKafkaScope(Supplier<T> action) {
         KafkaCustomScope kafkaScope = kafkaConsumerProcessor == null ? null : kafkaConsumerProcessor.getKafkaScope();
         if (kafkaScope == null) {
-            action.run();
-            return;
+            return action.get();
         }
-        try (KafkaCustomScope.Scope ignored = kafkaScope.open()) {
+        return kafkaScope.execute(action);
+    }
+
+    protected final void withKafkaScope(Runnable action) {
+        withKafkaScope(() -> {
             action.run();
-        }
+            return null;
+        });
     }
 
     void pause() {
