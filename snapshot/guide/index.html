@@ -3228,7 +3228,7 @@ kafka.consumers.product.bootstrap.servers=localhost:9098</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Any property in the <a href="https://kafka.apache.org/27/javadoc/\/org/apache/kafka/clients/consumer/ConsumerConfig.html">ConsumerConfig</a> class can be set for all <code>@KafkaListener</code> beans based on the . The above example will enable the consumer to create a topic if it doesn&#8217;t exist for the <code>default</code> (<code>@KafkaListener</code>) client and set a custom bootstrap server for the <code>product</code> client (<code>@KafkaListener(value = "product")</code>)</p>
+<p>Properties under <code>kafka.consumers.default</code> serve as shared defaults applied to all <a href="https://kafka.apache.org/27/javadoc//org/apache/kafka/clients/consumer/ConsumerConfig.html">ConsumerConfig</a>-compatible consumers, while properties under <code>kafka.consumers.&lt;id&gt;</code> apply only to the consumer whose <code>id</code> matches (falling back to <code>groupId</code> when <code>id</code> is not set). The above example enables topic auto-creation for all consumers via the <code>default</code> key and sets a custom bootstrap server only for a listener declared with <code>@KafkaListener(id = "product")</code>.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -3750,7 +3750,7 @@ Mono&lt;Product&gt; receiveBlocking(@KafkaKey String brand, Mono&lt;Product&gt; 
 <div class="sect2">
 <h3 id="_kafkalistener_and_consumer_groups">@KafkaListener and Consumer Groups</h3>
 <div class="paragraph">
-<p>Kafka consumers created with <code>@KafkaListener</code> will by default run within a consumer group that is the value of <code>micronaut.application.name</code> unless you explicitly specify a value to the <code>@KafkaListener</code> annotation. For example:</p>
+<p>Kafka consumers created with <code>@KafkaListener</code> will by default run within a consumer group that is the value of <code>micronaut.application.name</code> unless you explicitly specify <code>groupId</code> or <code>value</code>, or provide an <code>id</code> to use as the group fallback. For example:</p>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="title">Specifying a Consumer Group</div>
@@ -3818,6 +3818,11 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>The <code>id</code> member is used to resolve consumer-specific configuration from <code>kafka.consumers.*</code>.
+If <code>id</code> is not specified, Micronaut falls back to <code>groupId</code>.
+If <code>groupId</code> is not specified, Micronaut uses <code>id</code> as the Kafka consumer group unless <code>group.id</code> is already defined in configuration.</p>
 </div>
 <div class="paragraph">
 <p>To allow the records to be consumed by all the consumer instances (each instance will be part of a unique consumer group), <code>uniqueGroupId</code> can be set to <code>true</code>:</p>
@@ -3951,10 +3956,10 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 <p>The above example will set the default <code>session.timeout.ms</code> that Kafka uses to decide whether a consumer is alive or not and applies it to all created <code>KafkaConsumer</code> instances.</p>
 </div>
 <div class="paragraph">
-<p>You can also provide configuration specific to a consumer group. For example consider the following configuration:</p>
+<p>You can also provide configuration specific to a listener id. For example consider the following configuration:</p>
 </div>
 <div class="openblock">
-<div class="title">Applying Consumer Group Specific config</div>
+<div class="title">Applying Listener-Specific Config</div>
 <div class="content">
 <div class="listingblock multi-language-sample">
 <div class="content">
@@ -4033,7 +4038,7 @@ You can make the consumer group configurable using a placeholder: <code>@KafkaLi
 </div>
 </div>
 <div class="paragraph">
-<p>The above configuration will pass properties to only the <code>@KafkaListener</code> beans that apply to the consumer group <code>myGroup</code>.</p>
+<p>The above configuration will pass properties to only the <code>@KafkaListener</code> beans with <code>id = "myGroup"</code>, or listeners whose <code>groupId</code> is <code>myGroup</code> when <code>id</code> is not specified.</p>
 </div>
 <div class="paragraph">
 <p>Finally, the <a href="../api/io/micronaut/configuration/kafka/annotation/KafkaListener.html">@KafkaListener</a> annotation itself provides a <code>properties</code> member that you can use to set consumer specific properties:</p>

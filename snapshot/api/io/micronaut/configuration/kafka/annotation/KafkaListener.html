@@ -59,6 +59,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#value()" tabindex="0">value</a></li>
 <li><a href="#groupId()" tabindex="0">groupId</a></li>
+<li><a href="#id()" tabindex="0">id</a></li>
 <li><a href="#uniqueGroupId()" tabindex="0">uniqueGroupId</a></li>
 <li><a href="#uniqueGroupIdDeleteOnShutdown()" tabindex="0">uniqueGroupIdDeleteOnShutdown</a></li>
 <li><a href="#clientId()" tabindex="0">clientId</a></li>
@@ -156,72 +157,77 @@ and set the error strategy.</div>
 <div class="col-last even-row-color">
 <div class="block">The heart beat interval for the consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/IsolationLevel.html" title="class or interface in org.apache.kafka.common" class="external-link">IsolationLevel</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#isolation()" class="member-name-link">isolation</a></code></div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#id()" class="member-name-link">id</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Sets the listener identifier used to resolve consumer configuration from <code>kafka.consumers.*</code>.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/IsolationLevel.html" title="class or interface in org.apache.kafka.common" class="external-link">IsolationLevel</a></code></div>
+<div class="col-second even-row-color"><code><a href="#isolation()" class="member-name-link">isolation</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Kafka consumer isolation level to control how to read messages written transactionally.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></code></div>
-<div class="col-second even-row-color"><code><a href="#offsetReset()" class="member-name-link">offsetReset</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code><a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#offsetStrategy()" class="member-name-link">offsetStrategy</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first odd-row-color"><code><a href="OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#offsetReset()" class="member-name-link">offsetReset</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code><a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></code></div>
+<div class="col-second even-row-color"><code><a href="#offsetStrategy()" class="member-name-link">offsetStrategy</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The <a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>OffsetStrategy</code></a> to use for the consumer.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#pollTimeout()" class="member-name-link">pollTimeout</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#pollTimeout()" class="member-name-link">pollTimeout</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The timeout to use for calls to <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html#poll-java.time.Duration-" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer.poll(java.time.Duration)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#producerClientId()" class="member-name-link">producerClientId</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#producerClientId()" class="member-name-link">producerClientId</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The client id of the producer that is used for <code>SendTo</code>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#producerTransactionalId()" class="member-name-link">producerTransactionalId</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#producerTransactionalId()" class="member-name-link">producerTransactionalId</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">This setting applies only for the producer that is used for <code>SendTo</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code>io.micronaut.context.annotation.Property[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#properties()" class="member-name-link">properties</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>io.micronaut.context.annotation.Property[]</code></div>
+<div class="col-second even-row-color"><code><a href="#properties()" class="member-name-link">properties</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Additional properties to configure with for Consumer.</div>
 </div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#redelivery()" class="member-name-link">redelivery</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#redelivery()" class="member-name-link">redelivery</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">For listeners that return reactive types, message offsets are committed without blocking the consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#sessionTimeout()" class="member-name-link">sessionTimeout</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#sessionTimeout()" class="member-name-link">sessionTimeout</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The session timeout for a consumer.</div>
 </div>
-<div class="col-first even-row-color"><code>int</code></div>
-<div class="col-second even-row-color"><code><a href="#threads()" class="member-name-link">threads</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>int</code></div>
+<div class="col-second odd-row-color"><code><a href="#threads()" class="member-name-link">threads</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Statically configure the number of threads of a Kafka consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#threadsValue()" class="member-name-link">threadsValue</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#threadsValue()" class="member-name-link">threadsValue</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Dynamically configure the number of threads of a Kafka consumer.</div>
 </div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#uniqueGroupId()" class="member-name-link">uniqueGroupId</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#uniqueGroupId()" class="member-name-link">uniqueGroupId</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">A unique string (UUID) can be appended to the group ID.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#uniqueGroupIdDeleteOnShutdown()" class="member-name-link">uniqueGroupIdDeleteOnShutdown</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#uniqueGroupIdDeleteOnShutdown()" class="member-name-link">uniqueGroupIdDeleteOnShutdown</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Indicates whether the newly created group ID should be deleted upon application shutdown.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Sets the consumer group id of the Kafka consumer.</div>
 </div>
 </div>
@@ -243,8 +249,8 @@ and set the error strategy.</div>
 <div class="member-signature"><span class="annotations">@AliasFor(member="groupId")
 </span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">value</span></div>
 <div class="block">Sets the consumer group id of the Kafka consumer. If not specified the group id is configured
-to be the value of <code>ApplicationConfiguration.getName()</code> otherwise
-the name of the class is used.</div>
+from <a href="#id()"><code>id()</code></a> when present, otherwise to the value of
+<code>ApplicationConfiguration.getName()</code> and finally the name of the class.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The group id</dd>
@@ -266,6 +272,24 @@ the name of the class is used.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The group id</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>""</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="id()">
+<h3>id</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">id</span></div>
+<div class="block">Sets the listener identifier used to resolve consumer configuration from <code>kafka.consumers.*</code>.
+If not specified, the <a href="#groupId()"><code>groupId()</code></a> is used.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The listener identifier</dd>
 </dl>
 <dl class="notes">
 <dt>Default:</dt>
