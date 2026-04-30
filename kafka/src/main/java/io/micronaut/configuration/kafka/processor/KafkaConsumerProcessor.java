@@ -303,24 +303,41 @@ class KafkaConsumerProcessor
         if (CollectionUtils.isEmpty(topicAnnotations)) {
             return; // No topics to consume
         }
-        String groupId = consumerAnnotation.stringValue("groupId")
-                .filter(StringUtils::isNotEmpty)
-                .orElseGet(() -> applicationConfiguration.getName().orElse(beanType.getName()));
+        final Optional<String> listenerId = consumerAnnotation.stringValue("id")
+            .filter(StringUtils::isNotEmpty);
+        final Optional<String> annotationGroupId = consumerAnnotation.stringValue("groupId")
+            .filter(StringUtils::isNotEmpty);
         final String clientId = consumerAnnotation.stringValue("clientId")
                 .filter(StringUtils::isNotEmpty)
                 .orElseGet(() -> applicationConfiguration.getName().map(s -> s + '-' + NameUtils.hyphenate(beanType.getSimpleName())).orElse(null));
         final OffsetStrategy offsetStrategy = consumerAnnotation.enumValue("offsetStrategy", OffsetStrategy.class)
                 .orElse(OffsetStrategy.AUTO);
-        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(groupId);
+        final String defaultId = applicationConfiguration.getName().orElse(beanType.getName());
+        final String fallbackGroupId = annotationGroupId
+            .or(() -> listenerId)
+            .orElse(defaultId);
+        final String configId = listenerId
+            .or(() -> annotationGroupId)
+            .orElse(defaultId);
+        final AbstractKafkaConsumerConfiguration<?, ?> consumerConfigurationDefaults = getConsumerConfigurationDefaults(configId);
         boolean uniqueGroupIdDeleteOnShutdown = false;
+        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
+        final Properties properties = createConsumerProperties(
+            consumerAnnotation,
+            consumerConfiguration,
+            clientId,
+            fallbackGroupId,
+            annotationGroupId.isPresent(),
+            offsetStrategy
+        );
+        String groupId = properties.getProperty(ConsumerConfig.GROUP_ID_CONFIG, fallbackGroupId);
         if (consumerAnnotation.isTrue("uniqueGroupId")) {
             groupId = groupId + "_" + UUID.randomUUID();
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
             if (consumerAnnotation.isTrue("uniqueGroupIdDeleteOnShutdown")) {
                 uniqueGroupIdDeleteOnShutdown = true;
             }
         }
-        final DefaultKafkaConsumerConfiguration<?, ?> consumerConfiguration = new DefaultKafkaConsumerConfiguration<>(consumerConfigurationDefaults);
-        final Properties properties = createConsumerProperties(consumerAnnotation, consumerConfiguration, clientId, groupId, offsetStrategy);
         final ExecutableMethod<?, ?> primaryMethod = methods.get(0);
         configureDeserializers(methods, consumerConfiguration);
         submitConsumerThreads(primaryMethod, clientId, groupId, offsetStrategy, topicAnnotations,
@@ -489,6 +506,7 @@ class KafkaConsumerProcessor
                                                 final DefaultKafkaConsumerConfiguration consumerConfiguration,
                                                 final String clientId,
                                                 final String groupId,
+                                                final boolean overrideGroupId,
                                                 final OffsetStrategy offsetStrategy) {
         final Properties properties = consumerConfiguration.getConfig();
 
@@ -512,7 +530,11 @@ class KafkaConsumerProcessor
         consumerAnnotation.enumValue("isolation", IsolationLevel.class)
                 .ifPresent(isolation -> properties.putIfAbsent(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolation.toString().toLowerCase(Locale.ROOT)));
 
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        if (overrideGroupId) {
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        } else {
+            properties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        }
 
         if (clientId != null) {
             properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
