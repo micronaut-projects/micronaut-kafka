@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.EachProperty;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.exceptions.DisabledBeanException;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.naming.NameUtils;
 import io.micronaut.core.util.StringUtils;
@@ -65,6 +66,9 @@ public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfigu
             ApplicationConfiguration applicationConfiguration,
             Environment environment) {
         super(defaultConfiguration);
+        if ("enabled".equals(streamName)) {
+            throw new DisabledBeanException("Global property " + ENABLED + " is not a stream configuration");
+        }
         setName(streamName);
         Properties config = getConfig();
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(streamName, true);
