@@ -121,6 +121,17 @@ final class ConsumerInfo {
         );
     }
 
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        List<ExecutableMethod<?, ?>> methods
+    ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, methods, Map.of());
+    }
+
     @SuppressWarnings("unchecked")
     ConsumerInfo(
         String clientId,

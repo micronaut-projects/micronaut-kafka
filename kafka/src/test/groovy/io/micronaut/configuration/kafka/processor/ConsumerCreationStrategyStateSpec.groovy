@@ -30,6 +30,7 @@ class ConsumerCreationStrategyStateSpec extends Specification {
         def listener = new TestPerClassMultiTopicListener()
         def processor = Stub(KafkaConsumerProcessor) {
             getBinderRegistry() >> binderRegistry
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         def kafkaConsumer = Stub(Consumer) {
             subscription() >> ([] as Set)
@@ -54,6 +55,7 @@ class ConsumerCreationStrategyStateSpec extends Specification {
         def listener = new TestPerClassMultiTopicBatchListener()
         def processor = Stub(KafkaConsumerProcessor) {
             getBatchBinderRegistry() >> batchBinderRegistry
+            interceptRecords(_, _ as ConsumerRecords) >> { ConsumerInfo ignored, ConsumerRecords<?, ?> records -> records }
         }
         def kafkaConsumer = Stub(Consumer) {
             subscription() >> ([] as Set)
@@ -78,6 +80,7 @@ class ConsumerCreationStrategyStateSpec extends Specification {
         def listener = new TestBatchMultiTopicListener()
         def processor = Stub(KafkaConsumerProcessor) {
             getBatchBinderRegistry() >> batchBinderRegistry
+            interceptRecords(_, _ as ConsumerRecords) >> { ConsumerInfo ignored, ConsumerRecords<?, ?> records -> records }
         }
         def kafkaConsumer = Stub(Consumer) {
             subscription() >> ([] as Set)
