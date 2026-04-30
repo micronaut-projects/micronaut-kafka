@@ -42,17 +42,17 @@ class KafkaScopeConsumerStateSpec extends Specification {
 
     void "single consumer state recreates the scope for each record"() {
         given:
+        SingleScopedListener listener = context.getBean(SingleScopedListener)
         ConsumerStateSingle state = new ConsumerStateSingle(
             kafkaConsumerProcessor(),
             singleConsumerInfo(),
             kafkaConsumer(),
-            context.getBean(SingleScopedListener)
+            listener
         )
         ConsumerRecords<String, String> records = records(
             new ConsumerRecord<>('topic', 0, 0L, 'key-1', 'one'),
             new ConsumerRecord<>('topic', 0, 1L, 'key-2', 'two')
         )
-        SingleScopedListener listener = context.getBean(SingleScopedListener)
 
         when:
         state.processRecords(records, [:])
@@ -66,13 +66,13 @@ class KafkaScopeConsumerStateSpec extends Specification {
 
     void "batch consumer state shares a scope across the batch and recreates it for the next batch"() {
         given:
+        BatchScopedListener listener = context.getBean(BatchScopedListener)
         ConsumerStateBatch state = new ConsumerStateBatch(
             kafkaConsumerProcessor(),
             batchConsumerInfo(),
             kafkaConsumer(),
-            context.getBean(BatchScopedListener)
+            listener
         )
-        BatchScopedListener listener = context.getBean(BatchScopedListener)
 
         when:
         state.processRecords(records(
@@ -100,6 +100,8 @@ class KafkaScopeConsumerStateSpec extends Specification {
             getBinderRegistry() >> binderRegistry
             getBatchBinderRegistry() >> batchBinderRegistry
             getKafkaScope() >> kafkaScope
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
+            interceptRecords(_, _ as ConsumerRecords) >> { ConsumerInfo ignored, ConsumerRecords<?, ?> records -> records }
         }
     }
 
