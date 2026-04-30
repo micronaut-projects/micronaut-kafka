@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#errorStrategy()" tabindex="0">errorStrategy</a></li>
 <li><a href="#threadsValue()" tabindex="0">threadsValue</a></li>
 <li><a href="#threads()" tabindex="0">threads</a></li>
+<li><a href="#consumerCreationStrategy()" tabindex="0">consumerCreationStrategy</a></li>
 <li><a href="#pollTimeout()" tabindex="0">pollTimeout</a></li>
 <li><a href="#sessionTimeout()" tabindex="0">sessionTimeout</a></li>
 <li><a href="#heartbeatInterval()" tabindex="0">heartbeatInterval</a></li>
@@ -129,9 +130,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Sets the client id of the Kafka consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#errorStrategy()" class="member-name-link">errorStrategy</a></code></div>
+<div class="col-first odd-row-color"><code><a href="ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#consumerCreationStrategy()" class="member-name-link">consumerCreationStrategy</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Defines how consumers are created for multiple <a href="Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a> methods within the same listener.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></code></div>
+<div class="col-second even-row-color"><code><a href="#errorStrategy()" class="member-name-link">errorStrategy</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Setting the error strategy allows you to resume at the next offset
 or to seek the consumer (stop on error) to the failed offset so that
 it can retry if an error occurs
@@ -140,82 +146,82 @@ The consumer bean is still able to implement a custom exception handler to repla
 <a href="../exceptions/DefaultKafkaListenerExceptionHandler.html" title="class in io.micronaut.configuration.kafka.exceptions"><code>DefaultKafkaListenerExceptionHandler</code></a>
 and set the error strategy.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#groupId()" class="member-name-link">groupId</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#groupId()" class="member-name-link">groupId</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The same as <a href="#value()"><code>value()</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#heartbeatInterval()" class="member-name-link">heartbeatInterval</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#heartbeatInterval()" class="member-name-link">heartbeatInterval</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The heart beat interval for the consumer.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/IsolationLevel.html" title="class or interface in org.apache.kafka.common" class="external-link">IsolationLevel</a></code></div>
-<div class="col-second even-row-color"><code><a href="#isolation()" class="member-name-link">isolation</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/IsolationLevel.html" title="class or interface in org.apache.kafka.common" class="external-link">IsolationLevel</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#isolation()" class="member-name-link">isolation</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Kafka consumer isolation level to control how to read messages written transactionally.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#offsetReset()" class="member-name-link">offsetReset</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code><a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></code></div>
-<div class="col-second even-row-color"><code><a href="#offsetStrategy()" class="member-name-link">offsetStrategy</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first even-row-color"><code><a href="OffsetReset.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetReset</a></code></div>
+<div class="col-second even-row-color"><code><a href="#offsetReset()" class="member-name-link">offsetReset</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">OffsetStrategy</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#offsetStrategy()" class="member-name-link">offsetStrategy</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The <a href="OffsetStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>OffsetStrategy</code></a> to use for the consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#pollTimeout()" class="member-name-link">pollTimeout</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#pollTimeout()" class="member-name-link">pollTimeout</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">The timeout to use for calls to <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html#poll-java.time.Duration-" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer.poll(java.time.Duration)</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#producerClientId()" class="member-name-link">producerClientId</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#producerClientId()" class="member-name-link">producerClientId</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The client id of the producer that is used for <code>SendTo</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#producerTransactionalId()" class="member-name-link">producerTransactionalId</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#producerTransactionalId()" class="member-name-link">producerTransactionalId</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">This setting applies only for the producer that is used for <code>SendTo</code>.</div>
 </div>
-<div class="col-first even-row-color"><code>io.micronaut.context.annotation.Property[]</code></div>
-<div class="col-second even-row-color"><code><a href="#properties()" class="member-name-link">properties</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>io.micronaut.context.annotation.Property[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#properties()" class="member-name-link">properties</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Additional properties to configure with for Consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#redelivery()" class="member-name-link">redelivery</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#redelivery()" class="member-name-link">redelivery</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">For listeners that return reactive types, message offsets are committed without blocking the consumer.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#sessionTimeout()" class="member-name-link">sessionTimeout</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#sessionTimeout()" class="member-name-link">sessionTimeout</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The session timeout for a consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code>int</code></div>
-<div class="col-second odd-row-color"><code><a href="#threads()" class="member-name-link">threads</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>int</code></div>
+<div class="col-second even-row-color"><code><a href="#threads()" class="member-name-link">threads</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Statically configure the number of threads of a Kafka consumer.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#threadsValue()" class="member-name-link">threadsValue</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#threadsValue()" class="member-name-link">threadsValue</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Dynamically configure the number of threads of a Kafka consumer.</div>
 </div>
-<div class="col-first odd-row-color"><code>boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#uniqueGroupId()" class="member-name-link">uniqueGroupId</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#uniqueGroupId()" class="member-name-link">uniqueGroupId</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">A unique string (UUID) can be appended to the group ID.</div>
 </div>
-<div class="col-first even-row-color"><code>boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#uniqueGroupIdDeleteOnShutdown()" class="member-name-link">uniqueGroupIdDeleteOnShutdown</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#uniqueGroupIdDeleteOnShutdown()" class="member-name-link">uniqueGroupIdDeleteOnShutdown</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Indicates whether the newly created group ID should be deleted upon application shutdown.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Sets the consumer group id of the Kafka consumer.</div>
 </div>
 </div>
@@ -518,6 +524,25 @@ shared between invocations from different consumer threads</p>
 <dl class="notes">
 <dt>Default:</dt>
 <dd><code>1</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="consumerCreationStrategy()">
+<h3>consumerCreationStrategy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></span>&nbsp;<span class="element-name">consumerCreationStrategy</span></div>
+<div class="block">Defines how consumers are created for multiple <a href="Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a> methods within the same listener.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The consumer creation strategy</dd>
+<dt>Since:</dt>
+<dd>4.9.0</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>PER_TOPIC</code></dd>
 </dl>
 </div>
 </section>

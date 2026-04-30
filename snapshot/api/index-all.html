@@ -359,6 +359,14 @@ when a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/con
 <div class="block">Interface for <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> instances to implement
 if they wish to obtain a reference to the underlying <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/Consumer.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>Consumer</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#consumerCreationStrategy()" class="member-name-link">consumerCreationStrategy()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
+<dd>
+<div class="block">Defines how consumers are created for multiple <a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a> methods within the same listener.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a> - Enum Class in <a href="io/micronaut/configuration/kafka/annotation/package-summary.html">io.micronaut.configuration.kafka.annotation</a></dt>
+<dd>
+<div class="block">Defines how Kafka consumers are created for listener methods.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/executor/ConsumerExecutorServiceConfig.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.executor">ConsumerExecutorServiceConfig</a> - Class in <a href="io/micronaut/configuration/kafka/executor/package-summary.html">io.micronaut.configuration.kafka.executor</a></dt>
 <dd>
 <div class="block">Configures a <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ScheduledExecutorService.html" title="class or interface in java.util.concurrent" class="external-link"><code>ScheduledExecutorService</code></a> for running <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> instances.</div>
@@ -1453,6 +1461,14 @@ on completion of a successful partition re-assignment.</div>
 <dd>
 <div class="block">Pause the consumer for the given ID to consume from the given topic partitions.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html#PER_CLASS" class="member-name-link">PER_CLASS</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></dt>
+<dd>
+<div class="block">Create one consumer for the whole listener class and route records by topic.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html#PER_TOPIC" class="member-name-link">PER_TOPIC</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></dt>
+<dd>
+<div class="block">Create one consumer per <a href="io/micronaut/configuration/kafka/annotation/Topic.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>Topic</code></a>-annotated method.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html#perform(io.micronaut.configuration.kafka.seek.KafkaSeekOperation)" class="member-name-link">perform(KafkaSeekOperation)</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeeker.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeeker</a></dt>
 <dd>
 <div class="block">Performs a kafka seek operation immediately.</div>
@@ -1859,6 +1875,10 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/Topics.html#value()" class="member-name-link">value()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/Topics.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">Topics</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -1882,6 +1902,11 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ConsumerCreationStrategy.html" title="enum class in io.micronaut.configuration.kafka.annotation">ConsumerCreationStrategy</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>
