@@ -22,6 +22,8 @@ import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.inject.BeanIdentifier;
 import jakarta.inject.Singleton;
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
@@ -99,7 +101,7 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
     }
 
     @Override
-    protected Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
+    protected @Nullable Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
         Deque<ScopeEntry> stack = scopes.get();
         if (stack == null || stack.isEmpty()) {
             if (forCreation) {
