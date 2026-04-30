@@ -21,9 +21,8 @@ import io.micronaut.context.scope.CreatedBean;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.inject.BeanIdentifier;
 import jakarta.inject.Singleton;
-import org.jspecify.annotations.Nullable;
-
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +68,11 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
      * @return The action result
      */
     public <T> T execute(Supplier<T> action) {
-        try (Scope scope = open()) {
+        Scope activeScope = open();
+        try {
             return action.get();
+        } finally {
+            activeScope.close();
         }
     }
 
@@ -97,13 +99,13 @@ public final class KafkaCustomScope extends AbstractConcurrentCustomScope<KafkaS
     }
 
     @Override
-    protected @Nullable Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
+    protected Map<BeanIdentifier, CreatedBean<?>> getScopeMap(boolean forCreation) {
         Deque<ScopeEntry> stack = scopes.get();
         if (stack == null || stack.isEmpty()) {
             if (forCreation) {
                 throw new IllegalStateException("No active Kafka scope");
             }
-            return null;
+            return Collections.emptyMap();
         }
         return stack.peekLast().beans;
     }
