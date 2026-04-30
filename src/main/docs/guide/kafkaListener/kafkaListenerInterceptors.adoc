@@ -1,4 +1,4 @@
-To inspect, filter, or wrap consumed records before Micronaut binds them to a ann:configuration.kafka.annotation.KafkaListener[] method, define a bean that implements api:configuration.kafka.ConsumerRecordInterceptor[].
+To inspect, filter, or wrap consumed records before Micronaut binds them to an ann:configuration.kafka.annotation.KafkaListener[] method, define a bean that implements api:configuration.kafka.ConsumerRecordInterceptor[].
 
 Interceptors run before argument binding for single-record listeners and before Micronaut builds the batch arguments for batch listeners. If multiple interceptor beans are present, Micronaut applies them in order.
 
