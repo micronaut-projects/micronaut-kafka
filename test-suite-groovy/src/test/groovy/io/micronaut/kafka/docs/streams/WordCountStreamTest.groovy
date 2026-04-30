@@ -15,6 +15,7 @@ class WordCountStreamTest extends Specification {
         given:
         def config = new HashMap<>(Kafka.getProperties());
         config.put("kafka.enabled", "true");
+        config.put("micronaut.application.name", "test-suite-groovy-word-count-stream");
         config.put("spec.name", "WordCountStreamTest");
         config.put("kafka.streams.my-stream.application.id", "test-suite-groovy-my-stream");
         config.put("kafka.streams.my-stream.start-kafka-streams", "false");

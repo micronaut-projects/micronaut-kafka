@@ -18,6 +18,7 @@ internal class WordCountStreamTest {
         props.putAll(
             mapOf(
                 "kafka.enabled" to StringUtils.TRUE,
+                "micronaut.application.name" to "test-suite-kotlin-word-count-stream",
                 "spec.name" to "WordCountStreamTest",
                 "kafka.streams.my-stream.application.id" to "test-suite-kotlin-my-stream",
                 "kafka.streams.my-stream.start-kafka-streams" to StringUtils.FALSE,

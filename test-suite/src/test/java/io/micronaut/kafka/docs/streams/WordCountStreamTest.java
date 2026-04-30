@@ -20,6 +20,7 @@ class WordCountStreamTest {
         Map<String, String> kafkaProps = Kafka.getProperties();
         Map<String, Object> config = new HashMap<>(kafkaProps);
         config.put("kafka.enabled", StringUtils.TRUE);
+        config.put("micronaut.application.name", "test-suite-java-word-count-stream");
         config.put("spec.name", "WordCountStreamTest");
         config.put("kafka.streams.my-stream.application.id", "test-suite-java-my-stream");
         config.put("kafka.streams.my-stream.start-kafka-streams", StringUtils.FALSE);
