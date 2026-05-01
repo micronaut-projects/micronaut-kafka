@@ -185,10 +185,16 @@ public class KafkaStreamsFactory implements Closeable, GracefulShutdownCapable {
         if (currentShutdown != null) {
             return currentShutdown;
         }
-        CompletableFuture<Void> newShutdown = CompletableFuture.runAsync(() ->
-            streams.forEach(this::closeStream)
-        );
+        CompletableFuture<Void> newShutdown = new CompletableFuture<>();
         if (gracefulShutdown.compareAndSet(null, newShutdown)) {
+            CompletableFuture.runAsync(() -> streams.forEach(this::closeStream))
+                .whenComplete((v, e) -> {
+                    if (e != null) {
+                        newShutdown.completeExceptionally(e);
+                    } else {
+                        newShutdown.complete(null);
+                    }
+                });
             return newShutdown;
         }
         return gracefulShutdown.get();

@@ -73,7 +73,7 @@ class KafkaStreamsFactorySpec extends Specification {
                 true
             }
         }
-        kafkaStreamsFactory.streams.put(stream, new ConfiguredStreamBuilder(new Properties(), "test", Duration.ofSeconds(1)))
+        kafkaStreamsFactory.getStreams().put(stream, new ConfiguredStreamBuilder(new Properties(), "test", Duration.ofSeconds(1)))
 
         expect:
         kafkaStreamsFactory.reportActiveTasks().asLong == 1L
