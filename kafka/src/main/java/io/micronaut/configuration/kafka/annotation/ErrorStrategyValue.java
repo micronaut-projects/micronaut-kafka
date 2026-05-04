@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,16 @@ public enum ErrorStrategyValue {
     LOG_AND_RESUME_AT_NEXT_RECORD,
 
     /**
+     * This strategy will publish the failed record to retry topics so the original topic can continue
+     * processing while the failed record is retried asynchronously after the configured delay.
+     * When no retry topics remain, the record is optionally published to the configured dead letter
+     * topic and the listener exception is handled.
+     *
+     * @since 6.0.0
+     */
+    RETRY_TOPIC_ON_ERROR,
+
+    /**
      * This strategy will stop consuming subsequent records in the case of an error and will
      * attempt to re-consume or skip the current according to the behaviour defined by the
      * {@link ConditionalRetryBehaviourHandler}.
@@ -94,6 +104,14 @@ public enum ErrorStrategyValue {
             this == RETRY_EXPONENTIALLY_ON_ERROR ||
             this == RETRY_CONDITIONALLY_ON_ERROR ||
             this == RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR;
+    }
+
+    /**
+     * @return Whether this strategy uses non-blocking retry topics.
+     * @since 6.0.0
+     */
+    public boolean isRetryTopic() {
+        return this == RETRY_TOPIC_ON_ERROR;
     }
 
     public boolean isConditionalRetry() {

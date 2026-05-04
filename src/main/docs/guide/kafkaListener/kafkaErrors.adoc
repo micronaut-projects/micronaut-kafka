@@ -21,9 +21,13 @@ You can choose one of the error strategies:
 
 - `LOG_AND_RESUME_AT_NEXT_RECORD` - This strategy will publish the failed record to a dead letter topic, invoke the exception handler, and resume at the next offset. You must configure the target topic with `dlq`.
 
+- `RETRY_TOPIC_ON_ERROR` - This strategy will publish the failed record to derived retry topics and resume at the next offset on the original topic. Configure the retry topics with `retryTopicSuffixes` and `retryTopicDelays`. When retry topics are exhausted, Micronaut optionally publishes the record to `dlq`.
+
 - `NONE` - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.
 
 NOTE: For batch listeners, `LOG_AND_RESUME_AT_NEXT_RECORD` is supported. The other error strategies apply only to non-batch message processing.
+
+NOTE: `RETRY_TOPIC_ON_ERROR` requires direct topic names, not `@Topic` patterns. Retry topics must already exist in Kafka.
 
 NOTE: When using retry error strategies in combination with reactive consumer methods, it is necessary to add the `@Blocking` annotation to the reactive consumer method.
 
@@ -68,6 +72,30 @@ When a ann:configuration.kafka.annotation.KafkaListener[] does not implement ann
 If you wish to apply the same conditional retry strategy for all of your ann:configuration.kafka.annotation.KafkaListener[] you can define a bean that implements `ConditionalRetryBehaviourHandler` and use Micronaut's link:https://docs.micronaut.io/latest/guide/#replaces[Bean Replacement] feature to replace the default bean: `@Replaces(DefaultConditionalRetryBehaviourHandler.class)`.
 
 NOTE: Conditional retry behaviour only applies to `RETRY_CONDITIONALLY_ON_ERROR` and `RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR` error strategies.
+
+==== Non-blocking retry topics
+
+`RETRY_TOPIC_ON_ERROR` implements non-blocking retries by republishing the failed record to derived retry topics. Each retry topic suffix in `retryTopicSuffixes` must have a matching delay in `retryTopicDelays`.
+
+.A client that publishes to the source topic
+snippet::io.micronaut.kafka.docs.consumer.errors.RetryTopicProductClient[tags = client, indent = 0]
+
+.A listener that processes the source topic and derived retry topics
+snippet::io.micronaut.kafka.docs.consumer.errors.RetryTopicProductListener[tags = listener, indent = 0]
+
+.A listener for the dead letter topic
+snippet::io.micronaut.kafka.docs.consumer.errors.RetryTopicProductDltListener[tags = dlt, indent = 0]
+
+In this example, Micronaut derives `products-retry-5s` and `products-retry-30s` from the source topic `products`. The same listener processes the initial delivery and the retry topics, and `micronaut-kafka-retry-attempt` is populated only when the record is being retried.
+
+When Micronaut publishes a failed record to a retry topic, it preserves the record key, value, and headers, updates the failure metadata headers, and adds:
+
+- `micronaut-kafka-retry-attempt`
+- `micronaut-kafka-retry-due-timestamp`
+
+When a record arrives from a retry topic before its due timestamp, Micronaut pauses that retry partition until the configured delay expires and then processes the record.
+
+When all retry topics are exhausted, Micronaut publishes the record to the configured dead letter topic, preserving the original topic metadata in the dead letter headers.
 
 === Exception handlers
 

@@ -38,6 +38,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.WakeupException;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
@@ -77,11 +78,14 @@ abstract class ConsumerState {
     protected static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerProcessor.class); // NOSONAR
     private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration DLQ_PUBLISH_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration RETRY_TOPIC_PUBLISH_RETRY_DELAY = Duration.ofSeconds(1);
     private static final String DLQ_EXCEPTION_CLASS_HEADER = "micronaut-kafka-exception-class";
     private static final String DLQ_EXCEPTION_MESSAGE_HEADER = "micronaut-kafka-exception-message";
     private static final String DLQ_ORIGINAL_TOPIC_HEADER = "micronaut-kafka-original-topic";
     private static final String DLQ_ORIGINAL_PARTITION_HEADER = "micronaut-kafka-original-partition";
     private static final String DLQ_ORIGINAL_OFFSET_HEADER = "micronaut-kafka-original-offset";
+    private static final String RETRY_TOPIC_ATTEMPT_HEADER = "micronaut-kafka-retry-attempt";
+    private static final String RETRY_TOPIC_DUE_TIMESTAMP_HEADER = "micronaut-kafka-retry-due-timestamp";
 
     protected final KafkaConsumerProcessor kafkaConsumerProcessor;
     protected final Object consumerBean;
@@ -523,6 +527,12 @@ abstract class ConsumerState {
         final Duration retryDelay = info.errorStrategy.computeRetryDelay(info.retryDelay,
             currentRetryCount);
         if (retryDelay != null) {
+            delayRetry(retryDelay, partitions);
+        }
+    }
+
+    protected void delayRetry(Duration retryDelay, Set<TopicPartition> partitions) {
+        if (retryDelay != null) {
             pause(partitions);
             kafkaConsumerProcessor.scheduleTask(retryDelay, () -> resume(partitions));
         }
@@ -554,6 +564,24 @@ abstract class ConsumerState {
         return retryState;
     }
 
+    protected boolean retryTopicNotDue(ConsumerRecord<?, ?> consumerRecord) {
+        if (info.nonBlockingRetryTopics == null || !info.nonBlockingRetryTopics.isRetryTopic(consumerRecord.topic())) {
+            return false;
+        }
+        Instant due = retryTopicDueTimestamp(consumerRecord);
+        if (due == null) {
+            return false;
+        }
+        Instant now = Instant.now();
+        if (!due.isAfter(now)) {
+            return false;
+        }
+        TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+        kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+        delayRetry(Duration.between(now, due), Collections.singleton(topicPartition));
+        return true;
+    }
+
     protected void handleException(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
         @Nullable ConsumerRecord<?, ?> consumerRecord) {
         handleException(String.valueOf(e.getMessage()), e, consumerRecords, consumerRecord);
@@ -561,7 +589,11 @@ abstract class ConsumerState {
 
     protected void publishToDlq(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
         @Nullable ConsumerRecord<?, ?> consumerRecord) {
-        if (info.errorStrategy != io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD || info.dlq == null) {
+        if (info.dlq == null) {
+            return;
+        }
+        if (info.errorStrategy != io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD &&
+            !info.errorStrategy.isRetryTopic()) {
             return;
         }
         if (consumerRecord != null) {
@@ -588,11 +620,7 @@ abstract class ConsumerState {
             (Class<?>) (value != null ? value.getClass() : byte[].class)
         );
         final Headers headers = new RecordHeaders(consumerRecord.headers());
-        addDlqHeader(headers, DLQ_EXCEPTION_CLASS_HEADER, error.getClass().getName());
-        addDlqHeader(headers, DLQ_EXCEPTION_MESSAGE_HEADER, error.getMessage());
-        addDlqHeader(headers, DLQ_ORIGINAL_TOPIC_HEADER, consumerRecord.topic());
-        addDlqHeader(headers, DLQ_ORIGINAL_PARTITION_HEADER, Integer.toString(consumerRecord.partition()));
-        addDlqHeader(headers, DLQ_ORIGINAL_OFFSET_HEADER, Long.toString(consumerRecord.offset()));
+        populateFailureHeaders(headers, consumerRecord, error, shouldPreserveOriginalHeaders(consumerRecord));
         final Long timestamp = consumerRecord.timestamp() >= 0 ? consumerRecord.timestamp() : null;
         final ProducerRecord producerRecord = new ProducerRecord(info.dlq, null, timestamp, key, value, headers);
         final long dlqPublishTimeoutSeconds = DLQ_PUBLISH_TIMEOUT.toSeconds();
@@ -633,6 +661,77 @@ abstract class ConsumerState {
                 dlqError
             );
         }
+    }
+
+    protected boolean publishToRetryTopic(ConsumerRecord<?, ?> consumerRecord, Throwable error, NonBlockingRetryTopics.RetryDispatch retryDispatch) {
+        final Object key = consumerRecord.key();
+        final Object value = consumerRecord.value();
+        final Producer<?, ?> kafkaProducer = kafkaConsumerProcessor.getProducer(
+            Optional.ofNullable(info.producerClientId).orElse(info.groupId),
+            (Class<?>) (key != null ? key.getClass() : byte[].class),
+            (Class<?>) (value != null ? value.getClass() : byte[].class)
+        );
+        final Headers headers = new RecordHeaders(consumerRecord.headers());
+        populateFailureHeaders(headers, consumerRecord, error, shouldPreserveOriginalHeaders(consumerRecord));
+        addDlqHeader(headers, RETRY_TOPIC_ATTEMPT_HEADER, Integer.toString(retryDispatch.attempt()));
+        addDlqHeader(headers, RETRY_TOPIC_DUE_TIMESTAMP_HEADER, Long.toString(Instant.now().plus(retryDispatch.delay()).toEpochMilli()));
+        final Long timestamp = consumerRecord.timestamp() >= 0 ? consumerRecord.timestamp() : null;
+        final ProducerRecord producerRecord = new ProducerRecord(retryDispatch.retryTopic(), null, timestamp, key, value, headers);
+        try {
+            kafkaProducer.send(producerRecord).get(DLQ_PUBLISH_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+            return true;
+        } catch (Exception publishError) {
+            LOG.error(
+                "Error publishing record [topic={}, partition={}, offset={}] to retry topic [{}]: {}",
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
+                retryDispatch.retryTopic(),
+                publishError.getMessage(),
+                publishError
+            );
+            return false;
+        }
+    }
+
+    protected Duration retryTopicPublishRetryDelay() {
+        return RETRY_TOPIC_PUBLISH_RETRY_DELAY;
+    }
+
+    @Nullable
+    private static Instant retryTopicDueTimestamp(ConsumerRecord<?, ?> consumerRecord) {
+        Header header = consumerRecord.headers().lastHeader(RETRY_TOPIC_DUE_TIMESTAMP_HEADER);
+        if (header == null || header.value() == null) {
+            return null;
+        }
+        try {
+            return Instant.ofEpochMilli(Long.parseLong(new String(header.value(), StandardCharsets.UTF_8)));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void populateFailureHeaders(Headers headers, ConsumerRecord<?, ?> consumerRecord, Throwable error, boolean preserveOriginalHeaders) {
+        addDlqHeader(headers, DLQ_EXCEPTION_CLASS_HEADER, error.getClass().getName());
+        addDlqHeader(headers, DLQ_EXCEPTION_MESSAGE_HEADER, error.getMessage());
+        addDlqHeader(headers, DLQ_ORIGINAL_TOPIC_HEADER, originalHeaderValue(consumerRecord, DLQ_ORIGINAL_TOPIC_HEADER, consumerRecord.topic(), preserveOriginalHeaders));
+        addDlqHeader(headers, DLQ_ORIGINAL_PARTITION_HEADER, originalHeaderValue(consumerRecord, DLQ_ORIGINAL_PARTITION_HEADER, Integer.toString(consumerRecord.partition()), preserveOriginalHeaders));
+        addDlqHeader(headers, DLQ_ORIGINAL_OFFSET_HEADER, originalHeaderValue(consumerRecord, DLQ_ORIGINAL_OFFSET_HEADER, Long.toString(consumerRecord.offset()), preserveOriginalHeaders));
+    }
+
+    private boolean shouldPreserveOriginalHeaders(ConsumerRecord<?, ?> consumerRecord) {
+        return info.nonBlockingRetryTopics != null && info.nonBlockingRetryTopics.isRetryTopic(consumerRecord.topic());
+    }
+
+    private static String originalHeaderValue(ConsumerRecord<?, ?> consumerRecord, String name, String fallback, boolean preserveOriginalHeaders) {
+        if (!preserveOriginalHeaders) {
+            return fallback;
+        }
+        Header header = consumerRecord.headers().lastHeader(name);
+        if (header == null || header.value() == null) {
+            return fallback;
+        }
+        return new String(header.value(), StandardCharsets.UTF_8);
     }
 
     private static void addDlqHeader(Headers headers, String name, @Nullable String value) {

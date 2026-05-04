@@ -349,7 +349,9 @@ class KafkaConsumerProcessor
             }
         }
         final ExecutableMethod<?, ?> primaryMethod = methods.get(0);
-        configureDeserializers(methods, consumerConfiguration);
+        final boolean batch = primaryMethod.isTrue(KafkaListener.class, "batch");
+        final NonBlockingRetryTopics nonBlockingRetryTopics = NonBlockingRetryTopics.create(consumerAnnotation, topicAnnotations, batch);
+        configureDeserializers(methods, consumerConfiguration, nonBlockingRetryTopics);
         submitConsumerThreads(primaryMethod, clientId, groupId, offsetStrategy, topicAnnotations,
             consumerAnnotation, consumerConfiguration, properties, beanType, methods, uniqueGroupIdDeleteOnShutdown);
     }
@@ -609,9 +611,9 @@ class KafkaConsumerProcessor
                 //noinspection unchecked
                 ca.setKafkaConsumer(kafkaConsumer);
             }
-            setupConsumerSubscription(method, topicAnnotations, consumerBean, kafkaConsumer);
+            final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, properties, methods, topicAnnotations);
+            setupConsumerSubscription(method, topicAnnotations, consumerInfo, consumerBean, kafkaConsumer);
             kafkaConsumerSubscribedEventPublisher.publishEvent(new KafkaConsumerSubscribedEvent(kafkaConsumer));
-            final ConsumerInfo consumerInfo = new ConsumerInfo(finalClientId, groupId, offsetStrategy, consumerAnnotation, properties, methods);
             final ConsumerState consumerState = consumerInfo.isBatch ?
                 new ConsumerStateBatch(this, consumerInfo, kafkaConsumer, consumerBean) :
                 new ConsumerStateSingle(this, consumerInfo, kafkaConsumer, consumerBean);
@@ -628,15 +630,69 @@ class KafkaConsumerProcessor
     private static void setupConsumerSubscription(
         ExecutableMethod<?, ?> method,
         List<AnnotationValue<Topic>> topicAnnotations,
+        ConsumerInfo consumerInfo,
         Object consumerBean,
         Consumer<?, ?> kafkaConsumer
     ) {
-        final List<String> topicNames = topicAnnotations.stream()
+        java.util.stream.Stream<String> directTopics = topicAnnotations.stream()
             .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues()))
+            .filter(StringUtils::isNotEmpty);
+        if (consumerInfo.nonBlockingRetryTopics != null) {
+            directTopics = java.util.stream.Stream.concat(directTopics, consumerInfo.nonBlockingRetryTopics.additionalRetryTopics().stream());
+        }
+        final List<String> topicNames = directTopics.collect(java.util.stream.Collectors.collectingAndThen(
+            java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+            List::copyOf
+        ));
+        final List<String> patterns = topicAnnotations.stream()
+            .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues("patterns")))
             .collect(java.util.stream.Collectors.collectingAndThen(
                 java.util.stream.Collectors.toCollection(LinkedHashSet::new),
                 List::copyOf
             ));
+        final boolean hasTopics = !topicNames.isEmpty();
+        final boolean hasPatterns = !patterns.isEmpty();
+        final String logMethod = LOG.isInfoEnabled() ? logMethod(method) : null;
+
+        if (!hasTopics && !hasPatterns) {
+            throw new MessagingSystemException("Either topics or topic patterns must be specified for method: " + method);
+        }
+
+        final Optional<ConsumerRebalanceListener> listener = getConsumerRebalanceListener(consumerBean, kafkaConsumer);
+
+        if (hasPatterns) {
+            try {
+                final Pattern compiledPattern = compileTopicPattern(topicNames, patterns);
+                listener.ifPresentOrElse(
+                    l -> kafkaConsumer.subscribe(compiledPattern, l),
+                    () -> kafkaConsumer.subscribe(compiledPattern));
+                LOG.info("Kafka listener [{}] subscribed to topics: {} and topic patterns: {}", logMethod, topicNames, patterns);
+            } catch (PatternSyntaxException e) {
+                throw new MessagingSystemException("Invalid topic pattern [" + e.getPattern() + "] for method [" + method + "]: " + e.getMessage(), e);
+            }
+            return;
+        }
+
+        listener.ifPresentOrElse(
+            l -> kafkaConsumer.subscribe(topicNames, l),
+            () -> kafkaConsumer.subscribe(topicNames));
+        LOG.info("Kafka listener [{}] subscribed to topics: {}", logMethod, topicNames);
+    }
+
+    @SuppressWarnings("unused")
+    private static void setupConsumerSubscription(
+        ExecutableMethod<?, ?> method,
+        List<AnnotationValue<Topic>> topicAnnotations,
+        Object consumerBean,
+        Consumer<?, ?> kafkaConsumer
+    ) {
+        java.util.stream.Stream<String> directTopics = topicAnnotations.stream()
+            .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues()))
+            .filter(StringUtils::isNotEmpty);
+        final List<String> topicNames = directTopics.collect(java.util.stream.Collectors.collectingAndThen(
+            java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+            List::copyOf
+        ));
         final List<String> patterns = topicAnnotations.stream()
             .flatMap(annotationValue -> Arrays.stream(annotationValue.stringValues("patterns")))
             .collect(java.util.stream.Collectors.collectingAndThen(
@@ -720,16 +776,20 @@ class KafkaConsumerProcessor
         return argument.equals(lastArgumentValue);
     }
 
-    private void configureDeserializers(final List<ExecutableMethod<?, ?>> methods, final DefaultKafkaConsumerConfiguration<?, ?> config) {
+    private void configureDeserializers(
+        final List<ExecutableMethod<?, ?>> methods,
+        final DefaultKafkaConsumerConfiguration<?, ?> config,
+        @Nullable NonBlockingRetryTopics nonBlockingRetryTopics
+    ) {
         if (methods.size() == 1) {
             configureDeserializers(methods.get(0), config);
             return;
         }
         if (!config.getConfig().containsKey(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG) && config.getKeyDeserializer().isEmpty()) {
-            config.setKeyDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, true), "key"));
+            config.setKeyDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, true, nonBlockingRetryTopics), "key"));
         }
         if (!config.getConfig().containsKey(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG) && config.getValueDeserializer().isEmpty()) {
-            config.setValueDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, false), "value"));
+            config.setValueDeserializer((Deserializer) new TopicAwareDeserializer(buildDeserializerRouter(methods, false, nonBlockingRetryTopics), "value"));
         }
         debugDeserializationConfiguration(methods.get(0), config);
     }
@@ -743,14 +803,22 @@ class KafkaConsumerProcessor
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private TopicRouter<Deserializer<Object>> buildDeserializerRouter(List<ExecutableMethod<?, ?>> methods, boolean key) {
+    private TopicRouter<Deserializer<Object>> buildDeserializerRouter(
+        List<ExecutableMethod<?, ?>> methods,
+        boolean key,
+        @Nullable NonBlockingRetryTopics nonBlockingRetryTopics
+    ) {
         TopicRouter<Deserializer<Object>> router = new TopicRouter<>();
         for (ExecutableMethod<?, ?> method : methods) {
             final boolean batch = method.isTrue(KafkaListener.class, "batch");
             final Argument<?> bodyArgument = findBodyArgument(batch, method);
             final Deserializer<Object> deserializer = key ? resolveKeyDeserializer(bodyArgument, method) : resolveValueDeserializer(bodyArgument);
             for (AnnotationValue<Topic> topicAnnotation : method.getDeclaredAnnotationValuesByType(Topic.class)) {
-                router.register(topicAnnotation.stringValues(), topicAnnotation.stringValues("patterns"), deserializer, logMethod(method));
+                String[] topics = topicAnnotation.stringValues();
+                if (nonBlockingRetryTopics != null && topics.length > 0) {
+                    topics = nonBlockingRetryTopics.expandTopics(topics).toArray(String[]::new);
+                }
+                router.register(topics, topicAnnotation.stringValues("patterns"), deserializer, logMethod(method));
             }
         }
         return router;

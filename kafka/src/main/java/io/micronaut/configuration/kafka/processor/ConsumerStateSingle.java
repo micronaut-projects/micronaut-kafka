@@ -92,6 +92,11 @@ final class ConsumerStateSingle extends ConsumerState {
             final ConsumerRecord<?, ?> consumerRecord = iterator.next();
             final String topic = consumerRecord.topic();
             logRecord(topic, consumerRecord);
+            if (retryTopicNotDue(consumerRecord)) {
+                resetTheFollowingPartitions(consumerRecord, iterator);
+                failed = true;
+                return;
+            }
             trackCurrentOffset(consumerRecord, currentOffsets);
             final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);
             if (withKafkaScope(() -> processRecord(topic, consumerRecords, currentOffsets, iterator, consumerRecord, seek))) {
@@ -204,6 +209,23 @@ final class ConsumerStateSingle extends ConsumerState {
     @SuppressWarnings("java:S1874") // ErrorStrategyValue.NONE is deprecated
     private boolean resolveWithErrorStrategy(@Nullable ConsumerRecords<?, ?> consumerRecords,
         ConsumerRecord<?, ?> consumerRecord, Throwable e) {
+        if (info.nonBlockingRetryTopics != null) {
+            NonBlockingRetryTopics.RetryDispatch retryDispatch = shouldRetryException(e, consumerRecords, consumerRecord)
+                ? info.nonBlockingRetryTopics.nextRetry(consumerRecord.topic())
+                : null;
+            if (retryDispatch != null) {
+                if (publishToRetryTopic(consumerRecord, e, retryDispatch)) {
+                    if (info.shouldHandleAllExceptions) {
+                        handleException(e, consumerRecords, consumerRecord);
+                    }
+                    return false;
+                }
+                final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+                kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+                delayRetry(retryTopicPublishRetryDelay(), Collections.singleton(topicPartition));
+                return true;
+            }
+        }
         if (info.errorStrategy.isRetry()) {
             final TopicPartition topicPartition = getTopicPartition(consumerRecord);
             final boolean retryable = shouldRetryException(e, consumerRecords, consumerRecord);

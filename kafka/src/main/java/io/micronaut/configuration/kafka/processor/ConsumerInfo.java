@@ -78,6 +78,7 @@ final class ConsumerInfo {
     final boolean trackPartitions;
     final boolean shouldSendOffsetsToTransaction;
     final boolean cooperativeStickyAssignmentStrategy;
+    @Nullable final NonBlockingRetryTopics nonBlockingRetryTopics;
     private final List<ExecutableMethod<Object, ?>> listenerMethods;
     private final Map<String, ExecutableMethod<Object, ?>> topicMethods = new HashMap<>();
     private final List<PatternMethod> patternMethods;
@@ -97,7 +98,19 @@ final class ConsumerInfo {
         Properties properties,
         ExecutableMethod<?, ?> method
     ) {
-        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method));
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, method, method.getDeclaredAnnotationValuesByType(Topic.class));
+    }
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        ExecutableMethod<?, ?> method,
+        List<AnnotationValue<Topic>> topicAnnotations
+    ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method), topicAnnotations);
     }
 
     @SuppressWarnings("unchecked")
@@ -108,6 +121,20 @@ final class ConsumerInfo {
         AnnotationValue<KafkaListener> kafkaListener,
         Properties properties,
         List<ExecutableMethod<?, ?>> methods
+    ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, methods, methods.stream()
+            .flatMap(executableMethod -> executableMethod.getDeclaredAnnotationValuesByType(Topic.class).stream())
+            .toList());
+    }
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        List<ExecutableMethod<?, ?>> methods,
+        List<AnnotationValue<Topic>> topicAnnotations
     ) {
         this.clientId = clientId;
         this.groupId = groupId;
@@ -137,9 +164,10 @@ final class ConsumerInfo {
         }
         this.listenerMethods = List.copyOf(resolvedListenerMethods);
         this.method = this.listenerMethods.get(0);
+        this.isBatch = method.isTrue(KafkaListener.class, "batch");
+        this.nonBlockingRetryTopics = NonBlockingRetryTopics.create(kafkaListener, topicAnnotations, this.isBatch);
         this.patternMethods = resolveTopicMethods(this.listenerMethods);
         this.autoStartup = kafkaListener.booleanValue("autoStartup").orElse(true);
-        this.isBatch = method.isTrue(KafkaListener.class, "batch");
         this.pollTimeout = method.getValue(KafkaListener.class, "pollTimeout", Duration.class).orElseGet(() -> Duration.ofMillis(100));
         this.trackPartitions = anyMethodHasAckArg() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
         this.shouldSendOffsetsToTransaction = offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION;
@@ -282,10 +310,21 @@ final class ConsumerInfo {
 
     private void registerDirectTopics(ExecutableMethod<Object, ?> executableMethod, AnnotationValue<Topic> topicAnnotation) {
         for (String topic : topicAnnotation.stringValues()) {
-            ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
-            if (previous != null && previous != executableMethod) {
-                throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
+            registerDirectTopic(topic, executableMethod);
+            if (nonBlockingRetryTopics != null) {
+                for (String retryTopic : nonBlockingRetryTopics.expandTopics(new String[] { topic })) {
+                    if (!retryTopic.equals(topic)) {
+                        registerDirectTopic(retryTopic, executableMethod);
+                    }
+                }
             }
+        }
+    }
+
+    private void registerDirectTopic(String topic, ExecutableMethod<Object, ?> executableMethod) {
+        ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
+        if (previous != null && previous != executableMethod) {
+            throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
         }
     }
 
