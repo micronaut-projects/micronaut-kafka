@@ -161,7 +161,14 @@ final class ConsumerStateBatch extends ConsumerState {
         Throwable e
     ) {
         if (info.errorStrategy.isRetry()) {
-            final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
+            final Set<TopicPartition> partitions;
+            if (consumerRecords != null) {
+                partitions = consumerRecords.partitions();
+            } else if (consumerRecord != null) {
+                partitions = Collections.singleton(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()));
+            } else {
+                partitions = currentOffsets.keySet();
+            }
             final boolean retryable = shouldRetryException(e, consumerRecords, null);
             if (retryable && info.retryCount > 0) {
                 Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);

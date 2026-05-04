@@ -107,6 +107,7 @@ public @interface ErrorStrategy {
      * or the application is restarted.
      *
      * @return whether to stop consuming from the affected partitions after retries are exhausted
+     * @since 6.0
      */
     boolean stopOnExhaustedRetry() default false;
 
