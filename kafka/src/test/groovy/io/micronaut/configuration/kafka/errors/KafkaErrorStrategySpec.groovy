@@ -1,6 +1,7 @@
 package io.micronaut.configuration.kafka.errors
 
 import io.micronaut.configuration.kafka.AbstractEmbeddedServerSpec
+import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaClient
 import io.micronaut.configuration.kafka.annotation.KafkaKey
@@ -26,6 +27,7 @@ import spock.lang.Unroll
 
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NONE
@@ -112,6 +114,34 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         }
         and:"the retry of the first message is delivered at least 50ms afterwards"
         myConsumer.times[1] - myConsumer.times[0] >= 50
+    }
+
+    void "test when retry on error stops on exhausted retry the partition remains paused until resumed"() {
+        given:
+        ConsumerRegistry registry = context.getBean(ConsumerRegistry)
+
+        when: "A consumer keeps failing the first record"
+        StopOnExhaustedRetryClient myClient = context.getBean(StopOnExhaustedRetryClient)
+        myClient.sendMessage("ERROR")
+        myClient.sendMessage("OK")
+
+        then: "The failing partition is paused and the next record is not consumed"
+        StopOnExhaustedRetryConsumer myConsumer = context.getBean(StopOnExhaustedRetryConsumer)
+        conditions.eventually {
+            registry.isPaused("errors-stop-on-exhausted-retry")
+            myConsumer.received == ["ERROR", "ERROR", "ERROR"]
+            myConsumer.successful.isEmpty()
+        }
+
+        when: "The listener is allowed to succeed and the partition is resumed"
+        myConsumer.fail.set(false)
+        registry.resume("errors-stop-on-exhausted-retry")
+
+        then: "The failed record is retried from the same offset and consumption continues"
+        conditions.eventually {
+            !registry.isPaused("errors-stop-on-exhausted-retry")
+            myConsumer.successful == ["ERROR", "OK"]
+        }
     }
 
     void "test when the error strategy is 'retry on error' messages from another subscribed topic are not skipped"() {
@@ -347,6 +377,34 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
         myConsumer.errors[3].message == "Three #6"
     }
 
+    void "test reactive consumer when retry on error stops on exhausted retry the partition remains paused until resumed"() {
+        given:
+        ConsumerRegistry registry = context.getBean(ConsumerRegistry)
+
+        when: "A reactive consumer keeps failing the first record"
+        StopOnExhaustedReactiveRetryClient myClient = context.getBean(StopOnExhaustedReactiveRetryClient)
+        myClient.sendMessage("ERROR")
+        myClient.sendMessage("OK")
+
+        then: "The failing partition is paused and the next record is not consumed"
+        StopOnExhaustedReactiveRetryConsumer myConsumer = context.getBean(StopOnExhaustedReactiveRetryConsumer)
+        conditions.eventually {
+            registry.isPaused("errors-stop-on-exhausted-reactive-retry")
+            myConsumer.received == ["ERROR", "ERROR", "ERROR"]
+            myConsumer.successful.isEmpty()
+        }
+
+        when: "The listener is allowed to succeed and the partition is resumed"
+        myConsumer.fail.set(false)
+        registry.resume("errors-stop-on-exhausted-reactive-retry")
+
+        then: "The failed record is retried from the same offset and consumption continues"
+        conditions.eventually {
+            !registry.isPaused("errors-stop-on-exhausted-reactive-retry")
+            myConsumer.successful == ["ERROR", "OK"]
+        }
+    }
+
     @Unroll
     void "test when error strategy is 'retry on error' with #type retry count"(String type) {
         when: "A consumer throws an exception"
@@ -483,6 +541,30 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
             if (count.getAndIncrement() == 0) {
                 throw new RuntimeException("Won't handle first")
             }
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        clientId = "errors-stop-on-exhausted-retry",
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        uniqueGroupId = true,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 2, retryDelay = "50ms", stopOnExhaustedRetry = true),
+        properties = @Property(name = ConsumerConfig.MAX_POLL_RECORDS_CONFIG, value = "1")
+    )
+    static class StopOnExhaustedRetryConsumer {
+        AtomicBoolean fail = new AtomicBoolean(true)
+        List<String> received = new CopyOnWriteArrayList<>()
+        List<String> successful = new CopyOnWriteArrayList<>()
+
+        @Topic("errors-stop-on-exhausted-retry")
+        void handleMessage(String message) {
+            received << message
+            if (fail.get()) {
+                throw new RuntimeException("Still failing")
+            }
+            successful << message
         }
     }
 
@@ -748,6 +830,32 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaListener(
+        clientId = "errors-stop-on-exhausted-reactive-retry",
+        offsetReset = EARLIEST,
+        offsetStrategy = SYNC,
+        uniqueGroupId = true,
+        errorStrategy = @ErrorStrategy(value = RETRY_ON_ERROR, retryCount = 2, retryDelay = "50ms", stopOnExhaustedRetry = true),
+        properties = @Property(name = ConsumerConfig.MAX_POLL_RECORDS_CONFIG, value = "1")
+    )
+    static class StopOnExhaustedReactiveRetryConsumer {
+        AtomicBoolean fail = new AtomicBoolean(true)
+        List<String> received = new CopyOnWriteArrayList<>()
+        List<String> successful = new CopyOnWriteArrayList<>()
+
+        @Blocking
+        @Topic("errors-stop-on-exhausted-reactive-retry")
+        Mono<Boolean> handleMessage(String message) {
+            received << message
+            if (fail.get()) {
+                return Mono.error(new RuntimeException("Still failing"))
+            }
+            successful << message
+            return Mono.just(Boolean.TRUE)
+        }
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaListener(offsetReset = EARLIEST, offsetStrategy = SYNC, errorStrategy = @ErrorStrategy(value = NONE))
     static class PollNextErrorCausingConsumer implements KafkaListenerExceptionHandler {
         AtomicInteger count = new AtomicInteger(0)
@@ -953,6 +1061,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
 
     @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
     @KafkaClient
+    static interface StopOnExhaustedRetryClient {
+        @Topic("errors-stop-on-exhausted-retry")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
     static interface MultiTopicRetryErrorClient {
         void sendMessage(@Topic String topic, String message)
     }
@@ -1040,6 +1155,13 @@ class KafkaErrorStrategySpec extends AbstractEmbeddedServerSpec {
     @KafkaClient
     static interface RetryReactiveHandleAllErrorClient {
         @Topic("errors-retry-reactive-handle-all-exceptions")
+        void sendMessage(String message)
+    }
+
+    @Requires(property = 'spec.name', value = 'KafkaErrorStrategySpec')
+    @KafkaClient
+    static interface StopOnExhaustedReactiveRetryClient {
+        @Topic("errors-stop-on-exhausted-reactive-retry")
         void sendMessage(String message)
     }
 

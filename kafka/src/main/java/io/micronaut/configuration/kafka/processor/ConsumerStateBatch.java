@@ -162,7 +162,8 @@ final class ConsumerStateBatch extends ConsumerState {
     ) {
         if (info.errorStrategy.isRetry()) {
             final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : currentOffsets.keySet();
-            if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
+            final boolean retryable = shouldRetryException(e, consumerRecords, null);
+            if (retryable && info.retryCount > 0) {
                 Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
                 final int currentRetryCount = getCurrentRetryCount(partitions, reconstructedOffsets);
                 if (info.retryCount >= currentRetryCount) {
@@ -175,6 +176,13 @@ final class ConsumerStateBatch extends ConsumerState {
                 }
             }
             partitions.forEach(topicPartitionRetries::remove);
+            if (retryable && info.shouldStopOnExhaustedRetry) {
+                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
+                partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
+                handleException(e, consumerRecords, consumerRecord);
+                pause(partitions);
+                return true;
+            }
         }
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);

@@ -188,7 +188,8 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-            if (shouldRetryException(e, consumerRecords, consumerRecord) && info.retryCount > 0) {
+            final boolean retryable = shouldRetryException(e, consumerRecords, consumerRecord);
+            if (retryable && info.retryCount > 0) {
                 // Check how many retries so far
                 final int currentRetryCount = getCurrentRetryCount(consumerRecord);
                 if (info.retryCount >= currentRetryCount) {
@@ -205,6 +206,12 @@ final class ConsumerStateSingle extends ConsumerState {
             }
             // We will NOT retry this record anymore
             topicPartitionRetries.remove(topicPartition);
+            if (retryable && info.shouldStopOnExhaustedRetry) {
+                kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+                handleException(e, consumerRecords, consumerRecord);
+                pause(Collections.singleton(topicPartition));
+                return true;
+            }
         }
         // Skip the failing record
         publishToDlq(e, consumerRecords, consumerRecord);

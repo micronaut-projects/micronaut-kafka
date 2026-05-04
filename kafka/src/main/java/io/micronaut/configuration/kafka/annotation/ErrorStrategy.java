@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,18 @@ public @interface ErrorStrategy {
      * @since 5.0
      */
     boolean handleAllExceptions() default DEFAULT_HANDLE_ALL_EXCEPTIONS;
+
+    /**
+     * Whether Micronaut should pause the affected topic partitions after the last retryable failure
+     * instead of skipping past the failed record.
+     *
+     * <p>When enabled, the consumer seeks back to the failed offset, handles the exception, and
+     * pauses the affected partitions until they are resumed through the {@code ConsumerRegistry}
+     * or the application is restarted.
+     *
+     * @return whether to stop consuming from the affected partitions after retries are exhausted
+     */
+    boolean stopOnExhaustedRetry() default false;
 
     /**
      * The strategy to use when an error occurs, see {@link io.micronaut.configuration.kafka.annotation.ErrorStrategyValue}.

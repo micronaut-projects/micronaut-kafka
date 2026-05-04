@@ -27,6 +27,8 @@ NOTE: For batch listeners, `LOG_AND_RESUME_AT_NEXT_RECORD` is supported. The oth
 
 NOTE: When using retry error strategies in combination with reactive consumer methods, it is necessary to add the `@Blocking` annotation to the reactive consumer method.
 
+For retry error strategies, set `stopOnExhaustedRetry = true` to pause the affected topic partitions after the last retryable failure instead of skipping past the failed record. The consumer seeks back to the failed offset before pausing, and you can resume it later through api:configuration.kafka.ConsumerRegistry[].
+
 When `LOG_AND_RESUME_AT_NEXT_RECORD` publishes a failed record to the dead letter topic, the original key, value, and headers are preserved. Micronaut also adds the following headers so the downstream consumer can inspect the failure context:
 
 - `micronaut-kafka-exception-class`
