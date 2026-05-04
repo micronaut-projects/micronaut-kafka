@@ -773,9 +773,11 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             ContextSupplier<Integer> partitionSupplier = ctx -> finalPartitionFromProducerFn.apply(ctx, producer);
 
             String executor = context.stringValue(KafkaClient.class, "executor")
-                .orElseGet(() -> newConfiguration.getExecutor().orElseGet(() ->
-                    context.getReturnType().asArgument().isAsyncOrReactive() ? TaskExecutors.BLOCKING : ""
-                ));
+                .orElseGet(() -> newConfiguration.getExecutor()
+                    .filter(StringUtils::isNotEmpty)
+                    .orElseGet(() ->
+                        context.getReturnType().asArgument().isAsyncOrReactive() ? TaskExecutors.BLOCKING : ""
+                    ));
 
             ExecutorService executorService = StringUtils.isNotEmpty(executor)
                 ? beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null)

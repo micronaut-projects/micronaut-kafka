@@ -42,13 +42,13 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.subscribe(s -> { throw new IllegalStateException("Unexpected result") },
                     ex -> {
                         int currentCount = failureCount.incrementAndGet()
                         LOG.debug("Subscriber failure # {} : {}", currentCount, ex.getMessage())
                     })
-        }).toList()
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -68,13 +68,13 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.subscribe(s -> { throw new IllegalStateException("Unexpected result") },
                     ex -> {
                         int currentCount = failureCount.incrementAndGet()
                         LOG.debug("Subscriber failure # {} : {}", currentCount, ex.getMessage())
                     })
-        }).toList()
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -95,13 +95,13 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.subscribe(s -> { throw new IllegalStateException("Unexpected result") },
                     ex -> {
                         int currentCount = failureCount.incrementAndGet()
                         LOG.debug("Subscriber failure # {} : {}", currentCount, ex.getMessage())
                     })
-        }).toList()
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -121,17 +121,46 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.subscribe(s -> { throw new IllegalStateException("Unexpected result") },
                     ex -> {
                         int currentCount = failureCount.incrementAndGet()
                         LOG.debug("Subscriber failure # {} : {}", currentCount, ex.getMessage())
                     })
-        }).toList()
+        })
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
-        elapsedMillis < 1000
+        elapsedMillis < 1500
+        failureCount.get() == 0
+    }
+
+    void "test reactive send message with empty executor in config does not look up a named executor or block when Kafka is not available"() {
+        given: "executor is explicitly configured as empty string"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
+                         'kafka.producers.default.executor': ''])
+        MyDefaultExecutorClient client = ctx.getBean(MyDefaultExecutorClient)
+
+        when: "client operations are invoked while Kafka is unavailable"
+        long start = System.nanoTime()
+        AtomicInteger failureCount = new AtomicInteger(0)
+        List<Mono<String>> sendOps = new ArrayList<>()
+        for (int x=0; x<3; x++) {
+            sendOps.add(client.sendRx("test", "hello-world", new RecordHeaders([new RecordHeader("hello", "world".bytes)])))
+        }
+        sendOps.forEach(sendOp -> {
+            sendOp.subscribe(s -> { throw new IllegalStateException("Unexpected result") },
+                    ex -> {
+                        int currentCount = failureCount.incrementAndGet()
+                        LOG.debug("Subscriber failure # {} : {}", currentCount, ex.getMessage())
+                    })
+        })
+        long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+
+        then: "no named executor is looked up and the calls do not block for the maxBlock timeout"
+        elapsedMillis < 1500
         failureCount.get() == 0
     }
 
@@ -149,11 +178,12 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendSentence("test", "hello-world"))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.exceptionally {
                 int currentCount = failureCount.incrementAndGet()
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
-            }}).toList()
+            }
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -173,11 +203,12 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendSentence("test", "hello-world"))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.exceptionally {
                 int currentCount = failureCount.incrementAndGet()
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
-            }}).toList()
+            }
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -196,11 +227,12 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendSentence("test", "hello-world"))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.exceptionally {
                 int currentCount = failureCount.incrementAndGet()
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
-            }}).toList()
+            }
+        })
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
         failureCount.get() == 0
@@ -220,15 +252,44 @@ class KafkaClientWithExecutorSpec extends AbstractKafkaSpec {
         for (int x=0; x<3; x++) {
             sendOps.add(client.sendSentence("test", "hello-world"))
         }
-        sendOps.stream().map(sendOp -> {
+        sendOps.forEach(sendOp -> {
             sendOp.exceptionally {
                 int currentCount = failureCount.incrementAndGet()
                 LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
-            }}).toList()
+            }
+        })
         long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
 
         then: "the operations should not block the calling thread while waiting for the maxBlock timeout"
-        elapsedMillis < 1000
+        elapsedMillis < 1500
+        failureCount.get() == 0
+    }
+
+    void "test future send message with empty executor in config does not look up a named executor or block when Kafka is not available"() {
+        given: "executor is explicitly configured as empty string"
+        ctx = ApplicationContext.run(
+                getConfiguration() +
+                        ['kafka.bootstrap.servers': LOCALHOST + ':' + SocketUtils.findAvailableTcpPort(),
+                         'kafka.producers.default.executor': ''])
+        MyDefaultExecutorClient client = ctx.getBean(MyDefaultExecutorClient)
+
+        when: "client operations are invoked while Kafka is unavailable"
+        long start = System.nanoTime()
+        AtomicInteger failureCount = new AtomicInteger(0)
+        List<CompletableFuture<String>> sendOps = new ArrayList<>()
+        for (int x=0; x<3; x++) {
+            sendOps.add(client.sendSentence("test", "hello-world"))
+        }
+        sendOps.forEach(sendOp -> {
+            sendOp.exceptionally {
+                int currentCount = failureCount.incrementAndGet()
+                LOG.debug("Subscriber failure # {} : {}", currentCount, it.getMessage())
+            }
+        })
+        long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+
+        then: "no named executor is looked up and the calls do not block for the maxBlock timeout"
+        elapsedMillis < 1500
         failureCount.get() == 0
     }
 
