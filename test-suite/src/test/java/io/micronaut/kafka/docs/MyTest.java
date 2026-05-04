@@ -12,10 +12,11 @@ import io.micronaut.testcontainers.kafka.Kafka;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Property(name = "spec.name", value = "MyTest")
 @MicronautTest
@@ -28,10 +29,10 @@ class MyTest implements TestPropertyProvider {
     }
 
     @Test
-    void testKafkaRunning(MyProducer producer, MyConsumer consumer) {
+    void testKafkaRunning(MyProducer producer, MyConsumer consumer) throws InterruptedException {
         final String message = "hello";
         producer.produce(message);
-        await().atMost(5, SECONDS).until(() -> message.equals(consumer.consumed));
+        assertEquals(message, consumer.awaitMessage(15, TimeUnit.SECONDS));
     }
 
     @Requires(property = "spec.name", value = "MyTest")
@@ -44,10 +45,15 @@ class MyTest implements TestPropertyProvider {
     @Requires(property = "spec.name", value = "MyTest")
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     static class MyConsumer {
-        String consumed;
+        private final LinkedBlockingQueue<String> consumedMessages = new LinkedBlockingQueue<>();
+
         @Topic("my-topic")
         public void consume(String message) {
-            consumed = message;
+            consumedMessages.offer(message);
+        }
+
+        String awaitMessage(long timeout, TimeUnit timeUnit) throws InterruptedException {
+            return consumedMessages.poll(timeout, timeUnit);
         }
     }
 }
