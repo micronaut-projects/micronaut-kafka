@@ -1493,6 +1493,228 @@ kafka.consumers.document-group.specific.protobuf.value.type=example.DocumentEven
 <div class="paragraph">
 <p>That setup is often enough for tests that verify producer and listener wiring with generated Avro or Protobuf types. If you also want to validate registry compatibility rules or schema lifecycle behavior, run a real Schema Registry alongside Kafka in your integration tests.</p>
 </div>
+<div class="paragraph">
+<p>When the same test suite needs multiple isolated registries, keep the shared Kafka settings under <code>kafka.*</code> and override the registry URL per producer id and consumer group id:</p>
+</div>
+<div class="openblock">
+<div class="title">Configuring multiple mock schema registries in one test suite</div>
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.bootstrap.servers=localhost:9092
+kafka.schema.registry.url=mock://shared-registry
+kafka.producers.books.schema.registry.url=mock://books-registry
+kafka.producers.documents.schema.registry.url=mock://documents-registry
+kafka.consumers.book-group.schema.registry.url=mock://books-registry
+kafka.consumers.document-group.schema.registry.url=mock://documents-registry</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+  bootstrap:
+    servers: localhost:9092
+  schema:
+    registry:
+      url: mock://shared-registry
+  producers:
+    books:
+      schema:
+        registry:
+          url: mock://books-registry
+    documents:
+      schema:
+        registry:
+          url: mock://documents-registry
+  consumers:
+    book-group:
+      schema:
+        registry:
+          url: mock://books-registry
+    document-group:
+      schema:
+        registry:
+          url: mock://documents-registry</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
+  [kafka.bootstrap]
+    servers="localhost:9092"
+  [kafka.schema]
+    [kafka.schema.registry]
+      url="mock://shared-registry"
+  [kafka.producers]
+    [kafka.producers.books]
+      [kafka.producers.books.schema]
+        [kafka.producers.books.schema.registry]
+          url="mock://books-registry"
+    [kafka.producers.documents]
+      [kafka.producers.documents.schema]
+        [kafka.producers.documents.schema.registry]
+          url="mock://documents-registry"
+  [kafka.consumers]
+    [kafka.consumers.book-group]
+      [kafka.consumers.book-group.schema]
+        [kafka.consumers.book-group.schema.registry]
+          url="mock://books-registry"
+    [kafka.consumers.document-group]
+      [kafka.consumers.document-group.schema]
+        [kafka.consumers.document-group.schema.registry]
+          url="mock://documents-registry"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  bootstrap {
+    servers = "localhost:9092"
+  }
+  schema {
+    registry {
+      url = "mock://shared-registry"
+    }
+  }
+  producers {
+    books {
+      schema {
+        registry {
+          url = "mock://books-registry"
+        }
+      }
+    }
+    documents {
+      schema {
+        registry {
+          url = "mock://documents-registry"
+        }
+      }
+    }
+  }
+  consumers {
+    bookGroup {
+      schema {
+        registry {
+          url = "mock://books-registry"
+        }
+      }
+    }
+    documentGroup {
+      schema {
+        registry {
+          url = "mock://documents-registry"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    bootstrap {
+      servers = "localhost:9092"
+    }
+    schema {
+      registry {
+        url = "mock://shared-registry"
+      }
+    }
+    producers {
+      books {
+        schema {
+          registry {
+            url = "mock://books-registry"
+          }
+        }
+      }
+      documents {
+        schema {
+          registry {
+            url = "mock://documents-registry"
+          }
+        }
+      }
+    }
+    consumers {
+      book-group {
+        schema {
+          registry {
+            url = "mock://books-registry"
+          }
+        }
+      }
+      document-group {
+        schema {
+          registry {
+            url = "mock://documents-registry"
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "bootstrap": {
+      "servers": "localhost:9092"
+    },
+    "schema": {
+      "registry": {
+        "url": "mock://shared-registry"
+      }
+    },
+    "producers": {
+      "books": {
+        "schema": {
+          "registry": {
+            "url": "mock://books-registry"
+          }
+        }
+      },
+      "documents": {
+        "schema": {
+          "registry": {
+            "url": "mock://documents-registry"
+          }
+        }
+      }
+    },
+    "consumers": {
+      "book-group": {
+        "schema": {
+          "registry": {
+            "url": "mock://books-registry"
+          }
+        }
+      },
+      "document-group": {
+        "schema": {
+          "registry": {
+            "url": "mock://documents-registry"
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Use the same producer ids that you assign to <code>@KafkaClient</code> and the same consumer group ids that you assign to <code>@KafkaListener</code>. The matching producer and consumer should point at the same registry URL, while unrelated clients can use a different mock scope or a different local registry endpoint entirely.</p>
+</div>
+<div class="paragraph">
+<p>The same scoping pattern also works with other schema registry implementations. Replace the serializer and deserializer classes with the equivalents from your chosen library and point each producer or consumer configuration at the corresponding test endpoint.</p>
+</div>
 </div>
 </div>
 
