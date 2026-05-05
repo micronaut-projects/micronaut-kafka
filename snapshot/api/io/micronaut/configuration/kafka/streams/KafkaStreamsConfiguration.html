@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
 <li><a href="#PREFIX" tabindex="0">PREFIX</a></li>
+<li><a href="#ENABLED" tabindex="0">ENABLED</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
@@ -96,7 +97,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="annotations">@EachProperty(value="kafka.streams",
               primary="default")
 @ConfigurationProperties("kafka.streams")
-@Requires(beans=<a href="../config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration</a>.class)
+@Requires(beans=<a href="../config/KafkaDefaultConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaDefaultConfiguration</a>.class) @Requires(property="kafka.streams.enabled",notEquals="false",defaultValue="true")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">KafkaStreamsConfiguration&lt;K,<wbr>V&gt;</span>
 <span class="extends-implements">extends <a href="AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a>&lt;K,<wbr>V&gt;</span></div>
 <div class="block">The default configuration passed to <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a>.</div>
@@ -114,8 +115,13 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#PREFIX" class="member-name-link">PREFIX</a></code></div>
+<div class="col-second even-row-color"><code><a href="#ENABLED" class="member-name-link">ENABLED</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Global property used to disable Kafka Streams bean creation.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#PREFIX" class="member-name-link">PREFIX</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The default streams configuration.</div>
 </div>
 </div>
@@ -183,6 +189,23 @@ loadScripts(document, 'script');</script>
 <dd>
 <ul class="tag-list">
 <li><a href="../../../../../constant-values.html#io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration.PREFIX">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ENABLED">
+<h3>ENABLED</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">ENABLED</span></div>
+<div class="block">Global property used to disable Kafka Streams bean creation.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#io.micronaut.configuration.kafka.streams.KafkaStreamsConfiguration.ENABLED">Constant Field Values</a></li>
 </ul>
 </dd>
 </dl>

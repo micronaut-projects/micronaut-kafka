@@ -90,7 +90,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="annotations">@Singleton
-@Requires(classes=io.micronaut.management.health.indicator.HealthIndicator.class) @Requires(property="kafka.health.streams.enabled",value="true",defaultValue="true")
+@Requires(classes=io.micronaut.management.health.indicator.HealthIndicator.class) @Requires(beans=<a href="../KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a>.class) @Requires(property="kafka.health.streams.enabled",value="true",defaultValue="true")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">KafkaStreamsHealth</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements io.micronaut.management.health.indicator.HealthIndicator</span></div>
