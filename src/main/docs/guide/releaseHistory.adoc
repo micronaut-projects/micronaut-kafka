@@ -2,22 +2,24 @@ For this project, you can find a list of releases (with release notes) here:
 
 https://github.com/{githubSlug}/releases[https://github.com/{githubSlug}/releases]
 
-=== Upgrading to Micronaut Kafka 5.0
+=== Upgrading to Micronaut Kafka 6.0
 
-Micronaut Kafka 5.0 is a significant major version which includes a number of changes you will need to consider when upgrading.
+Micronaut Kafka 6.0 is a significant major version which updates the framework, Kafka client, and Java baselines and includes a number of listener, client, and administration enhancements.
 
-=== Micronaut 4, Kafka 3 & Java 17 baseline
+=== Micronaut 5, Kafka 4 & Java 25 baseline
 
-Micronaut Kafka 5.0 requires the following minimum set of dependencies:
+Micronaut Kafka 6.0 requires the following minimum set of dependencies:
 
-* Java 17 or above
-* Kafka 3
-* Micronaut 4 or above
+* Java 25 or above
+* Kafka 4
+* Micronaut 5 or above
 
-=== `@KafkaClient` no longer recoverable by default
+=== Major Enhancements
 
-Previous versions of Micronaut Kafka used the meta-annotation https://docs.micronaut.io/latest/api/io/micronaut/retry/annotation/Recoverable.html[@Recoverable] on the `@KafkaClient` annotation allowing you to define https://docs.micronaut.io/latest/guide/#clientFallback[fallbacks] in the case of failure. Micronaut Kafka 5 no longer includes this meta annotation and if you use fallbacks you should explicitly declare a dependency on `io.micronaut:micronaut-retry` and declare the `@Recoverable` explicitly.
+Micronaut Kafka 6.0 includes the following major enhancements:
 
-=== Open Tracing No Longer Supported
-
-Micronaut Kafka 5 no longer supports Open Tracing (which is deprecated and no longer maintained) and if you need distributed tracing you should instead https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka[use Open Telemetry].
+* ann:configuration.kafka.annotation.KafkaListener[] now supports an `id` member that is used to resolve consumer-specific configuration from `kafka.consumers.*` independently from the Kafka consumer group. When `id` is not set, Micronaut Kafka preserves the previous fallback behavior by using `groupId`.
+* ann:configuration.kafka.annotation.KafkaListener[] now supports `consumerCreationStrategy = ConsumerCreationStrategy.PER_CLASS` to create a single Kafka consumer for all topic methods in the listener class and route records to methods by the consumed topic. The default remains one consumer per ann:configuration.kafka.annotation.Topic[] method.
+* ann:configuration.kafka.annotation.KafkaScope[] provides a listener invocation scope for beans that should live for exactly one consumed record, or for one batch when the listener is configured for batch processing.
+* The default `AdminClient` bean can now be disabled with `kafka.admin.enabled=false`. When unrestricted Kafka health checks are enabled and admin support is disabled, the health indicator reports a clear `DOWN` result explaining that the `AdminClient` bean is unavailable.
+* Asynchronous and reactive ann:configuration.kafka.annotation.KafkaClient[] methods now use Micronaut's blocking executor by default when no explicit executor is configured, avoiding Kafka producer work on the caller thread while preserving explicitly configured executors.
