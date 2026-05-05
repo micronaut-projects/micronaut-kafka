@@ -21,7 +21,14 @@ import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.messaging.MessageHeaders;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.common.header.Header;
