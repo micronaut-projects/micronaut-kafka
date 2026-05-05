@@ -1311,7 +1311,7 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">A factory that constructs the <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a> bean.</div>
 </dd>
-<dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher)" class="member-name-link">KafkaStreamsFactory(ApplicationEventPublisher)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
+<dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher,io.micronaut.context.ApplicationContext)" class="member-name-link">KafkaStreamsFactory(ApplicationEventPublisher, ApplicationContext)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
@@ -1612,6 +1612,8 @@ on completion of a successful partition re-assignment.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#REPLICATION_PROPERTY" class="member-name-link">REPLICATION_PROPERTY</a> - Static variable in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#reportActiveTasks()" class="member-name-link">reportActiveTasks()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html#resume(java.lang.String)" class="member-name-link">resume(String)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a></dt>
 <dd>
 <div class="block">Resume the consumer for the given ID.</div>
@@ -1800,6 +1802,8 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <div class="block">Sets the default value serializer.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#shouldLogAtWarn(boolean,java.lang.Throwable)" class="member-name-link">shouldLogAtWarn(boolean, Throwable)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html#shutdownGracefully()" class="member-name-link">shutdownGracefully()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsFactory.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#SKIP" class="member-name-link">SKIP</a> - Enum constant in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
 <dd>&nbsp;</dd>

@@ -58,12 +58,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher)" tabindex="0">KafkaStreamsFactory(ApplicationEventPublisher)</a></li>
+<li><a href="#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher,io.micronaut.context.ApplicationContext)" tabindex="0">KafkaStreamsFactory(ApplicationEventPublisher, ApplicationContext)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#getStreams()" tabindex="0">getStreams()</a></li>
+<li><a href="#shutdownGracefully()" tabindex="0">shutdownGracefully()</a></li>
+<li><a href="#reportActiveTasks()" tabindex="0">reportActiveTasks()</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 </ol>
 </li>
@@ -80,7 +82,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a></code></dd>
+<dd><code>io.micronaut.runtime.graceful.GracefulShutdownCapable, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/AutoCloseable.html" title="class or interface in java.lang" class="external-link">AutoCloseable</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -90,7 +92,7 @@ loadScripts(document, 'script');</script>
           defaultValue="true")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">KafkaStreamsFactory</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a></span></div>
+implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Closeable.html" title="class or interface in java.io" class="external-link">Closeable</a>, io.micronaut.runtime.graceful.GracefulShutdownCapable</span></div>
 <div class="block">A factory that constructs the <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/streams/KafkaStreams.html" title="class or interface in org.apache.kafka.streams" class="external-link"><code>KafkaStreams</code></a> bean.</div>
 <dl class="notes">
 <dt>Since:</dt>
@@ -110,7 +112,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher)" class="member-name-link">KafkaStreamsFactory</a><wbr>(io.micronaut.context.event.ApplicationEventPublisher&nbsp;eventPublisher)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(io.micronaut.context.event.ApplicationEventPublisher,io.micronaut.context.ApplicationContext)" class="member-name-link">KafkaStreamsFactory</a><wbr>(io.micronaut.context.event.ApplicationEventPublisher&nbsp;eventPublisher,
+ io.micronaut.context.ApplicationContext&nbsp;applicationContext)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Default constructor.</div>
 </div>
@@ -136,6 +139,12 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get configured stream and builder for the stream.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalLong.html" title="class or interface in java.util" class="external-link">OptionalLong</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reportActiveTasks()" class="member-name-link">reportActiveTasks</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#shutdownGracefully()" class="member-name-link">shutdownGracefully</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -154,14 +163,16 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(io.micronaut.context.event.ApplicationEventPublisher)">
+<section class="detail" id="&lt;init&gt;(io.micronaut.context.event.ApplicationEventPublisher,io.micronaut.context.ApplicationContext)">
 <h3>KafkaStreamsFactory</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">KafkaStreamsFactory</span><wbr><span class="parameters">(io.micronaut.context.event.ApplicationEventPublisher&nbsp;eventPublisher)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">KafkaStreamsFactory</span><wbr><span class="parameters">(io.micronaut.context.event.ApplicationEventPublisher&nbsp;eventPublisher,
+ io.micronaut.context.ApplicationContext&nbsp;applicationContext)</span></div>
 <div class="block">Default constructor.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>eventPublisher</code> - The event publisher</dd>
+<dd><code>applicationContext</code> - The application context</dd>
 </dl>
 </div>
 </section>
@@ -183,6 +194,30 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Map of streams to builders</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="shutdownGracefully()">
+<h3>shutdownGracefully</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" title="class or interface in java.util.concurrent" class="external-link">CompletableFuture</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</span>&nbsp;<span class="element-name">shutdownGracefully</span>()</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code>shutdownGracefully</code>&nbsp;in interface&nbsp;<code>io.micronaut.runtime.graceful.GracefulShutdownCapable</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="reportActiveTasks()">
+<h3>reportActiveTasks</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalLong.html" title="class or interface in java.util" class="external-link">OptionalLong</a></span>&nbsp;<span class="element-name">reportActiveTasks</span>()</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code>reportActiveTasks</code>&nbsp;in interface&nbsp;<code>io.micronaut.runtime.graceful.GracefulShutdownCapable</code></dd>
 </dl>
 </div>
 </section>

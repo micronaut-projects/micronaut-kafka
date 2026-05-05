@@ -4683,12 +4683,16 @@ class ProductListener {
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.aware;
 
 import io.micronaut.configuration.kafka.ConsumerSeekAware;
-import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.configuration.kafka.seek.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperation;
+import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.apache.kafka.common.TopicPartition;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @KafkaListener
 @Requires(property = "spec.name", value = "ConsumerSeekAwareTest")
@@ -4829,13 +4833,18 @@ class ProductListener implements ConsumerSeekAware { // <b class="conum">(1)</b>
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.rebalance;
 
 import io.micronaut.configuration.kafka.ConsumerAware;
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.jspecify.annotations.NonNull;
-import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.common.TopicPartition;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST)
 @Requires(property = "spec.name", value = "ConsumerRebalanceListenerTest")
@@ -5027,12 +5036,17 @@ Not doing so will lead to a <code>ConcurrentModificationException</code> error.
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package io.micronaut.kafka.docs.seek.ops;
 
-import io.micronaut.configuration.kafka.annotation.*;
-import io.micronaut.configuration.kafka.seek.*;
-import io.micronaut.context.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperation;
+import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.kafka.docs.Product;
 import org.apache.kafka.common.TopicPartition;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @KafkaListener(offsetReset = OffsetReset.EARLIEST, properties = @Property(name = "max.poll.records", value = "1"))
 @Requires(property = "spec.name", value = "KafkaSeekOperationsTest")
@@ -7148,7 +7162,10 @@ kafka.streams.default.auto.offset.reset=earliest</code></pre>
 <p>The above configuration example sets the <code>processing.guarantee</code> and <code>auto.offset.reset</code> setting of the <code>default</code> Stream. Most of the configuration properties pass directly through to the <code>KafkaStreams</code> instance being initialized.</p>
 </div>
 <div class="paragraph">
-<p>In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down (this is mostly useful during testing), with <code>close-timeout</code>.</p>
+<p>In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down with <code>close-timeout</code>.</p>
+</div>
+<div class="paragraph">
+<p>Micronaut Kafka integrates Kafka Streams with Micronaut&#8217;s graceful shutdown lifecycle. When the application is stopping, Micronaut waits for the configured streams to close, and <code>close-timeout</code> defines how long Micronaut waits for each stream before logging a timeout.</p>
 </div>
 <div class="paragraph">
 <p>For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down the default stream:</p>
@@ -7949,6 +7966,9 @@ You can find more details about this mechanism <a href="https://developer.conflu
 </div>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p>If the handler returns <code>SHUTDOWN_APPLICATION</code>, Micronaut requests application shutdown and Kafka Streams participates in Micronaut&#8217;s graceful shutdown phase. This means the application lifecycle is stopped, health endpoints can transition accordingly, and Micronaut waits for the configured streams to close using each stream&#8217;s <code>close-timeout</code>.</p>
 </div>
 <div class="paragraph">
 <p>To implement your own handler, you can listen to the application event <a href="../api/io/micronaut/configuration/kafka/streams/event/BeforeKafkaStreamStart.html">BeforeKafkaStreamStart</a> and configure the streams with your own business logic:</p>
