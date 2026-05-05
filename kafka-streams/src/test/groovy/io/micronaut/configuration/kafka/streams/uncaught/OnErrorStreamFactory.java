@@ -23,6 +23,9 @@ public class OnErrorStreamFactory {
     public static final String ON_ERROR_REPLACE = "on-error-replace";
     public static final String ON_ERROR_REPLACE_INPUT = "on-error-replace-input";
     public static final String ON_ERROR_REPLACE_OUTPUT = "on-error-replace-output";
+    public static final String ON_ERROR_SHUTDOWN = "on-error-shutdown";
+    public static final String ON_ERROR_SHUTDOWN_INPUT = "on-error-shutdown-input";
+    public static final String ON_ERROR_SHUTDOWN_OUTPUT = "on-error-shutdown-output";
 
     @Singleton
     @Named(ON_ERROR_NO_CONFIG)
@@ -41,6 +44,16 @@ public class OnErrorStreamFactory {
             .stream(ON_ERROR_REPLACE_INPUT, Consumed.with(Serdes.String(), Serdes.String()))
             .mapValues(makeErrorValueMapper());
         source.to(ON_ERROR_REPLACE_OUTPUT, Produced.with(Serdes.String(), Serdes.String()));
+        return source;
+    }
+
+    @Singleton
+    @Named(ON_ERROR_SHUTDOWN)
+    KStream<String, String> createOnErrorShutdownApplicationStream(@Named(ON_ERROR_SHUTDOWN) ConfiguredStreamBuilder builder) {
+        final KStream<String, String> source = builder
+            .stream(ON_ERROR_SHUTDOWN_INPUT, Consumed.with(Serdes.String(), Serdes.String()))
+            .mapValues(makeErrorValueMapper());
+        source.to(ON_ERROR_SHUTDOWN_OUTPUT, Produced.with(Serdes.String(), Serdes.String()));
         return source;
     }
 

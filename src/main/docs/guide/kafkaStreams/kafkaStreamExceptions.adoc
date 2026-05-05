@@ -16,6 +16,8 @@ kafka:
             uncaught-exception-handler: REPLACE_THREAD
 ----
 
+If the handler returns `SHUTDOWN_APPLICATION`, Micronaut requests application shutdown and Kafka Streams participates in Micronaut's graceful shutdown phase. This means the application lifecycle is stopped, health endpoints can transition accordingly, and Micronaut waits for the configured streams to close using each stream's `close-timeout`.
+
 To implement your own handler, you can listen to the application event api:io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart[] and configure the streams with your own business logic:
 
 [source,java]

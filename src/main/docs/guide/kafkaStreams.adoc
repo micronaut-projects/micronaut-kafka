@@ -73,7 +73,9 @@ kafka:
 
 The above configuration example sets the `processing.guarantee` and `auto.offset.reset` setting of the `default` Stream. Most of the configuration properties pass directly through to the `KafkaStreams` instance being initialized.
 
-In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down (this is mostly useful during testing), with `close-timeout`.
+In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down with `close-timeout`.
+
+Micronaut Kafka integrates Kafka Streams with Micronaut's graceful shutdown lifecycle. When the application is stopping, Micronaut waits for the configured streams to close, and `close-timeout` defines how long Micronaut waits for each stream before logging a timeout.
 
 For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down the default stream:
 
