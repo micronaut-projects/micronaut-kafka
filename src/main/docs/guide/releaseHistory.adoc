@@ -23,3 +23,11 @@ Micronaut Kafka 6.0 includes the following major enhancements:
 * ann:configuration.kafka.annotation.KafkaScope[] provides a listener invocation scope for beans that should live for exactly one consumed record, or for one batch when the listener is configured for batch processing.
 * The default `AdminClient` bean can now be disabled with `kafka.admin.enabled=false`. When unrestricted Kafka health checks are enabled and admin support is disabled, the health indicator reports a clear `DOWN` result explaining that the `AdminClient` bean is unavailable.
 * Asynchronous and reactive ann:configuration.kafka.annotation.KafkaClient[] methods now use Micronaut's blocking executor by default when no explicit executor is configured, avoiding Kafka producer work on the caller thread while preserving explicitly configured executors.
+
+=== Kafka metric names now default to Micrometer style
+
+Micronaut Kafka 5 changes the default naming for consumer and producer Micrometer metrics to use Micrometer compatible names. For example, `kafka.consumer.bytes-consumed-total` is now exported as `kafka.consumer.fetch.manager.bytes.consumed.total`.
+
+This is a breaking change if you have dashboards, alerts, or scraping rules that depend on the previous names.
+
+To preserve the previous Micronaut naming during migration, set `micronaut.metrics.binders.kafka.metric-name-style=legacy`.

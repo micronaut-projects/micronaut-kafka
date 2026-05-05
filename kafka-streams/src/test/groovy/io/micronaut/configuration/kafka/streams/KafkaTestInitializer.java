@@ -47,6 +47,8 @@ public class KafkaTestInitializer implements BootstrapPropertySourceLocator {
             OnErrorStreamFactory.ON_ERROR_NO_CONFIG_OUTPUT,
             OnErrorStreamFactory.ON_ERROR_REPLACE_INPUT,
             OnErrorStreamFactory.ON_ERROR_REPLACE_OUTPUT,
+            OnErrorStreamFactory.ON_ERROR_SHUTDOWN_INPUT,
+            OnErrorStreamFactory.ON_ERROR_SHUTDOWN_OUTPUT,
             CustomUncaughtHandlerStreamFactory.CUSTOM_HANDLER_INPUT,
             CustomUncaughtHandlerStreamFactory.CUSTOM_HANDLER_OUTPUT,
             StartKafkaStreamsOff.STREAMS_OFF_INPUT,

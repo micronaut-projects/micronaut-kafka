@@ -52,19 +52,19 @@ class KafkaConsumerMetricsSpec extends AbstractEmbeddedServerSpec {
         conditions.eventually {
             HttpResponse<Map> response = Mono.from(httpClient.exchange("/metrics", Map)).block()
             Map result = response.body()
-            result.names.contains("kafka.consumer.bytes-consumed-total")
-            !result.names.contains("kafka.consumer.record-error-rate")
+            result.names.contains("kafka.consumer.fetch.manager.bytes.consumed.total")
+            !result.names.contains("kafka.consumer.record.error.rate")
             !result.names.contains("kafka.producer.count")
-            !result.names.contains("kafka.producer.record-error-rate")
-            !result.names.contains("kafka.producer.bytes-consumed-total")
+            !result.names.contains("kafka.producer.record.error.rate")
+            !result.names.contains("kafka.producer.bytes.consumed.total")
             !result.names.contains("kafka.count")
 
-            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.records-lead-avg", Map)).block()
+            def preferredReadReplica = Mono.from(httpClient.exchange("/metrics/kafka.consumer.fetch.manager.records.lead.avg", Map)).block()
             Map metricBody = preferredReadReplica.body()
             metricBody.availableTags.size() == 3
             metricBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.PARTITION_TAG, ConsumerKafkaMetricsReporter.TOPIC_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
 
-            def requestRate = Mono.from(httpClient.exchange("/metrics/kafka.consumer.request-rate", Map)).block()
+            def requestRate = Mono.from(httpClient.exchange("/metrics/kafka.consumer.node.request.rate", Map)).block()
             Map requestRateBody = requestRate.body()
             requestRateBody.availableTags.size() == 2
             requestRateBody.availableTags*.tag == [ConsumerKafkaMetricsReporter.NODE_ID_TAG, ConsumerKafkaMetricsReporter.CLIENT_ID_TAG]
