@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.messaging.exceptions.MessagingClientException;
+import io.micronaut.scheduling.TaskExecutors;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -771,9 +772,16 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             BiFunction<MethodInvocationContext<?, ?>, Producer, Integer> finalPartitionFromProducerFn = partitionFromProducerFn;
             ContextSupplier<Integer> partitionSupplier = ctx -> finalPartitionFromProducerFn.apply(ctx, producer);
 
-            String executor = context.stringValue(KafkaClient.class, "executor").orElseGet(() -> newConfiguration.getExecutor().orElse(""));
+            String executor = context.stringValue(KafkaClient.class, "executor")
+                .orElseGet(() -> newConfiguration.getExecutor()
+                    .filter(StringUtils::isNotEmpty)
+                    .orElseGet(() ->
+                        context.getReturnType().asArgument().isAsyncOrReactive() ? TaskExecutors.BLOCKING : ""
+                    ));
 
-            ExecutorService executorService = beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null);
+            ExecutorService executorService = StringUtils.isNotEmpty(executor)
+                ? beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null)
+                : null;
 
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
                     transactional, transactionalId, maxBlock, isBatchSend, bodyArgument, executorService);
