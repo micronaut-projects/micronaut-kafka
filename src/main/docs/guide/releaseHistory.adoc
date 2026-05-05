@@ -21,3 +21,11 @@ Previous versions of Micronaut Kafka used the meta-annotation https://docs.micro
 === Open Tracing No Longer Supported
 
 Micronaut Kafka 5 no longer supports Open Tracing (which is deprecated and no longer maintained) and if you need distributed tracing you should instead https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka[use Open Telemetry].
+
+=== Kafka metric names now default to Micrometer style
+
+Micronaut Kafka 5 changes the default naming for consumer and producer Micrometer metrics to use Micrometer compatible names. For example, `kafka.consumer.bytes-consumed-total` is now exported as `kafka.consumer.fetch.manager.bytes.consumed.total`.
+
+This is a breaking change if you have dashboards, alerts, or scraping rules that depend on the previous names.
+
+To preserve the previous Micronaut naming during migration, set `micronaut.metrics.binders.kafka.metric-name-style=legacy`.
