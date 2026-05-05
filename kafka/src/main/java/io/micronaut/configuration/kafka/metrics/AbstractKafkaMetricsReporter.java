@@ -45,7 +45,7 @@ import java.util.function.Function;
 @Internal
 public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
 
-    public static final String METRIC_NAME_STYLE_CONFIG = "micronaut.metric.name.style";
+    public static final String METRIC_NAME_STYLE_CONFIG = KafkaMetricsConfigurationProperties.PREFIX + ".metric-name-style";
     public static final String CLIENT_ID_TAG = "client-id";
     public static final String TOPIC_TAG = "topic";
     public static final String NODE_ID_TAG = "node-id";
@@ -69,7 +69,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     private final Map<MeterRegistry, Map<Meter.Id, Meter>> registeredMeters = new ConcurrentHashMap<>();
 
     private List<KafkaMetric> metrics;
-    private MetricNameStyle metricNameStyle = MetricNameStyle.SPRING;
+    private MetricNameStyle metricNameStyle = MetricNameStyle.MICROMETER;
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
@@ -110,7 +110,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         }
         Object configuredMetricNameStyle = configs.get(METRIC_NAME_STYLE_CONFIG);
         if (configuredMetricNameStyle != null) {
-            metricNameStyle = MetricNameStyle.valueOf(configuredMetricNameStyle.toString().toUpperCase(java.util.Locale.ENGLISH));
+            metricNameStyle = MetricNameStyle.parse(configuredMetricNameStyle.toString());
         }
     }
 

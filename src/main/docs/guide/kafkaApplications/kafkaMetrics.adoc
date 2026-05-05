@@ -3,7 +3,7 @@ You can enable Kafka Metrics collection by enabling https://micronaut-projects.g
 If you do not wish to collect Kafka metrics, you can set `micronaut.metrics.binders.kafka.enabled` to `false` in `application.yml`.
 In the case of Kafka Streams metrics, you can use `micronaut.metrics.binders.kafka.streams.enabled` instead.
 
-For consumer and producer client metrics, Micronaut Kafka 5 uses Spring / Micrometer compatible metric names by default. For example, `bytes-consumed-total` is exported as `kafka.consumer.fetch.manager.bytes.consumed.total`.
+For consumer and producer client metrics, Micronaut Kafka 5 uses Micrometer compatible metric names by default. For example, `bytes-consumed-total` is exported as `kafka.consumer.fetch.manager.bytes.consumed.total`.
 
 This is a breaking change from earlier Micronaut Kafka versions, which exported legacy names such as `kafka.consumer.bytes-consumed-total`.
 

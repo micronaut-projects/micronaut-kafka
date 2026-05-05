@@ -24,6 +24,7 @@ import io.micronaut.context.annotation.Primary;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import jakarta.inject.Inject;
 
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory
 @RequiresMetrics
 @Requires(property = MICRONAUT_METRICS_BINDERS + ".kafka.enabled", value = "true", defaultValue = "true")
 @Context
-// Producer metrics are primary since Grails/Boot only support a single metric provider
+// Producer metrics are primary because only one metric provider should be active.
 @Primary
 public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProducerConfiguration> implements BeanCreatedEventListener<AbstractKafkaProducerConfiguration> {
 
@@ -45,8 +46,18 @@ public class KafkaProducerMetrics extends AbstractKafkaMetrics<AbstractKafkaProd
     /**
      * Default constructor.
      * @param beanLocator The bean locator
+     */
+    protected KafkaProducerMetrics(BeanLocator beanLocator) {
+        super();
+        this.beanLocator = beanLocator;
+    }
+
+    /**
+     * Default constructor.
+     * @param beanLocator The bean locator
      * @param kafkaMetricsConfiguration The Kafka metrics configuration
      */
+    @Inject
     protected KafkaProducerMetrics(BeanLocator beanLocator, KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {
         super(kafkaMetricsConfiguration);
         this.beanLocator = beanLocator;

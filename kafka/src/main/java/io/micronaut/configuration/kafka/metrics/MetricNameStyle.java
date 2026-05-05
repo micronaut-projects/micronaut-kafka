@@ -15,6 +15,10 @@
  */
 package io.micronaut.configuration.kafka.metrics;
 
+import io.micronaut.context.exceptions.ConfigurationException;
+
+import java.util.Locale;
+
 /**
  * Supported Kafka client metric naming styles.
  *
@@ -23,13 +27,25 @@ package io.micronaut.configuration.kafka.metrics;
  */
 public enum MetricNameStyle {
     /**
-     * Use Spring / Micrometer compatible metric names such as
+     * Use Micrometer compatible metric names such as
      * {@code kafka.consumer.fetch.manager.bytes.consumed.total}.
      */
-    SPRING,
+    MICROMETER,
     /**
      * Preserve the legacy Micronaut metric names such as
      * {@code kafka.consumer.bytes-consumed-total}.
      */
-    LEGACY
+    LEGACY;
+
+    /**
+     * @param value The configured value
+     * @return The matching metric name style
+     */
+    public static MetricNameStyle parse(String value) {
+        try {
+            return valueOf(value.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            throw new ConfigurationException("Invalid Kafka metric name style [" + value + "]. Valid values: micrometer, legacy", e);
+        }
+    }
 }

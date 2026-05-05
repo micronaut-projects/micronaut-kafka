@@ -41,6 +41,13 @@ public abstract class AbstractKafkaMetrics<T extends AbstractKafkaConfiguration>
     private final KafkaMetricsConfigurationProperties kafkaMetricsConfiguration;
 
     /**
+     * Default constructor.
+     */
+    protected AbstractKafkaMetrics() {
+        this(new KafkaMetricsConfigurationProperties());
+    }
+
+    /**
      * @param kafkaMetricsConfiguration The Kafka metrics configuration
      */
     protected AbstractKafkaMetrics(KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {

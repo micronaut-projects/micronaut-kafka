@@ -3,6 +3,7 @@ package io.micronaut.configuration.kafka.metrics
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.micronaut.context.exceptions.ConfigurationException
 import org.apache.kafka.common.MetricName
 import org.apache.kafka.common.metrics.KafkaMetric
 import org.apache.kafka.common.metrics.MetricConfig
@@ -78,7 +79,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         ])
     }
 
-    void "consumer metrics use boot aligned names"() {
+    void "consumer metrics use micrometer aligned names"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
         def reporter = new ConsumerKafkaMetricsReporter()
@@ -96,7 +97,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.find("kafka.consumer.bytes-consumed-total").meter() == null
     }
 
-    void "consumer node metrics use boot aligned names"() {
+    void "consumer node metrics use micrometer aligned names"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
         def reporter = new ConsumerKafkaMetricsReporter()
@@ -129,7 +130,7 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.find("kafka.kafka.count.count").meter() == null
     }
 
-    void "producer topic metrics use boot aligned names"() {
+    void "producer topic metrics use micrometer aligned names"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
         def reporter = new ProducerKafkaMetricsReporter()
@@ -183,7 +184,23 @@ class AbstractKafkaMetricsReporterSpec extends Specification {
         meterRegistry.find("kafka.consumer.fetch.manager.bytes.consumed.total").meter() == null
     }
 
-    void "consumer metric removal removes boot aligned meters from registry"() {
+    void "invalid metric style reports valid values"() {
+        given:
+        def reporter = new ConsumerKafkaMetricsReporter()
+
+        when:
+        reporter.configure([
+                (AbstractKafkaMetricsReporter.METRIC_NAME_STYLE_CONFIG): "unknown"
+        ])
+
+        then:
+        def e = thrown(ConfigurationException)
+        e.message.contains("Invalid Kafka metric name style [unknown]")
+        e.message.contains("micrometer")
+        e.message.contains("legacy")
+    }
+
+    void "consumer metric removal removes micrometer aligned meters from registry"() {
         given:
         def meterRegistry = new SimpleMeterRegistry()
         def reporter = new ConsumerKafkaMetricsReporter()

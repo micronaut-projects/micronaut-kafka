@@ -33,10 +33,10 @@ public class KafkaMetricsConfigurationProperties {
      */
     public static final String PREFIX = MICRONAUT_METRICS_BINDERS + ".kafka";
 
-    private MetricNameStyle metricNameStyle = MetricNameStyle.SPRING;
+    private MetricNameStyle metricNameStyle = MetricNameStyle.MICROMETER;
 
     /**
-     * @return The metric naming style. Defaults to {@link MetricNameStyle#SPRING}.
+     * @return The metric naming style. Defaults to {@link MetricNameStyle#MICROMETER}.
      */
     public MetricNameStyle getMetricNameStyle() {
         return metricNameStyle;

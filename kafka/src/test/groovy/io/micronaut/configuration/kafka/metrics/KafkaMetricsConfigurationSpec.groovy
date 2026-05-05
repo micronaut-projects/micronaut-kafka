@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class KafkaMetricsConfigurationSpec extends Specification {
 
-    void "metric name style defaults to spring"() {
+    void "metric name style defaults to micrometer"() {
         given:
         ApplicationContext context = ApplicationContext.run()
 
@@ -13,7 +13,7 @@ class KafkaMetricsConfigurationSpec extends Specification {
         def configuration = context.getBean(KafkaMetricsConfigurationProperties)
 
         then:
-        configuration.metricNameStyle == MetricNameStyle.SPRING
+        configuration.metricNameStyle == MetricNameStyle.MICROMETER
 
         cleanup:
         context.close()
