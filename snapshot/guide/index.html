@@ -257,6 +257,18 @@
 <p>Micronaut Kafka 5 no longer supports Open Tracing (which is deprecated and no longer maintained) and if you need distributed tracing you should instead <a href="https://micronaut-projects.github.io/micronaut-tracing/latest/guide/#kafka">use Open Telemetry</a>.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_kafka_metric_names_now_default_to_micrometer_style">Kafka metric names now default to Micrometer style</h3>
+<div class="paragraph">
+<p>Micronaut Kafka 5 changes the default naming for consumer and producer Micrometer metrics to use Micrometer compatible names. For example, <code>kafka.consumer.bytes-consumed-total</code> is now exported as <code>kafka.consumer.fetch.manager.bytes.consumed.total</code>.</p>
+</div>
+<div class="paragraph">
+<p>This is a breaking change if you have dashboards, alerts, or scraping rules that depend on the previous names.</p>
+</div>
+<div class="paragraph">
+<p>To preserve the previous Micronaut naming during migration, set <code>micronaut.metrics.binders.kafka.metric-name-style=legacy</code>.</p>
+</div>
+</div>
 
 <h1 id="kafkaCli"><a class="anchor" href="#kafkaCli"></a>3 Using the Micronaut CLI</h1>
 
@@ -6577,6 +6589,85 @@ By default, the details visible above are only shown to authenticated users. See
 <div class="paragraph">
 <p>If you do not wish to collect Kafka metrics, you can set <code>micronaut.metrics.binders.kafka.enabled</code> to <code>false</code> in <code>application.yml</code>.
 In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binders.kafka.streams.enabled</code> instead.</p>
+</div>
+<div class="paragraph">
+<p>For consumer and producer client metrics, Micronaut Kafka 5 uses Micrometer compatible metric names by default. For example, <code>bytes-consumed-total</code> is exported as <code>kafka.consumer.fetch.manager.bytes.consumed.total</code>.</p>
+</div>
+<div class="paragraph">
+<p>This is a breaking change from earlier Micronaut Kafka versions, which exported legacy names such as <code>kafka.consumer.bytes-consumed-total</code>.</p>
+</div>
+<div class="paragraph">
+<p>If you need to preserve the legacy Micronaut metric names during migration, configure the metric name style explicitly:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">micronaut.metrics.binders.kafka.metric-name-style=legacy</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">micronaut:
+  metrics:
+    binders:
+      kafka:
+        metric-name-style: legacy</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[micronaut]
+  [micronaut.metrics]
+    [micronaut.metrics.binders]
+      [micronaut.metrics.binders.kafka]
+        metric-name-style="legacy"</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">micronaut {
+  metrics {
+    binders {
+      kafka {
+        metricNameStyle = "legacy"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  micronaut {
+    metrics {
+      binders {
+        kafka {
+          metric-name-style = "legacy"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "micronaut": {
+    "metrics": {
+      "binders": {
+        "kafka": {
+          "metric-name-style": "legacy"
+        }
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
 </div>
 
 <h2 id="kafkaTracing"><a class="anchor" href="#kafkaTracing"></a>8.3 Kafka Distributed Tracing</h2>

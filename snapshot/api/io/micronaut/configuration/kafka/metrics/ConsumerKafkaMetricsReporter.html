@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#getMetricPrefix()" tabindex="0">getMetricPrefix()</a></li>
+<li><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">getMetricName(KafkaMetric)</a></li>
 <li><a href="#getIncludedTags()" tabindex="0">getIncludedTags()</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 </ol>
@@ -116,7 +117,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter">Fields inherited from class&nbsp;<a href="AbstractKafkaMetricsReporter.html#field-summary" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></h3>
-<code><a href="AbstractKafkaMetricsReporter.html#CLIENT_ID_TAG">CLIENT_ID_TAG</a>, <a href="AbstractKafkaMetricsReporter.html#NODE_ID_TAG">NODE_ID_TAG</a>, <a href="AbstractKafkaMetricsReporter.html#TOPIC_TAG">TOPIC_TAG</a></code></div>
+<code><a href="AbstractKafkaMetricsReporter.html#CLIENT_ID_TAG">CLIENT_ID_TAG</a>, <a href="AbstractKafkaMetricsReporter.html#METRIC_NAME_STYLE_CONFIG">METRIC_NAME_STYLE_CONFIG</a>, <a href="AbstractKafkaMetricsReporter.html#NODE_ID_TAG">NODE_ID_TAG</a>, <a href="AbstractKafkaMetricsReporter.html#TOPIC_TAG">TOPIC_TAG</a></code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -154,8 +155,13 @@ loadScripts(document, 'script');</script>
 <div class="block">The tags to include in the gauge.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
 </div>
 </div>
@@ -163,7 +169,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter">Methods inherited from class&nbsp;<a href="AbstractKafkaMetricsReporter.html#method-summary" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></h3>
-<code><a href="AbstractKafkaMetricsReporter.html#bindTo(io.micrometer.core.instrument.MeterRegistry)" title="bindTo(MeterRegistry)">bindTo</a>, <a href="AbstractKafkaMetricsReporter.html#configure(java.util.Map)" title="configure(Map)">configure</a>, <a href="AbstractKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" title="getMetricName(KafkaMetric)">getMetricName</a>, <a href="AbstractKafkaMetricsReporter.html#init(java.util.List)" title="init(List)">init</a>, <a href="AbstractKafkaMetricsReporter.html#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" title="metricChange(KafkaMetric)">metricChange</a>, <a href="AbstractKafkaMetricsReporter.html#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" title="metricRemoval(KafkaMetric)">metricRemoval</a></code></div>
+<code><a href="AbstractKafkaMetricsReporter.html#bindTo(io.micrometer.core.instrument.MeterRegistry)" title="bindTo(MeterRegistry)">bindTo</a>, <a href="AbstractKafkaMetricsReporter.html#configure(java.util.Map)" title="configure(Map)">configure</a>, <a href="AbstractKafkaMetricsReporter.html#getMetricNameStyle()" title="getMetricNameStyle()">getMetricNameStyle</a>, <a href="AbstractKafkaMetricsReporter.html#getMicrometerMetricName(org.apache.kafka.common.metrics.KafkaMetric)" title="getMicrometerMetricName(KafkaMetric)">getMicrometerMetricName</a>, <a href="AbstractKafkaMetricsReporter.html#init(java.util.List)" title="init(List)">init</a>, <a href="AbstractKafkaMetricsReporter.html#isClientCountMetric(org.apache.kafka.common.metrics.KafkaMetric)" title="isClientCountMetric(KafkaMetric)">isClientCountMetric</a>, <a href="AbstractKafkaMetricsReporter.html#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" title="metricChange(KafkaMetric)">metricChange</a>, <a href="AbstractKafkaMetricsReporter.html#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" title="metricRemoval(KafkaMetric)">metricRemoval</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#method-summary" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -232,6 +238,24 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="AbstractKafkaMetricsReporter.html#getMetricPrefix()">getMetricPrefix</a></code>&nbsp;in class&nbsp;<code><a href="AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
 <dt>Returns:</dt>
 <dd>prefix name</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">
+<h3>getMetricName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getMetricName</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="AbstractKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">AbstractKafkaMetricsReporter</a></code></span></div>
+<div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="AbstractKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)">getMetricName</a></code>&nbsp;in class&nbsp;<code><a href="AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>metric</code> - The Kafka metric</dd>
+<dt>Returns:</dt>
+<dd>The metric name to register with Micrometer</dd>
 </dl>
 </div>
 </section>

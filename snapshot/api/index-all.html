@@ -88,6 +88,10 @@ loadScripts(document, 'script');</script>
 <div class="block">A class to simplify the producer and consumer metric.reporters default property.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html#%3Cinit%3E()" class="member-name-link">AbstractKafkaMetrics()</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetrics</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html#%3Cinit%3E(io.micronaut.configuration.kafka.metrics.KafkaMetricsConfigurationProperties)" class="member-name-link">AbstractKafkaMetrics(KafkaMetricsConfigurationProperties)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a> - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
 <dd>
@@ -745,7 +749,15 @@ see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html
 <dd>
 <div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ProducerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ProducerKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMetricName(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMetricNameStyle()" class="member-name-link">getMetricNameStyle()</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html#getMetricNameStyle()" class="member-name-link">getMetricNameStyle()</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMetricPrefix()" class="member-name-link">getMetricPrefix()</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>
@@ -761,6 +773,10 @@ see <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html#getMetricPrefix()" class="member-name-link">getMetricPrefix()</a> - Method in class io.micronaut.configuration.kafka.streams.metrics.<a href="io/micronaut/configuration/kafka/streams/metrics/KafkaStreamsMetricsReporter.html" title="class in io.micronaut.configuration.kafka.streams.metrics">KafkaStreamsMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#getMicrometerMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMicrometerMetricName(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>
+<div class="block">Resolve the Micrometer-style metric name for the supplied Kafka metric group and name.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html#getMinNodeCount(org.apache.kafka.clients.admin.Config)" class="member-name-link">getMinNodeCount(Config)</a> - Static method in class io.micronaut.configuration.kafka.health.<a href="io/micronaut/configuration/kafka/health/KafkaHealthIndicator.html" title="class in io.micronaut.configuration.kafka.health">KafkaHealthIndicator</a></dt>
 <dd>
 <div class="block">Retrieve the cluster "min.insync.replicas" for the given <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/Config.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>Config</code></a>, falling back to
@@ -962,6 +978,8 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/testcontainers/kafka/package-summary.html">io.micronaut.testcontainers.kafka</a> - package io.micronaut.testcontainers.kafka</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#isClientCountMetric(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">isClientCountMetric(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in interface io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfiguration.html" title="interface in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html#isCommitRecordOnDeserializationFailure()" class="member-name-link">isCommitRecordOnDeserializationFailure()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/DefaultKafkaListenerExceptionHandlerConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">DefaultKafkaListenerExceptionHandlerConfigurationProperties</a></dt>
@@ -1057,6 +1075,10 @@ support Confluent Cloud hosted Kafka.</div>
 <div class="block">Binds Kafka Metrics to Micrometer.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#%3Cinit%3E(io.micronaut.context.BeanLocator)" class="member-name-link">KafkaConsumerMetrics(BeanLocator)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html#%3Cinit%3E(io.micronaut.context.BeanLocator,io.micronaut.configuration.kafka.metrics.KafkaMetricsConfigurationProperties)" class="member-name-link">KafkaConsumerMetrics(BeanLocator, KafkaMetricsConfigurationProperties)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaConsumerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaConsumerMetrics</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
@@ -1228,6 +1250,12 @@ support Confluent Cloud hosted Kafka.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html#%3Cinit%3E()" class="member-name-link">KafkaMetricMeterTypeBuilder()</a> - Constructor for class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/KafkaMetricMeterTypeBuilder.html" title="class in io.micronaut.configuration.kafka.metrics.builder">KafkaMetricMeterTypeBuilder</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a> - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
+<dd>
+<div class="block">Configuration for Kafka client metric binding.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html#%3Cinit%3E()" class="member-name-link">KafkaMetricsConfigurationProperties()</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/admin/KafkaNewTopics.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.admin">KafkaNewTopics</a> - Class in <a href="io/micronaut/configuration/kafka/admin/package-summary.html">io.micronaut.configuration.kafka.admin</a></dt>
 <dd>
 <div class="block">Creates Kafka topics via <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/admin/AdminClient.html" title="class or interface in org.apache.kafka.clients.admin" class="external-link"><code>AdminClient</code></a>.</div>
@@ -1269,6 +1297,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a> - Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#%3Cinit%3E(io.micronaut.context.BeanLocator)" class="member-name-link">KafkaProducerMetrics(BeanLocator)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html#%3Cinit%3E(io.micronaut.context.BeanLocator,io.micronaut.configuration.kafka.metrics.KafkaMetricsConfigurationProperties)" class="member-name-link">KafkaProducerMetrics(BeanLocator, KafkaMetricsConfigurationProperties)</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaProducerMetrics.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaProducerMetrics</a></dt>
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
@@ -1350,6 +1382,11 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">Latest means that a consumer will start reading the latest consumer records.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#LEGACY" class="member-name-link">LEGACY</a> - Enum constant in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
+<dd>
+<div class="block">Preserve the legacy Micronaut metric names such as
+<code>kafka.consumer.bytes-consumed-total</code>.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#log(org.slf4j.Logger,boolean,java.lang.String,java.lang.Throwable,java.lang.Object...)" class="member-name-link">log(Logger, boolean, String, Throwable, Object...)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD" class="member-name-link">LOG_AND_RESUME_AT_NEXT_RECORD</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
@@ -1372,12 +1409,23 @@ exception handler, and then resume at the next offset.</div>
 <dd>
 <div class="block">Builder method for setting kafka metric.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#METRIC_NAME_STYLE_CONFIG" class="member-name-link">METRIC_NAME_STYLE_CONFIG</a> - Static variable in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricChange(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" class="type-name-link" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a> - Enum Class in <a href="io/micronaut/configuration/kafka/metrics/package-summary.html">io.micronaut.configuration.kafka.metrics</a></dt>
+<dd>
+<div class="block">Supported Kafka client metric naming styles.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricRemoval(KafkaMetric)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html#metrics()" class="member-name-link">metrics()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html" title="class in io.micronaut.configuration.kafka">RecoveringTransactionalProducer</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#MICROMETER" class="member-name-link">MICROMETER</a> - Enum constant in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
+<dd>
+<div class="block">Use Micrometer compatible metric names such as
+<code>kafka.consumer.fetch.manager.bytes.consumed.total</code>.</div>
+</dd>
 <dt><a href="io/micronaut/kafka/info/MicronautKafkaModuleInfo.html" class="type-name-link" title="class in io.micronaut.kafka.info">MicronautKafkaModuleInfo</a> - Class in <a href="io/micronaut/kafka/info/package-summary.html">io.micronaut.kafka.info</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/kafka/info/MicronautKafkaModuleInfo.html#%3Cinit%3E()" class="member-name-link">MicronautKafkaModuleInfo()</a> - Constructor for class io.micronaut.kafka.info.<a href="io/micronaut/kafka/info/MicronautKafkaModuleInfo.html" title="class in io.micronaut.kafka.info">MicronautKafkaModuleInfo</a></dt>
@@ -1489,6 +1537,8 @@ on completion of a successful partition re-assignment.</div>
 </dl>
 <h2 class="title" id="I:P">P</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#parse(java.lang.String)" class="member-name-link">parse(String)</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#partition()" class="member-name-link">partition()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#partition(java.lang.Integer)" class="member-name-link">partition(Integer)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
@@ -1554,6 +1604,10 @@ on completion of a successful partition re-assignment.</div>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaProducerConfiguration.html" title="class in io.micronaut.configuration.kafka.config">KafkaProducerConfiguration</a></dt>
 <dd>
 <div class="block">The default configuration for producers.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a></dt>
+<dd>
+<div class="block">Prefix for Kafka metrics binder configuration.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html#PREFIX" class="member-name-link">PREFIX</a> - Static variable in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/KafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">KafkaStreamsConfiguration</a></dt>
 <dd>
@@ -1779,6 +1833,8 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dd>
 <div class="block">Sets the key serializer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html#setMetricNameStyle(io.micronaut.configuration.kafka.metrics.MetricNameStyle)" class="member-name-link">setMetricNameStyle(MetricNameStyle)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#setName(java.lang.String)" class="member-name-link">setName(String)</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#setRestricted(boolean)" class="member-name-link">setRestricted(boolean)</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
@@ -1945,6 +2001,10 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class io.micronaut.configuration.kafka.retry.<a href="io/micronaut/configuration/kafka/retry/ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour.html" title="enum class in io.micronaut.configuration.kafka.retry">ConditionalRetryBehaviourHandler.ConditionalRetryBehaviour</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -1976,6 +2036,11 @@ the order they are declared.</div>
 <dt><a href="io/micronaut/configuration/kafka/KafkaHeaders.html#values()" class="member-name-link">values()</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaHeaders.html" title="class in io.micronaut.configuration.kafka">KafkaHeaders</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.builder.<a href="io/micronaut/configuration/kafka/metrics/builder/MeterType.html" title="enum class in io.micronaut.configuration.kafka.metrics.builder">MeterType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#values()" class="member-name-link">values()</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>

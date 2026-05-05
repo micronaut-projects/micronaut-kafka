@@ -59,6 +59,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#field-detail" tabindex="0">Field Details</a>
 <ol class="toc-list">
+<li><a href="#METRIC_NAME_STYLE_CONFIG" tabindex="0">METRIC_NAME_STYLE_CONFIG</a></li>
 <li><a href="#CLIENT_ID_TAG" tabindex="0">CLIENT_ID_TAG</a></li>
 <li><a href="#TOPIC_TAG" tabindex="0">TOPIC_TAG</a></li>
 <li><a href="#NODE_ID_TAG" tabindex="0">NODE_ID_TAG</a></li>
@@ -78,6 +79,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#configure(java.util.Map)" tabindex="0">configure(Map)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 <li><a href="#getMetricName(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">getMetricName(KafkaMetric)</a></li>
+<li><a href="#getMicrometerMetricName(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">getMicrometerMetricName(KafkaMetric)</a></li>
+<li><a href="#getMetricNameStyle()" tabindex="0">getMetricNameStyle()</a></li>
+<li><a href="#isClientCountMetric(org.apache.kafka.common.metrics.KafkaMetric)" tabindex="0">isClientCountMetric(KafkaMetric)</a></li>
 <li><a href="#getIncludedTags()" tabindex="0">getIncludedTags()</a></li>
 <li><a href="#getMetricPrefix()" tabindex="0">getMetricPrefix()</a></li>
 </ol>
@@ -125,11 +129,14 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <div class="col-second even-row-color"><code><a href="#CLIENT_ID_TAG" class="member-name-link">CLIENT_ID_TAG</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#NODE_ID_TAG" class="member-name-link">NODE_ID_TAG</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#METRIC_NAME_STYLE_CONFIG" class="member-name-link">METRIC_NAME_STYLE_CONFIG</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color"><code><a href="#TOPIC_TAG" class="member-name-link">TOPIC_TAG</a></code></div>
+<div class="col-second even-row-color"><code><a href="#NODE_ID_TAG" class="member-name-link">NODE_ID_TAG</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#TOPIC_TAG" class="member-name-link">TOPIC_TAG</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -176,20 +183,31 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resolve the exported metric name for the supplied Kafka metric.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final <a href="MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMetricNameStyle()" class="member-name-link">getMetricNameStyle</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMetricPrefix()" class="member-name-link">getMetricPrefix</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Abstract method to implement with the metric prefix for the reporter.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMicrometerMetricName(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">getMicrometerMetricName</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolve the Micrometer-style metric name for the supplied Kafka metric group and name.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#init(java.util.List)" class="member-name-link">init</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&gt;&nbsp;metrics)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricChange</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isClientCountMetric(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">isClientCountMetric</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricRemoval</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricChange(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricChange</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricRemoval(org.apache.kafka.common.metrics.KafkaMetric)" class="member-name-link">metricRemoval</a><wbr>(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -210,6 +228,22 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="METRIC_NAME_STYLE_CONFIG">
+<h3>METRIC_NAME_STYLE_CONFIG</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">METRIC_NAME_STYLE_CONFIG</span></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#io.micronaut.configuration.kafka.metrics.AbstractKafkaMetricsReporter.METRIC_NAME_STYLE_CONFIG">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="CLIENT_ID_TAG">
 <h3>CLIENT_ID_TAG</h3>
@@ -370,6 +404,47 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <dd><code>metric</code> - The Kafka metric</dd>
 <dt>Returns:</dt>
 <dd>The metric name to register with Micrometer</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMicrometerMetricName(org.apache.kafka.common.metrics.KafkaMetric)">
+<h3>getMicrometerMetricName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getMicrometerMetricName</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</span></div>
+<div class="block">Resolve the Micrometer-style metric name for the supplied Kafka metric group and name.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>metric</code> - The Kafka metric</dd>
+<dt>Returns:</dt>
+<dd>The normalized metric name</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMetricNameStyle()">
+<h3>getMetricNameStyle</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type"><a href="MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></span>&nbsp;<span class="element-name">getMetricNameStyle</span>()</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The configured metric name style</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isClientCountMetric(org.apache.kafka.common.metrics.KafkaMetric)">
+<h3>isClientCountMetric</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isClientCountMetric</span><wbr><span class="parameters">(<a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/metrics/KafkaMetric.html" title="class or interface in org.apache.kafka.common.metrics" class="external-link">KafkaMetric</a>&nbsp;metric)</span></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>metric</code> - The Kafka metric</dd>
+<dt>Returns:</dt>
+<dd>Whether the metric is the generic Kafka client count metric</dd>
 </dl>
 </div>
 </section>
