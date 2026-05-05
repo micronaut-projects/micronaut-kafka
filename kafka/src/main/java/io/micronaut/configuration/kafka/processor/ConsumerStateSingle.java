@@ -126,10 +126,9 @@ final class ConsumerStateSingle extends ConsumerState {
         KafkaSeekOperations seek = null;
         try {
             interceptedConsumerRecord = kafkaConsumerProcessor.interceptRecord(info, consumerRecord);
-            final String interceptedTopic = interceptedConsumerRecord != null ? interceptedConsumerRecord.topic() : topic;
-            seek = bindRecordArguments(interceptedTopic, currentOffsets);
+            seek = bindRecordArguments(topic, currentOffsets);
             if (interceptedConsumerRecord != null) {
-                process(interceptedTopic, interceptedConsumerRecord, consumerRecords);
+                process(topic, interceptedConsumerRecord, consumerRecords);
             }
         } catch (Exception e) {
             final ConsumerRecord<?, ?> errorRecord = interceptedConsumerRecord != null ? interceptedConsumerRecord : consumerRecord;

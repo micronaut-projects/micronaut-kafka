@@ -474,6 +474,7 @@ class KafkaConsumerProcessor
                 consumerInfo.groupId
             );
             intercepted = ((ConsumerRecordInterceptor<K, V>) consumerRecordInterceptor).intercept(interceptionContext);
+            validateCoordinates(consumerRecord, intercepted);
             if (intercepted == null) {
                 return null;
             }
@@ -499,6 +500,17 @@ class KafkaConsumerProcessor
             return ConsumerRecords.empty();
         }
         return new ConsumerRecords<>(interceptedRecords);
+    }
+
+    private static void validateCoordinates(ConsumerRecord<?, ?> original, @Nullable ConsumerRecord<?, ?> intercepted) {
+        if (intercepted == null) {
+            return;
+        }
+        if (!original.topic().equals(intercepted.topic()) ||
+            original.partition() != intercepted.partition() ||
+            original.offset() != intercepted.offset()) {
+            throw new IllegalStateException("ConsumerRecordInterceptor must preserve the consumed record topic, partition, and offset");
+        }
     }
 
     List<ConsumerRecordInterceptor<?, ?>> matchingInterceptors(@NonNull BeanDefinition<?> beanDefinition, @NonNull ExecutableMethod<?, ?> method) {

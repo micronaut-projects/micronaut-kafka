@@ -3,11 +3,15 @@ package io.micronaut.configuration.kafka.processor
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
+import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry
+import io.micronaut.configuration.kafka.bind.batch.BatchConsumerRecordsBinderRegistry
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.core.annotation.AnnotationValue
+import io.micronaut.core.convert.ConversionService
 import io.micronaut.core.type.Argument
 import io.micronaut.core.type.ReturnType
 import io.micronaut.inject.ExecutableMethod
+import io.micronaut.messaging.annotation.SendTo
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -210,6 +214,87 @@ class ConsumerStateBatchSpec extends Specification {
         0 * kafkaConsumerProcessor.handleException(_, _)
     }
 
+    void "send-to-transaction uses original batch offsets when trailing records are filtered"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 1)
+        ConsumerRecord<String, String> kept = new ConsumerRecord<>('source-topic', 1, 3L, 'key-1', 'keep')
+        ConsumerRecord<String, String> skipped = new ConsumerRecord<>('source-topic', 1, 4L, 'key-2', 'skip')
+        ConsumerRecords<String, String> originalRecords = new ConsumerRecords<>([(topicPartition): [kept, skipped]])
+        ConsumerRecords<String, String> interceptedRecords = new ConsumerRecords<>([(topicPartition): [kept]])
+        Producer<?, ?> kafkaProducer = Mock(Producer)
+        ConsumerRecordBinderRegistry binderRegistry = new ConsumerRecordBinderRegistry(ConversionService.SHARED)
+        BatchConsumerRecordsBinderRegistry batchBinderRegistry = new BatchConsumerRecordsBinderRegistry(binderRegistry, ConversionService.SHARED)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBatchBinderRegistry() >> batchBinderRegistry
+            interceptRecords(_, originalRecords) >> interceptedRecords
+            getTransactionalProducer(_, 'tx-id', byte[].class, Object.class) >> kafkaProducer
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateBatch consumerState = newConsumerStateBatch(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SEND_TO_TRANSACTION,
+            transactionalKafkaListenerAnnotation(),
+            sendToExecutableMethod { ['out'] }
+        )
+
+        when:
+        consumerState.processRecords(originalRecords, [:])
+
+        then:
+        1 * kafkaProducer.beginTransaction()
+        1 * kafkaProducer.send({
+            ProducerRecord<?, ?> record ->
+                record.topic() == 'target' &&
+                    record.key() == 'key-1' &&
+                    record.value() == 'out'
+        }, _) >> CompletableFuture.completedFuture(null)
+        1 * kafkaProducer.sendOffsetsToTransaction({
+            Map<TopicPartition, OffsetAndMetadata> offsets ->
+                offsets[topicPartition]?.offset() == 5L
+        }, _)
+        1 * kafkaProducer.commitTransaction()
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "fully filtered send-to-transaction batches still commit original offsets"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 1)
+        ConsumerRecord<String, String> first = new ConsumerRecord<>('source-topic', 1, 3L, 'key-1', 'one')
+        ConsumerRecord<String, String> second = new ConsumerRecord<>('source-topic', 1, 4L, 'key-2', 'two')
+        ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>([(topicPartition): [first, second]])
+        Producer<?, ?> kafkaProducer = Mock(Producer)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            interceptRecords(_, consumerRecords) >> ConsumerRecords.empty()
+            getTransactionalProducer(_, 'tx-id', byte[].class, Object.class) >> kafkaProducer
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateBatch consumerState = newConsumerStateBatch(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SEND_TO_TRANSACTION,
+            transactionalKafkaListenerAnnotation(),
+            sendToExecutableMethod { throw new AssertionError('listener should not be invoked') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * kafkaProducer.beginTransaction()
+        0 * kafkaProducer.send(_, _)
+        1 * kafkaProducer.sendOffsetsToTransaction({
+            Map<TopicPartition, OffsetAndMetadata> offsets ->
+                offsets[topicPartition]?.offset() == 5L
+        }, _)
+        1 * kafkaProducer.commitTransaction()
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
     private ConsumerStateBatch newConsumerStateBatch() {
         newConsumerStateBatch(Mock(KafkaConsumerProcessor), Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -234,10 +319,20 @@ class ConsumerStateBatchSpec extends Specification {
         AnnotationValue<KafkaListener> kafkaListener,
         ExecutableMethod<?, ?> executableMethod
     ) {
+        newConsumerStateBatch(kafkaConsumerProcessor, kafkaConsumer, OffsetStrategy.DISABLED, kafkaListener, executableMethod)
+    }
+
+    private ConsumerStateBatch newConsumerStateBatch(
+        KafkaConsumerProcessor kafkaConsumerProcessor,
+        Consumer<?, ?> kafkaConsumer,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        ExecutableMethod<?, ?> executableMethod
+    ) {
         ConsumerInfo consumerInfo = new ConsumerInfo(
                 'client',
                 'group',
-                OffsetStrategy.DISABLED,
+                offsetStrategy,
                 kafkaListener,
                 new Properties(),
                 executableMethod,
@@ -291,6 +386,13 @@ class ConsumerStateBatchSpec extends Specification {
                 .build()
     }
 
+    private AnnotationValue<KafkaListener> transactionalKafkaListenerAnnotation() {
+        AnnotationValue.builder(KafkaListener)
+            .member('batch', true)
+            .member('producerTransactionalId', 'tx-id')
+            .build()
+    }
+
     private ExecutableMethod<?, ?> executableMethod() {
         executableMethod(Argument.ZERO_ARGUMENTS) { null }
     }
@@ -309,6 +411,30 @@ class ConsumerStateBatchSpec extends Specification {
             getValue(KafkaListener, 'pollTimeout', Duration) >> Optional.of(Duration.ofMillis(100))
             getArguments() >> arguments
             stringValues(_ as Class) >> ([] as String[])
+            getReturnType() >> returnType
+            invoke(_, _ as Object[]) >> { Object instance, Object[] args ->
+                invocation.call(([instance] + args) as Object[])
+            }
+            invoke(_) >> { Object instance ->
+                invocation.call(([instance]) as Object[])
+            }
+        }
+    }
+
+    private ExecutableMethod<?, ?> sendToExecutableMethod(Closure<?> invocation) {
+        ReturnType<?> returnType = Stub() {
+            getType() >> List
+            isAsyncOrReactive() >> false
+            getFirstTypeVariable() >> Optional.empty()
+        }
+        Stub(ExecutableMethod) {
+            getDeclaringType() >> TestBatchListener
+            getName() >> 'receive'
+            isTrue(KafkaListener, 'batch') >> true
+            hasAnnotation(_ as Class) >> { Class<?> annotation -> annotation == SendTo }
+            getValue(KafkaListener, 'pollTimeout', Duration) >> Optional.of(Duration.ofMillis(100))
+            getArguments() >> Argument.ZERO_ARGUMENTS
+            stringValues(_ as Class) >> { Class<?> annotation -> annotation == SendTo ? (['target'] as String[]) : ([] as String[]) }
             getReturnType() >> returnType
             invoke(_, _ as Object[]) >> { Object instance, Object[] args ->
                 invocation.call(([instance] + args) as Object[])

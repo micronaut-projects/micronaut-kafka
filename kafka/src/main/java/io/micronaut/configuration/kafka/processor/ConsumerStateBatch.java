@@ -88,35 +88,37 @@ final class ConsumerStateBatch extends ConsumerState {
     @Override
     protected void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
-            final ConsumerRecords<?, ?> interceptedConsumerRecords = kafkaConsumerProcessor.interceptRecords(info, consumerRecords);
-            if (interceptedConsumerRecords.isEmpty()) {
-                final String topic = consumerRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
-                handleResult(normalizeResult(null), consumerRecords, topic);
-                failed = false;
-                return;
-            }
-            for (ConsumerRecords<?, ?> topicRecords : recordsByTopic(interceptedConsumerRecords)) {
-                withKafkaScope(() -> {
-                    final String topic = topicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
-                    final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
-                    Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
-                        final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(topicRecords);
-                        boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
-                    });
-                    Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
-                    if (method.isSuspend()) {
-                        Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
-                        boundArguments.put(lastArgument, null);
-                    }
-                    final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
-                    final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), topicRecords).invoke(consumerBean);
-                    handleResult(normalizeResult(result), topicRecords, topic);
-                });
+            for (ConsumerRecords<?, ?> originalTopicRecords : recordsByTopic(consumerRecords)) {
+                withKafkaScope(() -> processTopicRecords(originalTopicRecords));
             }
             failed = false;
         } catch (Exception e) {
             failed = resolveWithErrorStrategy(consumerRecords, currentOffsets, null, e);
         }
+    }
+
+    private void processTopicRecords(ConsumerRecords<?, ?> originalTopicRecords) {
+        final String topic = originalTopicRecords.partitions().stream().findFirst().map(TopicPartition::topic).orElseThrow();
+        final ConsumerRecords<?, ?> interceptedTopicRecords = kafkaConsumerProcessor.interceptRecords(info, originalTopicRecords);
+        if (interceptedTopicRecords.isEmpty()) {
+            if (info.shouldSendOffsetsToTransaction) {
+                commitOffsetsOnlyToTransaction(originalTopicRecords);
+            }
+            return;
+        }
+        final ExecutableMethod<Object, ?> method = info.methodForTopic(topic);
+        Optional.ofNullable(info.ackArg(topic)).ifPresent(argument -> {
+            final Map<TopicPartition, OffsetAndMetadata> batchOffsets = getAckOffsets(interceptedTopicRecords);
+            boundArguments.put(argument, (KafkaAcknowledgement) () -> kafkaConsumer.commitSync(batchOffsets));
+        });
+        Optional.ofNullable(info.consumerArg(topic)).ifPresent(argument -> boundArguments.put(argument, kafkaConsumer));
+        if (method.isSuspend()) {
+            Argument<?> lastArgument = method.getArguments()[method.getArguments().length - 1];
+            boundArguments.put(lastArgument, null);
+        }
+        final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
+        final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), interceptedTopicRecords).invoke(consumerBean);
+        handleResult(normalizeResult(result), originalTopicRecords, interceptedTopicRecords, topic);
     }
 
     private Map<TopicPartition, OffsetAndMetadata> getAckOffsets(ConsumerRecords<?, ?> consumerRecords) {
@@ -137,7 +139,12 @@ final class ConsumerStateBatch extends ConsumerState {
         return result;
     }
 
-    private void handleResult(Object result, ConsumerRecords<?, ?> consumerRecords, String topic) {
+    private void handleResult(
+        Object result,
+        ConsumerRecords<?, ?> offsetRecords,
+        ConsumerRecords<?, ?> listenerRecords,
+        String topic
+    ) {
         if (result != null) {
             final boolean isPublisher = Publishers.isConvertibleToPublisher(result);
             final boolean isBlocking = info.isBlocking(topic) || !isPublisher;
@@ -150,8 +157,8 @@ final class ConsumerStateBatch extends ConsumerState {
             } else {
                 resultFlux = Flux.just(result);
             }
-            resultRecordFlux = resultFlux.zipWithIterable(consumerRecords)
-                .doOnNext(x -> handleResultFlux(consumerRecords, x.getT2(), topic, Flux.just(x.getT1()), isBlocking));
+            resultRecordFlux = resultFlux.zipWithIterable(listenerRecords)
+                .doOnNext(x -> handleResultFlux(offsetRecords, x.getT2(), topic, Flux.just(x.getT1()), isBlocking));
             if (isBlocking) {
                 resultRecordFlux.blockLast();
             } else {

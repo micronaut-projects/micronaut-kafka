@@ -24,11 +24,14 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Intercepts a consumed Kafka {@link ConsumerRecord} before Micronaut binds it to a listener method.
- * Implementations may return the original record, return a wrapped record, or return {@code null} to
- * skip listener invocation for the consumed record.
+ * Implementations may return the original record, return a wrapped record that preserves the consumed
+ * record coordinates, or return {@code null} to skip listener invocation for the consumed record.
  *
  * <p>When Micronaut manages offset commits, returning {@code null} still allows the framework to advance
  * offsets for the consumed record according to the configured listener offset strategy.</p>
+ *
+ * <p>Wrapped records must preserve the original topic, partition, and offset because Micronaut continues
+ * to use the consumed record coordinates for listener routing, retries, and offset management.</p>
  *
  * @param <K> The key type
  * @param <V> The value type

@@ -144,6 +144,25 @@ class KafkaConsumerProcessorGracefulShutdownSpec extends Specification {
         intercepted.records(partition)*.value() == ['keep', 'wrapped']
     }
 
+    void "interceptRecord rejects wrapped records that change record coordinates"() {
+        given:
+        ConsumerRecord<String, String> record = new ConsumerRecord<>('books', 1, 3L, 'key', 'value')
+        KafkaConsumerProcessor processor = newKafkaConsumerProcessor([
+            interceptor(0) { ConsumerRecordInterceptor.InterceptionContext<String, String> context ->
+                ConsumerRecord<String, String> intercepted = context.consumerRecord()
+                new ConsumerRecord<>('other-books', intercepted.partition(), intercepted.offset(), intercepted.key(), intercepted.value())
+            }
+        ])
+        ConsumerInfo consumerInfo = consumerInfo(processor.matchingInterceptors(beanDefinition('receive'), executableMethod('receive')))
+
+        when:
+        processor.interceptRecord(consumerInfo, record)
+
+        then:
+        IllegalStateException e = thrown()
+        e.message.contains('must preserve the consumed record topic, partition, and offset')
+    }
+
     void "matchingInterceptors filters interceptors per listener method"() {
         given:
         KafkaConsumerProcessor processor = newKafkaConsumerProcessor([

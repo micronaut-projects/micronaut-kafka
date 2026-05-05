@@ -439,6 +439,22 @@ abstract class ConsumerState {
         }
     }
 
+    protected final void commitOffsetsOnlyToTransaction(ConsumerRecords<?, ?> consumerRecords) {
+        final Producer<?, ?> kafkaProducer = kafkaConsumerProcessor.getTransactionalProducer(
+            info.producerClientId,
+            info.producerTransactionalId,
+            byte[].class,
+            Object.class
+        );
+        try {
+            beginTransaction(kafkaProducer);
+            endTransaction(kafkaProducer, consumerRecords);
+        } catch (Exception e) {
+            abortTransaction(kafkaProducer, e);
+            throw e;
+        }
+    }
+
     private void endTransaction(Producer<?, ?> kafkaProducer, ConsumerRecords<?, ?> consumerRecords) {
         final Map<TopicPartition, OffsetAndMetadata> offsetsToCommit = new HashMap<>();
         for (TopicPartition partition : consumerRecords.partitions()) {
