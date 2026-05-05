@@ -21,6 +21,7 @@ import io.micronaut.context.BeanProvider;
 import io.micronaut.context.annotation.*;
 import io.micronaut.context.exceptions.DisabledBeanException;
 import io.micronaut.context.event.ApplicationEventPublisher;
+import io.micronaut.core.util.StringUtils;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 import org.apache.kafka.streams.KafkaClientSupplier;
@@ -52,6 +53,7 @@ import static java.util.function.Predicate.not;
  * @since 1.0
  */
 @Factory
+@Requires(property = KafkaStreamsConfiguration.ENABLED, notEquals = StringUtils.FALSE, defaultValue = StringUtils.TRUE)
 public class KafkaStreamsFactory implements Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsFactory.class);

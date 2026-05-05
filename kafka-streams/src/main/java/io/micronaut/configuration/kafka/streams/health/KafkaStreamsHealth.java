@@ -53,6 +53,7 @@ import java.util.stream.Stream;
  */
 @Singleton
 @Requires(classes = HealthIndicator.class)
+@Requires(beans = KafkaStreamsFactory.class)
 @Requires(property = KafkaStreamsHealth.ENABLED_PROPERTY, value = "true", defaultValue = "true")
 public class KafkaStreamsHealth implements HealthIndicator {
 
