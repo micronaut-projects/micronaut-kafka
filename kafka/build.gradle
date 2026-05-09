@@ -13,7 +13,17 @@ configurations.all {
 dependencies {
     annotationProcessor mn.micronaut.graal
 
-    api libs.managed.kafka.clients
+    api(libs.managed.kafka.clients) {
+        exclude(group: "com.fasterxml.jackson.core", module: "jackson-core")
+    }
+    constraints {
+        // "org.apache.kafka:kafka-clients 4.2.0 requests jackson-core 2.19.1, which is affected by GHSA-72hv-8253-57qq"
+        api("com.fasterxml.jackson.core:jackson-core:2.21.1") {
+            because("Require a non-vulnerable jackson-core version instead of the transitive 2.19.1 from :kafka-clients")
+        }
+    }
+    api("com.fasterxml.jackson.core:jackson-core")
+
     testImplementation(platform(mnTest.boms.testcontainers))
     testImplementation(libs.testcontainers.kafka)
     compileOnly mnMicrometer.micronaut.micrometer.core
