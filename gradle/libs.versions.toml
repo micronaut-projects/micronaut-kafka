@@ -17,7 +17,7 @@ micronaut-cache = "6.0.0"
 micronaut-micrometer = "6.0.0"
 micronaut-reactor = "4.0.0"
 micronaut-serde = "3.0.0"
-micronaut-tracing = "8.0.0-RC1"
+micronaut-tracing = "8.0.0"
 
 [libraries]
 # Core
