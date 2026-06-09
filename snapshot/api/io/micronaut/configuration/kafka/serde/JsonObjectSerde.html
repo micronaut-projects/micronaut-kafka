@@ -142,16 +142,16 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#configure(java.util.Map,boolean)" class="member-name-link">configure</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr>?&gt;&nbsp;configs,
  boolean&nbsp;isKey)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a></code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#deserialize(java.lang.String,byte%5B%5D)" class="member-name-link">deserialize</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
- byte[]&nbsp;data)</code></div>
+ byte @Nullable []&nbsp;data)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Deserializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link">Deserializer</a><wbr>&lt;<a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#deserializer()" class="member-name-link">deserializer</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>byte[]</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>byte @Nullable []</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#serialize(java.lang.String,T)" class="member-name-link">serialize</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
- <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&nbsp;data)</code></div>
+ @Nullable <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&nbsp;data)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link">Serializer</a><wbr>&lt;<a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#serializer()" class="member-name-link">serializer</a>()</code></div>
@@ -211,8 +211,8 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <section class="detail" id="deserialize(java.lang.String,byte[])">
 <h3>deserialize</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a></span>&nbsp;<span class="element-name">deserialize</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
- byte[]&nbsp;data)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">@Nullable <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a></span>&nbsp;<span class="element-name">deserialize</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
+ byte @Nullable []&nbsp;data)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Deserializer.html#deserialize-java.lang.String-byte:A-" title="class or interface in org.apache.kafka.common.serialization" class="external-link">deserialize</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Deserializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link">Deserializer</a>&lt;<a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&gt;</code></dd>
@@ -241,8 +241,8 @@ implements <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/
 <section class="detail" id="serialize(java.lang.String,T)">
 <h3 id="serialize(java.lang.String,java.lang.Object)">serialize</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">byte[]</span>&nbsp;<span class="element-name">serialize</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
- <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&nbsp;data)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">byte @Nullable []</span>&nbsp;<span class="element-name">serialize</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;topic,
+ @Nullable <a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&nbsp;data)</span></div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serializer.html#serialize-java.lang.String-T-" title="class or interface in org.apache.kafka.common.serialization" class="external-link">serialize</a></code>&nbsp;in interface&nbsp;<code><a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/common/serialization/Serializer.html" title="class or interface in org.apache.kafka.common.serialization" class="external-link">Serializer</a>&lt;<a href="#type-param-T" title="type parameter in JsonObjectSerde">T</a>&gt;</code></dd>
