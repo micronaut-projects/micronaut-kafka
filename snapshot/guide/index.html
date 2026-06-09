@@ -4700,7 +4700,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 <p>If the listener throws and a retry strategy schedules another attempt, Micronaut seeks back to the failed offset and does not commit it while retries remain.</p>
 </li>
 <li>
-<p>If the listener throws and a retry strategy exhausts its retries, Micronaut stops retrying that record and the current attempt commits past it.</p>
+<p>If the listener throws and a retry strategy exhausts its retries, Micronaut stops retrying that record and the current attempt commits past it unless <code>stopOnExhaustedRetry = true</code>, in which case Micronaut seeks back to the failed offset and pauses the affected partitions without committing the record.</p>
 </li>
 <li>
 <p>If the listener throws and the deprecated <code>NONE</code> strategy is used, Micronaut stops the current <code>poll()</code> loop and does not perform an additional per-record commit for the failing record.</p>
@@ -6215,6 +6215,9 @@ When using retry error strategies in combination with reactive consumer methods,
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>For retry error strategies, set <code>stopOnExhaustedRetry = true</code> to pause the affected topic partitions after the last retryable failure instead of skipping past the failed record. The consumer seeks back to the failed offset before pausing, and you can resume it later through <a href="../api/io/micronaut/configuration/kafka/ConsumerRegistry.html">ConsumerRegistry</a>.</p>
 </div>
 <div class="paragraph">
 <p>When <code>LOG_AND_RESUME_AT_NEXT_RECORD</code> publishes a failed record to the dead letter topic, the original key, value, and headers are preserved. Micronaut also adds the following headers so the downstream consumer can inspect the failure context:</p>

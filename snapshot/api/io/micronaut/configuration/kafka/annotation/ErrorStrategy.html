@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#retryCount()" tabindex="0">retryCount</a></li>
 <li><a href="#retryCountValue()" tabindex="0">retryCountValue</a></li>
 <li><a href="#handleAllExceptions()" tabindex="0">handleAllExceptions</a></li>
+<li><a href="#stopOnExhaustedRetry()" tabindex="0">stopOnExhaustedRetry</a></li>
 <li><a href="#value()" tabindex="0">value</a></li>
 <li><a href="#dlq()" tabindex="0">dlq</a></li>
 <li><a href="#exceptionTypes()" tabindex="0">exceptionTypes</a></li>
@@ -178,9 +179,15 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
-<div class="col-second even-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-first even-row-color"><code>boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#stopOnExhaustedRetry()" class="member-name-link">stopOnExhaustedRetry</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Whether Micronaut should pause the affected topic partitions after the last retryable failure
+instead of skipping past the failed record.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#value()" class="member-name-link">value</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">The strategy to use when an error occurs, see <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
 </div>
 </div>
@@ -341,6 +348,30 @@ By default, only the last failed attempt will be handed over to the exception ha
 <dd>whether all exceptions should be handled or ignored</dd>
 <dt>Since:</dt>
 <dd>5.0</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>false</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stopOnExhaustedRetry()">
+<h3>stopOnExhaustedRetry</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">stopOnExhaustedRetry</span></div>
+<div class="block">Whether Micronaut should pause the affected topic partitions after the last retryable failure
+instead of skipping past the failed record.
+
+<p>When enabled, the consumer seeks back to the failed offset, handles the exception, and
+pauses the affected partitions until they are resumed through the <code>ConsumerRegistry</code>
+or the application is restarted.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>whether to stop consuming from the affected partitions after retries are exhausted</dd>
+<dt>Since:</dt>
+<dd>6.0</dd>
 </dl>
 <dl class="notes">
 <dt>Default:</dt>
