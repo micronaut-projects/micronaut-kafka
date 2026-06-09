@@ -131,6 +131,23 @@ class ConsumerStateSingleSpec extends Specification {
         ex.message.contains('dlq')
     }
 
+    void "consumer info requires a retry strategy to stop on exhausted retry"() {
+        when:
+        new ConsumerInfo(
+            'client',
+            'group',
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null, null, true),
+            new Properties(),
+            executableMethod()
+        )
+
+        then:
+        def ex = thrown(MessagingSystemException)
+        ex.message.contains('stopOnExhaustedRetry')
+        ex.message.contains('retry error strategy')
+    }
+
     void "poll-time deserialization failures expose a synthetic consumer record to the exception handler"() {
         given:
         TopicPartition topicPartition = new TopicPartition('books', 1)
@@ -386,7 +403,12 @@ class ConsumerStateSingleSpec extends Specification {
         method.invoke(target, arguments)
     }
 
-    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(def errorStrategy = LOG_AND_RESUME_AT_NEXT_RECORD, String dlq = 'errors-dlq', Integer retryCount = null) {
+    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(
+        def errorStrategy = LOG_AND_RESUME_AT_NEXT_RECORD,
+        String dlq = 'errors-dlq',
+        Integer retryCount = null,
+        boolean stopOnExhaustedRetry = false
+    ) {
         def errorStrategyAnnotation = AnnotationValue.builder(ErrorStrategy)
             .member('value', errorStrategy)
         if (dlq != null) {
@@ -394,6 +416,9 @@ class ConsumerStateSingleSpec extends Specification {
         }
         if (retryCount != null) {
             errorStrategyAnnotation.member('retryCount', retryCount)
+        }
+        if (stopOnExhaustedRetry) {
+            errorStrategyAnnotation.member('stopOnExhaustedRetry', true)
         }
         AnnotationValue.builder(KafkaListener)
             .member('errorStrategy', errorStrategyAnnotation.build())
