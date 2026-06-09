@@ -93,9 +93,9 @@ abstract class ConsumerState {
     final Consumer<?, ?> kafkaConsumer;
     final Set<String> subscriptions;
     Set<TopicPartition> assignments;
-    private Set<TopicPartition> pausedTopicPartitions;
-    private Set<TopicPartition> pauseRequests;
-    private CountDownLatch startupLatch;
+    private @Nullable Set<TopicPartition> pausedTopicPartitions;
+    private @Nullable Set<TopicPartition> pauseRequests;
+    private @Nullable CountDownLatch startupLatch;
     private final CountDownLatch closedLatch;
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
@@ -112,17 +112,18 @@ abstract class ConsumerState {
         this.info = info;
         this.kafkaConsumer = consumer;
         this.consumerBean = consumerBean;
-        this.subscriptions = Collections.unmodifiableSet(kafkaConsumer.subscription());
-        this.startupLatch = info.autoStartup ? null : new CountDownLatch(1);
         this.boundArguments = new HashMap<>(2);
+        this.subscriptions = Collections.unmodifiableSet(kafkaConsumer.subscription());
+        this.assignments = Collections.emptySet();
+        this.startupLatch = info.autoStartup ? null : new CountDownLatch(1);
         this.closedState = ConsumerCloseState.NOT_STARTED;
         this.closedLatch = new CountDownLatch(1);
         this.topicPartitionRetries = this.info.errorStrategy.isRetry() ? new HashMap<>() : null;
     }
 
-    protected abstract ConsumerRecords<?, ?> pollRecords(@Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
+    protected abstract @Nullable ConsumerRecords<?, ?> pollRecords(@Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
 
-    protected abstract void processRecords(ConsumerRecords<?, ?> consumerRecords, Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
+    protected abstract void processRecords(ConsumerRecords<?, ?> consumerRecords, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets); // NOSONAR
 
     @Nullable
     protected abstract Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets();
@@ -386,7 +387,7 @@ abstract class ConsumerState {
             );
         } else {
             kafkaProducer = kafkaConsumerProcessor.getProducer(
-                Optional.ofNullable(info.producerClientId).orElse(info.groupId),
+                Optional.ofNullable(info.producerClientId).orElseGet(() -> clientKeyId(info.groupId)),
                 (Class<?>) (key != null ? key.getClass() : byte[].class),
                 value.getClass()
             );
@@ -506,7 +507,7 @@ abstract class ConsumerState {
         LOG.debug("Attempting redelivery of record [{}] following error", consumerRecord);
 
         final Producer<?, ?> kafkaProducer = kafkaConsumerProcessor.getProducer(
-            Optional.ofNullable(info.producerClientId).orElse(info.groupId),
+            producerClientId(),
             key.getClass(),
             value.getClass()
         );
@@ -527,9 +528,9 @@ abstract class ConsumerState {
         }
     }
 
-    protected boolean shouldRetryException(Throwable e, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+    protected boolean shouldRetryException(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords, @Nullable ConsumerRecord<?, ?> consumerRecord) {
         if (info.errorStrategy.isConditionalRetry()) {
-            return kafkaConsumerProcessor.shouldRetryMessage(consumerBean, wrapExceptionInKafkaListenerException(e.getMessage(), e, consumerRecords, consumerRecord)) ||
+            return kafkaConsumerProcessor.shouldRetryMessage(consumerBean, wrapExceptionInKafkaListenerException(String.valueOf(e.getMessage()), e, consumerRecords, consumerRecord)) ||
                 info.exceptionTypes.stream().anyMatch(e.getClass()::equals);
         }
 
@@ -538,7 +539,11 @@ abstract class ConsumerState {
     }
 
     protected PartitionRetryState getPartitionRetryState(TopicPartition tp, long currentOffset) {
-        final PartitionRetryState retryState = topicPartitionRetries
+        Map<TopicPartition, PartitionRetryState> retries = topicPartitionRetries;
+        if (retries == null) {
+            throw new IllegalStateException("Partition retry state is not available when retry is disabled");
+        }
+        final PartitionRetryState retryState = retries
             .computeIfAbsent(tp, x -> new PartitionRetryState());
         if (retryState.currentRetryOffset != currentOffset) {
             retryState.currentRetryOffset = currentOffset;
@@ -551,7 +556,7 @@ abstract class ConsumerState {
 
     protected void handleException(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
         @Nullable ConsumerRecord<?, ?> consumerRecord) {
-        handleException(e.getMessage(), e, consumerRecords, consumerRecord);
+        handleException(String.valueOf(e.getMessage()), e, consumerRecords, consumerRecord);
     }
 
     protected void publishToDlq(Throwable e, @Nullable ConsumerRecords<?, ?> consumerRecords,
@@ -578,7 +583,7 @@ abstract class ConsumerState {
         final Object key = consumerRecord.key();
         final Object value = consumerRecord.value();
         final Producer<?, ?> kafkaProducer = kafkaConsumerProcessor.getProducer(
-            Optional.ofNullable(info.producerClientId).orElse(info.groupId),
+            producerClientId(),
             (Class<?>) (key != null ? key.getClass() : byte[].class),
             (Class<?>) (value != null ? value.getClass() : byte[].class)
         );
@@ -647,9 +652,17 @@ abstract class ConsumerState {
                 occ.onComplete(offsets, exception);
             } else if (exception != null) {
                 OffsetCommitExceptionLogger.log(LOG, info.cooperativeStickyAssignmentStrategy,
-                    "Error asynchronously committing Kafka offsets [{}]: {}", exception, offsets, exception.getMessage());
+                    "Error asynchronously committing Kafka offsets [{}]: {}", exception, offsets, String.valueOf(exception.getMessage()));
             }
         };
+    }
+
+    private String producerClientId() {
+        return Optional.ofNullable(info.producerClientId).orElseGet(() -> info.groupId == null ? "" : info.groupId);
+    }
+
+    private static String clientKeyId(@Nullable String id) {
+        return id == null ? "" : id;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

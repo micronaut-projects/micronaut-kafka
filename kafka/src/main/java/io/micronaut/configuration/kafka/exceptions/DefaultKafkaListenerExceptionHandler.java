@@ -80,8 +80,13 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
     public void handle(KafkaListenerException exception) {
         final Throwable cause = exception.getCause();
         final Object consumerBean = exception.getKafkaListener();
+        if (cause == null) {
+            logger.error("Kafka consumer [{}] produced error: {}", consumerBean, exception.getMessage(), exception);
+            return;
+        }
+        String causeMessage = String.valueOf(cause.getMessage());
         if (cause instanceof SerializationException) {
-            logger.error("Kafka consumer [{}] failed to deserialize value: {}", consumerBean, cause.getMessage(), cause);
+            logger.error("Kafka consumer [{}] failed to deserialize value: {}", consumerBean, causeMessage, cause);
 
             if (skipRecordOnDeserializationFailure) {
                 final Consumer<?, ?> kafkaConsumer = exception.getKafkaConsumer();
@@ -92,18 +97,18 @@ public class DefaultKafkaListenerExceptionHandler implements KafkaListenerExcept
             if (consumerRecord.isPresent()) {
                 OffsetCommitExceptionLogger.log(logger, exception.isCooperativeStickyAssignmentStrategy(),
                     "Error processing record [{}] for Kafka consumer [{}] produced error: {}",
-                    cause, consumerRecord.get(), consumerBean, cause.getMessage());
+                    cause, consumerRecord.get(), consumerBean, causeMessage);
             } else {
                 OffsetCommitExceptionLogger.log(logger, exception.isCooperativeStickyAssignmentStrategy(),
-                    "Kafka consumer [{}] produced error: {}", cause, consumerBean, cause.getMessage());
+                    "Kafka consumer [{}] produced error: {}", cause, consumerBean, causeMessage);
             }
         } else {
             if (logger.isErrorEnabled()) {
                 Optional<ConsumerRecord<?, ?>> consumerRecord = exception.getConsumerRecord();
                 if (consumerRecord.isPresent()) {
-                    logger.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord.get(), consumerBean, cause.getMessage(), cause);
+                    logger.error("Error processing record [{}] for Kafka consumer [{}] produced error: {}", consumerRecord.get(), consumerBean, causeMessage, cause);
                 } else {
-                    logger.error("Kafka consumer [{}] produced error: {}", consumerBean, cause.getMessage(), cause);
+                    logger.error("Kafka consumer [{}] produced error: {}", consumerBean, causeMessage, cause);
                 }
             }
         }

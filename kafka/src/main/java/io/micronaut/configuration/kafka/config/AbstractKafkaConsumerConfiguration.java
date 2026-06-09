@@ -33,8 +33,8 @@ import java.util.Properties;
  */
 public abstract class AbstractKafkaConsumerConfiguration<K, V> extends AbstractKafkaConfiguration<K, V> {
 
-    private Deserializer<K> keyDeserializer;
-    private Deserializer<V> valueDeserializer;
+    private @Nullable Deserializer<K> keyDeserializer;
+    private @Nullable Deserializer<V> valueDeserializer;
 
     /**
      * Constructs a new instance.

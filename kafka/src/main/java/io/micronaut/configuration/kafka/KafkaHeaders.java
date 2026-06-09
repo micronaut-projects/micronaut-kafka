@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link MessageHeaders} implementation for Kafka.
@@ -79,10 +80,11 @@ public class KafkaHeaders implements MessageHeaders {
     }
 
     @Override
+    @Nullable
     public String get(CharSequence name) {
         Header header = headers.lastHeader(name.toString());
         if (header != null) {
-            return new String(header.value());
+            return new String(header.value(), StandardCharsets.UTF_8);
         }
         return null;
     }
@@ -98,7 +100,7 @@ public class KafkaHeaders implements MessageHeaders {
             Iterable<Header> headers = KafkaHeaders.this.headers.headers(name);
             List<String> values = new ArrayList<>();
             for (Header header : headers) {
-                values.add(new String(header.value()));
+                values.add(new String(header.value(), StandardCharsets.UTF_8));
             }
             return values;
         }).collect(Collectors.toList());

@@ -133,8 +133,9 @@ public class KafkaStreamsFactory implements Closeable, GracefulShutdownCapable {
     ) {
         KStream<?, ?>[] kStreams = kStreamsProvider.stream().toArray(KStream[]::new);
         // count() forces eager resolution before build() without allocating unused arrays.
-        kTablesProvider.stream().count();
-        globalKTablesProvider.stream().count();
+        long kTableCount = kTablesProvider.stream().count();
+        long globalKTableCount = globalKTablesProvider.stream().count();
+        LOG.trace("Resolved {} KTable definitions and {} GlobalKTable definitions", kTableCount, globalKTableCount);
         Topology topology = builder.build(builder.getConfiguration());
         TopologyDescription topologyDescription = topology.describe();
         if (topologyDescription.subtopologies().isEmpty() && topologyDescription.globalStores().isEmpty()) {
@@ -202,7 +203,11 @@ public class KafkaStreamsFactory implements Closeable, GracefulShutdownCapable {
                 });
             return newShutdown;
         }
-        return gracefulShutdown.get();
+        currentShutdown = gracefulShutdown.get();
+        if (currentShutdown != null) {
+            return currentShutdown;
+        }
+        return newShutdown;
     }
 
     @Override

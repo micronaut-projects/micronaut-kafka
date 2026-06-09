@@ -30,12 +30,12 @@ import java.util.Map;
  */
 public final class KafkaMessage<K, V> {
 
-    private final String topic;
-    private final K key;
-    private final V body;
-    private final Integer partition;
-    private final Long timestamp;
-    private final Map<String, Object> headers;
+    private final @Nullable String topic;
+    private final @Nullable K key;
+    private final @Nullable V body;
+    private final @Nullable Integer partition;
+    private final @Nullable Long timestamp;
+    private final @Nullable Map<String, Object> headers;
 
     /**
      * The default constructor.
@@ -93,12 +93,12 @@ public final class KafkaMessage<K, V> {
      * @param <V> The value type
      */
     public static final class Builder<K, V> {
-        private String topic;
-        private K key;
-        private V body;
-        private Integer partition;
-        private Long timestamp;
-        private Map<String, Object> headers;
+        private @Nullable String topic;
+        private @Nullable K key;
+        private @Nullable V body;
+        private @Nullable Integer partition;
+        private @Nullable Long timestamp;
+        private @Nullable Map<String, Object> headers;
 
         @NonNull
         public static <T, F> Builder<T, F> withBody(@Nullable F body) {

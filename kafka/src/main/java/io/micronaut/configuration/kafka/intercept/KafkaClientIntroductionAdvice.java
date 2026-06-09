@@ -130,7 +130,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     @Override
-    public final Object intercept(MethodInvocationContext<Object, Object> context) {
+    public final @Nullable Object intercept(MethodInvocationContext<Object, Object> context) {
         if (context.hasAnnotation(KafkaClient.class)) {
             if (!context.hasAnnotation(KafkaClient.class)) {
                 throw new IllegalStateException("No @KafkaClient annotation present on method: " + context);
@@ -177,7 +177,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         }
     }
 
-    private Object returnSynchronous(MethodInvocationContext<Object, Object> context, ProducerState producerState) {
+    private @Nullable Object returnSynchronous(MethodInvocationContext<Object, Object> context, ProducerState producerState) {
         ReturnType<Object> returnType = context.getReturnType();
         Class<Object> javaReturnType = returnType.getType();
         Argument<Object> returnTypeArgument = returnType.asArgument();
@@ -845,7 +845,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                                               @Nullable String transactionalId,
                                               @Nullable Duration maxBlock,
                                               boolean isBatchSend,
-                                              @Nullable Argument<?> bodyArgument,
+                                              Argument<?> bodyArgument,
                                               @Nullable ExecutorService executorService) {
 
     }
