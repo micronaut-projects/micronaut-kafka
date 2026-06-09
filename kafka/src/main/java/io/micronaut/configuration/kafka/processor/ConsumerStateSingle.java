@@ -22,7 +22,6 @@ import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
 import io.micronaut.core.annotation.Internal;
-import org.jspecify.annotations.Nullable;
 import io.micronaut.core.async.publisher.Publishers;
 import io.micronaut.core.bind.DefaultExecutableBinder;
 import io.micronaut.core.bind.ExecutableBinder;
@@ -36,6 +35,7 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.RecordDeserializationException;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
@@ -206,30 +206,62 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord, Throwable e) {
         if (info.errorStrategy.isRetry()) {
             final TopicPartition topicPartition = getTopicPartition(consumerRecord);
-            if (shouldRetryException(e, consumerRecords, consumerRecord) && info.retryCount > 0) {
-                // Check how many retries so far
-                final int currentRetryCount = getCurrentRetryCount(consumerRecord);
-                if (info.retryCount >= currentRetryCount) {
-                    // We will retry this batch again next time
-                    if (info.shouldHandleAllExceptions) {
-                        handleException(e, consumerRecords, consumerRecord);
-                    }
-                    // Move back to the previous position
-                    kafkaConsumer.seek(topicPartition, consumerRecord.offset());
-                    // Decide how long should we wait to retry this batch again
-                    delayRetry(currentRetryCount, Collections.singleton(topicPartition));
-                    return true;
-                }
+            final boolean retryable = shouldRetryException(e, consumerRecords, consumerRecord);
+            if (retryable && scheduleRetry(consumerRecords, consumerRecord, e, topicPartition)) {
+                return true;
             }
             // We will NOT retry this record anymore
             if (topicPartitionRetries != null) {
                 topicPartitionRetries.remove(topicPartition);
+            }
+            if (retryable && stopOnExhaustedRetry(consumerRecords, consumerRecord, e, topicPartition)) {
+                return true;
             }
         }
         // Skip the failing record
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
+    }
+
+    private boolean scheduleRetry(
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        ConsumerRecord<?, ?> consumerRecord,
+        Throwable e,
+        TopicPartition topicPartition
+    ) {
+        if (info.retryCount <= 0) {
+            return false;
+        }
+        // Check how many retries so far
+        final int currentRetryCount = getCurrentRetryCount(consumerRecord);
+        if (info.retryCount < currentRetryCount) {
+            return false;
+        }
+        // We will retry this batch again next time
+        if (info.shouldHandleAllExceptions) {
+            handleException(e, consumerRecords, consumerRecord);
+        }
+        // Move back to the previous position
+        kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+        // Decide how long should we wait to retry this batch again
+        delayRetry(currentRetryCount, Collections.singleton(topicPartition));
+        return true;
+    }
+
+    private boolean stopOnExhaustedRetry(
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        ConsumerRecord<?, ?> consumerRecord,
+        Throwable e,
+        TopicPartition topicPartition
+    ) {
+        if (!info.shouldStopOnExhaustedRetry) {
+            return false;
+        }
+        kafkaConsumer.seek(topicPartition, consumerRecord.offset());
+        handleException(e, consumerRecords, consumerRecord);
+        pause(Collections.singleton(topicPartition));
+        return true;
     }
 
     private void commitSync(ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {

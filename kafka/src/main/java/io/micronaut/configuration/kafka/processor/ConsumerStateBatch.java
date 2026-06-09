@@ -165,8 +165,9 @@ final class ConsumerStateBatch extends ConsumerState {
     ) {
         if (info.errorStrategy.isRetry()) {
             final Map<TopicPartition, OffsetAndMetadata> resolvedOffsets = currentOffsets == null ? Map.of() : currentOffsets;
-            final Set<TopicPartition> partitions = consumerRecords != null ? consumerRecords.partitions() : resolvedOffsets.keySet();
-            if (shouldRetryException(e, consumerRecords, null) && info.retryCount > 0) {
+            final Set<TopicPartition> partitions = resolvePartitions(consumerRecords, consumerRecord, resolvedOffsets);
+            final boolean retryable = shouldRetryException(e, consumerRecords, null);
+            if (retryable && info.retryCount > 0) {
                 Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = Optional.ofNullable(
                     reconstructCurrentOffsetsIfAbsent(resolvedOffsets, consumerRecords)
                 ).orElseGet(Map::of);
@@ -188,10 +189,38 @@ final class ConsumerStateBatch extends ConsumerState {
             if (topicPartitionRetries != null) {
                 partitions.forEach(topicPartitionRetries::remove);
             }
+            if (retryable && info.shouldStopOnExhaustedRetry) {
+                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = Optional.ofNullable(
+                    reconstructCurrentOffsetsIfAbsent(resolvedOffsets, consumerRecords)
+                ).orElseGet(Map::of);
+                partitions.forEach(tp -> {
+                    OffsetAndMetadata offsetAndMetadata = reconstructedOffsets.get(tp);
+                    if (offsetAndMetadata != null) {
+                        kafkaConsumer.seek(tp, offsetAndMetadata.offset());
+                    }
+                });
+                handleException(e, consumerRecords, consumerRecord);
+                pause(partitions);
+                return true;
+            }
         }
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
+    }
+
+    private Set<TopicPartition> resolvePartitions(
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets
+    ) {
+        if (consumerRecords != null) {
+            return consumerRecords.partitions();
+        }
+        if (consumerRecord != null) {
+            return Collections.singleton(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()));
+        }
+        return currentOffsets.keySet();
     }
 
     private int getCurrentRetryCount(Set<TopicPartition> partitions, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
