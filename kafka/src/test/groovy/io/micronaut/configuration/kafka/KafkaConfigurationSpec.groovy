@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaConsumerConfiguration
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration
 import io.micronaut.configuration.kafka.config.KafkaConsumerConfiguration
+import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.env.EnvironmentPropertySource
@@ -261,6 +262,35 @@ class KafkaConfigurationSpec extends Specification {
 
         cleanup:
         consumer.close()
+    }
+
+    @Issue('https://github.com/micronaut-projects/micronaut-kafka/issues/1160')
+    void "test named producer and consumer schema registry urls override the shared default"() {
+        given:
+        applicationContext = ApplicationContext.run(
+                ('kafka.' + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG): "localhost:1111",
+                'kafka.schema.registry.url': 'mock://shared-registry',
+                'kafka.producers.books.schema.registry.url': 'mock://books-registry',
+                'kafka.producers.orders.schema.registry.url': 'mock://orders-registry',
+                'kafka.consumers.book-group.schema.registry.url': 'mock://books-registry',
+                'kafka.consumers.order-group.schema.registry.url': 'mock://orders-registry'
+        )
+
+        when:
+        AbstractKafkaProducerConfiguration defaultProducer = applicationContext.getBean(AbstractKafkaProducerConfiguration)
+        KafkaProducerConfiguration booksProducer = applicationContext.getBean(KafkaProducerConfiguration, Qualifiers.byName('books'))
+        KafkaProducerConfiguration ordersProducer = applicationContext.getBean(KafkaProducerConfiguration, Qualifiers.byName('orders'))
+        AbstractKafkaConsumerConfiguration defaultConsumer = applicationContext.getBean(AbstractKafkaConsumerConfiguration)
+        KafkaConsumerConfiguration bookGroupConsumer = applicationContext.getBean(KafkaConsumerConfiguration, Qualifiers.byName('book-group'))
+        KafkaConsumerConfiguration orderGroupConsumer = applicationContext.getBean(KafkaConsumerConfiguration, Qualifiers.byName('order-group'))
+
+        then:
+        defaultProducer.config['schema.registry.url'] == 'mock://shared-registry'
+        booksProducer.config['schema.registry.url'] == 'mock://books-registry'
+        ordersProducer.config['schema.registry.url'] == 'mock://orders-registry'
+        defaultConsumer.config['schema.registry.url'] == 'mock://shared-registry'
+        bookGroupConsumer.config['schema.registry.url'] == 'mock://books-registry'
+        orderGroupConsumer.config['schema.registry.url'] == 'mock://orders-registry'
     }
 
     void "test consumer with camel-case group id"() {

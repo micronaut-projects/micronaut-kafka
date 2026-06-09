@@ -15,7 +15,8 @@
  */
 package io.micronaut.configuration.kafka.annotation;
 
-import io.micronaut.context.annotation.*;
+import io.micronaut.context.annotation.AliasFor;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.messaging.annotation.MessageListener;
 import org.apache.kafka.common.IsolationLevel;
 

@@ -20,7 +20,13 @@ import io.micronaut.context.annotation.Executable;
 import io.micronaut.core.bind.annotation.Bindable;
 import io.micronaut.messaging.annotation.MessageMapping;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Method level annotation used to specify which topics should be subscribed to.

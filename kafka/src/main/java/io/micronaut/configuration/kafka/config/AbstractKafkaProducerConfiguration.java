@@ -38,9 +38,9 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
     static final Class DEFAULT_KEY_SERIALIZER = org.apache.kafka.common.serialization.StringSerializer.class;
     static final Class DEFAULT_VALUE_SERIALIZER = org.apache.kafka.common.serialization.StringSerializer.class;
 
-    private Serializer<K> keySerializer;
-    private Serializer<V> valueSerializer;
-    private String executor;
+    private @Nullable Serializer<K> keySerializer;
+    private @Nullable Serializer<V> valueSerializer;
+    private @Nullable String executor;
 
     /**
      * Constructs a new instance.
@@ -103,7 +103,7 @@ public abstract class AbstractKafkaProducerConfiguration<K, V> extends AbstractK
      *
      * @param executor The executor name
      */
-    public void setExecutor(String executor) {
+    public void setExecutor(@Nullable String executor) {
         this.executor = executor;
     }
 }

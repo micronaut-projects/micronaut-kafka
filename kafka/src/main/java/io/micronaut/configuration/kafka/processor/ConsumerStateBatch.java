@@ -69,7 +69,7 @@ final class ConsumerStateBatch extends ConsumerState {
     }
 
     @Override
-    protected ConsumerRecords<?, ?> pollRecords(
+    protected @Nullable ConsumerRecords<?, ?> pollRecords(
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         try {
             return kafkaConsumer.poll(info.pollTimeout);
@@ -103,7 +103,10 @@ final class ConsumerStateBatch extends ConsumerState {
                     }
                     final ExecutableBinder<ConsumerRecords<?, ?>> batchBinder = new DefaultExecutableBinder<>(boundArguments);
                     final Object result = batchBinder.bind(method, kafkaConsumerProcessor.getBatchBinderRegistry(), topicRecords).invoke(consumerBean);
-                    handleResult(normalizeResult(result), topicRecords, topic);
+                    Object normalized = normalizeResult(result);
+                    if (normalized != null) {
+                        handleResult(normalized, topicRecords, topic);
+                    }
                 });
             }
             failed = false;
@@ -156,36 +159,46 @@ final class ConsumerStateBatch extends ConsumerState {
     @SuppressWarnings("java:S1874") // ErrorStrategyValue.NONE is deprecated
     private boolean resolveWithErrorStrategy(
         @Nullable ConsumerRecords<?, ?> consumerRecords,
-        Map<TopicPartition, OffsetAndMetadata> currentOffsets,
+        @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
         @Nullable ConsumerRecord<?, ?> consumerRecord,
         Throwable e
     ) {
         if (info.errorStrategy.isRetry()) {
-            final Set<TopicPartition> partitions;
-            if (consumerRecords != null) {
-                partitions = consumerRecords.partitions();
-            } else if (consumerRecord != null) {
-                partitions = Collections.singleton(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()));
-            } else {
-                partitions = currentOffsets.keySet();
-            }
+            final Map<TopicPartition, OffsetAndMetadata> resolvedOffsets = currentOffsets == null ? Map.of() : currentOffsets;
+            final Set<TopicPartition> partitions = resolvePartitions(consumerRecords, consumerRecord, resolvedOffsets);
             final boolean retryable = shouldRetryException(e, consumerRecords, null);
             if (retryable && info.retryCount > 0) {
-                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
+                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = Optional.ofNullable(
+                    reconstructCurrentOffsetsIfAbsent(resolvedOffsets, consumerRecords)
+                ).orElseGet(Map::of);
                 final int currentRetryCount = getCurrentRetryCount(partitions, reconstructedOffsets);
                 if (info.retryCount >= currentRetryCount) {
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, null);
                     }
-                    partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
+                    partitions.forEach(tp -> {
+                        OffsetAndMetadata offsetAndMetadata = reconstructedOffsets.get(tp);
+                        if (offsetAndMetadata != null) {
+                            kafkaConsumer.seek(tp, offsetAndMetadata.offset());
+                        }
+                    });
                     delayRetry(currentRetryCount, partitions);
                     return true;
                 }
             }
-            partitions.forEach(topicPartitionRetries::remove);
+            if (topicPartitionRetries != null) {
+                partitions.forEach(topicPartitionRetries::remove);
+            }
             if (retryable && info.shouldStopOnExhaustedRetry) {
-                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = reconstructCurrentOffsetsIfAbsent(currentOffsets, consumerRecords);
-                partitions.forEach(tp -> kafkaConsumer.seek(tp, reconstructedOffsets.get(tp).offset()));
+                Map<TopicPartition, OffsetAndMetadata> reconstructedOffsets = Optional.ofNullable(
+                    reconstructCurrentOffsetsIfAbsent(resolvedOffsets, consumerRecords)
+                ).orElseGet(Map::of);
+                partitions.forEach(tp -> {
+                    OffsetAndMetadata offsetAndMetadata = reconstructedOffsets.get(tp);
+                    if (offsetAndMetadata != null) {
+                        kafkaConsumer.seek(tp, offsetAndMetadata.offset());
+                    }
+                });
                 handleException(e, consumerRecords, consumerRecord);
                 pause(partitions);
                 return true;
@@ -196,7 +209,21 @@ final class ConsumerStateBatch extends ConsumerState {
         return info.errorStrategy == ErrorStrategyValue.NONE;
     }
 
-    private int getCurrentRetryCount(Set<TopicPartition> partitions, @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+    private Set<TopicPartition> resolvePartitions(
+        @Nullable ConsumerRecords<?, ?> consumerRecords,
+        @Nullable ConsumerRecord<?, ?> consumerRecord,
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets
+    ) {
+        if (consumerRecords != null) {
+            return consumerRecords.partitions();
+        }
+        if (consumerRecord != null) {
+            return Collections.singleton(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()));
+        }
+        return currentOffsets.keySet();
+    }
+
+    private int getCurrentRetryCount(Set<TopicPartition> partitions, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
         return partitions.stream()
             .map(tp -> {
                 OffsetAndMetadata offsetAndMetadata = currentOffsets.get(tp);

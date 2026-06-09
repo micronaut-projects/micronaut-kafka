@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serializer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A factory class for creating Kafka {@link org.apache.kafka.clients.producer.Producer} instances.
@@ -42,5 +43,5 @@ public interface ProducerFactory {
      * @return new instance of producer
      */
     @NonNull
-    <K, V> Producer<K, V> createProducer(Properties config, Serializer<K> ks, Serializer<V> vs);
+    <K, V> Producer<K, V> createProducer(Properties config, @Nullable Serializer<K> ks, @Nullable Serializer<V> vs);
 }

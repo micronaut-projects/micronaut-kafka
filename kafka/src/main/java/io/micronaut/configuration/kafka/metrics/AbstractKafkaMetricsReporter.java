@@ -26,6 +26,7 @@ import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.MetricsReporter;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import java.util.function.Function;
 @Internal
 public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, MeterBinder, Closeable {
 
+    public static final String METRIC_NAME_STYLE_CONFIG = KafkaMetricsConfigurationProperties.PREFIX + ".metric-name-style";
     public static final String CLIENT_ID_TAG = "client-id";
     public static final String TOPIC_TAG = "topic";
     public static final String NODE_ID_TAG = "node-id";
@@ -67,7 +69,8 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
     private final Map<MeterRegistry, Map<Meter.Id, Meter>> registeredMeters = new ConcurrentHashMap<>();
 
-    private List<KafkaMetric> metrics;
+    private @Nullable List<KafkaMetric> metrics;
+    private MetricNameStyle metricNameStyle = MetricNameStyle.MICROMETER;
 
     @Override
     public void bindTo(@NonNull MeterRegistry registry) {
@@ -106,13 +109,18 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         if (meterRegistry != null) {
             meterRegistries.add((MeterRegistry) meterRegistry);
         }
+        Object configuredMetricNameStyle = configs.get(METRIC_NAME_STYLE_CONFIG);
+        if (configuredMetricNameStyle != null) {
+            metricNameStyle = MetricNameStyle.parse(configuredMetricNameStyle.toString());
+        }
     }
 
     @PreDestroy
     @Override
     public void close() {
-        if (metrics != null) {
-            metrics.clear();
+        List<KafkaMetric> currentMetrics = metrics;
+        if (currentMetrics != null) {
+            currentMetrics.clear();
             metrics = null;
         }
         registeredMeters.forEach((meterRegistry, meters) -> meters.values().forEach(meterRegistry::remove));
@@ -139,9 +147,9 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
             return;
         }
 
+        String meterName = getMetricPrefix() + "." + getMetricName(metric);
         List<String> sortedIncludedTags = getIncludedTags().stream().sorted().toList();
         boolean includeEmptyTags = isPrometheusRegistry(meterRegistry);
-        String meterName = getMetricPrefix() + "." + metric.metricName().name();
         Set<Tag> expectedTags = Set.copyOf(getTags(metric.metricName(), sortedIncludedTags, includeEmptyTags));
         for (var iterator = meters.entrySet().iterator(); iterator.hasNext(); ) {
             var meterEntry = iterator.next();
@@ -174,6 +182,41 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
         List<String> sortedIncludedTags = getIncludedTags().stream().sorted().toList();
         boolean includeEmptyTags = isPrometheusRegistry(meterRegistry);
         return metricName -> getTags(metricName, sortedIncludedTags, includeEmptyTags);
+    }
+
+    /**
+     * Resolve the Micrometer-style metric name for the supplied Kafka metric group and name.
+     *
+     * @param metric The Kafka metric
+     * @return The normalized metric name
+     */
+    protected final String getMicrometerMetricName(KafkaMetric metric) {
+        String group = metric.metricName().group();
+        String name = normalizeMetricName(metric.metricName().name());
+        if (group == null || group.isEmpty()) {
+            return name;
+        }
+        return normalizeMetricName(group) + "." + name;
+    }
+
+    private static String normalizeMetricName(String name) {
+        return name.replace("-metrics", "").replace('-', '.');
+    }
+
+    /**
+     * @return The configured metric name style
+     */
+    protected final MetricNameStyle getMetricNameStyle() {
+        return metricNameStyle;
+    }
+
+    /**
+     * @param metric The Kafka metric
+     * @return Whether the metric is the generic Kafka client count metric
+     */
+    protected final boolean isClientCountMetric(KafkaMetric metric) {
+        return "count".equals(metric.metricName().name())
+                && "kafka-metrics-count".equals(metric.metricName().group());
     }
 
     private static List<Tag> getTags(MetricName metricName, List<String> sortedIncludedTags, boolean includeEmptyTags) {

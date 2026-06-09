@@ -33,8 +33,8 @@ public class KafkaListenerException extends MessageListenerException {
 
     private final transient Object listener;
     private final transient Consumer<?, ?> kafkaConsumer;
-    private final transient ConsumerRecords<?, ?> consumerRecords;
-    private final transient ConsumerRecord<?, ?> consumerRecord;
+    private final transient @Nullable ConsumerRecords<?, ?> consumerRecords;
+    private final transient @Nullable ConsumerRecord<?, ?> consumerRecord;
     private final boolean cooperativeStickyAssignmentStrategy;
 
     /**
@@ -46,7 +46,12 @@ public class KafkaListenerException extends MessageListenerException {
      * @param consumerRecord The consumer record
      */
     public KafkaListenerException(String message, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
-        this(message, null, listener, kafkaConsumer, consumerRecord);
+        super(message);
+        this.listener = listener;
+        this.kafkaConsumer = kafkaConsumer;
+        this.consumerRecords = null;
+        this.consumerRecord = consumerRecord;
+        this.cooperativeStickyAssignmentStrategy = false;
     }
 
     /**
@@ -71,7 +76,7 @@ public class KafkaListenerException extends MessageListenerException {
      * @param consumerRecord The consumer record
      */
     public KafkaListenerException(Throwable cause, Object listener, Consumer<?, ?> kafkaConsumer, ConsumerRecord<?, ?> consumerRecord) {
-        this(cause.getMessage(), cause, listener, kafkaConsumer, consumerRecord);
+        this(String.valueOf(cause.getMessage()), cause, listener, kafkaConsumer, consumerRecord);
     }
 
     /**

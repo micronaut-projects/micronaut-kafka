@@ -93,3 +93,38 @@ kafka:
 ----
 
 That setup is often enough for tests that verify producer and listener wiring with generated Avro or Protobuf types. If you also want to validate registry compatibility rules or schema lifecycle behavior, run a real Schema Registry alongside Kafka in your integration tests.
+
+When the same test suite needs multiple isolated registries, keep the shared Kafka settings under `kafka.*` and override the registry URL per producer id and consumer group id:
+
+.Configuring multiple mock schema registries in one test suite
+[configuration]
+----
+kafka:
+  bootstrap:
+    servers: localhost:9092
+  schema:
+    registry:
+      url: mock://shared-registry
+  producers:
+    books:
+      schema:
+        registry:
+          url: mock://books-registry
+    documents:
+      schema:
+        registry:
+          url: mock://documents-registry
+  consumers:
+    book-group:
+      schema:
+        registry:
+          url: mock://books-registry
+    document-group:
+      schema:
+        registry:
+          url: mock://documents-registry
+----
+
+Use the same producer ids that you assign to `@KafkaClient` and the same consumer group ids that you assign to `@KafkaListener`. The matching producer and consumer should point at the same registry URL, while unrelated clients can use a different mock scope or a different local registry endpoint entirely.
+
+The same scoping pattern also works with other schema registry implementations. Replace the serializer and deserializer classes with the equivalents from your chosen library and point each producer or consumer configuration at the corresponding test endpoint.

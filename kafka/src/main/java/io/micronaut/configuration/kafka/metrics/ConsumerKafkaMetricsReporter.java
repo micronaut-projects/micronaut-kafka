@@ -19,6 +19,8 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.annotation.TypeHint;
 import jakarta.annotation.PreDestroy;
+import org.apache.kafka.common.metrics.KafkaMetric;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,15 +32,28 @@ import java.util.Set;
 public class ConsumerKafkaMetricsReporter extends AbstractKafkaMetricsReporter {
 
     public static final String PARTITION_TAG = "partition";
-
-    private static final String CONSUMER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".consumer";
+    private static final String LEGACY_CONSUMER_PREFIX = AbstractKafkaConfiguration.PREFIX + ".consumer";
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected String getMetricPrefix() {
-        return CONSUMER_PREFIX;
+        if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
+            return LEGACY_CONSUMER_PREFIX;
+        }
+        return AbstractKafkaConfiguration.PREFIX;
+    }
+
+    @Override
+    protected String getMetricName(KafkaMetric metric) {
+        if (getMetricNameStyle() == MetricNameStyle.LEGACY) {
+            return super.getMetricName(metric);
+        }
+        if (isClientCountMetric(metric)) {
+            return "consumer.count";
+        }
+        return getMicrometerMetricName(metric);
     }
 
     @Override
