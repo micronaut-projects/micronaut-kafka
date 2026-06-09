@@ -79,7 +79,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
 
     private final KafkaHealthConfiguration kafkaHealthConfiguration;
 
-    private String clusterId;
+    private @Nullable String clusterId;
 
     /**
      * Constructs a new Kafka health indicator for the given arguments.
@@ -180,6 +180,9 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
             Mono<Map<ConfigResource, Config>> configs = KafkaReactorUtil.fromKafkaFuture(configResult::all);
             return configs.flux().switchMap(resources -> {
                 Config config = resources.get(configResource);
+                if (config == null) {
+                    return Mono.just(getHealthResult(false, null, null, brokerId));
+                }
                 int minNodeCount = getMinNodeCount(config);
                 return nodes.flux().switchMap(nodeList -> clusterId.map(clusterIdString -> {
                     int nodeCount = nodeList.size();
@@ -237,7 +240,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
         final long requestTimeoutMs = defaultConfiguration.getHealthTimeout().toMillis();
         final LeastLoadedNode leastLoadedNode = networkClient.leastLoadedNode(SYSTEM.milliseconds());
         try {
-            return result(awaitReady(networkClient, leastLoadedNode.node(), SYSTEM, requestTimeoutMs), null).build();
+            return result(awaitReady(networkClient, leastLoadedNode.node(), SYSTEM, requestTimeoutMs), Collections.emptyMap()).build();
         } catch (IOException e) {
             return failure(e, Collections.emptyMap());
         }

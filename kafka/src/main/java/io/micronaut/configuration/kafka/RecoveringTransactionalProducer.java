@@ -85,8 +85,8 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
             if (!isTransactionalIdExpired(e)) {
                 throw e;
             }
-            replaceProducer();
-            producer.beginTransaction();
+            Producer<K, V> current = replaceProducer();
+            current.beginTransaction();
             inTransaction = true;
             pendingSends.clear();
             generation++;
@@ -149,7 +149,7 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
     }
 
     @Override
-    public synchronized Future<RecordMetadata> send(ProducerRecord<K, V> record, Callback callback) {
+    public synchronized Future<RecordMetadata> send(ProducerRecord<K, V> record, @Nullable Callback callback) {
         if (!inTransaction) {
             return currentProducer().send(record, callback);
         }
@@ -303,20 +303,21 @@ public final class RecoveringTransactionalProducer<K, V> implements Producer<K, 
 
     private void replayTransaction() {
         LOG.debug("Recreating transactional producer for transactional.id [{}] after Kafka expired the producer id", transactionalId);
-        replaceProducer();
+        Producer<K, V> current = replaceProducer();
         generation++;
-        producer.beginTransaction();
+        current.beginTransaction();
         for (PendingSend<K, V> pendingSend : pendingSends) {
             dispatchSend(generation, pendingSend);
         }
         inTransaction = true;
     }
 
-    private void replaceProducer() {
+    private Producer<K, V> replaceProducer() {
         Producer<K, V> previous = producer;
         producer = producerSupplier.get();
         producer.initTransactions();
         closeProducer(previous, Duration.ZERO);
+        return producer;
     }
 
     private void completeTransaction() {

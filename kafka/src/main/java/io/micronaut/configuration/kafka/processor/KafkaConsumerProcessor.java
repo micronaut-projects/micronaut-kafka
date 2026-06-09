@@ -434,6 +434,9 @@ class KafkaConsumerProcessor
     }
 
     <K, V> Producer<K, V> getTransactionalProducer(@Nullable String clientId, @Nullable String transactionalId, Class<K> keyClass, Class<V> valueClass) {
+        if (transactionalId == null) {
+            throw new IllegalStateException("Transactional id is required to create a transactional Kafka producer");
+        }
         return transactionalProducerRegistry.getTransactionalProducer(clientId, transactionalId, Argument.of(keyClass), Argument.of(valueClass));
     }
 

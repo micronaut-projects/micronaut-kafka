@@ -26,6 +26,7 @@ import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.MetricsReporter;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     private final Collection<MeterRegistry> meterRegistries = new ConcurrentLinkedQueue<>();
     private final Map<MeterRegistry, Map<Meter.Id, Meter>> registeredMeters = new ConcurrentHashMap<>();
 
-    private List<KafkaMetric> metrics;
+    private @Nullable List<KafkaMetric> metrics;
     private MetricNameStyle metricNameStyle = MetricNameStyle.MICROMETER;
 
     @Override
@@ -117,8 +118,9 @@ public abstract class AbstractKafkaMetricsReporter implements MetricsReporter, M
     @PreDestroy
     @Override
     public void close() {
-        if (metrics != null) {
-            metrics.clear();
+        List<KafkaMetric> currentMetrics = metrics;
+        if (currentMetrics != null) {
+            currentMetrics.clear();
             metrics = null;
         }
         registeredMeters.forEach((meterRegistry, meters) -> meters.values().forEach(meterRegistry::remove));

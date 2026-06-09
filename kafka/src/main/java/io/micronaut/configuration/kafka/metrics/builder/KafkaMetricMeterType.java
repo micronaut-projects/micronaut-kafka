@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.metrics.builder;
 
 import io.micronaut.core.annotation.Internal;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,9 +31,9 @@ import java.util.concurrent.TimeUnit;
 @Internal
 class KafkaMetricMeterType {
     private MeterType meterType = MeterType.GAUGE;
-    private String description = null;
+    private @Nullable String description = null;
     private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-    private String baseUnit = null;
+    private @Nullable String baseUnit = null;
 
     /**
      * Class for hosing a metric type, description, time unit and base unit.
@@ -48,7 +49,7 @@ class KafkaMetricMeterType {
      * @param timeUnit    Time Unit of metric
      * @param baseUnit    Base Unit of metric
      */
-    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, @NonNull final TimeUnit timeUnit, final String baseUnit) {
+    KafkaMetricMeterType(@NonNull final MeterType meterType, @Nullable final String description, @NonNull final TimeUnit timeUnit, @Nullable final String baseUnit) {
         this.meterType = meterType;
         this.description = description;
         this.timeUnit = timeUnit;
@@ -62,7 +63,7 @@ class KafkaMetricMeterType {
      * @param description Metric Description
      * @param baseUnit    Base Unit of metric
      */
-    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, final String baseUnit) {
+    KafkaMetricMeterType(@NonNull final MeterType meterType, @Nullable final String description, @Nullable final String baseUnit) {
         this.meterType = meterType;
         this.description = description;
         this.baseUnit = baseUnit;
@@ -75,7 +76,7 @@ class KafkaMetricMeterType {
      * @param description Metric Description
      * @param timeUnit    Time Unit of metric
      */
-    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description, @NonNull final TimeUnit timeUnit) {
+    KafkaMetricMeterType(@NonNull final MeterType meterType, @Nullable final String description, @NonNull final TimeUnit timeUnit) {
         this.meterType = meterType;
         this.description = description;
         this.timeUnit = timeUnit;
@@ -87,7 +88,7 @@ class KafkaMetricMeterType {
      * @param meterType   Meter Type
      * @param description Metric Description
      */
-    KafkaMetricMeterType(@NonNull final MeterType meterType, final String description) {
+    KafkaMetricMeterType(@NonNull final MeterType meterType, @Nullable final String description) {
         this.meterType = meterType;
         this.description = description;
     }
@@ -106,6 +107,7 @@ class KafkaMetricMeterType {
      *
      * @return meter description
      */
+    @Nullable
     String getDescription() {
         return description;
     }
@@ -124,6 +126,7 @@ class KafkaMetricMeterType {
      *
      * @return meter base unit
      */
+    @Nullable
     String getBaseUnit() {
         return baseUnit;
     }

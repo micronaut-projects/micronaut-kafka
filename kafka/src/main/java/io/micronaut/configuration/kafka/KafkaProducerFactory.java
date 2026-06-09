@@ -165,7 +165,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     @SuppressWarnings("unchecked")
     private <T> T getKafkaProducer(@Nullable String id, @Nullable String transactionalId, Argument<?> keyType, Argument<?> valueType, boolean transactional, @Nullable Map<String, String> props) {
         ClientKey key = new ClientKey(
-                id,
+                clientKeyId(id),
                 keyType.getType(),
                 valueType.getType(),
                 transactional);
@@ -267,7 +267,7 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
     }
 
     @Override
-    public <K, V> Producer<K, V> getTransactionalProducer(String id, String transactionalId, Argument<K> keyType, Argument<V> valueType) {
+    public <K, V> Producer<K, V> getTransactionalProducer(@Nullable String id, String transactionalId, Argument<K> keyType, Argument<V> valueType) {
         return getKafkaProducer(id, transactionalId, keyType, valueType, true, null);
     }
 
@@ -338,5 +338,9 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         public int hashCode() {
             return Objects.hash(id, keyType, valueType, transactional);
         }
+    }
+
+    private static String clientKeyId(@Nullable String id) {
+        return id == null ? "" : id;
     }
 }
