@@ -105,7 +105,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
      *
      * @param adminClient          The admin client
      * @param defaultConfiguration The default configuration
-     * @deprecated Use {@link KafkaHealthIndicator(BeanContext, KafkaDefaultConfiguration, NetworkClientCreator, KafkaHealthConfiguration)} instead.
+     * @deprecated Use the primary constructor instead.
      */
     @Deprecated(forRemoval = true)
     public KafkaHealthIndicator(AdminClient adminClient,

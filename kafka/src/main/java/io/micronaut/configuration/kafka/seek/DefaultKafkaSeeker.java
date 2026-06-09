@@ -17,7 +17,6 @@ package io.micronaut.configuration.kafka.seek;
 
 import io.micronaut.core.annotation.Internal;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.TopicPartition;

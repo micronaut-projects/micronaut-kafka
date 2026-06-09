@@ -300,6 +300,10 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
        return beanContext.getBean(AbstractKafkaProducerConfiguration.class);
     }
 
+    private static String clientKeyId(@Nullable String id) {
+        return id == null ? "" : id;
+    }
+
     /**
      * key for retrieving built producers.
      *
@@ -340,7 +344,4 @@ public class KafkaProducerFactory implements ProducerRegistry, TransactionalProd
         }
     }
 
-    private static String clientKeyId(@Nullable String id) {
-        return id == null ? "" : id;
-    }
 }
