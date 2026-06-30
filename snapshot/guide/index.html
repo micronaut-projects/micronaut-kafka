@@ -399,9 +399,7 @@ See the guide for <a href="https://guides.micronaut.io/latest/micronaut-kafka.ht
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.bootstrap]
-    servers="localhost:9092"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = "localhost:9092"}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -460,12 +458,7 @@ kafka.bootstrap.servers[1]=bar:9092</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.bootstrap]
-    servers=[
-      "foo:9092",
-      "bar:9092"
-    ]</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = ["foo:9092", "bar:9092"]}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -608,11 +601,7 @@ kafka.retry.backoff.ms=32000</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  "reconnect.backoff.ms"=30000
-  "retry.backoff.ms"=32000
-  [kafka.bootstrap]
-    servers="localhost:9092"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = "localhost:9092"}, "reconnect.backoff.ms" = 30000, "retry.backoff.ms" = 32000}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -692,20 +681,7 @@ kafka.security.protocol=ssl</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.bootstrap]
-    servers="localhost:9093"
-  [kafka.ssl]
-    [kafka.ssl.keystore]
-      location="/path/to/client.keystore.p12"
-      password="secret"
-      type="PKCS12"
-    [kafka.ssl.truststore]
-      location="/path/to/client.truststore.p12"
-      password="secret"
-      type="PKCS12"
-  [kafka.security]
-    protocol="ssl"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = "localhost:9093"}, ssl = {keystore = {location = "/path/to/client.keystore.p12", password = "secret", type = "PKCS12"}, truststore = {location = "/path/to/client.truststore.p12", password = "secret", type = "PKCS12"}}, security = {protocol = "ssl"}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1018,8 +994,7 @@ class ProductListener {
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  enabled=false</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {enabled = false}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1133,23 +1108,7 @@ kafka.consumers.book-group.specific.avro.reader=true</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  "schema.registry.url"="http://localhost:8081"
-  [kafka.producers]
-    [kafka.producers.books]
-      [kafka.producers.books.key]
-        serializer="org.apache.kafka.common.serialization.StringSerializer"
-      [kafka.producers.books.value]
-        serializer="io.confluent.kafka.serializers.KafkaAvroSerializer"
-  [kafka.consumers]
-    [kafka.consumers.book-group]
-      [kafka.consumers.book-group.key]
-        deserializer="org.apache.kafka.common.serialization.StringDeserializer"
-      [kafka.consumers.book-group.value]
-        deserializer="io.confluent.kafka.serializers.KafkaAvroDeserializer"
-      [kafka.consumers.book-group.specific]
-        [kafka.consumers.book-group.specific.avro]
-          reader=true</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {"schema.registry.url" = "http://localhost:8081", producers = {books = {key = {serializer = "org.apache.kafka.common.serialization.StringSerializer"}, value = {serializer = "io.confluent.kafka.serializers.KafkaAvroSerializer"}}}, consumers = {book-group = {key = {deserializer = "org.apache.kafka.common.serialization.StringDeserializer"}, value = {deserializer = "io.confluent.kafka.serializers.KafkaAvroDeserializer"}, specific = {avro = {reader = true}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1302,24 +1261,7 @@ kafka.consumers.document-group.specific.protobuf.value.type=example.DocumentEven
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  "schema.registry.url"="http://localhost:8081"
-  [kafka.producers]
-    [kafka.producers.documents]
-      [kafka.producers.documents.key]
-        serializer="org.apache.kafka.common.serialization.StringSerializer"
-      [kafka.producers.documents.value]
-        serializer="io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"
-  [kafka.consumers]
-    [kafka.consumers.document-group]
-      [kafka.consumers.document-group.key]
-        deserializer="org.apache.kafka.common.serialization.StringDeserializer"
-      [kafka.consumers.document-group.value]
-        deserializer="io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"
-      [kafka.consumers.document-group.specific]
-        [kafka.consumers.document-group.specific.protobuf]
-          [kafka.consumers.document-group.specific.protobuf.value]
-            type="example.DocumentEvent"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {"schema.registry.url" = "http://localhost:8081", producers = {documents = {key = {serializer = "org.apache.kafka.common.serialization.StringSerializer"}, value = {serializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer"}}}, consumers = {document-group = {key = {deserializer = "org.apache.kafka.common.serialization.StringDeserializer"}, value = {deserializer = "io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer"}, specific = {protobuf = {value = {type = "example.DocumentEvent"}}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1484,8 +1426,7 @@ kafka.consumers.document-group.specific.protobuf.value.type=example.DocumentEven
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  "schema.registry.url"="mock://test-schema-registry"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {"schema.registry.url" = "mock://test-schema-registry"}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1564,30 +1505,7 @@ kafka.consumers.document-group.schema.registry.url=mock://documents-registry</co
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.bootstrap]
-    servers="localhost:9092"
-  [kafka.schema]
-    [kafka.schema.registry]
-      url="mock://shared-registry"
-  [kafka.producers]
-    [kafka.producers.books]
-      [kafka.producers.books.schema]
-        [kafka.producers.books.schema.registry]
-          url="mock://books-registry"
-    [kafka.producers.documents]
-      [kafka.producers.documents.schema]
-        [kafka.producers.documents.schema.registry]
-          url="mock://documents-registry"
-  [kafka.consumers]
-    [kafka.consumers.book-group]
-      [kafka.consumers.book-group.schema]
-        [kafka.consumers.book-group.schema.registry]
-          url="mock://books-registry"
-    [kafka.consumers.document-group]
-      [kafka.consumers.document-group.schema]
-        [kafka.consumers.document-group.schema.registry]
-          url="mock://documents-registry"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = "localhost:9092"}, schema = {registry = {url = "mock://shared-registry"}}, producers = {books = {schema = {registry = {url = "mock://books-registry"}}}, documents = {schema = {registry = {url = "mock://documents-registry"}}}}, consumers = {book-group = {schema = {registry = {url = "mock://books-registry"}}}, document-group = {schema = {registry = {url = "mock://documents-registry"}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -1977,12 +1895,7 @@ kafka.producers.my-named-producer.executor=io</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.producers]
-    [kafka.producers.default]
-      executor="blocking"
-    [kafka.producers.my-named-producer]
-      executor="io"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {producers = {default = {executor = "blocking"}, my-named-producer = {executor = "io"}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -2195,12 +2108,7 @@ kafka.producers.default.bootstrap.servers=localhost:9096</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.producers]
-    [kafka.producers.default]
-      retries=5
-      [kafka.producers.default.bootstrap]
-        servers="localhost:9096"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {producers = {default = {retries = 5, bootstrap = {servers = "localhost:9096"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -2306,15 +2214,7 @@ kafka.producers.product-client-2.bootstrap.servers=localhost:9098</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.producers]
-    [kafka.producers.product-client]
-      retries=5
-      [kafka.producers.product-client.bootstrap]
-        servers="localhost:9097"
-    [kafka.producers.product-client-2]
-      [kafka.producers.product-client-2.bootstrap]
-        servers="localhost:9098"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {producers = {product-client = {retries = 5, bootstrap = {servers = "localhost:9097"}}, product-client-2 = {bootstrap = {servers = "localhost:9098"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -2480,11 +2380,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.producers]
-    [kafka.producers.product-client]
-      [kafka.producers.product-client.value]
-        serializer="org.apache.kafka.common.serialization.ByteArraySerializer"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {producers = {product-client = {value = {serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -3270,11 +3166,7 @@ micronaut.executors.consumer.nThreads=25</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[micronaut]
-  [micronaut.executors]
-    [micronaut.executors.consumer]
-      type="fixed"
-      nThreads=25</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">micronaut = {executors = {consumer = {type = "fixed", nThreads = 25}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -3419,13 +3311,7 @@ kafka.consumers.product.bootstrap.servers=localhost:9098</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.consumers]
-    [kafka.consumers.default]
-      "allow.auto.create.topics"=true
-    [kafka.consumers.product]
-      [kafka.consumers.product.bootstrap]
-        servers="localhost:9098"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {consumers = {default = {"allow.auto.create.topics" = true}, product = {bootstrap = {servers = "localhost:9098"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -4285,12 +4171,7 @@ If <code>groupId</code> is not specified, Micronaut uses <code>id</code> as the 
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.consumers]
-    [kafka.consumers.default]
-      [kafka.consumers.default.session]
-        [kafka.consumers.default.session.timeout]
-          ms=30000</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {consumers = {default = {session = {timeout = {ms = 30000}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -4370,12 +4251,7 @@ If <code>groupId</code> is not specified, Micronaut uses <code>id</code> as the 
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.consumers]
-    [kafka.consumers.myGroup]
-      [kafka.consumers.myGroup.session]
-        [kafka.consumers.myGroup.session.timeout]
-          ms=30000</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {consumers = {myGroup = {session = {timeout = {ms = 30000}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -4544,11 +4420,7 @@ You can replace the default <a href="../api/io/micronaut/configuration/kafka/ser
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.consumers]
-    [kafka.consumers.myGroup]
-      [kafka.consumers.myGroup.value]
-        deserializer="org.apache.kafka.common.serialization.ByteArrayDeserializer"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {consumers = {myGroup = {value = {deserializer = "org.apache.kafka.common.serialization.ByteArrayDeserializer"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -6633,11 +6505,7 @@ In the case of Kafka Streams metrics, you can use <code>micronaut.metrics.binder
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[micronaut]
-  [micronaut.metrics]
-    [micronaut.metrics.binders]
-      [micronaut.metrics.binders.kafka]
-        metric-name-style="legacy"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">micronaut = {metrics = {binders = {kafka = {metric-name-style = "legacy"}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7023,9 +6891,7 @@ class MessageClientFallback implements MessageClient { // <b class="conum">(3)</
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.bootstrap]
-    servers="localhost:9092"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {bootstrap = {servers = "localhost:9092"}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7438,11 +7304,7 @@ kafka.streams.default.auto.offset.reset=earliest</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.streams]
-    [kafka.streams.default]
-      "processing.guarantee"="exactly_once"
-      "auto.offset.reset"="earliest"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {streams = {default = {"processing.guarantee" = "exactly_once", "auto.offset.reset" = "earliest"}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7516,10 +7378,7 @@ kafka.streams.default.auto.offset.reset=earliest</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.streams]
-    [kafka.streams.default]
-      close-timeout="10s"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {streams = {default = {close-timeout = "10s"}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7606,23 +7465,7 @@ kafka.streams.my-other-stream.num.stream.threads=10</code></pre>
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.streams]
-    [kafka.streams.default]
-      "application.id"="my-app-default-stream"
-      [kafka.streams.default.num]
-        [kafka.streams.default.num.stream]
-          threads=1
-    [kafka.streams.my-stream]
-      "application.id"="my-app-my-stream"
-      [kafka.streams.my-stream.num]
-        [kafka.streams.my-stream.num.stream]
-          threads=2
-    [kafka.streams.my-other-stream]
-      "application.id"="my-app-other-stream"
-      [kafka.streams.my-other-stream.num]
-        [kafka.streams.my-other-stream.num.stream]
-          threads=10</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {streams = {default = {"application.id" = "my-app-default-stream", num = {stream = {threads = 1}}}, my-stream = {"application.id" = "my-app-my-stream", num = {stream = {threads = 2}}}, my-other-stream = {"application.id" = "my-app-other-stream", num = {stream = {threads = 10}}}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -7824,10 +7667,7 @@ KStream&lt;String, String&gt; myStream(@Named('my-stream') ConfiguredStreamBuild
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.streams]
-    [kafka.streams.default]
-      start-kafka-streams=false</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {streams = {default = {start-kafka-streams = false}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -8155,10 +7995,7 @@ By default, the details visible above are only shown to authenticated users. See
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.health]
-    [kafka.health.streams]
-      enabled=false</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {health = {streams = {enabled = false}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
@@ -8251,10 +8088,7 @@ You can find more details about this mechanism <a href="https://developer.conflu
 </div>
 <div class="listingblock multi-language-sample">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka]
-  [kafka.streams]
-    [kafka.streams.my-stream]
-      uncaught-exception-handler="REPLACE_THREAD"</code></pre>
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">kafka = {streams = {my-stream = {uncaught-exception-handler = "REPLACE_THREAD"}}}</code></pre>
 </div>
 </div>
 <div class="listingblock multi-language-sample">
