@@ -5,7 +5,7 @@ plugins {
 configurations.all {
     resolutionStrategy {
         force 'org.graalvm.sdk:graal-sdk:25.0.3'
-        force 'io.micronaut.platform:micronaut-platform:5.0.2'
+        force 'io.micronaut.platform:micronaut-platform:5.0.4'
     }
 }
 
@@ -18,7 +18,7 @@ dependencies {
     }
     constraints {
         // "org.apache.kafka:kafka-clients 4.2.0 requests jackson-core 2.19.1, which is affected by GHSA-72hv-8253-57qq"
-        api("com.fasterxml.jackson.core:jackson-core:2.22.0") {
+        api("com.fasterxml.jackson.core:jackson-core:2.22.1") {
             because("Require a non-vulnerable jackson-core version instead of the transitive 2.19.1 from :kafka-clients")
         }
     }
