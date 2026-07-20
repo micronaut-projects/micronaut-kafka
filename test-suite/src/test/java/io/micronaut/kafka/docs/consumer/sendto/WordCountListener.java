@@ -7,8 +7,8 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Requires;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -18,7 +18,7 @@ public class WordCountListener {
 
     private static final Logger LOG = getLogger(WordCountListener.class);
 
-    Map<String, Integer> wordCount = new HashMap<>();
+    Map<String, Integer> wordCount = new ConcurrentHashMap<>();
 
     @Topic("my-words-count")
     public void receive(@KafkaKey byte[] key, Object value) {

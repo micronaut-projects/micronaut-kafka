@@ -6,6 +6,7 @@ import io.micronaut.configuration.kafka.annotation.OffsetReset
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Requires
 import org.slf4j.LoggerFactory
+import java.util.concurrent.ConcurrentHashMap
 
 @Requires(property = "spec.name", value = "WordCounterTest")
 @KafkaListener(offsetReset = OffsetReset.EARLIEST)
@@ -15,7 +16,7 @@ class WordCountListener {
         private val LOG = LoggerFactory.getLogger(WordCountListener::class.java)
     }
 
-    var wordCount: MutableMap<String, Int> = HashMap()
+    var wordCount: MutableMap<String, Int> = ConcurrentHashMap()
 
     @Topic("my-words-count")
     fun receive(@KafkaKey key: ByteArray?, value: Any) {
