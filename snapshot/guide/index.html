@@ -6103,6 +6103,9 @@ class WordCounter {
 <p><code>LOG_AND_RESUME_AT_NEXT_RECORD</code> - This strategy will publish the failed record to a dead letter topic, invoke the exception handler, and resume at the next offset. You must configure the target topic with <code>dlq</code>.</p>
 </li>
 <li>
+<p><code>RETRY_TOPIC_ON_ERROR</code> - This strategy will publish the failed record to derived retry topics and resume at the next offset on the original topic. Configure the retry topics with <code>retryTopicSuffixes</code> and <code>retryTopicDelays</code>. When retry topics are exhausted, Micronaut optionally publishes the record to <code>dlq</code>.</p>
+</li>
+<li>
 <p><code>NONE</code> - This error strategy will skip over all records from the current offset in the current poll when the consumer encounters an error. This option is deprecated and kept for consistent behaviour with previous versions of Micronaut Kafka that do not support error strategy.</p>
 </li>
 </ul>
@@ -6115,6 +6118,18 @@ class WordCounter {
 </td>
 <td class="content">
 For batch listeners, <code>LOG_AND_RESUME_AT_NEXT_RECORD</code> is supported. The other error strategies apply only to non-batch message processing.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>RETRY_TOPIC_ON_ERROR</code> requires direct topic names, not <code>@Topic</code> patterns. Retry topics must already exist in Kafka.
 </td>
 </tr>
 </table>
@@ -6348,6 +6363,178 @@ Conditional retry behaviour only applies to <code>RETRY_CONDITIONALLY_ON_ERROR</
 </td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_non_blocking_retry_topics">Non-blocking retry topics</h4>
+<div class="paragraph">
+<p><code>RETRY_TOPIC_ON_ERROR</code> implements non-blocking retries by republishing the failed record to derived retry topics. Each retry topic suffix in <code>retryTopicSuffixes</code> must have a matching delay in <code>retryTopicDelays</code>.</p>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A client that publishes to the source topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaClient("product-client")
+public interface RetryTopicProductClient {
+
+    @Topic("products")
+    void sendProduct(String product);
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A client that publishes to the source topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaClient("product-client")
+interface RetryTopicProductClient {
+
+    @Topic("products")
+    fun sendProduct(product: String)
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A client that publishes to the source topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaClient('product-client')
+interface RetryTopicProductClient {
+
+    @Topic('products')
+    void sendProduct(String product)
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener that processes the source topic and derived retry topics</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener(
+    value = "product-retry-group",
+    errorStrategy = @ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_TOPIC_ON_ERROR,
+        retryTopicSuffixes = {"-retry-5s", "-retry-30s"},
+        retryTopicDelays = {"5s", "30s"},
+        dlq = "products-dlt"
+    )
+)
+public class RetryTopicProductListener {
+
+    @Topic("products")
+    void receive(String product, MessageHeaders headers) {
+        String retryAttempt = headers.get("micronaut-kafka-retry-attempt", String.class).orElse("initial");
+        String sourceTopic = headers.get("micronaut-kafka-original-topic", String.class).orElse("products");
+        System.out.printf("Processing %s from %s (attempt=%s)%n", product, sourceTopic, retryAttempt);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener that processes the source topic and derived retry topics</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener(
+    value = "product-retry-group",
+    errorStrategy = ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_TOPIC_ON_ERROR,
+        retryTopicSuffixes = ["-retry-5s", "-retry-30s"],
+        retryTopicDelays = ["5s", "30s"],
+        dlq = "products-dlt"
+    )
+)
+class RetryTopicProductListener {
+
+    @Topic("products")
+    fun receive(product: String, headers: MessageHeaders) {
+        val retryAttempt = headers.get("micronaut-kafka-retry-attempt", String::class.java).orElse("initial")
+        val sourceTopic = headers.get("micronaut-kafka-original-topic", String::class.java).orElse("products")
+        println("Processing $product from $sourceTopic (attempt=$retryAttempt)")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener that processes the source topic and derived retry topics</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener(
+    value = 'product-retry-group',
+    errorStrategy = @ErrorStrategy(
+        value = ErrorStrategyValue.RETRY_TOPIC_ON_ERROR,
+        retryTopicSuffixes = ['-retry-5s', '-retry-30s'],
+        retryTopicDelays = ['5s', '30s'],
+        dlq = 'products-dlt'
+    )
+)
+class RetryTopicProductListener {
+
+    @Topic('products')
+    void receive(String product, MessageHeaders headers) {
+        String retryAttempt = headers.get('micronaut-kafka-retry-attempt', String).orElse('initial')
+        String sourceTopic = headers.get('micronaut-kafka-original-topic', String).orElse('products')
+        System.out.printf('Processing %s from %s (attempt=%s)%n', product, sourceTopic, retryAttempt)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener for the dead letter topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@KafkaListener("product-retry-dlt-group")
+public class RetryTopicProductDltListener {
+
+    @Topic("products-dlt")
+    void receive(String product, MessageHeaders headers) {
+        String originalTopic = headers.get("micronaut-kafka-original-topic", String.class).orElse("unknown");
+        System.out.printf("Routing %s from %s to the dead letter topic%n", product, originalTopic);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener for the dead letter topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">@KafkaListener("product-retry-dlt-group")
+class RetryTopicProductDltListener {
+
+    @Topic("products-dlt")
+    fun receive(product: String, headers: MessageHeaders) {
+        val originalTopic = headers.get("micronaut-kafka-original-topic", String::class.java).orElse("unknown")
+        println("Routing $product from $originalTopic to the dead letter topic")
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="title">A listener for the dead letter topic</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">@KafkaListener('product-retry-dlt-group')
+class RetryTopicProductDltListener {
+
+    @Topic('products-dlt')
+    void receive(String product, MessageHeaders headers) {
+        String originalTopic = headers.get('micronaut-kafka-original-topic', String).orElse('unknown')
+        System.out.printf('Routing %s from %s to the dead letter topic%n', product, originalTopic)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, Micronaut derives <code>products-retry-5s</code> and <code>products-retry-30s</code> from the source topic <code>products</code>. The same listener processes the initial delivery and the retry topics, and <code>micronaut-kafka-retry-attempt</code> is populated only when the record is being retried.</p>
+</div>
+<div class="paragraph">
+<p>When Micronaut publishes a failed record to a retry topic, it preserves the record key, value, and headers, updates the failure metadata headers, and adds:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>micronaut-kafka-retry-attempt</code></p>
+</li>
+<li>
+<p><code>micronaut-kafka-retry-due-timestamp</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When a record arrives from a retry topic before its due timestamp, Micronaut pauses that retry partition until the configured delay expires and then processes the record.</p>
+</div>
+<div class="paragraph">
+<p>When all retry topics are exhausted, Micronaut publishes the record to the configured dead letter topic, preserving the original topic metadata in the dead letter headers.</p>
 </div>
 </div>
 </div>

@@ -72,6 +72,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#stopOnExhaustedRetry()" tabindex="0">stopOnExhaustedRetry</a></li>
 <li><a href="#value()" tabindex="0">value</a></li>
 <li><a href="#dlq()" tabindex="0">dlq</a></li>
+<li><a href="#retryTopicSuffixes()" tabindex="0">retryTopicSuffixes</a></li>
+<li><a href="#retryTopicDelays()" tabindex="0">retryTopicDelays</a></li>
 <li><a href="#exceptionTypes()" tabindex="0">exceptionTypes</a></li>
 </ol>
 </li>
@@ -145,7 +147,8 @@ as well as set the error strategy.</div>
 <div class="col-second even-row-color"><code><a href="#dlq()" class="member-name-link">dlq</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">The dead letter topic to publish failed records to when using
-<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a> or
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a> after retry topics are exhausted.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;? extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Throwable.html" title="class or interface in java.lang" class="external-link">Throwable</a>&gt;[]</code></div>
 <div class="col-second odd-row-color"><code><a href="#exceptionTypes()" class="member-name-link">exceptionTypes</a></code></div>
@@ -178,6 +181,19 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
 RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <a href="ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second even-row-color"><code><a href="#retryTopicDelays()" class="member-name-link">retryTopicDelays</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">The delays to apply before consuming records from the retry topics declared in
+<a href="#retryTopicSuffixes()"><code>retryTopicSuffixes()</code></a> when using
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#retryTopicSuffixes()" class="member-name-link">retryTopicSuffixes</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">The suffixes used to derive retry topics from the original topic name when using
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.</div>
 </div>
 <div class="col-first even-row-color"><code>boolean</code></div>
 <div class="col-second even-row-color"><code><a href="#stopOnExhaustedRetry()" class="member-name-link">stopOnExhaustedRetry</a></code></div>
@@ -403,7 +419,8 @@ or the application is restarted.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">dlq</span></div>
 <div class="block">The dead letter topic to publish failed records to when using
-<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+<a href="ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a> or
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a> after retry topics are exhausted.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The dead letter topic name</dd>
@@ -413,6 +430,53 @@ or the application is restarted.</div>
 <dl class="notes">
 <dt>Default:</dt>
 <dd><code>""</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="retryTopicSuffixes()">
+<h3>retryTopicSuffixes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">retryTopicSuffixes</span></div>
+<div class="block">The suffixes used to derive retry topics from the original topic name when using
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.
+
+<p>For example, with an original topic <code>orders</code> and suffixes
+<code>-retry-5s</code> and <code>-retry-30s</code>, Micronaut will use the retry topics
+<code>orders-retry-5s</code> and <code>orders-retry-30s</code>.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The retry topic suffixes</dd>
+<dt>Since:</dt>
+<dd>6.0.0</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>{}</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="retryTopicDelays()">
+<h3>retryTopicDelays</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">retryTopicDelays</span></div>
+<div class="block">The delays to apply before consuming records from the retry topics declared in
+<a href="#retryTopicSuffixes()"><code>retryTopicSuffixes()</code></a> when using
+<a href="ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.
+
+<p>The number of configured delays must match the number of configured retry topic suffixes.</p></div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The retry topic delays</dd>
+<dt>Since:</dt>
+<dd>6.0.0</dd>
+</dl>
+<dl class="notes">
+<dt>Default:</dt>
+<dd><code>{}</code></dd>
 </dl>
 </div>
 </section>

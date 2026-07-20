@@ -597,7 +597,8 @@ fails to process a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#dlq()" class="member-name-link">dlq()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
 <div class="block">The dead letter topic to publish failed records to when using
-<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a>.</div>
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#LOG_AND_RESUME_AT_NEXT_RECORD"><code>ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD</code></a> or
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a> after retry topics are exhausted.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
@@ -1047,6 +1048,8 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isRestricted()" class="member-name-link">isRestricted()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#isRetry()" class="member-name-link">isRetry()</a> - Method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#isRetryTopic()" class="member-name-link">isRetryTopic()</a> - Method in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html#isRunning()" class="member-name-link">isRunning()</a> - Method in class io.micronaut.configuration.kafka.scope.<a href="io/micronaut/configuration/kafka/scope/KafkaCustomScope.html" title="class in io.micronaut.configuration.kafka.scope">KafkaCustomScope</a></dt>
 <dd>&nbsp;</dd>
@@ -1753,6 +1756,11 @@ consumption attempts.</div>
 <div class="block">This strategy will stop consuming subsequent records in the case of an error and will
 attempt to re-consume the current record indefinitely.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR" class="member-name-link">RETRY_TOPIC_ON_ERROR</a> - Enum constant in enum class io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation">ErrorStrategyValue</a></dt>
+<dd>
+<div class="block">This strategy will publish the failed record to retry topics so the original topic can continue
+processing while the failed record is retried asynchronously after the configured delay.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryCount()" class="member-name-link">retryCount()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
 <dd>
 <div class="block">The fixed retry count used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
@@ -1769,6 +1777,17 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <div class="block">The delay used with RETRY_ON_ERROR, RETRY_EXPONENTIALLY_ON_ERROR,
 RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryTopicDelays()" class="member-name-link">retryTopicDelays()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
+<dd>
+<div class="block">The delays to apply before consuming records from the retry topics declared in
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryTopicSuffixes()"><code>ErrorStrategy.retryTopicSuffixes()</code></a> when using
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html#retryTopicSuffixes()" class="member-name-link">retryTopicSuffixes()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategy.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">ErrorStrategy</a></dt>
+<dd>
+<div class="block">The suffixes used to derive retry topics from the original topic name when using
+<a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html#RETRY_TOPIC_ON_ERROR"><code>ErrorStrategyValue.RETRY_TOPIC_ON_ERROR</code></a>.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:S">S</h2>
