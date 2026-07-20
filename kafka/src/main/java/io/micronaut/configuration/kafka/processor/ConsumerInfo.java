@@ -41,7 +41,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +110,7 @@ final class ConsumerInfo {
         AnnotationValue<KafkaListener> kafkaListener,
         Properties properties,
         ExecutableMethod<?, ?> method,
-        Collection<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors
+        Object values
     ) {
         this(
             clientId,
@@ -120,20 +119,9 @@ final class ConsumerInfo {
             kafkaListener,
             properties,
             List.of(method),
-            Map.of(method, List.copyOf(consumerRecordInterceptors))
+            topicAnnotations(values, method),
+            Map.of(method, List.copyOf(interceptors(values)))
         );
-    }
-
-    ConsumerInfo(
-        String clientId,
-        String groupId,
-        OffsetStrategy offsetStrategy,
-        AnnotationValue<KafkaListener> kafkaListener,
-        Properties properties,
-        ExecutableMethod<?, ?> method,
-        List<AnnotationValue<Topic>> topicAnnotations
-    ) {
-        this(clientId, groupId, offsetStrategy, kafkaListener, properties, List.of(method), topicAnnotations, Map.of());
     }
 
     ConsumerInfo(
@@ -228,6 +216,20 @@ final class ConsumerInfo {
                 throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<AnnotationValue<Topic>> topicAnnotations(Object values, ExecutableMethod<?, ?> method) {
+        return values instanceof List<?> list && (list.isEmpty() || list.get(0) instanceof AnnotationValue)
+            ? (List<AnnotationValue<Topic>>) values
+            : method.getDeclaredAnnotationValuesByType(Topic.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<ConsumerRecordInterceptor<?, ?>> interceptors(Object values) {
+        return values instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof ConsumerRecordInterceptor
+            ? (List<ConsumerRecordInterceptor<?, ?>>) values
+            : List.of();
     }
 
     boolean routesByTopic() {

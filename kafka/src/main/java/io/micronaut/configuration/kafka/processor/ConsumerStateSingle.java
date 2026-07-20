@@ -175,6 +175,7 @@ final class ConsumerStateSingle extends ConsumerState {
         failed = true;
         return true;
     }
+
     private void commitOffsets(ConsumerRecords<?, ?> consumerRecords,
         ConsumerRecord<?, ?> consumerRecord,
         Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
