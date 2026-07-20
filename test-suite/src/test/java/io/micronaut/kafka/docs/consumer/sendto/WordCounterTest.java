@@ -18,6 +18,7 @@ class WordCounterTest {
 
         Map<String, Object> config = new HashMap<>(kafkaProps);
         config.put("kafka.enabled", "true");
+        config.put("kafka.streams.enabled", "false");
         config.put("spec.name", "WordCounterTest");
 
         try (ApplicationContext ctx = ApplicationContext.run(config)) {

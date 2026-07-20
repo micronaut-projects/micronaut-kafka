@@ -1,8 +1,8 @@
 [versions]
-micronaut = "5.1.6"
+micronaut = "5.1.7"
 micronaut-platform = "5.0.4"
 micronaut-gradle-plugin = "5.0.2"
-micronaut-test = "5.0.1"
+micronaut-test = "5.1.0"
 managed-kafka = '4.3.1'
 awaitility = '4.3.0'
 opentracing-kafka-client = '0.1.15'
@@ -13,7 +13,7 @@ micronaut-cache = "6.1.0"
 micronaut-micrometer = "6.0.1"
 micronaut-reactor = "4.1.0"
 micronaut-serde = "3.1.0"
-micronaut-tracing = "8.1.0"
+micronaut-tracing = "8.2.0"
 
 [libraries]
 # Core
