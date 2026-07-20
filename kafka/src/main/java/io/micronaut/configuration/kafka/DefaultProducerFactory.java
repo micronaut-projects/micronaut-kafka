@@ -22,6 +22,7 @@ import org.jspecify.annotations.NonNull;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serializer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A default implementation of {@link ProducerFactory} used for creating producer.
@@ -46,7 +47,7 @@ public class DefaultProducerFactory implements ProducerFactory {
      */
     @Override
     @NonNull
-    public <K, V> Producer<K, V> createProducer(Properties config, Serializer<K> ks, Serializer<V> vs) {
+    public <K, V> Producer<K, V> createProducer(Properties config, @Nullable Serializer<K> ks, @Nullable Serializer<V> vs) {
         return new KafkaProducer<>(config, ks, vs);
     }
 }

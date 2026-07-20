@@ -17,13 +17,13 @@ package io.micronaut.configuration.kafka.seek;
 
 import io.micronaut.core.annotation.Internal;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -102,7 +102,7 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
         }
     }
 
-    private long offset(@NonNull KafkaSeekOperation operation, @Nullable TopicPartition tp) {
+    private long offset(@NonNull KafkaSeekOperation operation, @NonNull TopicPartition tp) {
         return switch (operation.offsetType()) {
             case ABSOLUTE -> operation.offset();
             case FORWARD -> current(tp) + operation.offset();
@@ -118,11 +118,19 @@ record DefaultKafkaSeeker(@NonNull Consumer<?, ?> consumer) implements KafkaSeek
     }
 
     public long beginning(TopicPartition tp) {
-        return consumer.beginningOffsets(singletonList(tp)).get(tp);
+        return offsetFor(consumer.beginningOffsets(singletonList(tp)), tp);
     }
 
     private long end(TopicPartition tp) {
-        return consumer.endOffsets(singletonList(tp)).get(tp);
+        return offsetFor(consumer.endOffsets(singletonList(tp)), tp);
+    }
+
+    private static long offsetFor(Map<TopicPartition, Long> offsets, TopicPartition tp) {
+        Long offset = offsets.get(tp);
+        if (offset == null) {
+            throw new IllegalStateException("No offset returned for topic partition " + tp);
+        }
+        return offset;
     }
 
     private Optional<Long> earliest(TopicPartition tp, long ts) {

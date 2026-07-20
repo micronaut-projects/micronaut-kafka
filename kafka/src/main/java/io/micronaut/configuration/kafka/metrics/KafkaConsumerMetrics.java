@@ -23,6 +23,7 @@ import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import jakarta.inject.Inject;
 import java.util.Optional;
 import static io.micronaut.configuration.metrics.micrometer.MeterRegistryFactory.MICRONAUT_METRICS_BINDERS;
 
@@ -44,6 +45,18 @@ public class KafkaConsumerMetrics extends AbstractKafkaMetrics<AbstractKafkaCons
      * @param beanLocator The bean locator
      */
     public KafkaConsumerMetrics(BeanLocator beanLocator) {
+        super();
+        this.beanLocator = beanLocator;
+    }
+
+    /**
+     * Default constructor.
+     * @param beanLocator The bean locator
+     * @param kafkaMetricsConfiguration The Kafka metrics configuration
+     */
+    @Inject
+    public KafkaConsumerMetrics(BeanLocator beanLocator, KafkaMetricsConfigurationProperties kafkaMetricsConfiguration) {
+        super(kafkaMetricsConfiguration);
         this.beanLocator = beanLocator;
     }
 

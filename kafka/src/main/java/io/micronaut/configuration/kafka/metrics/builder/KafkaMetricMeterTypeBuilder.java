@@ -25,6 +25,7 @@ import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +44,11 @@ public class KafkaMetricMeterTypeBuilder {
 
     private static final KafkaMetricMeterTypeRegistry KAFKA_METRIC_METER_TYPE_REGISTRY = new KafkaMetricMeterTypeRegistry();
 
-    private MeterRegistry meterRegistry;
-    private String name;
-    private Function<MetricName, List<Tag>> tagFunction;
-    private KafkaMetric kafkaMetric;
-    private String prefix;
+    private @Nullable MeterRegistry meterRegistry;
+    private @Nullable String name;
+    private @Nullable Function<MetricName, List<Tag>> tagFunction;
+    private @Nullable KafkaMetric kafkaMetric;
+    private @Nullable String prefix;
 
     /**
      * Method for creating a new builder class.
@@ -124,33 +125,44 @@ public class KafkaMetricMeterTypeBuilder {
             return Optional.empty();
         }
 
-        if (StringUtils.isEmpty(name)) {
-            name = kafkaMetric.metricName().name();
+        KafkaMetric currentKafkaMetric = kafkaMetric;
+        MeterRegistry currentMeterRegistry = meterRegistry;
+        Function<MetricName, List<Tag>> currentTagFunction = tagFunction;
+        String currentPrefix = prefix;
+        String currentName = name;
+        if (currentKafkaMetric == null || currentMeterRegistry == null || currentTagFunction == null || StringUtils.isEmpty(currentPrefix)) {
+            return Optional.empty();
         }
 
-        KafkaMetricMeterType kafkaMetricMeterType = KAFKA_METRIC_METER_TYPE_REGISTRY.lookup(this.name);
-        List<Tag> tags = tagFunction.apply(kafkaMetric.metricName());
+        String kafkaMetricName = currentKafkaMetric.metricName().name();
+        if (StringUtils.isEmpty(currentName)) {
+            currentName = kafkaMetricName;
+            name = currentName;
+        }
 
-        if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
+        KafkaMetricMeterType kafkaMetricMeterType = KAFKA_METRIC_METER_TYPE_REGISTRY.lookup(kafkaMetricName);
+        List<Tag> tags = currentTagFunction.apply(currentKafkaMetric.metricName());
+
+        if (kafkaMetricMeterType.getMeterType() == MeterType.GAUGE && currentKafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(Gauge.builder(getMetricName(), kafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
+            return Optional.of(Gauge.builder(getMetricName(currentPrefix, currentName), currentKafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
-                    .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && this.kafkaMetric.metricValue() instanceof Number) {
+                    .register(currentMeterRegistry));
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.FUNCTION_COUNTER && currentKafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(FunctionCounter.builder(getMetricName(), kafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
+            return Optional.of(FunctionCounter.builder(getMetricName(currentPrefix, currentName), currentKafkaMetric, metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
                     .baseUnit(kafkaMetricMeterType.getBaseUnit())
-                    .register(meterRegistry));
-        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && this.kafkaMetric.metricValue() instanceof Number) {
+                    .register(currentMeterRegistry));
+        } else if (kafkaMetricMeterType.getMeterType() == MeterType.TIME_GAUGE && currentKafkaMetric.metricValue() instanceof Number) {
             removeExistingMeter(tags);
-            return Optional.of(TimeGauge.builder(getMetricName(), kafkaMetric, kafkaMetricMeterType.getTimeUnit(), metric -> ((Number) metric.metricValue()).doubleValue())
+            return Optional.of(TimeGauge.builder(getMetricName(currentPrefix, currentName), currentKafkaMetric, kafkaMetricMeterType.getTimeUnit(), metric -> ((Number) metric.metricValue()).doubleValue())
                     .tags(tags)
                     .description(kafkaMetricMeterType.getDescription())
-                    .register(meterRegistry));
+                    .register(currentMeterRegistry));
         }
 
         return Optional.empty();
@@ -163,16 +175,22 @@ public class KafkaMetricMeterTypeBuilder {
                 StringUtils.isNotEmpty(prefix);
     }
 
-    private String getMetricName() {
+    private String getMetricName(String prefix, String name) {
         return prefix + "." + name;
     }
 
     private void removeExistingMeter(List<Tag> tags) {
-        Meter existingMeter = meterRegistry.find(getMetricName())
+        MeterRegistry currentMeterRegistry = meterRegistry;
+        String currentPrefix = prefix;
+        String currentName = name;
+        if (currentMeterRegistry == null || StringUtils.isEmpty(currentPrefix) || StringUtils.isEmpty(currentName)) {
+            return;
+        }
+        Meter existingMeter = currentMeterRegistry.find(getMetricName(currentPrefix, currentName))
                 .tags(tags)
                 .meter();
         if (existingMeter != null) {
-            meterRegistry.remove(existingMeter);
+            currentMeterRegistry.remove(existingMeter);
         }
     }
 }

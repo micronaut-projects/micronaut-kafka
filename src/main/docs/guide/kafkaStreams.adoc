@@ -73,7 +73,9 @@ kafka:
 
 The above configuration example sets the `processing.guarantee` and `auto.offset.reset` setting of the `default` Stream. Most of the configuration properties pass directly through to the `KafkaStreams` instance being initialized.
 
-In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down (this is mostly useful during testing), with `close-timeout`.
+In addition to those standard properties, you may want to customize how long you wait for Kafka Streams to shut down with `close-timeout`.
+
+Micronaut Kafka integrates Kafka Streams with Micronaut's graceful shutdown lifecycle. When the application is stopping, Micronaut waits for the configured streams to close, and `close-timeout` defines how long Micronaut waits for each stream before logging a timeout.
 
 For example, this will make Micronaut Kafka wait for up to 10 seconds to shut down the default stream:
 
@@ -125,6 +127,10 @@ NOTE: The `@Named` qualifier must be applied to the injected `ConfiguredStreamBu
 .Kafka Streams Word Count
 
 snippet::io.micronaut.kafka.docs.streams.WordCountStream[tags="namedStream", indent=0]
+
+.Disabling Kafka Streams integration
+
+If an application includes the `kafka-streams` module but should not initialize any Kafka Streams beans in a given environment, set `kafka.streams.enabled` to `false`.
 
 .Configuring Kafka Streams for testing
 When writing a test without starting the actual Kafka server, you can instruct Micronaut not to start Kafka Streams. To do this create a config file suffixed with an environment name, such as `application-test.yml` and set the `kafka.streams.[STREAM-NAME].start-kafka-streams` to `false`.

@@ -67,6 +67,7 @@ final class ConsumerInfo {
     @Nullable final Duration retryDelay;
     final int retryCount;
     final boolean shouldHandleAllExceptions;
+    final boolean shouldStopOnExhaustedRetry;
     final List<Class<? extends Throwable>> exceptionTypes;
     @Nullable final String producerClientId;
     @Nullable final String producerTransactionalId;
@@ -155,6 +156,10 @@ final class ConsumerInfo {
         this.retryDelay = errorStrategyAnnotation.flatMap(a -> a.get("retryDelay", Duration.class)).filter(d -> !d.isZero() && !d.isNegative()).orElse(null);
         this.retryCount = errorStrategyAnnotation.map(a -> a.intValue("retryCount").orElse(ErrorStrategy.DEFAULT_RETRY_COUNT)).orElse(0);
         this.shouldHandleAllExceptions = errorStrategyAnnotation.flatMap(a -> a.booleanValue("handleAllExceptions")).orElse(ErrorStrategy.DEFAULT_HANDLE_ALL_EXCEPTIONS);
+        this.shouldStopOnExhaustedRetry = errorStrategyAnnotation.flatMap(a -> a.booleanValue("stopOnExhaustedRetry")).orElse(false);
+        if (this.shouldStopOnExhaustedRetry && !this.errorStrategy.isRetry()) {
+            throw new MessagingSystemException("'stopOnExhaustedRetry' requires a retry error strategy");
+        }
         this.exceptionTypes = Arrays.stream((Class<? extends Throwable>[]) errorStrategyAnnotation.map(a -> a.classValues("exceptionTypes")).orElse(ReflectionUtils.EMPTY_CLASS_ARRAY)).toList();
         this.producerClientId = kafkaListener.stringValue("producerClientId").orElse(null);
         this.producerTransactionalId = kafkaListener.stringValue("producerTransactionalId").filter(StringUtils::isNotEmpty).orElse(null);

@@ -23,7 +23,9 @@ import io.micronaut.json.JsonObjectSerializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -52,12 +54,12 @@ public class JsonObjectSerde<T> implements Serializer<T>, Deserializer<T>, Serde
     }
 
     @Override
-    public T deserialize(String topic, byte[] data) {
+    public @Nullable T deserialize(String topic, byte @Nullable [] data) {
         if (data == null) {
             return null;
         }
         return objectSerializer.deserialize(data, type)
-                .orElseThrow(() -> new SerializationException("Unable to deserialize data: " + data));
+                .orElseThrow(() -> new SerializationException("Unable to deserialize data: " + Arrays.toString(data)));
     }
 
     @Override
@@ -66,7 +68,7 @@ public class JsonObjectSerde<T> implements Serializer<T>, Deserializer<T>, Serde
     }
 
     @Override
-    public byte[] serialize(String topic, T data) {
+    public byte @Nullable [] serialize(String topic, @Nullable T data) {
         if (data == null) {
             return null;
         }

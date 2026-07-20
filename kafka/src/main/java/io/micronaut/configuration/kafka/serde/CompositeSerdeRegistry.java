@@ -25,7 +25,11 @@ import org.apache.kafka.common.serialization.Serdes;
 
 import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

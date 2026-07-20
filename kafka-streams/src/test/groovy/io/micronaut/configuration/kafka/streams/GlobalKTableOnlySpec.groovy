@@ -37,6 +37,31 @@ class GlobalKTableOnlySpec extends AbstractKafkaSpec {
         topologyDescription.contains(GlobalTableOnlyFactory.STORE)
     }
 
+    void "global kafka streams enabled property is not treated as a stream name"() {
+        given:
+        ApplicationContext enabledContext = ApplicationContext.run([
+                'spec.name'                                           : 'GlobalKTableOnlySpec',
+                'kafka.test.initializer.enabled'                      : false,
+                'kafka.bootstrap.servers'                             : 'localhost:9092',
+                'kafka.streams.enabled'                               : true,
+                'kafka.streams.default.application.id'                : 'default-enabled-' + UNIQUE_SUFFIX,
+                'kafka.streams.default.start-kafka-streams'           : false,
+                'kafka.streams.default.state.dir'                     : TMP_DIR + '/enabled-property-default-' + UNIQUE_SUFFIX,
+                'kafka.streams.global-table-only.application.id'      : 'global-table-only-' + UNIQUE_SUFFIX,
+                'kafka.streams.global-table-only.start-kafka-streams' : false,
+                'kafka.streams.global-table-only.state.dir'           : TMP_DIR + '/enabled-property-global-' + UNIQUE_SUFFIX
+        ])
+
+        when:
+        List<String> streamNames = enabledContext.getBeansOfType(ConfiguredStreamBuilder)*.name.sort()
+
+        then:
+        !streamNames.contains('enabled')
+
+        cleanup:
+        enabledContext.close()
+    }
+
     @Override
     protected Map<String, Object> getConfiguration() {
         super.getConfiguration() + [

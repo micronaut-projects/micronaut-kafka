@@ -121,6 +121,71 @@ class ConsumerStateBatchSpec extends Specification {
         1 * kafkaConsumerProcessor.handleException(_, _)
     }
 
+    void "resolveWithErrorStrategy stops on exhausted retry for the failed batch"() {
+        given:
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor)
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateBatch consumerState = newConsumerStateBatch(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 0, true)
+        )
+        TopicPartition firstPartition = new TopicPartition('source-topic', 0)
+        TopicPartition secondPartition = new TopicPartition('source-topic', 1)
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([
+            (firstPartition): [new ConsumerRecord<>('source-topic', 0, 7L, 'key-0', 'value-0')],
+            (secondPartition): [new ConsumerRecord<>('source-topic', 1, 9L, 'key-1', 'value-1')]
+        ])
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets = [(firstPartition): new OffsetAndMetadata(8L, null)]
+
+        when:
+        boolean shouldRetry = invokePrivateMethod(
+            consumerState,
+            'resolveWithErrorStrategy',
+            [ConsumerRecords, Map, ConsumerRecord, Throwable] as Class[],
+            [consumerRecords, currentOffsets, null, new RuntimeException('boom')] as Object[]
+        ) as boolean
+
+        then:
+        shouldRetry
+        1 * kafkaConsumer.seek(firstPartition, 8L)
+        1 * kafkaConsumer.seek(secondPartition, 9L)
+        1 * kafkaConsumerProcessor.handleException(_, _)
+        pauseRequests(consumerState) == [firstPartition, secondPartition] as Set
+    }
+
+    void "resolveWithErrorStrategy stops on exhausted retry for a synthetic failed record"() {
+        given:
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor)
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateBatch consumerState = newConsumerStateBatch(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 0, true)
+        )
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 11L, 'key', 'value')
+        TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition())
+        Map<TopicPartition, OffsetAndMetadata> currentOffsets = [(topicPartition): new OffsetAndMetadata(11L, null)]
+
+        when:
+        boolean shouldRetry = invokePrivateMethod(
+            consumerState,
+            'resolveWithErrorStrategy',
+            [ConsumerRecords, Map, ConsumerRecord, Throwable] as Class[],
+            [null, currentOffsets, consumerRecord, new RuntimeException('boom')] as Object[]
+        ) as boolean
+
+        then:
+        shouldRetry
+        1 * kafkaConsumer.seek(topicPartition, 11L)
+        1 * kafkaConsumerProcessor.handleException(_, _)
+        pauseRequests(consumerState) == [topicPartition] as Set
+    }
+
     void "does not seek past deserialization failures when offset strategy is disabled"() {
         given:
         TopicPartition topicPartition = new TopicPartition("books", 1)
@@ -371,14 +436,22 @@ class ConsumerStateBatchSpec extends Specification {
         kafkaListenerAnnotation(RETRY_ON_ERROR, null)
     }
 
-    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(def errorStrategy, String dlq) {
+    private AnnotationValue<KafkaListener> kafkaListenerAnnotation(
+        def errorStrategy,
+        String dlq,
+        Integer retryCount = null,
+        boolean stopOnExhaustedRetry = false
+    ) {
         def errorStrategyAnnotation = AnnotationValue.builder(ErrorStrategy)
             .member('value', errorStrategy)
         if (dlq != null) {
             errorStrategyAnnotation.member('dlq', dlq)
         }
         if (errorStrategy == RETRY_ON_ERROR) {
-            errorStrategyAnnotation.member('retryCount', 3)
+            errorStrategyAnnotation.member('retryCount', retryCount == null ? 3 : retryCount)
+        }
+        if (stopOnExhaustedRetry) {
+            errorStrategyAnnotation.member('stopOnExhaustedRetry', true)
         }
         AnnotationValue.builder(KafkaListener)
                 .member('batch', true)
@@ -443,6 +516,12 @@ class ConsumerStateBatchSpec extends Specification {
                 invocation.call(([instance]) as Object[])
             }
         }
+    }
+
+    private static Set<TopicPartition> pauseRequests(ConsumerStateBatch consumerState) {
+        def field = ConsumerState.getDeclaredField('pauseRequests')
+        field.accessible = true
+        field.get(consumerState) as Set<TopicPartition>
     }
 
     private static final class TestBatchListener {

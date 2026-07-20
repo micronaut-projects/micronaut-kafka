@@ -16,7 +16,6 @@
 package io.micronaut.configuration.kafka.streams.health.serde;
 
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import io.micronaut.core.type.Argument;
 import io.micronaut.serde.Decoder;
 import io.micronaut.serde.Encoder;
@@ -47,9 +46,13 @@ public final class TaskIdSerde implements Serde<TaskId> {
      * @throws IOException If an I/O error occurs during deserialization.
      */
     @Override
-    public @Nullable TaskId deserialize(@NonNull Decoder decoder, DecoderContext context, @NonNull Argument<? super TaskId> type) throws IOException {
+    public TaskId deserialize(@NonNull Decoder decoder, DecoderContext context, @NonNull Argument<? super TaskId> type) throws IOException {
         final String taskIdStr = decoder.decodeString();
-        return TaskId.parse(taskIdStr);
+        TaskId taskId = TaskId.parse(taskIdStr);
+        if (taskId == null) {
+            throw new IOException("Unable to deserialize Kafka Streams task id: " + taskIdStr);
+        }
+        return taskId;
     }
 
     /**

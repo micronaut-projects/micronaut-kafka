@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 original authors
+ * Copyright 2017-2026 original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ import io.micronaut.aop.InterceptorBean;
 import io.micronaut.aop.MethodInterceptor;
 import io.micronaut.aop.MethodInvocationContext;
 import io.micronaut.configuration.kafka.RecoveringTransactionalProducer;
-import io.micronaut.configuration.kafka.annotation.*;
+import io.micronaut.configuration.kafka.annotation.KafkaClient;
+import io.micronaut.configuration.kafka.annotation.KafkaKey;
+import io.micronaut.configuration.kafka.annotation.KafkaPartition;
+import io.micronaut.configuration.kafka.annotation.KafkaPartitionKey;
+import io.micronaut.configuration.kafka.annotation.KafkaTimestamp;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.config.AbstractKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.DefaultKafkaProducerConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaProducerConfiguration;
@@ -43,6 +48,7 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.messaging.annotation.MessageBody;
 import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.messaging.exceptions.MessagingClientException;
+import io.micronaut.scheduling.TaskExecutors;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -66,7 +72,16 @@ import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -115,7 +130,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
     }
 
     @Override
-    public final Object intercept(MethodInvocationContext<Object, Object> context) {
+    public final @Nullable Object intercept(MethodInvocationContext<Object, Object> context) {
         if (context.hasAnnotation(KafkaClient.class)) {
             if (!context.hasAnnotation(KafkaClient.class)) {
                 throw new IllegalStateException("No @KafkaClient annotation present on method: " + context);
@@ -162,7 +177,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
         }
     }
 
-    private Object returnSynchronous(MethodInvocationContext<Object, Object> context, ProducerState producerState) {
+    private @Nullable Object returnSynchronous(MethodInvocationContext<Object, Object> context, ProducerState producerState) {
         ReturnType<Object> returnType = context.getReturnType();
         Class<Object> javaReturnType = returnType.getType();
         Argument<Object> returnTypeArgument = returnType.asArgument();
@@ -771,9 +786,16 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
             BiFunction<MethodInvocationContext<?, ?>, Producer, Integer> finalPartitionFromProducerFn = partitionFromProducerFn;
             ContextSupplier<Integer> partitionSupplier = ctx -> finalPartitionFromProducerFn.apply(ctx, producer);
 
-            String executor = context.stringValue(KafkaClient.class, "executor").orElseGet(() -> newConfiguration.getExecutor().orElse(""));
+            String executor = context.stringValue(KafkaClient.class, "executor")
+                .orElseGet(() -> newConfiguration.getExecutor()
+                    .filter(StringUtils::isNotEmpty)
+                    .orElseGet(() ->
+                        context.getReturnType().asArgument().isAsyncOrReactive() ? TaskExecutors.BLOCKING : ""
+                    ));
 
-            ExecutorService executorService = beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null);
+            ExecutorService executorService = StringUtils.isNotEmpty(executor)
+                ? beanContext.findBean(ExecutorService.class, Qualifiers.byName(executor)).orElse(null)
+                : null;
 
             return new ProducerState(producer, keySupplier, topicSupplier[0], valueSupplier, timestampSupplier, partitionSupplier, headersSupplier,
                     transactional, transactionalId, maxBlock, isBatchSend, bodyArgument, executorService);
@@ -823,7 +845,7 @@ class KafkaClientIntroductionAdvice implements MethodInterceptor<Object, Object>
                                               @Nullable String transactionalId,
                                               @Nullable Duration maxBlock,
                                               boolean isBatchSend,
-                                              @Nullable Argument<?> bodyArgument,
+                                              Argument<?> bodyArgument,
                                               @Nullable ExecutorService executorService) {
 
     }

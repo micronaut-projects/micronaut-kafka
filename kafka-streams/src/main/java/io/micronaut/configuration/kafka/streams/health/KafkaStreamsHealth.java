@@ -28,6 +28,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TaskMetadata;
 import org.apache.kafka.streams.ThreadMetadata;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import jakarta.inject.Singleton;
@@ -53,6 +54,7 @@ import java.util.stream.Stream;
  */
 @Singleton
 @Requires(classes = HealthIndicator.class)
+@Requires(beans = KafkaStreamsFactory.class)
 @Requires(property = KafkaStreamsHealth.ENABLED_PROPERTY, value = "true", defaultValue = "true")
 public class KafkaStreamsHealth implements HealthIndicator {
 
@@ -108,7 +110,7 @@ public class KafkaStreamsHealth implements HealthIndicator {
                             emitter.complete();
                         }))
                         .onErrorResume(e -> Flux.just(HealthResult.builder(pair.getKey(), HealthStatus.DOWN)
-                                .details(buildDownDetails(e.getMessage(), pair.getValue().state(), pair.getKey(), e)))))
+                                .details(buildDownDetails(String.valueOf(e.getMessage()), pair.getValue().state(), pair.getKey(), e)))))
                 .map(HealthResult.Builder::build);
         return healthAggregator.aggregate(NAME, kafkaStreamHealth);
     }
@@ -132,10 +134,10 @@ public class KafkaStreamsHealth implements HealthIndicator {
      * @param e The exception
      * @return Map of details messages
      */
-    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId, Throwable e) {
+    private Map<String, String> buildDownDetails(String message, KafkaStreams.State state, String streamId, @Nullable Throwable e) {
         if (e != null) {
             LOG.debug("Reporting Kafka health DOWN. Kafka stream [{}] in state [{}] is DOWN. Reason: {}", streamId, state, message);
-            LOG.debug(e.getMessage(), e);
+            LOG.debug(String.valueOf(e.getMessage()), e);
         } else {
             LOG.debug("Reporting Kafka health DOWN. Kafka stream [{}] in state [{}] is DOWN. Reason: {}", streamId, state, message);
         }
