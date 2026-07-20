@@ -142,6 +142,9 @@ final class ConsumerInfo {
         this.offsetStrategy = offsetStrategy;
         final Optional<AnnotationValue<ErrorStrategy>> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class);
         this.errorStrategy = errorStrategyAnnotation.map(a -> a.getRequiredValue(ErrorStrategyValue.class)).orElse(ErrorStrategyValue.NONE); // NOSONAR
+        if (this.errorStrategy.isRetryTopic() && offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION) {
+            throw new MessagingSystemException("Error strategy 'RETRY_TOPIC_ON_ERROR' cannot be used with offset strategy 'SEND_TO_TRANSACTION'");
+        }
         this.dlq = errorStrategyAnnotation.flatMap(a -> a.stringValue("dlq")).filter(StringUtils::isNotEmpty).orElse(null);
         if (this.errorStrategy == ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD && this.dlq == null) {
             throw new MessagingSystemException("Error strategy 'LOG_AND_RESUME_AT_NEXT_RECORD' requires setting a non-empty dead letter topic with 'dlq'");

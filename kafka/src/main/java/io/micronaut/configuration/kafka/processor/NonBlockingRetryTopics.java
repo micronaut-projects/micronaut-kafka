@@ -109,7 +109,10 @@ final class NonBlockingRetryTopics {
         Map<String, TopicBinding> bindings = new LinkedHashMap<>();
         for (String directTopic : directTopics) {
             TopicBinding originalBinding = new TopicBinding(directTopic, 0);
-            bindings.put(directTopic, originalBinding);
+            TopicBinding previousOriginal = bindings.putIfAbsent(directTopic, originalBinding);
+            if (previousOriginal != null && previousOriginal.attempt() > 0) {
+                throw new MessagingSystemException("Topic [" + directTopic + "] is both an original topic and a retry topic");
+            }
             for (int i = 0; i < suffixes.size(); i++) {
                 String retryTopic = directTopic + suffixes.get(i);
                 TopicBinding previous = bindings.putIfAbsent(retryTopic, new TopicBinding(directTopic, i + 1));

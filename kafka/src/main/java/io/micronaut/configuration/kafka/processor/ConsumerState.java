@@ -680,6 +680,18 @@ abstract class ConsumerState {
         try {
             kafkaProducer.send(producerRecord).get(DLQ_PUBLISH_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             return true;
+        } catch (InterruptedException publishError) {
+            Thread.currentThread().interrupt();
+            LOG.error(
+                "Error publishing record [topic={}, partition={}, offset={}] to retry topic [{}]: {}",
+                consumerRecord.topic(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
+                retryDispatch.retryTopic(),
+                publishError.getMessage(),
+                publishError
+            );
+            return false;
         } catch (Exception publishError) {
             LOG.error(
                 "Error publishing record [topic={}, partition={}, offset={}] to retry topic [{}]: {}",
