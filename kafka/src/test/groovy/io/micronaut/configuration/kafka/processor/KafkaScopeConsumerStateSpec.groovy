@@ -42,17 +42,23 @@ class KafkaScopeConsumerStateSpec extends Specification {
 
     void "single consumer state recreates the scope for each record"() {
         given:
+        List<String> interceptedIds = new CopyOnWriteArrayList<>()
+        SingleScopedListener listener = context.getBean(SingleScopedListener)
         ConsumerStateSingle state = new ConsumerStateSingle(
-            kafkaConsumerProcessor(),
+            kafkaConsumerProcessor(
+                { ConsumerInfo ignored, ConsumerRecord<?, ?> record ->
+                    interceptedIds.add(context.getBean(InvocationScopedBean).currentId())
+                    record
+                }
+            ),
             singleConsumerInfo(),
             kafkaConsumer(),
-            context.getBean(SingleScopedListener)
+            listener
         )
         ConsumerRecords<String, String> records = records(
             new ConsumerRecord<>('topic', 0, 0L, 'key-1', 'one'),
             new ConsumerRecord<>('topic', 0, 1L, 'key-2', 'two')
         )
-        SingleScopedListener listener = context.getBean(SingleScopedListener)
 
         when:
         state.processRecords(records, [:])
@@ -60,19 +66,27 @@ class KafkaScopeConsumerStateSpec extends Specification {
         then:
         listener.directIds.size() == 2
         listener.directIds == listener.helperIds
+        listener.directIds == interceptedIds
         listener.directIds.toSet().size() == 2
         InvocationScopedBean.DESTROYED.get() == 2
     }
 
     void "batch consumer state shares a scope across the batch and recreates it for the next batch"() {
         given:
+        List<List<String>> interceptedIdsPerInvocation = new CopyOnWriteArrayList<>()
+        BatchScopedListener listener = context.getBean(BatchScopedListener)
         ConsumerStateBatch state = new ConsumerStateBatch(
-            kafkaConsumerProcessor(),
+            kafkaConsumerProcessor(
+                { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record },
+                { ConsumerInfo ignored, ConsumerRecords<?, ?> records ->
+                    interceptedIdsPerInvocation.add(records.collect { context.getBean(InvocationScopedBean).currentId() })
+                    records
+                }
+            ),
             batchConsumerInfo(),
             kafkaConsumer(),
-            context.getBean(BatchScopedListener)
+            listener
         )
-        BatchScopedListener listener = context.getBean(BatchScopedListener)
 
         when:
         state.processRecords(records(
@@ -87,12 +101,17 @@ class KafkaScopeConsumerStateSpec extends Specification {
         listener.directIds.size() == 2
         listener.batchSizes == [2, 1]
         listener.directIds.toSet().size() == 2
+        interceptedIdsPerInvocation[0].every { it == listener.directIds[0] }
+        interceptedIdsPerInvocation[1].every { it == listener.directIds[1] }
         listener.helperIdsPerInvocation[0].every { it == listener.directIds[0] }
         listener.helperIdsPerInvocation[1].every { it == listener.directIds[1] }
         InvocationScopedBean.DESTROYED.get() == 2
     }
 
-    private KafkaConsumerProcessor kafkaConsumerProcessor() {
+    private KafkaConsumerProcessor kafkaConsumerProcessor(
+        Closure<ConsumerRecord<?, ?>> recordInterceptor = { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record },
+        Closure<ConsumerRecords<?, ?>> batchInterceptor = { ConsumerInfo ignored, ConsumerRecords<?, ?> records -> records }
+    ) {
         ConsumerRecordBinderRegistry binderRegistry = new ConsumerRecordBinderRegistry(ConversionService.SHARED)
         BatchConsumerRecordsBinderRegistry batchBinderRegistry = new BatchConsumerRecordsBinderRegistry(binderRegistry, ConversionService.SHARED)
         KafkaCustomScope kafkaScope = context.getBean(KafkaCustomScope)
@@ -100,6 +119,8 @@ class KafkaScopeConsumerStateSpec extends Specification {
             getBinderRegistry() >> binderRegistry
             getBatchBinderRegistry() >> batchBinderRegistry
             getKafkaScope() >> kafkaScope
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo info, ConsumerRecord<?, ?> record -> recordInterceptor.call(info, record) }
+            interceptRecords(_, _ as ConsumerRecords) >> { ConsumerInfo info, ConsumerRecords<?, ?> records -> batchInterceptor.call(info, records) }
         }
     }
 

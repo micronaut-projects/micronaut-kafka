@@ -98,8 +98,7 @@ final class ConsumerStateSingle extends ConsumerState {
                 return;
             }
             trackCurrentOffset(consumerRecord, currentOffsets);
-            final KafkaSeekOperations seek = bindRecordArguments(topic, currentOffsets);
-            if (withKafkaScope(() -> processRecord(topic, consumerRecords, currentOffsets, iterator, consumerRecord, seek))) {
+            if (withKafkaScope(() -> processRecord(topic, consumerRecords, currentOffsets, iterator, consumerRecord))) {
                 return;
             }
         }
@@ -143,12 +142,18 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecords<?, ?> consumerRecords,
         @Nullable Map<TopicPartition, OffsetAndMetadata> currentOffsets,
         Iterator<? extends ConsumerRecord<?, ?>> iterator,
-        ConsumerRecord<?, ?> consumerRecord,
-        @Nullable KafkaSeekOperations seek) {
+        ConsumerRecord<?, ?> consumerRecord) {
+        ConsumerRecord<?, ?> interceptedConsumerRecord = null;
+        KafkaSeekOperations seek = null;
         try {
-            process(topic, consumerRecord, consumerRecords);
+            interceptedConsumerRecord = kafkaConsumerProcessor.interceptRecord(info, consumerRecord);
+            seek = bindRecordArguments(topic, currentOffsets);
+            if (interceptedConsumerRecord != null) {
+                process(topic, interceptedConsumerRecord, consumerRecords);
+            }
         } catch (Exception e) {
-            if (handleRecordFailure(consumerRecords, iterator, consumerRecord, e)) {
+            final ConsumerRecord<?, ?> errorRecord = interceptedConsumerRecord != null ? interceptedConsumerRecord : consumerRecord;
+            if (handleRecordFailure(consumerRecords, iterator, errorRecord, e)) {
                 return true;
             }
         }
@@ -170,7 +175,6 @@ final class ConsumerStateSingle extends ConsumerState {
         failed = true;
         return true;
     }
-
     private void commitOffsets(ConsumerRecords<?, ?> consumerRecords,
         ConsumerRecord<?, ?> consumerRecord,
         Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
