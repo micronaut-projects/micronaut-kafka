@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.bind.ConsumerRecordBinderRegistry
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
+import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.core.type.Argument
@@ -32,6 +33,7 @@ import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.NON
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_ON_ERROR
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RETRY_TOPIC_ON_ERROR
 
 class ConsumerStateSingleSpec extends Specification {
 
@@ -132,21 +134,127 @@ class ConsumerStateSingleSpec extends Specification {
         ex.message.contains('dlq')
     }
 
-    void "consumer info requires a retry strategy to stop on exhausted retry"() {
+    void "resolveWithErrorStrategy publishes the failed record to the retry topic and resumes"() {
+        given:
+        Producer<?, ?> kafkaProducer = Mock(Producer)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getProducer('group', String, String) >> kafkaProducer
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newRetryTopicConsumerState(kafkaConsumerProcessor, kafkaConsumer)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([
+            (new TopicPartition(consumerRecord.topic(), consumerRecord.partition())): [consumerRecord]
+        ])
+        RuntimeException error = new RuntimeException('boom')
+
+        when:
+        boolean shouldRetry = invokePrivateMethod(
+            consumerState,
+            'resolveWithErrorStrategy',
+            [ConsumerRecords, ConsumerRecord, Throwable] as Class[],
+            [consumerRecords, consumerRecord, error] as Object[]
+        ) as boolean
+
+        then:
+        !shouldRetry
+        1 * kafkaProducer.send({
+            ProducerRecord<?, ?> record ->
+                record.topic() == 'source-topic-retry-100ms' &&
+                    record.key() == 'key' &&
+                    record.value() == 'value' &&
+                    headerValue(record, 'micronaut-kafka-exception-class') == RuntimeException.name &&
+                    headerValue(record, 'micronaut-kafka-original-topic') == 'source-topic' &&
+                    headerValue(record, 'micronaut-kafka-original-partition') == '2' &&
+                    headerValue(record, 'micronaut-kafka-original-offset') == '7' &&
+                    headerValue(record, 'micronaut-kafka-retry-attempt') == '1' &&
+                    Long.parseLong(headerValue(record, 'micronaut-kafka-retry-due-timestamp')) >= System.currentTimeMillis()
+        }) >> CompletableFuture.completedFuture(null)
+        0 * kafkaConsumer.seek(_, _)
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "consumer info requires retry topic suffixes and delays for retry topic strategy"() {
         when:
         new ConsumerInfo(
             'client',
             'group',
             OffsetStrategy.DISABLED,
-            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null, null, true),
+            kafkaListenerAnnotation(RETRY_TOPIC_ON_ERROR, null),
             new Properties(),
-            executableMethod()
+            executableMethod(),
+            topicAnnotations('source-topic')
         )
 
         then:
         def ex = thrown(MessagingSystemException)
-        ex.message.contains('stopOnExhaustedRetry')
-        ex.message.contains('retry error strategy')
+        ex.message.contains('RETRY_TOPIC_ON_ERROR')
+    }
+
+    void "retry topic record is deferred until its due timestamp"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic-retry-100ms', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic-retry-100ms', 2, 7L, 'key', 'value')
+        consumerRecord.headers().add('micronaut-kafka-retry-due-timestamp', Long.toString(System.currentTimeMillis() + 60_000).getBytes(StandardCharsets.UTF_8))
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newRetryTopicConsumerState(kafkaConsumerProcessor, kafkaConsumer)
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * kafkaConsumer.seek(topicPartition, 7L)
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
+    void "exhausted retry topic record is published to dlq with original headers preserved"() {
+        given:
+        Producer<?, ?> kafkaProducer = Mock(Producer)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getProducer(_, _, _) >> kafkaProducer
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newRetryTopicConsumerState(kafkaConsumerProcessor, kafkaConsumer)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic-retry-100ms', 2, 8L, 'key', 'value')
+        consumerRecord.headers().add('micronaut-kafka-original-topic', 'source-topic'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-original-partition', '2'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-original-offset', '7'.getBytes(StandardCharsets.UTF_8))
+        consumerRecord.headers().add('micronaut-kafka-retry-attempt', '1'.getBytes(StandardCharsets.UTF_8))
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([
+            (new TopicPartition(consumerRecord.topic(), consumerRecord.partition())): [consumerRecord]
+        ])
+        RuntimeException error = new RuntimeException('boom again')
+
+        when:
+        boolean shouldRetry = invokePrivateMethod(
+            consumerState,
+            'resolveWithErrorStrategy',
+            [ConsumerRecords, ConsumerRecord, Throwable] as Class[],
+            [consumerRecords, consumerRecord, error] as Object[]
+        ) as boolean
+
+        then:
+        !shouldRetry
+        1 * kafkaProducer.send({
+            ProducerRecord<?, ?> record ->
+                record.topic() == 'errors-dlq' &&
+                    headerValue(record, 'micronaut-kafka-original-topic') == 'source-topic' &&
+                    headerValue(record, 'micronaut-kafka-original-partition') == '2' &&
+                    headerValue(record, 'micronaut-kafka-original-offset') == '7' &&
+                    headerValue(record, 'micronaut-kafka-exception-message') == 'boom again'
+        }) >> CompletableFuture.completedFuture(null)
+        1 * kafkaConsumerProcessor.handleException(_, _)
     }
 
     void "poll-time deserialization failures expose a synthetic consumer record to the exception handler"() {
@@ -434,6 +542,19 @@ class ConsumerStateSingleSpec extends Specification {
         new ConsumerStateSingle(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
     }
 
+    private ConsumerStateSingle newRetryTopicConsumerState(KafkaConsumerProcessor kafkaConsumerProcessor, Consumer<?, ?> kafkaConsumer) {
+        ConsumerInfo consumerInfo = new ConsumerInfo(
+            'client',
+            'group',
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RETRY_TOPIC_ON_ERROR, 'errors-dlq', null, ['-retry-100ms'], ['100ms']),
+            new Properties(),
+            executableMethod(),
+            topicAnnotations('source-topic')
+        )
+        new ConsumerStateSingle(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
+    }
+
     private static Object invokePrivateMethod(Object target, String name, Class[] parameterTypes, Object[] arguments) {
         def method = target.class.getDeclaredMethod(name, parameterTypes)
         method.accessible = true
@@ -444,7 +565,8 @@ class ConsumerStateSingleSpec extends Specification {
         def errorStrategy = LOG_AND_RESUME_AT_NEXT_RECORD,
         String dlq = 'errors-dlq',
         Integer retryCount = null,
-        boolean stopOnExhaustedRetry = false
+        List<String> retryTopicSuffixes = [],
+        List<String> retryTopicDelays = []
     ) {
         def errorStrategyAnnotation = AnnotationValue.builder(ErrorStrategy)
             .member('value', errorStrategy)
@@ -454,12 +576,21 @@ class ConsumerStateSingleSpec extends Specification {
         if (retryCount != null) {
             errorStrategyAnnotation.member('retryCount', retryCount)
         }
-        if (stopOnExhaustedRetry) {
-            errorStrategyAnnotation.member('stopOnExhaustedRetry', true)
+        if (!retryTopicSuffixes.isEmpty()) {
+            errorStrategyAnnotation.member('retryTopicSuffixes', retryTopicSuffixes as String[])
+        }
+        if (!retryTopicDelays.isEmpty()) {
+            errorStrategyAnnotation.member('retryTopicDelays', retryTopicDelays as String[])
         }
         AnnotationValue.builder(KafkaListener)
             .member('errorStrategy', errorStrategyAnnotation.build())
             .build()
+    }
+
+    private static List<AnnotationValue<Topic>> topicAnnotations(String... topics) {
+        [AnnotationValue.builder(Topic)
+            .member('value', topics)
+            .build()]
     }
 
     private ExecutableMethod<?, ?> executableMethod() {

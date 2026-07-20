@@ -79,6 +79,7 @@ final class ConsumerInfo {
     final boolean trackPartitions;
     final boolean shouldSendOffsetsToTransaction;
     final boolean cooperativeStickyAssignmentStrategy;
+    @Nullable final NonBlockingRetryTopics nonBlockingRetryTopics;
     private final List<ExecutableMethod<Object, ?>> listenerMethods;
     private final Map<String, ExecutableMethod<Object, ?>> topicMethods = new HashMap<>();
     private final List<PatternMethod> patternMethods;
@@ -109,7 +110,7 @@ final class ConsumerInfo {
         AnnotationValue<KafkaListener> kafkaListener,
         Properties properties,
         ExecutableMethod<?, ?> method,
-        List<ConsumerRecordInterceptor<?, ?>> consumerRecordInterceptors
+        Object values
     ) {
         this(
             clientId,
@@ -118,7 +119,8 @@ final class ConsumerInfo {
             kafkaListener,
             properties,
             List.of(method),
-            Map.of(method, List.copyOf(consumerRecordInterceptors))
+            topicAnnotations(values, method),
+            Map.of(method, List.copyOf(interceptors(values)))
         );
     }
 
@@ -130,7 +132,9 @@ final class ConsumerInfo {
         Properties properties,
         List<ExecutableMethod<?, ?>> methods
     ) {
-        this(clientId, groupId, offsetStrategy, kafkaListener, properties, methods, Map.of());
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, methods, methods.stream()
+            .flatMap(executableMethod -> executableMethod.getDeclaredAnnotationValuesByType(Topic.class).stream())
+            .toList(), Map.of());
     }
 
     @SuppressWarnings("unchecked")
@@ -143,12 +147,30 @@ final class ConsumerInfo {
         List<ExecutableMethod<?, ?>> methods,
         Map<ExecutableMethod<?, ?>, List<ConsumerRecordInterceptor<?, ?>>> consumerRecordInterceptorsByMethod
     ) {
+        this(clientId, groupId, offsetStrategy, kafkaListener, properties, methods, methods.stream()
+            .flatMap(executableMethod -> executableMethod.getDeclaredAnnotationValuesByType(Topic.class).stream())
+            .toList(), consumerRecordInterceptorsByMethod);
+    }
+
+    ConsumerInfo(
+        String clientId,
+        String groupId,
+        OffsetStrategy offsetStrategy,
+        AnnotationValue<KafkaListener> kafkaListener,
+        Properties properties,
+        List<ExecutableMethod<?, ?>> methods,
+        List<AnnotationValue<Topic>> topicAnnotations,
+        Map<ExecutableMethod<?, ?>, List<ConsumerRecordInterceptor<?, ?>>> consumerRecordInterceptorsByMethod
+    ) {
         this.clientId = clientId;
         this.groupId = groupId;
         this.shouldRedeliver = kafkaListener.isTrue("redelivery");
         this.offsetStrategy = offsetStrategy;
         final Optional<AnnotationValue<ErrorStrategy>> errorStrategyAnnotation = kafkaListener.getAnnotation("errorStrategy", ErrorStrategy.class);
         this.errorStrategy = errorStrategyAnnotation.map(a -> a.getRequiredValue(ErrorStrategyValue.class)).orElse(ErrorStrategyValue.NONE); // NOSONAR
+        if (this.errorStrategy.isRetryTopic() && offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION) {
+            throw new MessagingSystemException("Error strategy 'RETRY_TOPIC_ON_ERROR' cannot be used with offset strategy 'SEND_TO_TRANSACTION'");
+        }
         this.dlq = errorStrategyAnnotation.flatMap(a -> a.stringValue("dlq")).filter(StringUtils::isNotEmpty).orElse(null);
         if (this.errorStrategy == ErrorStrategyValue.LOG_AND_RESUME_AT_NEXT_RECORD && this.dlq == null) {
             throw new MessagingSystemException("Error strategy 'LOG_AND_RESUME_AT_NEXT_RECORD' requires setting a non-empty dead letter topic with 'dlq'");
@@ -178,9 +200,10 @@ final class ConsumerInfo {
         this.listenerMethods = List.copyOf(resolvedListenerMethods);
         this.consumerRecordInterceptorsByMethod = Map.copyOf(resolvedInterceptors);
         this.method = this.listenerMethods.get(0);
+        this.isBatch = method.isTrue(KafkaListener.class, "batch");
+        this.nonBlockingRetryTopics = NonBlockingRetryTopics.create(kafkaListener, topicAnnotations, this.isBatch);
         this.patternMethods = resolveTopicMethods(this.listenerMethods);
         this.autoStartup = kafkaListener.booleanValue("autoStartup").orElse(true);
-        this.isBatch = this.method.isTrue(KafkaListener.class, "batch");
         this.pollTimeout = this.method.getValue(KafkaListener.class, "pollTimeout", Duration.class).orElseGet(() -> Duration.ofMillis(100));
         this.trackPartitions = anyMethodHasAckArg() || offsetStrategy == OffsetStrategy.SYNC_PER_RECORD || offsetStrategy == OffsetStrategy.ASYNC_PER_RECORD;
         this.shouldSendOffsetsToTransaction = offsetStrategy == OffsetStrategy.SEND_TO_TRANSACTION;
@@ -193,6 +216,20 @@ final class ConsumerInfo {
                 throw new MessagingSystemException("Redelivery not supported for transactions in combination with @SendTo");
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<AnnotationValue<Topic>> topicAnnotations(Object values, ExecutableMethod<?, ?> method) {
+        return values instanceof List<?> list && (list.isEmpty() || list.get(0) instanceof AnnotationValue)
+            ? (List<AnnotationValue<Topic>>) values
+            : method.getDeclaredAnnotationValuesByType(Topic.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<ConsumerRecordInterceptor<?, ?>> interceptors(Object values) {
+        return values instanceof List<?> list && !list.isEmpty() && list.get(0) instanceof ConsumerRecordInterceptor
+            ? (List<ConsumerRecordInterceptor<?, ?>>) values
+            : List.of();
     }
 
     boolean routesByTopic() {
@@ -327,10 +364,21 @@ final class ConsumerInfo {
 
     private void registerDirectTopics(ExecutableMethod<Object, ?> executableMethod, AnnotationValue<Topic> topicAnnotation) {
         for (String topic : topicAnnotation.stringValues()) {
-            ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
-            if (previous != null && previous != executableMethod) {
-                throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
+            registerDirectTopic(topic, executableMethod);
+            if (nonBlockingRetryTopics != null) {
+                for (String retryTopic : nonBlockingRetryTopics.expandTopics(new String[] { topic })) {
+                    if (!retryTopic.equals(topic)) {
+                        registerDirectTopic(retryTopic, executableMethod);
+                    }
+                }
             }
+        }
+    }
+
+    private void registerDirectTopic(String topic, ExecutableMethod<Object, ?> executableMethod) {
+        ExecutableMethod<Object, ?> previous = topicMethods.putIfAbsent(topic, executableMethod);
+        if (previous != null && previous != executableMethod) {
+            throw new MessagingSystemException("Duplicate topic [" + topic + "] found for listener [" + executableMethod.getDeclaringType().getName() + ']');
         }
     }
 

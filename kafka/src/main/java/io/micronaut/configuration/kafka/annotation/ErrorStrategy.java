@@ -120,12 +120,38 @@ public @interface ErrorStrategy {
 
     /**
      * The dead letter topic to publish failed records to when using
-     * {@link ErrorStrategyValue#LOG_AND_RESUME_AT_NEXT_RECORD}.
+     * {@link ErrorStrategyValue#LOG_AND_RESUME_AT_NEXT_RECORD} or
+     * {@link ErrorStrategyValue#RETRY_TOPIC_ON_ERROR} after retry topics are exhausted.
      *
      * @return The dead letter topic name
      * @since 5.8
      */
     String dlq() default "";
+
+    /**
+     * The suffixes used to derive retry topics from the original topic name when using
+     * {@link ErrorStrategyValue#RETRY_TOPIC_ON_ERROR}.
+     *
+     * <p>For example, with an original topic {@code orders} and suffixes
+     * {@code -retry-5s} and {@code -retry-30s}, Micronaut will use the retry topics
+     * {@code orders-retry-5s} and {@code orders-retry-30s}.</p>
+     *
+     * @return The retry topic suffixes
+     * @since 6.0.0
+     */
+    String[] retryTopicSuffixes() default {};
+
+    /**
+     * The delays to apply before consuming records from the retry topics declared in
+     * {@link #retryTopicSuffixes()} when using
+     * {@link ErrorStrategyValue#RETRY_TOPIC_ON_ERROR}.
+     *
+     * <p>The number of configured delays must match the number of configured retry topic suffixes.</p>
+     *
+     * @return The retry topic delays
+     * @since 6.0.0
+     */
+    String[] retryTopicDelays() default {};
 
     /**
      * The types of exceptions to retry, used with RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR,
