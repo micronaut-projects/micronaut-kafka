@@ -279,6 +279,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the client id of the Kafka consumer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#clientId()" class="member-name-link">clientId()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-clientId"><code>clientId</code></a> record component.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html#clientInstanceId(java.time.Duration)" class="member-name-link">clientInstanceId(Duration)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/RecoveringTransactionalProducer.html" title="class in io.micronaut.configuration.kafka">RecoveringTransactionalProducer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html#close()" class="member-name-link">close()</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/AbstractKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">AbstractKafkaMetricsReporter</a></dt>
@@ -387,6 +391,10 @@ if they wish to obtain a reference to the underlying <a href="https://kafka.apac
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html#%3Cinit%3E()" class="member-name-link">ConsumerKafkaMetricsReporter()</a> - Constructor for class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/ConsumerKafkaMetricsReporter.html" title="class in io.micronaut.configuration.kafka.metrics">ConsumerKafkaMetricsReporter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#consumerRecord()" class="member-name-link">consumerRecord()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-consumerRecord"><code>consumerRecord</code></a> record component.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinder.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka.bind">ConsumerRecordBinder&lt;T&gt;</a> - Interface in <a href="io/micronaut/configuration/kafka/bind/package-summary.html">io.micronaut.configuration.kafka.bind</a></dt>
 <dd>
 <div class="block">Interface for binders that bind method arguments from a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/ConsumerRecord.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>ConsumerRecord</code></a>.</div>
@@ -404,6 +412,14 @@ if they wish to obtain a reference to the underlying <a href="https://kafka.apac
 <dt><a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html#%3Cinit%3E(io.micronaut.core.convert.ConversionService,io.micronaut.configuration.kafka.bind.ConsumerRecordBinder...)" class="member-name-link">ConsumerRecordBinderRegistry(ConversionService, ConsumerRecordBinder...)</a> - Constructor for class io.micronaut.configuration.kafka.bind.<a href="io/micronaut/configuration/kafka/bind/ConsumerRecordBinderRegistry.html" title="class in io.micronaut.configuration.kafka.bind">ConsumerRecordBinderRegistry</a></dt>
 <dd>
 <div class="block">Creates the registry for the given binders.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerRecordInterceptor&lt;K,<wbr>V&gt;</a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">Intercepts a consumed Kafka <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/consumer/ConsumerRecord.html" title="class or interface in org.apache.kafka.clients.consumer" class="external-link"><code>ConsumerRecord</code></a> before Micronaut binds it to a listener method.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" class="type-name-link" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext&lt;K,<wbr>V&gt;</a> - Record Class in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
+<dd>
+<div class="block">The context for record interception.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/ConsumerRegistry.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerRegistry</a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
 <dd>
@@ -605,6 +621,10 @@ fails to process a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html#END" class="member-name-link">END</a> - Enum constant in enum class io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.OffsetType.html" title="enum class in io.micronaut.configuration.kafka.seek">KafkaSeekOperation.OffsetType</a></dt>
 <dd>
 <div class="block">The offset goes backward, relative to the end of the partition.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#errorStrategy()" class="member-name-link">errorStrategy()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>
@@ -859,6 +879,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">The same as <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#value()"><code>KafkaListener.value()</code></a>.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#groupId()" class="member-name-link">groupId()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-groupId"><code>groupId</code></a> record component.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:H">H</h2>
 <dl class="index">
@@ -868,6 +892,10 @@ support Confluent Cloud hosted Kafka.</div>
 <dd>
 <div class="block">Whether all exceptions should be handled or ignored when using RETRY_ON_ERROR and RETRY_EXPONENTIALLY_ON_ERROR
 <a href="io/micronaut/configuration/kafka/annotation/ErrorStrategyValue.html" title="enum class in io.micronaut.configuration.kafka.annotation"><code>ErrorStrategyValue</code></a>.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#header(java.util.Map)" class="member-name-link">header(Map)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
 <dd>&nbsp;</dd>
@@ -895,6 +923,14 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/streams/InteractiveQueryService.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.streams">InteractiveQueryService</a> - Class in <a href="io/micronaut/configuration/kafka/streams/package-summary.html">io.micronaut.configuration.kafka.streams</a></dt>
 <dd>
 <div class="block">Services to facilitate the interactive query capabilities of Kafka Streams.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.html#intercept(io.micronaut.configuration.kafka.ConsumerRecordInterceptor.InterceptionContext)" class="member-name-link">intercept(ConsumerRecordInterceptor.InterceptionContext)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.html" title="interface in io.micronaut.configuration.kafka">ConsumerRecordInterceptor</a></dt>
+<dd>
+<div class="block">Intercept the consumed record before Micronaut binds it to a listener method.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#%3Cinit%3E(org.apache.kafka.clients.consumer.ConsumerRecord,java.lang.String,int,long,java.lang.String,java.lang.String)" class="member-name-link">InterceptionContext(ConsumerRecord, String, int, long, String, String)</a> - Constructor for record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>InterceptionContext</code> record class.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a> - package io.micronaut.configuration.kafka</dt>
 <dd>
@@ -1397,6 +1433,10 @@ exception handler, and then resume at the next offset.</div>
 </dl>
 <h2 class="title" id="I:M">M</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.html#matches(io.micronaut.inject.BeanDefinition,io.micronaut.inject.ExecutableMethod)" class="member-name-link">matches(BeanDefinition, ExecutableMethod)</a> - Method in interface io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.html" title="interface in io.micronaut.configuration.kafka">ConsumerRecordInterceptor</a></dt>
+<dd>
+<div class="block">Determine whether this interceptor applies to the given listener method.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html#maxBlock()" class="member-name-link">maxBlock()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaClient.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaClient</a></dt>
 <dd>
 <div class="block">The maximum duration to block synchronous send operations.</div>
@@ -1483,6 +1523,10 @@ See https://github.com/micronaut-projects/micronaut-kafka/issues/372</div>
 </dl>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#offset()" class="member-name-link">offset()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-offset"><code>offset</code></a> record component.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#offset()" class="member-name-link">offset()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" class="type-name-link" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a> - Class in <a href="io/micronaut/configuration/kafka/exceptions/package-summary.html">io.micronaut.configuration.kafka.exceptions</a></dt>
@@ -1539,6 +1583,10 @@ on completion of a successful partition re-assignment.</div>
 <dl class="index">
 <dt><a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html#parse(java.lang.String)" class="member-name-link">parse(String)</a> - Static method in enum class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/MetricNameStyle.html" title="enum class in io.micronaut.configuration.kafka.metrics">MetricNameStyle</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#partition()" class="member-name-link">partition()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-partition"><code>partition</code></a> record component.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#partition()" class="member-name-link">partition()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#partition(java.lang.Integer)" class="member-name-link">partition(Integer)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
@@ -1918,6 +1966,10 @@ instead of skipping past the failed record.</div>
 <dd>
 <div class="block">Convert the given map of values to kafka properties.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#topic()" class="member-name-link">topic()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#param-topic"><code>topic</code></a> record component.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html#topic()" class="member-name-link">topic()</a> - Method in interface io.micronaut.configuration.kafka.seek.<a href="io/micronaut/configuration/kafka/seek/KafkaSeekOperation.html" title="interface in io.micronaut.configuration.kafka.seek">KafkaSeekOperation</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html#topic(java.lang.String)" class="member-name-link">topic(String)</a> - Method in class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/KafkaMessage.Builder.html" title="class in io.micronaut.configuration.kafka">KafkaMessage.Builder</a></dt>
@@ -1937,6 +1989,10 @@ instead of skipping past the failed record.</div>
 <dt><a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html#TOPICS" class="member-name-link">TOPICS</a> - Static variable in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/AbstractKafkaConfiguration.html" title="class in io.micronaut.configuration.kafka.config">AbstractKafkaConfiguration</a></dt>
 <dd>
 <div class="block">The topics that should be created.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html#toString()" class="member-name-link">toString()</a> - Method in record class io.micronaut.configuration.kafka.<a href="io/micronaut/configuration/kafka/ConsumerRecordInterceptor.InterceptionContext.html" title="class in io.micronaut.configuration.kafka">ConsumerRecordInterceptor.InterceptionContext</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
 </dd>
 <dt><a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html#toString()" class="member-name-link">toString()</a> - Method in class io.micronaut.configuration.kafka.serde.<a href="io/micronaut/configuration/kafka/serde/JsonObjectSerde.html" title="class in io.micronaut.configuration.kafka.serde">JsonObjectSerde</a></dt>
 <dd>&nbsp;</dd>
