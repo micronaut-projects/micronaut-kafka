@@ -47,7 +47,7 @@ class ConsumerStateSpec extends Specification {
             BeanDefinition<ConsumerStateSpecListener> beanDefinition = context.getBeanDefinition(ConsumerStateSpecListener)
             ExecutableMethod<ConsumerStateSpecListener, Object> method = beanDefinition.getRequiredMethod('receive', String)
             AnnotationValue<KafkaListener> kafkaListener = beanDefinition.getAnnotation(KafkaListener)
-            return new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, new Properties(), method)
+            return new ConsumerInfo('client', 'group', OffsetStrategy.ASYNC_PER_RECORD, kafkaListener, new Properties(), method, [])
         }
     }
 

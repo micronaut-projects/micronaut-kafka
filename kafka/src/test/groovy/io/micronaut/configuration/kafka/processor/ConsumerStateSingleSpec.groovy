@@ -122,7 +122,8 @@ class ConsumerStateSingleSpec extends Specification {
             OffsetStrategy.DISABLED,
             kafkaListenerAnnotation(LOG_AND_RESUME_AT_NEXT_RECORD, null),
             new Properties(),
-            executableMethod()
+            executableMethod(),
+            []
         )
 
         then:
@@ -188,6 +189,7 @@ class ConsumerStateSingleSpec extends Specification {
         ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
         KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
             getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -213,6 +215,37 @@ class ConsumerStateSingleSpec extends Specification {
         1 * kafkaConsumerProcessor.handleException(_, _)
     }
 
+    void "sync per record commits filtered records without invoking the listener"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            interceptRecord(_, consumerRecord) >> null
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.SYNC_PER_RECORD,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD),
+            executableMethod { throw new AssertionError('listener should not be invoked') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * kafkaConsumer.commitSync({
+            Map<TopicPartition, OffsetAndMetadata> offsets ->
+                offsets[topicPartition]?.offset() == 8L
+        })
+        0 * kafkaConsumerProcessor.handleException(_, _)
+    }
+
     void "sync per record does not commit the failed record offset while a retry is scheduled"() {
         given:
         TopicPartition topicPartition = new TopicPartition('source-topic', 2)
@@ -221,6 +254,7 @@ class ConsumerStateSingleSpec extends Specification {
         KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
             getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
             scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -250,6 +284,7 @@ class ConsumerStateSingleSpec extends Specification {
         KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
             getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
             scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -282,6 +317,7 @@ class ConsumerStateSingleSpec extends Specification {
         ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
         KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
             getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
             subscription() >> Collections.emptySet()
@@ -366,7 +402,7 @@ class ConsumerStateSingleSpec extends Specification {
             }
         ) as ExecutableMethod<?, ?>
         AnnotationValue<KafkaListener> annotation = AnnotationValue.builder(KafkaListener).build()
-        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, new Properties(), executableMethod)
+        new ConsumerInfo("test-client", "test-group", OffsetStrategy.SYNC, annotation, new Properties(), executableMethod, [])
     }
 
     private ConsumerStateSingle newConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, Consumer<?, ?> kafkaConsumer) {
@@ -392,7 +428,8 @@ class ConsumerStateSingleSpec extends Specification {
             offsetStrategy,
             kafkaListener,
             new Properties(),
-            executableMethod
+            executableMethod,
+            []
         )
         new ConsumerStateSingle(kafkaConsumerProcessor, consumerInfo, kafkaConsumer, new Object())
     }
@@ -430,6 +467,10 @@ class ConsumerStateSingleSpec extends Specification {
     }
 
     private ExecutableMethod<?, ?> executableMethod(Closure<?> invocation) {
+        executableMethod(Argument.ZERO_ARGUMENTS, invocation)
+    }
+
+    private ExecutableMethod<?, ?> executableMethod(Argument[] arguments, Closure<?> invocation) {
         ReturnType<?> returnType = Stub() {
             getType() >> void
             isAsyncOrReactive() >> false
@@ -451,7 +492,7 @@ class ConsumerStateSingleSpec extends Specification {
                     case 'getValue':
                         return Optional.of(Duration.ofMillis(100))
                     case 'getArguments':
-                        return Argument.ZERO_ARGUMENTS
+                        return arguments
                     case 'stringValues':
                         return [] as String[]
                     case 'getDeclaredAnnotationValuesByType':
@@ -459,7 +500,10 @@ class ConsumerStateSingleSpec extends Specification {
                     case 'getReturnType':
                         return returnType
                     case 'invoke':
-                        return invocation.call()
+                        Object[] invocationArguments = args != null && args.length == 2 && args[1] instanceof Object[] ?
+                            ([args[0]] + ((Object[]) args[1])) as Object[] :
+                            (args == null ? [] as Object[] : args)
+                        return invocation.call(invocationArguments)
                     default:
                         return defaultValue(method.returnType)
                 }
