@@ -38,6 +38,11 @@ abstract class AbstractTestContainersSpec extends AbstractEmbeddedServerSpec {
     }
 
     void stopContext() {
+        if (!context?.isRunning()) {
+            // Already shut down (e.g. by a SHUTDOWN_APPLICATION uncaught exception handler), which closed the streams
+            // and cleared the factory; resolving beans from a stopped context throws since Micronaut 5.2
+            return
+        }
         def kafkaStreamsFactory = context.getBean(KafkaStreamsFactory)
         try {
           embeddedServer.stop()

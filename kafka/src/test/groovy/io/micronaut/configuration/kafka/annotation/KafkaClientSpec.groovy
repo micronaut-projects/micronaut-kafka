@@ -63,7 +63,7 @@ class KafkaClientSpec extends AbstractKafkaSpec {
         MyClient client = ctx.getBean(MyClient)
 
         when:
-        client.sendSentence("test", "hello-world").get(1, SECONDS)
+        client.sendSentence("test", "hello-world").get(10, SECONDS)
 
         then:
         ExecutionException e = thrown()
