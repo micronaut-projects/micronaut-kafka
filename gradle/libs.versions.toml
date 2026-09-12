@@ -1,8 +1,8 @@
 [versions]
-micronaut = "5.1.7"
-micronaut-platform = "5.0.4"
+micronaut = "5.2.1"
+micronaut-platform = "5.1.5"
 micronaut-gradle-plugin = "5.0.2"
-micronaut-test = "5.1.0"
+micronaut-test = "5.1.1"
 managed-kafka = '4.3.1'
 awaitility = '4.3.0'
 opentracing-kafka-client = '0.1.15'
@@ -10,10 +10,10 @@ opentracing-mock = '0.33.0'
 zipkin-brave-kafka-clients = '6.3.1'
 lz4-java = '1.11.2'
 
-micronaut-cache = "6.1.0"
-micronaut-micrometer = "6.0.1"
-micronaut-reactor = "4.1.0"
-micronaut-serde = "3.1.0"
+micronaut-cache = "6.1.1"
+micronaut-micrometer = "6.0.2"
+micronaut-reactor = "4.2.0"
+micronaut-serde = "3.1.1"
 micronaut-tracing = "8.2.0"
 
 [libraries]
