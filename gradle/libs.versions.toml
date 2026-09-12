@@ -8,6 +8,7 @@ awaitility = '4.3.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 zipkin-brave-kafka-clients = '6.3.1'
+lz4-java = '1.11.2'
 
 micronaut-cache = "6.1.1"
 micronaut-micrometer = "6.0.2"
@@ -21,6 +22,7 @@ micronaut-core = { module = 'io.micronaut:micronaut-core-bom', version.ref = 'mi
 
 managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
 managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
+lz4-java = { module = 'at.yawk.lz4:lz4-java', version.ref = 'lz4-java' }
 
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
