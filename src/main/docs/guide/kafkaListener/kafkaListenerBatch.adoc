@@ -20,6 +20,9 @@ As with one by one message processing, if you set the `OffsetStrategy` to api:co
 
 If you want to commit the entire batch of offsets at once during the course of processing, then the simplest approach is to add an argument of type link:{apimicronaut}messaging/Acknowledgement.html[Acknowledgement] and call the `ack()` method to commit the batch of offsets synchronously:
 
+[.lang-python]
+NOTE: In Python the `@KafkaListener` annotation of the following examples is declared on the class rather than on the listener method.
+
 .Committing a Batch of Offsets Manually with ack()
 
 snippet::io.micronaut.kafka.docs.consumer.batch.ack.BookListener[tags=method, indent=0]
