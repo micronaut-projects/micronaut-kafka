@@ -11,3 +11,6 @@ snippet::io.micronaut.kafka.docs.AbstractKafkaTest[]
 And then test:
 
 snippet::io.micronaut.kafka.docs.MyTest[]
+
+[.lang-python]
+NOTE: A Python test class cannot yet provide properties through `TestPropertyProvider`, because Micronaut Test calls `getProperties()` before the application context, and with it the Python runtime, is started. Prefer Micronaut Test Resources for Python tests, or supply `kafka.bootstrap.servers` for a dedicated environment from a Java `@ContextConfigurer` class implementing `ApplicationContextConfigurer` (using the `configure(ApplicationContext)` callback, which runs after the test environments are applied) as the Python test suite of this module does.
