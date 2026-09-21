@@ -33,7 +33,7 @@ class WordCountStreamTest:
             sleep(0.1)
         assert self.streams_started()
 
-        client = self.ctx.getBean(WordCountClient).asPolyglotValue()
+        client = self.ctx.getBean(WordCountClient)
         client.publish_sentence("test to test for words")
 
         for _ in range(300):

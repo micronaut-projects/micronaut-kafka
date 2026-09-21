@@ -17,7 +17,7 @@ class MessageClientFallbackTest:
 
     @Test
     def test_context_contains_fallback_bean(self):
-        bean = self.context.getBean(MessageClientFallback).asPolyglotValue()
+        bean = self.context.getBean(MessageClientFallback)
         assert bean is not None
         try:
             bean.send("message")

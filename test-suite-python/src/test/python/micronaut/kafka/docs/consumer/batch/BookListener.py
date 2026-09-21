@@ -3,7 +3,6 @@ import logging
 # tag::imports[]
 from micronaut.configuration.kafka.annotation import KafkaListener, Topic
 from micronaut.context.annotation import Requires
-from org.reactivestreams import Publisher
 from reactor.core.publisher import Flux
 
 from .Book import Book
@@ -27,7 +26,7 @@ class BookListener:
 
     # tag::reactive[]
     @Topic("all-the-books")
-    def receive_flux(self, books: Flux[Book]) -> Publisher[Book]:
+    def receive_flux(self, books: Flux[Book]) -> Flux[Book]:
         return books.doOnNext(lambda book: LOG.info("Got Book = %s", book.title))
     # end::reactive[]
 #tag::endclazz[]

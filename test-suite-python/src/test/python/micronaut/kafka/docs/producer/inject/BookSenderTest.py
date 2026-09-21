@@ -19,7 +19,7 @@ class BookSenderTest:
 
     @Test
     def test_book_sender(self):
-        book_sender = self.ctx.getBean(BookSender).asPolyglotValue()  # <2>
+        book_sender = self.ctx.getBean(BookSender)  # <2>
         book = Book("The Stand")
         stephen_king = book_sender.send("Stephen King", book)
         record_metadata = stephen_king.get()

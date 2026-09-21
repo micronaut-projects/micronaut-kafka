@@ -21,7 +21,7 @@ class WordCounterTest:
 
     @Test
     def test_word_counter(self):
-        client = self.ctx.getBean(WordCounterClient).asPolyglotValue()
+        client = self.ctx.getBean(WordCounterClient)
         client.send("test to test for words")
         for _ in range(100):
             if self.counted():

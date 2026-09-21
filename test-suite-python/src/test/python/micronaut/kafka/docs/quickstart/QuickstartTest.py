@@ -18,6 +18,6 @@ class QuickstartTest:
     @Test
     def test_send_product(self):
         # tag::quickstart[]
-        client = self.applicationContext.getBean(ProductClient).asPolyglotValue()
+        client = self.applicationContext.getBean(ProductClient)
         client.send_product("Nike", "Blue Trainers")
         # end::quickstart[]

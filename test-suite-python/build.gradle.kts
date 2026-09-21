@@ -23,7 +23,7 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    // The Java KafkaTestConfigurer and PythonRuntimeInitializer helpers (src/test/java) are processed by javac
+    // The Java KafkaTestConfigurer helper (src/test/java) is processed by javac
     testAnnotationProcessor(platform(mn.micronaut.core.bom))
     testAnnotationProcessor(mn.micronaut.inject.java)
     // Annotation processors of the Python sources MUST be testImplementation (not testAnnotationProcessor):

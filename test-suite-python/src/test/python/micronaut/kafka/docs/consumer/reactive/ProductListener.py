@@ -5,7 +5,6 @@ from micronaut.configuration.kafka.annotation import KafkaKey, KafkaListener, To
 from micronaut.context.annotation import Requires
 from micronaut.core.annotation import Blocking
 from micronaut.kafka.docs.Product import Product
-from org.reactivestreams import Publisher
 from reactor.core.publisher import Mono
 
 LOG = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ class ProductListener:
     # tag::method[]
     @Topic("reactive-products")
     def receive(self, brand: Annotated[str, KafkaKey],  # <1>
-                product_publisher: Mono[Product]) -> Publisher[Product]:  # <2>
+                product_publisher: Mono[Product]) -> Mono[Product]:  # <2>
         return product_publisher.doOnSuccess(
             lambda product: LOG.info("Got Product - %s by %s", product.name, brand)  # <3>
         )
@@ -27,7 +26,7 @@ class ProductListener:
     # tag::blocking[]
     @Blocking
     @Topic("reactive-products")
-    def receive_blocking(self, brand: Annotated[str, KafkaKey], product_publisher: Mono[Product]) -> Publisher[Product]:
+    def receive_blocking(self, brand: Annotated[str, KafkaKey], product_publisher: Mono[Product]) -> Mono[Product]:
         return product_publisher.doOnSuccess(
             lambda product: LOG.info("Got Product - %s by %s", product.name, brand)
         )

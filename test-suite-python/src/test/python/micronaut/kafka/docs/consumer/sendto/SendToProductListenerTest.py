@@ -22,7 +22,7 @@ class SendToProductListenerTest:
     @Test
     def test_send_product(self):
         product = Product("Blue Trainers", 5)
-        client = self.ctx.getBean(ProductClient).asPolyglotValue()
+        client = self.ctx.getBean(ProductClient)
         client.send("Nike", product)
         for _ in range(100):
             if self.listener.quantity == 5:

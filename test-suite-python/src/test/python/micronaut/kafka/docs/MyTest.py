@@ -6,7 +6,6 @@ from jakarta.inject import Inject
 from micronaut.configuration.kafka.annotation import KafkaClient, KafkaListener, OffsetReset, Topic
 from micronaut.context.annotation import Property, Requires
 from micronaut.test.extensions.junit5.annotation import MicronautTest
-from micronaut.test.support import TestPropertyProvider
 from org.junit.jupiter.api import Disabled, Test, TestInstance
 
 from .AbstractKafkaTest import AbstractKafkaTest
@@ -40,21 +39,17 @@ class MyConsumer:
             return None
 
 
-# TODO(python): TestPropertyProvider.getProperties() is called by Micronaut Test before the
-# application context, and with it the GraalPy runtime, exists, so a Python test class cannot
-# provide properties yet (and a test class cannot extend AbstractKafkaTest either). The other
-# Python tests of this suite get the bootstrap servers from the Java KafkaProperties locator of
-# the "kafka" environment instead.
-@Disabled("TODO(python): Python test classes cannot implement TestPropertyProvider")
+# TODO(python): Micronaut Test calls TestPropertyProvider.getProperties() before the application
+# context, and with it the GraalPy runtime, exists ("GraalPy context has not been initialized"), so a
+# Python test class cannot supply the container properties yet. The other Python tests of this suite
+# get the bootstrap servers from the Java KafkaTestConfigurer of the "kafka" environment instead.
+@Disabled("TODO(python): TestPropertyProvider.getProperties() runs before the GraalPy runtime exists")
 @Property(name="spec.name", value="MyTest")
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MyTest(TestPropertyProvider):
+class MyTest(AbstractKafkaTest):
     producer: Annotated[MyProducer, Inject]
     consumer: Annotated[MyConsumer, Inject]
-
-    def getProperties(self) -> dict[str, str]:
-        return AbstractKafkaTest().getProperties()
 
     @Test
     def test_kafka_running(self):
