@@ -7,7 +7,7 @@ from micronaut.configuration.kafka.streams import ConfiguredStreamBuilder
 from micronaut.context.annotation import Factory, Requires
 from org.apache.kafka.clients.consumer import ConsumerConfig
 from org.apache.kafka.common.serialization import Serdes
-from org.apache.kafka.streams import KeyValue, StreamsConfig
+from org.apache.kafka.streams import StreamsConfig
 from org.apache.kafka.streams.kstream import Grouped, KStream, Materialized, Produced
 # end::imports[]
 
@@ -32,7 +32,7 @@ class WordCountStream:
         source = builder.stream("streams-plaintext-input")  # <2>
 
         grouped_by_word = (source
-            .flatMap(lambda key, value: [KeyValue.pair(key, word) for word in re.split(r"\W+", value.lower())])
+            .flatMapValues(lambda value: re.split(r"\W+", value.lower()))
             .groupBy(lambda key, word: word, Grouped.with_(Serdes.String(), Serdes.String()))
             # Store the result in a store for lookup later
             .count(Materialized.as_("word-count-store-python")))  # <3>
@@ -61,7 +61,7 @@ class WordCountStream:
 
         source = builder.stream("named-word-count-input")
         counts = (source
-            .flatMap(lambda key, value: [KeyValue.pair(key, word) for word in value.lower().split(" ")])
+            .flatMapValues(lambda value: value.lower().split(" "))
             .groupBy(lambda key, value: value)
             .count())
 
