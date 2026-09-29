@@ -17,14 +17,14 @@ class BookSenderTest {
     // tag::test[]
     @Test
     void testBookSender() {
-        Map<String, String> kafkaProps = Kafka.getProperties();
+        Map<String, String> kafkaProps = Kafka.getProperties(); // <1>
 
         Map<String, Object> config = new HashMap<>(kafkaProps);
         config.put("kafka.enabled", "true");
         config.put("spec.name", "BookSenderTest");
 
         try (ApplicationContext ctx = ApplicationContext.run(config)) {
-            BookSender bookSender = ctx.getBean(BookSender.class);
+            BookSender bookSender = ctx.getBean(BookSender.class); // <2>
             Book book = new Book("The Stand");
             Future<RecordMetadata> stephenKing = bookSender.send("Stephen King", book);
             assertDoesNotThrow(() -> {

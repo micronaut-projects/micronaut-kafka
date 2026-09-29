@@ -4,18 +4,16 @@ Transaction processing can be enabled by defining `transactionalId` on `@KafkaCl
 
 snippet::io.micronaut.kafka.docs.producer.config.TransactionalClient[tags = 'clazz']
 
+Alternatively, the same transaction demarcation can be done by hand with an injected transactional `Producer` (see <<kafkaClientScope,Injecting Kafka Producer Beans>>):
+
 .Alternative Kafka producer transactional code
-[source,java]
-----
-producer.initTransactions();
-try {
-    producer.beginTransaction();
-    producer.send(...);
-    producer.commitTransaction();
-} catch (Exception e) {
-    producer.abortTransaction();
-}
-----
+
+snippet::io.micronaut.kafka.docs.producer.config.TransactionalProducer[tags = 'clazz']
+
+<1> The injected `Producer` is already initialized for transactions, so `initTransactions()` must not be called again
+<2> Every `send` operation is wrapped in a transaction
+<3> The transaction is committed once the records are sent
+<4> The transaction is aborted if sending fails
 
 [NOTE]
 ====

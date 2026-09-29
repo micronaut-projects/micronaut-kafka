@@ -1,11 +1,13 @@
 package io.micronaut.kafka.docs.consumer.scope
 
+// tag::imports[]
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.KafkaScope
 import io.micronaut.configuration.kafka.annotation.OffsetReset
 import io.micronaut.configuration.kafka.annotation.Topic
 import jakarta.inject.Inject
 import java.util.UUID
+// end::imports[]
 
 // tag::listener[]
 @KafkaListener(offsetReset = OffsetReset.EARLIEST)

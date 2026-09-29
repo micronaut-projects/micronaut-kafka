@@ -20,9 +20,4 @@ If the handler returns `SHUTDOWN_APPLICATION`, Micronaut requests application sh
 
 To implement your own handler, you can listen to the application event api:io.micronaut.configuration.kafka.streams.event.BeforeKafkaStreamStart[] and configure the streams with your own business logic:
 
-[source,java]
-----
-include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=imports, indent=0]
-
-include::{testskafkastreams}/uncaught/MyStreamsUncaughtExceptionHandler.java[tags=clazz, indent=0]
-----
+snippet::io.micronaut.kafka.docs.streams.uncaught.MyStreamsUncaughtExceptionHandler[tags="imports,clazz", indent=0]

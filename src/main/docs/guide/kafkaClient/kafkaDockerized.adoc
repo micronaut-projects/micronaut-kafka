@@ -11,3 +11,6 @@ snippet::io.micronaut.kafka.docs.AbstractKafkaTest[]
 And then test:
 
 snippet::io.micronaut.kafka.docs.MyTest[]
+
+[.lang-python]
+NOTE: These two examples have no Python version. `TestPropertyProvider` is consulted by Micronaut Test *before* it starts the application, and the Python runtime only comes up with the application, so a Python class cannot be asked for these properties — there is nothing to run its `getProperties()` method yet. Python tests therefore get the container's `kafka.bootstrap.servers` a different way: a small Java class annotated with `@ContextConfigurer` adds the property to a named environment once the application context exists, and the tests opt into it with `@MicronautTest(environments=["kafka"])`. The Python test suite of this module does exactly that in `io.micronaut.kafka.docs.KafkaTestConfigurer`. Using https://micronaut-projects.github.io/micronaut-test-resources/latest/guide/#modules-kafka[Micronaut Test Resources], as shown at the top of this page, avoids the problem altogether and is the recommended option for Python.

@@ -15,7 +15,11 @@ There are a number of ways you can include message headers. One way is to annota
 
 snippet::io.micronaut.kafka.docs.producer.methods.ProductClient[tags=messageheader,indents=0]
 
+[.lang-java.lang-kotlin.lang-groovy]
 The example above will include the value of the `myHeader` argument as a header called `My-Header`.
+
+[.lang-python]
+The example above will include the value of the `my_header` argument as a header called `My-Header`.
 
 Another way to include headers is at the type level with the values driven from configuration:
 
