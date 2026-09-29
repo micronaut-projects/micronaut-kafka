@@ -22,7 +22,10 @@ class BookClient(ABC):
     # end::lists[]
 
     # tag::arrays[]
-    # TODO(python): variadic parameters (Book...) are not mapped to Java arrays, pass a list instead
+    @Topic("books")
+    @abstractmethod
+    def send_books(self, *books: Book) -> None:
+        ...
     # end::arrays[]
 
     # tag::reactive[]

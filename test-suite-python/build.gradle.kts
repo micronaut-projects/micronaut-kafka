@@ -33,7 +33,5 @@ dependencies {
     testImplementation(mnSerde.micronaut.serde.processor)
     testImplementation(mnTest.micronaut.test.junit5)
     testImplementation(mnTest.junit.platform.launcher)
-    implementation(platform(mnTest.boms.testcontainers))
-    implementation(libs.testcontainers.kafka)
     testImplementation(projects.testSuiteKafkaUtils)
 }
