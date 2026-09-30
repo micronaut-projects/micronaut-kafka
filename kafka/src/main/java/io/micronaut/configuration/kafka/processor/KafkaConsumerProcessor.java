@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.ConsumerRecordInterceptor;
+import io.micronaut.configuration.kafka.KafkaConsumerProcessingObserver;
 import io.micronaut.configuration.kafka.ConsumerAware;
 import io.micronaut.configuration.kafka.ConsumerRegistry;
 import io.micronaut.configuration.kafka.ConsumerSeekAware;
@@ -152,6 +153,8 @@ class KafkaConsumerProcessor
 
     private final Supplier<Optional<KafkaCustomScope>> kafkaCustomScopeSupplier;
 
+    private final Supplier<Optional<KafkaConsumerProcessingObserver>> processingObserverSupplier;
+
     /**
      * Creates a new processor using the given {@link ExecutorService} to schedule consumers on.
      *
@@ -207,6 +210,7 @@ class KafkaConsumerProcessor
         this.kafkaConsumerSubscribedEventPublisher = subscribedEventPublisher;
         this.conditionalRetryBehaviourHandler = conditionalRetryBehaviourHandler;
         this.kafkaCustomScopeSupplier = SupplierUtil.memoized(() -> beanContext.findBean(KafkaCustomScope.class));
+        this.processingObserverSupplier = SupplierUtil.memoized(() -> beanContext.findBean(KafkaConsumerProcessingObserver.class));
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -463,6 +467,14 @@ class KafkaConsumerProcessor
 
     ConsumerRecordBinderRegistry getBinderRegistry() {
         return binderRegistry;
+    }
+
+    /**
+     * @return the optional processing observer, or {@code null} when no observability module is present
+     */
+    @Nullable
+    KafkaConsumerProcessingObserver getProcessingObserver() {
+        return processingObserverSupplier.get().orElse(null);
     }
 
     @Nullable

@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
+import io.micronaut.configuration.kafka.KafkaConsumerProcessingObserver;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
 import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
@@ -54,6 +55,13 @@ import java.util.Set;
  */
 @Internal
 final class ConsumerStateSingle extends ConsumerState {
+
+    /**
+     * Handles for in-flight processing observations, keyed by record coordinates so that the handle
+     * survives across application retries of the same record (blocking retries re-poll the same
+     * offset). Only populated when a {@link KafkaConsumerProcessingObserver} bean is present.
+     */
+    private final Map<ObservedRecordKey, Object> processingObservations = new HashMap<>();
 
     ConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, ConsumerInfo info, Consumer<?, ?> consumer, Object consumerBean) {
         super(kafkaConsumerProcessor, info, consumer, consumerBean);
@@ -149,7 +157,9 @@ final class ConsumerStateSingle extends ConsumerState {
             interceptedConsumerRecord = kafkaConsumerProcessor.interceptRecord(info, consumerRecord);
             seek = bindRecordArguments(topic, currentOffsets);
             if (interceptedConsumerRecord != null) {
+                beginProcessingObservation(interceptedConsumerRecord);
                 process(topic, interceptedConsumerRecord, consumerRecords);
+                succeedProcessingObservation(interceptedConsumerRecord);
             }
         } catch (Exception e) {
             final ConsumerRecord<?, ?> errorRecord = interceptedConsumerRecord != null ? interceptedConsumerRecord : consumerRecord;
@@ -246,6 +256,7 @@ final class ConsumerStateSingle extends ConsumerState {
             }
         }
         // Skip the failing record
+        failProcessingObservation(consumerRecord, e);
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
@@ -332,5 +343,45 @@ final class ConsumerStateSingle extends ConsumerState {
     private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
         final TopicPartition tp = ex.topicPartition();
         return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
+    }
+
+    private void beginProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        // Reuse the handle across application retries of the same record so the observation spans the
+        // whole message lifecycle (first attempt to terminal outcome) rather than a single attempt.
+        processingObservations.computeIfAbsent(observedKey(consumerRecord),
+            key -> observer.onStart(consumerRecord, info.clientId, info.groupId));
+    }
+
+    private void succeedProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        final Object handle = processingObservations.remove(observedKey(consumerRecord));
+        if (handle != null) {
+            observer.onSuccess(handle);
+        }
+    }
+
+    private void failProcessingObservation(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        final Object handle = processingObservations.remove(observedKey(consumerRecord));
+        if (handle != null) {
+            observer.onError(handle, error);
+        }
+    }
+
+    private static ObservedRecordKey observedKey(ConsumerRecord<?, ?> consumerRecord) {
+        return new ObservedRecordKey(consumerRecord.topic(), consumerRecord.partition(), consumerRecord.offset());
+    }
+
+    private record ObservedRecordKey(String topic, int partition, long offset) {
     }
 }
