@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * The internal state of the consumer in single mode.
@@ -57,9 +58,18 @@ import java.util.Set;
 final class ConsumerStateSingle extends ConsumerState {
 
     /**
+     * Sentinel stored in {@link #processingObservations} when an observer opted out of a record (by
+     * returning {@code null} from {@link KafkaConsumerProcessingObserver#onStart}). A non-null marker
+     * is required because {@link Map#computeIfAbsent} does not remember a {@code null} result and would
+     * otherwise re-invoke {@code onStart} on every blocking retry of the same record.
+     */
+    private static final Object OPTED_OUT = new Object();
+
+    /**
      * Handles for in-flight processing observations, keyed by record coordinates so that the handle
      * survives across application retries of the same record (blocking retries re-poll the same
-     * offset). Only populated when a {@link KafkaConsumerProcessingObserver} bean is present.
+     * offset). Only populated when a {@link KafkaConsumerProcessingObserver} bean is present. An entry
+     * may hold the opaque observer handle or the {@link #OPTED_OUT} sentinel.
      */
     private final Map<ObservedRecordKey, Object> processingObservations = new HashMap<>();
 
@@ -158,7 +168,12 @@ final class ConsumerStateSingle extends ConsumerState {
             seek = bindRecordArguments(topic, currentOffsets);
             if (interceptedConsumerRecord != null) {
                 beginProcessingObservation(interceptedConsumerRecord);
-                process(topic, interceptedConsumerRecord, consumerRecords);
+                final Object attempt = beginProcessingAttempt(interceptedConsumerRecord);
+                try {
+                    process(topic, interceptedConsumerRecord, consumerRecords);
+                } finally {
+                    endProcessingAttempt(attempt);
+                }
                 succeedProcessingObservation(interceptedConsumerRecord);
             }
         } catch (Exception e) {
@@ -233,6 +248,9 @@ final class ConsumerStateSingle extends ConsumerState {
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, consumerRecord);
                     }
+                    // Handing the record off to a separate retry topic is the terminal outcome of the
+                    // source record's delivery; the retry record begins its own observation when consumed.
+                    failProcessingObservation(consumerRecord, e);
                     return false;
                 }
                 final TopicPartition topicPartition = getTopicPartition(consumerRecord);
@@ -298,6 +316,9 @@ final class ConsumerStateSingle extends ConsumerState {
         }
         kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         handleException(e, consumerRecords, consumerRecord);
+        // Report the terminal failure before pausing so the observation is finished rather than left
+        // dangling while the partition stays paused.
+        failProcessingObservation(consumerRecord, e);
         pause(Collections.singleton(topicPartition));
         return true;
     }
@@ -350,10 +371,37 @@ final class ConsumerStateSingle extends ConsumerState {
         if (observer == null) {
             return;
         }
-        // Reuse the handle across application retries of the same record so the observation spans the
-        // whole message lifecycle (first attempt to terminal outcome) rather than a single attempt.
-        processingObservations.computeIfAbsent(observedKey(consumerRecord),
-            key -> observer.onStart(consumerRecord, info.clientId, info.groupId));
+        // Reuse the handle (or the opt-out sentinel) across application retries of the same record so
+        // the observation spans the whole message lifecycle (first attempt to terminal outcome) rather
+        // than a single attempt, and onStart is invoked at most once per record.
+        processingObservations.computeIfAbsent(observedKey(consumerRecord), key -> {
+            final Object handle = safely(() -> observer.onStart(consumerRecord, info.clientId, info.groupId));
+            return handle == null ? OPTED_OUT : handle;
+        });
+    }
+
+    @Nullable
+    private Object beginProcessingAttempt(ConsumerRecord<?, ?> consumerRecord) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return null;
+        }
+        final Object handle = processingObservations.get(observedKey(consumerRecord));
+        if (handle == null || handle == OPTED_OUT) {
+            return null;
+        }
+        return safely(() -> observer.onAttemptStart(handle));
+    }
+
+    private void endProcessingAttempt(@Nullable Object attempt) {
+        if (attempt == null) {
+            return;
+        }
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        safelyRun(() -> observer.onAttemptEnd(attempt));
     }
 
     private void succeedProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
@@ -362,8 +410,8 @@ final class ConsumerStateSingle extends ConsumerState {
             return;
         }
         final Object handle = processingObservations.remove(observedKey(consumerRecord));
-        if (handle != null) {
-            observer.onSuccess(handle);
+        if (handle != null && handle != OPTED_OUT) {
+            safelyRun(() -> observer.onSuccess(handle));
         }
     }
 
@@ -373,9 +421,30 @@ final class ConsumerStateSingle extends ConsumerState {
             return;
         }
         final Object handle = processingObservations.remove(observedKey(consumerRecord));
-        if (handle != null) {
-            observer.onError(handle, error);
+        if (handle != null && handle != OPTED_OUT) {
+            safelyRun(() -> observer.onError(handle, error));
         }
+    }
+
+    /**
+     * Invokes an observer callback fail-open: any exception is caught and logged so that telemetry
+     * never alters Kafka delivery semantics (listener invocation, retries, offset commits, DLQ).
+     */
+    @Nullable
+    private static <T> T safely(Supplier<T> callback) {
+        try {
+            return callback.get();
+        } catch (Exception e) {
+            LOG.warn("Kafka processing observer threw an exception and was ignored", e);
+            return null;
+        }
+    }
+
+    private static void safelyRun(Runnable callback) {
+        safely(() -> {
+            callback.run();
+            return null;
+        });
     }
 
     private static ObservedRecordKey observedKey(ConsumerRecord<?, ?> consumerRecord) {
