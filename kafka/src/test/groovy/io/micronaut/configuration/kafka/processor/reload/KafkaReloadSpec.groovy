@@ -29,6 +29,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.Serializer
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -43,6 +44,7 @@ class KafkaReloadSpec extends Specification {
     private static final String RELOADER = 'io.micronaut.configuration.kafka.processor.DevelopmentKafkaReloader'
     private static final String TOPIC = 'reload-spec-topic'
     private static final String METHOD_TOPIC = 'reload-spec-method-topic'
+    private static final String AWARE_TOPIC = 'reload-spec-aware-topic'
 
     PollingConditions conditions = new PollingConditions(timeout: 10)
 
@@ -178,6 +180,39 @@ class KafkaReloadSpec extends Specification {
         context.close()
     }
 
+    void "in development mode a definition of a bean that is both a serializer and a deserializer, registered or removed, restarts the consumers once"() {
+        given:
+        ApplicationContext context = devContext(true)
+        MockConsumer<?, ?> first = polling()
+        BeanDefinition<?> both = context.getBeanDefinition(ReloadBothSerde)
+        // the reloader logs each restart once; Logback is on the test runtime classpath only, so it is used dynamically
+        def restarts = Class.forName('ch.qos.logback.core.read.ListAppender').getDeclaredConstructor().newInstance()
+        restarts.start()
+        def logger = LoggerFactory.getLogger(RELOADER)
+        logger.addAppender(restarts)
+
+        when: 'the launcher registers it'
+        ((DefaultBeanContext) context).notifyDefinitionChange([], [both])
+
+        then: 'one restart, not one per serde type the bean is'
+        closed(first)
+        MockConsumer<?, ?> second = polling()
+        restarts.list*.formattedMessage == ['Restarting the Kafka consumers: serde definitions changed']
+
+        when: 'the launcher removes it'
+        restarts.list.clear()
+        ((DefaultBeanContext) context).notifyDefinitionChange([both], [])
+
+        then:
+        closed(second)
+        polling() != second
+        restarts.list*.formattedMessage == ['Restarting the Kafka consumers: serde definitions changed']
+
+        cleanup:
+        logger.detachAppender(restarts)
+        context.close()
+    }
+
     void "in development mode an in-place change of a factory that produces a serde recreates the serde and producer registries, and of a factory of other beans does not"() {
         given:
         ApplicationContext context = devContext(true)
@@ -245,6 +280,37 @@ class KafkaReloadSpec extends Specification {
         closed(methodFirst)
         polling() != first
         conditions.eventually { assert MockConsumers.on(METHOD_TOPIC).findAll { !it.closed() }.size() == 1 }
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode a definition of a listener of a generic interface, registered or removed while running, restarts the consumers"() {
+        given:
+        ApplicationContext context = devContext(true)
+        MockConsumer<?, ?> first = polling()
+        conditions.eventually { assert MockConsumers.on(AWARE_TOPIC).findAll { !it.closed() }.size() == 1 }
+        MockConsumer<?, ?> awareFirst = MockConsumers.on(AWARE_TOPIC).find { !it.closed() }
+        BeanDefinition<?> definition = context.getBeanDefinition(ReloadAwareListener)
+
+        when: 'the launcher removes the definition of a listener that implements ConsumerAware<K, V>'
+        ((DefaultBeanContext) context).notifyDefinitionChange([definition], [])
+
+        then: 'the consumers are restarted: the notice alone leaves the definition registered, so the new processor starts one again'
+        closed(first)
+        closed(awareFirst)
+        MockConsumer<?, ?> second = polling()
+        conditions.eventually { assert MockConsumers.on(AWARE_TOPIC).findAll { !it.closed() }.size() == 1 }
+        MockConsumer<?, ?> awareSecond = MockConsumers.on(AWARE_TOPIC).find { !it.closed() }
+
+        when: 'the launcher registers it again'
+        ((DefaultBeanContext) context).notifyDefinitionChange([], [definition])
+
+        then: 'the consumers are restarted, and one polls for it again'
+        closed(second)
+        closed(awareSecond)
+        polling() != second
+        conditions.eventually { assert MockConsumers.on(AWARE_TOPIC).findAll { !it.closed() }.size() == 1 }
 
         cleanup:
         context.close()
@@ -468,3 +534,39 @@ class ReloadMethodListener {
     void receive(String value) {
     }
 }
+
+@Singleton
+@Named('reload-spec-both')
+@Requires(property = 'spec.name', value = 'KafkaReloadSpec')
+class ReloadBothSerde implements Serializer<String>, org.apache.kafka.common.serialization.Deserializer<String> {
+    @Override
+    byte[] serialize(String topic, String data) {
+        return data?.bytes
+    }
+
+    @Override
+    String deserialize(String topic, byte[] data) {
+        return data == null ? null : new String(data)
+    }
+
+    @Override
+    void configure(Map<String, ?> configs, boolean isKey) {
+    }
+
+    @Override
+    void close() {
+    }
+}
+
+@KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = 'reload-spec-aware')
+@Requires(property = 'spec.name', value = 'KafkaReloadSpec')
+class ReloadAwareListener implements io.micronaut.configuration.kafka.ConsumerAware<String, String> {
+    @Override
+    void setKafkaConsumer(Consumer<String, String> consumer) {
+    }
+
+    @Topic('reload-spec-aware-topic')
+    void receive(String value) {
+    }
+}
+

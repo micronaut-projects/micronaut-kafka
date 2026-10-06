@@ -116,19 +116,22 @@ final class DevelopmentKafkaReloader {
      */
     private static final Qualifier<Object> LISTENERS = new ListenerQualifier();
 
+    /**
+     * The serde beans: a serializer, a deserializer, a serde or a serde registry.
+     */
+    private static final Qualifier<Object> SERDES = new SerdeQualifier();
+
     private final BeanContext beanContext;
 
     /**
      * @param beanContext The context, watched when it can be
      */
-    @SuppressWarnings("unchecked")
     DevelopmentKafkaReloader(BeanContext beanContext) {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
             watchable.watchDefinitions(Object.class, LISTENERS, new ListenerDefinitionsWatcher());
-            for (Class<?> type : SERDE_TYPES) {
-                watchable.watchDefinitions((Class<Object>) type, null, new SerdeDefinitionsWatcher());
-            }
+            // one watch for every serde type, so that a definition of several of them restarts the consumers once
+            watchable.watchDefinitions(Object.class, SERDES, new SerdeDefinitionsWatcher());
             watchable.watchClassChanges(new ClassWatcher());
         }
     }
@@ -390,6 +393,30 @@ final class DevelopmentKafkaReloader {
         @Override
         public String toString() {
             return "Kafka listeners";
+        }
+    }
+
+    /**
+     * Selects the beans of any of the {@link #SERDE_TYPES}, by the bean type.
+     */
+    private static final class SerdeQualifier implements Qualifier<Object> {
+        @Override
+        public <B extends BeanType<Object>> Stream<B> reduce(Class<Object> beanType, Stream<B> candidates) {
+            return candidates.filter(SerdeQualifier::isSerdeBean);
+        }
+
+        @Override
+        public boolean doesQualify(Class<Object> beanType, BeanType<Object> candidate) {
+            return isSerdeBean(candidate);
+        }
+
+        private static boolean isSerdeBean(BeanType<?> candidate) {
+            return isSerdeType(candidate.getBeanType());
+        }
+
+        @Override
+        public String toString() {
+            return "Kafka serdes";
         }
     }
 
