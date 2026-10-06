@@ -874,10 +874,10 @@ class ConsumerStateSingleSpec extends Specification {
         Proxy.newProxyInstance(
             ConsumerStateSingleSpec.classLoader,
             [ExecutableMethod] as Class<?>[],
-            { _, method, _ ->
-                switch (method.name) {
-                    case 'getDeclaringType':
-                        return TestListener
+             { _, method, args ->
+                 switch (method.name) {
+                     case 'getDeclaringType':
+                         return TestListener
                     case 'getName':
                         return 'receive'
                     case 'isTrue':
