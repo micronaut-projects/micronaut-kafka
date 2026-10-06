@@ -19,13 +19,11 @@ import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanRegistration;
 import io.micronaut.context.WatchableBeanContext;
 import io.micronaut.context.annotation.Context;
-import io.micronaut.context.annotation.Executable;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.DevelopmentMode;
 import io.micronaut.context.reload.ClassChange;
@@ -34,7 +32,6 @@ import io.micronaut.context.reload.ReloadStrategy;
 import io.micronaut.context.watch.BeanDefinitionChange;
 import io.micronaut.context.watch.BeanDefinitionWatcher;
 import io.micronaut.context.watch.ClassChangeWatcher;
-import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.Ordered;
 import io.micronaut.inject.BeanDefinition;
@@ -59,18 +56,19 @@ import java.util.Set;
  *
  * <ul>
  *     <li>A {@link KafkaListener} bean definition registered or removed, or a listener class changed in place,
- *     restarts the consumers: the {@link KafkaConsumerProcessor} is recreated, which stops and closes every consumer
- *     it started, the changed listener beans are recreated, and the new processor is given the listener methods, as
- *     at startup, so that it starts their consumers again.</li>
+ *     restarts the consumers: the changed listener beans are recreated, then the {@link KafkaConsumerProcessor},
+ *     which stops and closes every consumer it started.</li>
  *     <li>A class change applied in place that retires a classloader, or that changes a serializer, a deserializer,
  *     a serde, a serde registry or a {@link KafkaClient}, recreates the serde registries and the producer registries,
  *     whose maps are keyed by the classes of the generation that filled them. The beans that received them, the
  *     {@link KafkaClient} advice with its producers and the consumer processor among them, are destroyed with them,
- *     as the dependency graph records; the consumers are then started again on top of the new beans.</li>
- *     <li>A class change applied in place that touches none of these starts the consumers again when the processor
- *     is gone: another module that recreated a bean it received, such as a JSON mapper, destroyed it with its
- *     consumers.</li>
+ *     as the dependency graph records.</li>
+ *     <li>A class change applied in place that touches none of these recreates nothing.</li>
  * </ul>
+ *
+ * <p>The context creates a recreated processor, or one destroyed as a dependent of a recreated bean, again at once,
+ * and gives it the listener methods it gave it at startup, so that it starts the consumers again on top of the new
+ * beans. That covers a bean the processor received that another module recreates, such as a JSON mapper.</p>
  *
  * <p>A change that restarts the application is ignored: the new context starts new consumers, and the one it
  * replaces closes its own as it stops. The processor has no way to stop the consumers of one bean, so a change of
@@ -83,8 +81,7 @@ import java.util.Set;
  * it, and the new context builds its clients from the new values.</p>
  *
  * <p>The watches run after those of other modules, so that a serde or a mapper another module recreates for the
- * same change, which destroys the processor that received it, is in place before the consumers start again. It
- * holds the context only, never a Kafka bean: a bean that received one is a dependent of it, which recreating it
+ * same change is in place before this reloader restarts the consumers. It holds the context only, never a Kafka bean: a bean that received one is a dependent of it, which recreating it
  * would destroy along with its watches.</p>
  *
  * @author graemerocher
@@ -142,11 +139,10 @@ final class DevelopmentKafkaReloader {
                 typeCaches = true;
             }
         }
+        // a change that touches none of these needs nothing: a module that recreated a bean the processor received,
+        // such as a JSON mapper, destroyed the processor with it, and the context created it again and restarted it
         if (typeCaches || !listeners.isEmpty()) {
             restartConsumers(typeCaches, listeners, typeCaches ? "a serde or a Kafka client changed" : listeners + " changed");
-        } else {
-            // a module that recreated a bean the processor received for this change destroyed the processor too
-            startConsumersIfStopped();
         }
     }
 
@@ -255,8 +251,10 @@ final class DevelopmentKafkaReloader {
     }
 
     /**
-     * Stops every consumer, recreates what changed, and starts the consumers again on top of the new beans. Nothing
-     * is created that was not created already, but for the processor and the listener beans it starts.
+     * Recreates what changed and the consumer processor, which stops every consumer. The context creates the
+     * processor again at once and gives it the listener methods, as at startup, so that it starts the consumers again
+     * on top of the new beans. Nothing is created that was not created already, but for the listener beans the
+     * processor starts.
      *
      * @param typeCaches Whether to recreate the serde and producer registries, and the beans that received them
      * @param listeners The listener classes that changed, whose beans are recreated
@@ -266,19 +264,10 @@ final class DevelopmentKafkaReloader {
         if (!(beanContext instanceof WatchableBeanContext context)) {
             return;
         }
-        // taken first: recreating one destroys the beans that received it, as the graph records them. The processor
-        // goes first, so that its consumers stop before anything they call is destroyed
+        // taken first: recreating one destroys the beans that received it, as the graph records them. The listener
+        // beans go first, as the processor starts its consumers again as soon as it is recreated, on the listener
+        // beans it finds then; it goes last, recreated already, and so skipped, when a registry it received was
         List<Object> beans = new ArrayList<>();
-        for (BeanRegistration<KafkaConsumerProcessor> registration : beanContext.getActiveBeanRegistrations(KafkaConsumerProcessor.class)) {
-            add(beans, registration.bean());
-        }
-        if (typeCaches) {
-            for (Class<?> type : TYPE_CACHES) {
-                for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(type)) {
-                    add(beans, registration.bean());
-                }
-            }
-        }
         if (!listeners.isEmpty()) {
             Set<String> names = new HashSet<>(listeners);
             for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(Qualifiers.byStereotype(KafkaListener.class))) {
@@ -287,73 +276,25 @@ final class DevelopmentKafkaReloader {
                 }
             }
         }
-        if (beans.isEmpty()) {
-            startConsumersIfStopped();
-            return;
-        }
-        LOG.debug("Restarting the Kafka consumers: {}", reason);
-        boolean recreated = false;
-        for (Object bean : beans) {
-            // false for a bean destroyed with one recreated before it, and for all of them in a context that does
-            // not track bean dependencies: they are kept, and the consumers keep running until a restart
-            recreated |= context.recreate(bean);
-        }
-        if (recreated) {
-            startConsumers();
-        }
-    }
-
-    /**
-     * Starts the consumers when the processor is gone: a bean it received was recreated, by this reloader or by
-     * another module, and destroyed it, and with it every consumer it had started.
-     */
-    private void startConsumersIfStopped() {
-        if (beanContext.getActiveBeanRegistrations(KafkaConsumerProcessor.class).isEmpty() && !listenerMethods().isEmpty()) {
-            LOG.debug("Starting the Kafka consumers again: the consumer processor was destroyed");
-            startConsumers();
-        }
-    }
-
-    /**
-     * Gives the current processor, created now if it is gone, every listener method, as the context does at startup.
-     */
-    private void startConsumers() {
-        List<ListenerMethod> methods = listenerMethods();
-        if (methods.isEmpty()) {
-            return;
-        }
-        KafkaConsumerProcessor processor = beanContext.findBean(KafkaConsumerProcessor.class).orElse(null);
-        if (processor == null) {
-            return;
-        }
-        for (ListenerMethod entry : methods) {
-            try {
-                processor.process(entry.definition(), entry.method());
-            } catch (RuntimeException e) {
-                LOG.warn("The Kafka listener {} could not be started again: {}", entry.method(), e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * The methods the context gives the processor at startup: those a listener marks for processing that carry
-     * {@link Topic}.
-     */
-    @SuppressWarnings("unchecked")
-    private List<ListenerMethod> listenerMethods() {
-        List<ListenerMethod> methods = new ArrayList<>();
-        for (BeanDefinition<?> definition : beanContext.getBeanDefinitions(Qualifiers.byStereotype(KafkaListener.class))) {
-            if (!definition.requiresMethodProcessing()) {
-                continue;
-            }
-            for (ExecutableMethod<?, ?> method : definition.getExecutableMethodsForProcessing()) {
-                AnnotationMetadata metadata = method.getAnnotationMetadata();
-                if (metadata.getAnnotationTypesByStereotype(Executable.class).contains(Topic.class)) {
-                    methods.add(new ListenerMethod((BeanDefinition<Object>) definition, (ExecutableMethod<Object, ?>) method));
+        if (typeCaches) {
+            for (Class<?> type : TYPE_CACHES) {
+                for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(type)) {
+                    add(beans, registration.bean());
                 }
             }
         }
-        return methods;
+        for (BeanRegistration<KafkaConsumerProcessor> registration : beanContext.getActiveBeanRegistrations(KafkaConsumerProcessor.class)) {
+            add(beans, registration.bean());
+        }
+        if (beans.isEmpty()) {
+            return;
+        }
+        LOG.debug("Restarting the Kafka consumers: {}", reason);
+        for (Object bean : beans) {
+            // false for a bean destroyed with one recreated before it, and for all of them in a context that does
+            // not track bean dependencies: they are kept, and the consumers keep running until a restart
+            context.recreate(bean);
+        }
     }
 
     private static void add(List<Object> beans, Object bean) {
@@ -406,12 +347,4 @@ final class DevelopmentKafkaReloader {
         }
     }
 
-    /**
-     * A listener method, and the definition that declares it.
-     *
-     * @param definition The definition
-     * @param method The method
-     */
-    private record ListenerMethod(BeanDefinition<Object> definition, ExecutableMethod<Object, ?> method) {
-    }
 }

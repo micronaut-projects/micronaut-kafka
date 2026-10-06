@@ -159,24 +159,33 @@ class KafkaReloadSpec extends Specification {
         context.close()
     }
 
-    void "in development mode the consumers are started again when another module recreates a bean the processor received"() {
+    void "in development mode the context starts the consumers again on a new processor when another module recreates a bean the processor received, without the reloader"() {
         given:
         ApplicationContext context = devContext(true)
         ConsumerRegistry registry = context.getBean(ConsumerRegistry)
+        ReloadListener listener = context.getBean(ReloadListener)
         MockConsumer<?, ?> first = polling()
 
         when: 'a module recreates the serde registry for a change of its own, which destroys the processor'
         context.recreate(context.getBean(SerdeRegistry))
 
-        then:
+        then: 'the context created the processor again at once, and gave it the listener methods: no class change follows'
         closed(first)
-
-        when: 'a class change follows'
-        context.publishEvent(classChange([] as Set, [new ClassChange(KafkaReloadSpec.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
-
-        then:
         !context.getBean(ConsumerRegistry).is(registry)
-        polling() != first
+        MockConsumer<?, ?> second = polling()
+        !second.is(first)
+        second.subscription() == [TOPIC] as Set
+
+        and: 'records reach the listener, which was not recreated'
+        consume(second, 'two')
+        conditions.eventually { assert listener.received == ['two'] }
+
+        when: 'the processor itself is recreated'
+        context.recreate(context.getBean(ConsumerRegistry))
+
+        then: 'exactly one consumer polls on the new processor'
+        closed(second)
+        polling() != second
 
         cleanup:
         context.close()
