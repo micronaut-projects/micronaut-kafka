@@ -16,11 +16,13 @@
 package io.micronaut.configuration.kafka.dev;
 
 import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.DefaultBeanContext;
 import io.micronaut.context.reload.ClassChange;
 import io.micronaut.context.reload.ClassChangeEvent;
 import io.micronaut.context.reload.ReloadStrategy;
 import io.micronaut.dev.tck.ReloadHarness;
 import io.micronaut.dev.tck.ReloadTck;
+import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import io.micronaut.testcontainers.kafka.Kafka;
 import org.apache.kafka.clients.admin.Admin;
@@ -35,6 +37,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.kstream.KStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -131,6 +134,17 @@ class KafkaStreamsReloadTest {
             System.out.println("The rebuilt streams processed a record " + rebuiltIn + " ms after the change");
             first = null;
 
+            // the definition of the topology bean is swapped, as the development runtime does when it applies new definitions
+            definitionsChanged(harness);
+            KafkaStreams swapped = streams(harness.context());
+            assertNotSame(rebuilt, swapped);
+            assertEquals(KafkaStreams.State.NOT_RUNNING, rebuilt.state());
+            awaitRunning(swapped);
+            producer.send(new ProducerRecord<>(IN, "swapped")).get();
+            awaitOutput(output, "first swapped");
+            rebuilt = swapped;
+            swapped = null;
+
             harness.source("example.Topology", TOPOLOGY.formatted(STREAM, IN, OUT, "second"));
             long restartStart = System.nanoTime();
             harness.reload();
@@ -161,6 +175,15 @@ class KafkaStreamsReloadTest {
         ApplicationContext context = harness.context();
         context.publishEvent(new ClassChangeEvent(KafkaStreamsReloadTest.class, harness.generation(), Set.of(), context.getClassLoader(),
             List.of(new ClassChange(className, ClassChange.Kind.MODIFIED)), ReloadStrategy.RELOAD));
+    }
+
+    /**
+     * Tells the running generation that the definition of the topology bean was retired and added again.
+     */
+    private static void definitionsChanged(ReloadHarness harness) {
+        ApplicationContext context = harness.context();
+        BeanDefinition<?> definition = context.getBeanDefinition(KStream.class, Qualifiers.byName(STREAM));
+        ((DefaultBeanContext) context).notifyDefinitionChange(List.of(definition), List.of(definition));
     }
 
     private static KafkaStreams streams(ApplicationContext context) {

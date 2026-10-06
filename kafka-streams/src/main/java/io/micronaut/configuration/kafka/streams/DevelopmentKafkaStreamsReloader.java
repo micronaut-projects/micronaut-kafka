@@ -24,6 +24,8 @@ import io.micronaut.context.env.DevelopmentMode;
 import io.micronaut.context.reload.ClassChange;
 import io.micronaut.context.reload.ClassChangeEvent;
 import io.micronaut.context.reload.ReloadStrategy;
+import io.micronaut.context.watch.BeanDefinitionChange;
+import io.micronaut.context.watch.BeanDefinitionWatcher;
 import io.micronaut.context.watch.ClassChangeWatcher;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.Ordered;
@@ -51,6 +53,8 @@ import java.util.Set;
  *     <li>A class change applied in place that retires a classloader, or that changes a class declaring a
  *     {@link KStream}, {@link KTable} or {@link GlobalKTable} bean, such as the factory that builds a topology,
  *     rebuilds the streams.</li>
+ *     <li>A {@link KStream}, {@link KTable} or {@link GlobalKTable} bean definition registered or removed rebuilds the
+ *     streams.</li>
  * </ul>
  *
  * <p>A {@link KafkaStreams} is built once, from a topology its builder cannot build again. A rebuild closes the
@@ -100,41 +104,14 @@ final class DevelopmentKafkaStreamsReloader {
     /**
      * @param beanContext The context, watched when it can be
      */
+    @SuppressWarnings("unchecked")
     DevelopmentKafkaStreamsReloader(BeanContext beanContext) {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
+            for (Class<?> type : TOPOLOGY_TYPES) {
+                watchable.watchDefinitions((Class<Object>) type, null, new TopologyDefinitionsWatcher());
+            }
             watchable.watchClassChanges(new ClassWatcher());
-        }
-    }
-
-    /**
-     * Follows a class change applied in place, after the watches of other modules.
-     */
-    private final class ClassWatcher implements ClassChangeWatcher, Ordered {
-        @Override
-        public void onChange(ClassChangeEvent change) {
-            if (change.strategy() == ReloadStrategy.RESTART) {
-                // the new context builds its own streams, and the one it replaces closes these as it stops; they leave
-                // their groups first, so that the new streams need not wait for the group to time them out
-                leaveGroups();
-                return;
-            }
-            if (!change.retiredLoaders().isEmpty()) {
-                rebuild("a reload retired a classloader");
-                return;
-            }
-            Set<String> topologyClasses = topologyClasses();
-            for (ClassChange classChange : change.changes()) {
-                if (topologyClasses.contains(classChange.className())) {
-                    rebuild(classChange.className() + " changed");
-                    return;
-                }
-            }
-        }
-
-        @Override
-        public int getOrder() {
-            return Ordered.LOWEST_PRECEDENCE;
         }
     }
 
@@ -224,5 +201,54 @@ final class DevelopmentKafkaStreamsReloader {
             }
         }
         beans.add(bean);
+    }
+
+    /**
+     * Rebuilds the streams when a topology bean definition is registered or removed: the streams run the topology
+     * built from the definitions there were. The first batch is what they were built from.
+     */
+    private final class TopologyDefinitionsWatcher implements BeanDefinitionWatcher<Object>, Ordered {
+        @Override
+        public void onChange(BeanDefinitionChange<Object> change) {
+            if (!change.initial() && (!change.added().isEmpty() || !change.removed().isEmpty())) {
+                rebuild("topology definitions changed");
+            }
+        }
+
+        @Override
+        public int getOrder() {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
+    }
+
+    /**
+     * Follows a class change applied in place, after the watches of other modules.
+     */
+    private final class ClassWatcher implements ClassChangeWatcher, Ordered {
+        @Override
+        public void onChange(ClassChangeEvent change) {
+            if (change.strategy() == ReloadStrategy.RESTART) {
+                // the new context builds its own streams, and the one it replaces closes these as it stops; they leave
+                // their groups first, so that the new streams need not wait for the group to time them out
+                leaveGroups();
+                return;
+            }
+            if (!change.retiredLoaders().isEmpty()) {
+                rebuild("a reload retired a classloader");
+                return;
+            }
+            Set<String> topologyClasses = topologyClasses();
+            for (ClassChange classChange : change.changes()) {
+                if (topologyClasses.contains(classChange.className())) {
+                    rebuild(classChange.className() + " changed");
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public int getOrder() {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
     }
 }
