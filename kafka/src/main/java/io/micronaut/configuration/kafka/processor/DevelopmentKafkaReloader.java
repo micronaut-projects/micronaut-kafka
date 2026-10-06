@@ -19,9 +19,11 @@ import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
+import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanRegistration;
+import io.micronaut.context.Qualifier;
 import io.micronaut.context.WatchableBeanContext;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
@@ -32,12 +34,13 @@ import io.micronaut.context.reload.ReloadStrategy;
 import io.micronaut.context.watch.BeanDefinitionChange;
 import io.micronaut.context.watch.BeanDefinitionWatcher;
 import io.micronaut.context.watch.ClassChangeWatcher;
+import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.Ordered;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.BeanDefinitionReference;
+import io.micronaut.inject.BeanType;
 import io.micronaut.inject.ExecutableMethod;
-import io.micronaut.inject.qualifiers.Qualifiers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
@@ -49,13 +52,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Keeps the Kafka consumers, producers and serdes in step with the code in development mode. It exists only in
  * development mode, so nothing of it is on the path of a record consumed or produced.
  *
  * <ul>
- *     <li>A {@link KafkaListener} bean definition registered or removed, or a listener class changed in place,
+ *     <li>A {@link KafkaListener} bean definition registered or removed, the listener on the class or on a method, or a listener class changed in place,
  *     restarts the consumers: the changed listener beans are recreated, then the {@link KafkaConsumerProcessor},
  *     which stops and closes every consumer it started.</li>
  *     <li>A serializer, deserializer, serde or serde registry bean definition registered or removed recreates the
@@ -107,6 +111,11 @@ final class DevelopmentKafkaReloader {
      */
     private static final List<Class<?>> SERDE_TYPES = List.of(Serializer.class, Deserializer.class, Serde.class, SerdeRegistry.class);
 
+    /**
+     * The listener beans: a {@link KafkaListener} or {@link Topic} on the class, or on an executable method.
+     */
+    private static final Qualifier<Object> LISTENERS = new ListenerQualifier();
+
     private final BeanContext beanContext;
 
     /**
@@ -116,7 +125,7 @@ final class DevelopmentKafkaReloader {
     DevelopmentKafkaReloader(BeanContext beanContext) {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
-            watchable.watchDefinitions(Object.class, Qualifiers.byStereotype(KafkaListener.class), new ListenerDefinitionsWatcher());
+            watchable.watchDefinitions(Object.class, LISTENERS, new ListenerDefinitionsWatcher());
             for (Class<?> type : SERDE_TYPES) {
                 watchable.watchDefinitions((Class<Object>) type, null, new SerdeDefinitionsWatcher());
             }
@@ -304,7 +313,7 @@ final class DevelopmentKafkaReloader {
         List<Object> beans = new ArrayList<>();
         if (!listeners.isEmpty()) {
             Set<String> names = new HashSet<>(listeners);
-            for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(Qualifiers.byStereotype(KafkaListener.class))) {
+            for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(LISTENERS)) {
                 if (names.contains(registration.getBeanDefinition().getBeanType().getName())) {
                     add(beans, registration.bean());
                 }
@@ -341,7 +350,52 @@ final class DevelopmentKafkaReloader {
     }
 
     /**
-     * Restarts the consumers when a listener definition is registered or removed. The first batch is what the
+     * Selects the listener beans, whether {@link KafkaListener} or {@link Topic} is on the class or only on a method.
+     * The class metadata of a bean is read first, which needs nothing loaded. The methods are read only for a bean that
+     * requires method processing, as a bean whose methods the {@link KafkaConsumerProcessor} receives does; that skips
+     * the executable methods of every other bean, and the class that holds them. A reference, which has no methods to
+     * read, is kept when it requires method processing.
+     */
+    private static final class ListenerQualifier implements Qualifier<Object> {
+        @Override
+        public <B extends BeanType<Object>> Stream<B> reduce(Class<Object> beanType, Stream<B> candidates) {
+            return candidates.filter(ListenerQualifier::isListenerBean);
+        }
+
+        @Override
+        public boolean doesQualify(Class<Object> beanType, BeanType<Object> candidate) {
+            return isListenerBean(candidate);
+        }
+
+        private static boolean isListenerBean(BeanType<?> candidate) {
+            AnnotationMetadata metadata = candidate.getAnnotationMetadata();
+            if (metadata.hasStereotype(KafkaListener.class) || metadata.hasStereotype(Topic.class)) {
+                return true;
+            }
+            if (!candidate.requiresMethodProcessing()) {
+                return false;
+            }
+            if (!(candidate instanceof BeanDefinition<?> definition)) {
+                return true;
+            }
+            for (ExecutableMethod<?, ?> method : definition.getExecutableMethods()) {
+                AnnotationMetadata methodMetadata = method.getAnnotationMetadata();
+                if (methodMetadata.hasStereotype(KafkaListener.class) || methodMetadata.hasStereotype(Topic.class)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "Kafka listeners";
+        }
+    }
+
+    /**
+     * Restarts the consumers when a listener definition is registered or removed, the listener being on the class or
+     * on a method. The first batch is what the
      * processor was given at startup.
      */
     private final class ListenerDefinitionsWatcher implements BeanDefinitionWatcher<Object>, Ordered {

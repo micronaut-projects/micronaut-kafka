@@ -42,6 +42,7 @@ class KafkaReloadSpec extends Specification {
 
     private static final String RELOADER = 'io.micronaut.configuration.kafka.processor.DevelopmentKafkaReloader'
     private static final String TOPIC = 'reload-spec-topic'
+    private static final String METHOD_TOPIC = 'reload-spec-method-topic'
 
     PollingConditions conditions = new PollingConditions(timeout: 10)
 
@@ -225,6 +226,30 @@ class KafkaReloadSpec extends Specification {
         context.close()
     }
 
+    void "in development mode a definition of a bean whose listener is on a method, registered while running, restarts the consumers once"() {
+        given:
+        ApplicationContext context = devContext(true)
+        MockConsumer<?, ?> first = polling()
+        conditions.eventually { assert MockConsumers.on(METHOD_TOPIC).findAll { !it.closed() }.size() == 1 }
+        MockConsumer<?, ?> methodFirst = MockConsumers.on(METHOD_TOPIC).find { !it.closed() }
+        BeanDefinition<?> definition = context.getBeanDefinition(ReloadMethodListener)
+
+        expect: 'the class carries no listener stereotype, only its method does'
+        !definition.hasStereotype(KafkaListener)
+
+        when: 'the launcher swaps the definition of the method-scoped listener for another of the same class'
+        ((DefaultBeanContext) context).notifyDefinitionChange([definition], [definition])
+
+        then: 'every consumer started before is closed, and exactly one consumer polls for each listener'
+        closed(first)
+        closed(methodFirst)
+        polling() != first
+        conditions.eventually { assert MockConsumers.on(METHOD_TOPIC).findAll { !it.closed() }.size() == 1 }
+
+        cleanup:
+        context.close()
+    }
+
     void "in development mode the context starts the consumers again on a new processor when another module recreates a bean the processor received, without the reloader"() {
         given:
         ApplicationContext context = devContext(true)
@@ -357,7 +382,11 @@ class MockConsumers {
 
     // the consumers of the listener of the spec: the other listeners of the test sources are started too
     static List<PollingMockConsumer> mine() {
-        return created.findAll { it.topics.contains('reload-spec-topic') }
+        return on('reload-spec-topic')
+    }
+
+    static List<PollingMockConsumer> on(String topic) {
+        return created.findAll { it.topics.contains(topic) }
     }
 }
 
@@ -428,5 +457,14 @@ class ReloadSerdeFactory {
     @Named('reload-spec')
     Serializer<String> serializer() {
         return new ReloadSerializer()
+    }
+}
+
+@Singleton
+@Requires(property = 'spec.name', value = 'KafkaReloadSpec')
+class ReloadMethodListener {
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST, groupId = 'reload-spec-method')
+    @Topic('reload-spec-method-topic')
+    void receive(String value) {
     }
 }
