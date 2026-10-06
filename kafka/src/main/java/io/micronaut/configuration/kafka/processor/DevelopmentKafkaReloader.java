@@ -58,8 +58,10 @@ import java.util.Set;
  *     <li>A {@link KafkaListener} bean definition registered or removed, or a listener class changed in place,
  *     restarts the consumers: the changed listener beans are recreated, then the {@link KafkaConsumerProcessor},
  *     which stops and closes every consumer it started.</li>
+ *     <li>A serializer, deserializer, serde or serde registry bean definition registered or removed recreates the
+ *     serde registries and the producer registries, as a class change of one does.</li>
  *     <li>A class change applied in place that retires a classloader, or that changes a serializer, a deserializer,
- *     a serde, a serde registry or a {@link KafkaClient}, recreates the serde registries and the producer registries,
+ *     a serde, a serde registry, a factory that produces one of these, or a {@link KafkaClient}, recreates the serde registries and the producer registries,
  *     whose maps are keyed by the classes of the generation that filled them. The beans that received them, the
  *     {@link KafkaClient} advice with its producers and the consumer processor among them, are destroyed with them,
  *     as the dependency graph records.</li>
@@ -110,10 +112,14 @@ final class DevelopmentKafkaReloader {
     /**
      * @param beanContext The context, watched when it can be
      */
+    @SuppressWarnings("unchecked")
     DevelopmentKafkaReloader(BeanContext beanContext) {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
             watchable.watchDefinitions(Object.class, Qualifiers.byStereotype(KafkaListener.class), new ListenerDefinitionsWatcher());
+            for (Class<?> type : SERDE_TYPES) {
+                watchable.watchDefinitions((Class<Object>) type, null, new SerdeDefinitionsWatcher());
+            }
             watchable.watchClassChanges(new ClassWatcher());
         }
     }
@@ -217,18 +223,46 @@ final class DevelopmentKafkaReloader {
     }
 
     /**
-     * Whether the class a change replaces was a serde or a serde registry bean as the context was compiled.
+     * Whether the class a change replaces was a serde or a serde registry bean as the context was compiled, or a
+     * factory that produced one: a product of a factory is defined by {@code $Factory$MethodN$Definition}, whose bean
+     * type is the product and whose declaring type is the factory.
      */
     private boolean wasSerde(String className) {
         for (BeanDefinitionReference<?> reference : definitionsOf(className)) {
             try {
-                Class<?> beanType = reference.getBeanType();
-                for (Class<?> serdeType : SERDE_TYPES) {
-                    if (serdeType.isAssignableFrom(beanType)) {
-                        return true;
-                    }
+                if (isSerdeType(reference.getBeanType())) {
+                    return true;
                 }
             } catch (RuntimeException | LinkageError e) {
+                return true;
+            }
+        }
+        int lastDot = className.lastIndexOf('.');
+        String products = className.substring(0, lastDot + 1) + '$' + className.substring(lastDot + 1) + '$';
+        for (BeanDefinitionReference<?> reference : beanContext.getBeanDefinitionReferences()) {
+            String name = reference.getBeanDefinitionName();
+            if (!name.startsWith(products) || !name.endsWith("$Definition")) {
+                continue;
+            }
+            try {
+                if (!isSerdeType(reference.getBeanType())) {
+                    continue;
+                }
+                // the name alone matches a nested class too: the declaring type tells the product of this factory
+                BeanDefinition<?> definition = reference.load();
+                if (definition == null || definition.getDeclaringType().map(Class::getName).filter(className::equals).isPresent()) {
+                    return true;
+                }
+            } catch (RuntimeException | LinkageError e) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isSerdeType(Class<?> beanType) {
+        for (Class<?> serdeType : SERDE_TYPES) {
+            if (serdeType.isAssignableFrom(beanType)) {
                 return true;
             }
         }
@@ -324,6 +358,25 @@ final class DevelopmentKafkaReloader {
                 changed.add(definition.getBeanType().getName());
             }
             restartConsumers(false, changed, "listener definitions changed");
+        }
+
+        @Override
+        public int getOrder() {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
+    }
+
+    /**
+     * Recreates the serde and producer registries when a serde, serializer, deserializer or serde registry definition
+     * is registered or removed, as the in-place class change only sees the definitions that remain. The first batch
+     * is what the registries were built from.
+     */
+    private final class SerdeDefinitionsWatcher implements BeanDefinitionWatcher<Object>, Ordered {
+        @Override
+        public void onChange(BeanDefinitionChange<Object> change) {
+            if (!change.initial() && (!change.added().isEmpty() || !change.removed().isEmpty())) {
+                restartConsumers(true, List.of(), "serde definitions changed");
+            }
         }
 
         @Override

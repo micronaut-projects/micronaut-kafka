@@ -20,11 +20,15 @@ import io.micronaut.context.reload.ClassChange
 import io.micronaut.context.reload.ClassChangeEvent
 import io.micronaut.context.reload.ReloadStrategy
 import io.micronaut.inject.BeanDefinition
+import io.micronaut.inject.qualifiers.Qualifiers
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.serialization.Serializer
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -134,6 +138,68 @@ class KafkaReloadSpec extends Specification {
         !context.getBean(ConsumerRegistry).is(registry)
         MockConsumer<?, ?> third = polling()
         !third.is(second)
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode a serde definition registered or removed while running recreates the serde and producer registries"() {
+        given:
+        ApplicationContext context = devContext(true)
+        SerdeRegistry serdes = context.getBean(SerdeRegistry)
+        ProducerRegistry producers = context.getBean(ProducerRegistry)
+        ReloadClient client = context.getBean(ReloadClient)
+        MockConsumer<?, ?> first = polling()
+        BeanDefinition<?> serializer = context.getBeanDefinition(Serializer, Qualifiers.byName('reload-spec'))
+
+        when: 'the launcher registers a serializer definition'
+        ((DefaultBeanContext) context).notifyDefinitionChange([], [serializer])
+
+        then: 'the registries keyed by class are new, and so are the beans that received them'
+        !context.getBean(SerdeRegistry).is(serdes)
+        !context.getBean(ProducerRegistry).is(producers)
+        !context.getBean(ReloadClient).is(client)
+        closed(first)
+        MockConsumer<?, ?> second = polling()
+
+        when: 'the launcher removes it'
+        serdes = context.getBean(SerdeRegistry)
+        producers = context.getBean(ProducerRegistry)
+        ((DefaultBeanContext) context).notifyDefinitionChange([serializer], [])
+
+        then:
+        !context.getBean(SerdeRegistry).is(serdes)
+        !context.getBean(ProducerRegistry).is(producers)
+        closed(second)
+        polling() != second
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode an in-place change of a factory that produces a serde recreates the serde and producer registries, and of a factory of other beans does not"() {
+        given:
+        ApplicationContext context = devContext(true)
+        SerdeRegistry serdes = context.getBean(SerdeRegistry)
+        ProducerRegistry producers = context.getBean(ProducerRegistry)
+        MockConsumer<?, ?> first = polling()
+
+        when: 'a factory of consumers is redefined in place'
+        context.publishEvent(classChange([] as Set, [new ClassChange(MockConsumerFactory.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
+
+        then:
+        context.getBean(SerdeRegistry).is(serdes)
+        context.getBean(ProducerRegistry).is(producers)
+        !first.closed()
+
+        when: 'the factory of a serializer is redefined in place'
+        context.publishEvent(classChange([] as Set, [new ClassChange(ReloadSerdeFactory.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
+
+        then:
+        !context.getBean(SerdeRegistry).is(serdes)
+        !context.getBean(ProducerRegistry).is(producers)
+        closed(first)
+        polling() != first
 
         cleanup:
         context.close()
@@ -352,5 +418,15 @@ class ReloadSerializer implements org.apache.kafka.common.serialization.Serializ
     @Override
     byte[] serialize(String topic, String data) {
         return data?.bytes
+    }
+}
+
+@Factory
+@Requires(property = 'spec.name', value = 'KafkaReloadSpec')
+class ReloadSerdeFactory {
+    @Singleton
+    @Named('reload-spec')
+    Serializer<String> serializer() {
+        return new ReloadSerializer()
     }
 }
