@@ -20,6 +20,7 @@ import io.micronaut.dev.tck.ReloadHarness;
 import io.micronaut.dev.tck.ReloadTck;
 import io.micronaut.testcontainers.kafka.Kafka;
 import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -33,17 +34,23 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Runs an application with a Kafka listener through the development runtime, against a broker, and edits the
  * listener. The restart closes the consumers of the retired generation as its context stops: they leave the
  * consumer group at once, rather than when the session times out, and nothing of them keeps the retired
- * generation reachable.
+ * generation reachable. The admin client is retained across the restart, until a change under {@code kafka}
+ * releases it.
  */
 class KafkaReloadTest {
 
@@ -75,6 +82,38 @@ class KafkaReloadTest {
         }
         """;
 
+    private static final String REPORTER = """
+        package example;
+
+        import org.apache.kafka.common.metrics.KafkaMetric;
+        import org.apache.kafka.common.metrics.MetricsReporter;
+
+        import java.util.List;
+        import java.util.Map;
+
+        public class Reporter implements MetricsReporter {
+            @Override
+            public void init(List<KafkaMetric> metrics) {
+            }
+
+            @Override
+            public void metricChange(KafkaMetric metric) {
+            }
+
+            @Override
+            public void metricRemoval(KafkaMetric metric) {
+            }
+
+            @Override
+            public void close() {
+            }
+
+            @Override
+            public void configure(Map<String, ?> configs) {
+            }
+        }
+        """;
+
     @TempDir
     Path project;
 
@@ -94,12 +133,19 @@ class KafkaReloadTest {
             awaitTrue("the first generation consumes", () -> received(harness.context()).contains("first one"));
             awaitTrue("the first generation joined the group", () -> members(admin) == 1);
             ReloadTck.assertFollowsReload(harness, KafkaReloadTest::listener);
+            AdminClient adminClient = harness.context().getBean(AdminClient.class);
 
             harness.source("example.Listener", LISTENER.formatted(GROUP, TOPIC, "second"));
             long reloadStart = System.nanoTime();
             harness.reload();
             assertEquals(2, harness.generation());
             assertReloaderPresent(harness.context());
+
+            // the admin client, with its connections, is kept
+            ReloadTck.assertRetained(harness, adminClient);
+            assertSame(adminClient, harness.context().getBean(AdminClient.class));
+            assertTopicsListed(adminClient);
+            adminClient = null;
 
             // the retired consumer left the group as its context stopped: the group settles on the one member of the
             // new generation well before the 45 second session timeout would have evicted a consumer that did not leave
@@ -113,9 +159,92 @@ class KafkaReloadTest {
             assertFalse(received(harness.context()).contains("first two"));
             ReloadTck.assertFollowsReload(harness, KafkaReloadTest::listener);
 
-            // neither the consumers of the first generation, their threads, nor the development-only reloader keep it reachable
+            // neither the consumers of the first generation, their threads, the retained admin client nor the
+            // development-only reloader keep it reachable
             ReloadTck.assertRetiredGenerationsCollected(harness);
         }
+    }
+
+    @Test
+    void aChangeUnderTheKafkaPrefixReleasesAndClosesTheAdminClient() throws Exception {
+        String bootstrap = Kafka.getProperties().get("kafka.bootstrap.servers");
+        try (ReloadHarness harness = ReloadHarness.inDirectory(project)) {
+            harness.property("kafka.bootstrap.servers", bootstrap);
+            harness.property("kafka.health.enabled", "false");
+            harness.source("example.Listener", LISTENER.formatted(GROUP + "-released", TOPIC, "first"));
+            harness.start();
+            AdminClient first = harness.context().getBean(AdminClient.class);
+            assertTopicsListed(first);
+
+            // the application properties change under kafka, together with a class, so the application restarts
+            harness.resource("application.properties", """
+                kafka.bootstrap.servers=%s
+                kafka.health.enabled=false
+                kafka.request.timeout.ms=20000
+                """.formatted(bootstrap));
+            harness.source("example.Listener", LISTENER.formatted(GROUP + "-released", TOPIC, "second"));
+            harness.reload();
+            assertEquals(2, harness.generation());
+
+            AdminClient second = harness.context().getBean(AdminClient.class);
+            assertNotSame(first, second, "a change under kafka releases the admin client");
+            assertTopicsListed(second);
+            // the released admin client was closed with the retired generation
+            AdminClient released = first;
+            ExecutionException closed = assertThrows(ExecutionException.class,
+                () -> released.listTopics().names().get(10, TimeUnit.SECONDS));
+            System.out.println("The released admin client refuses calls: " + closed.getCause());
+            first = null;
+            second = null;
+            ReloadTck.assertRetiredGenerationsCollected(harness);
+        }
+    }
+
+    @Test
+    void anAdminClientConfiguredWithAClassOfTheApplicationIsNotRetained() throws Exception {
+        String bootstrap = Kafka.getProperties().get("kafka.bootstrap.servers");
+        try (ReloadHarness harness = ReloadHarness.inDirectory(project)) {
+            harness.property("kafka.bootstrap.servers", bootstrap);
+            harness.property("kafka.health.enabled", "false");
+            // the admin client instantiates the reporter, a class of the application, and keeps it
+            harness.property("kafka.metric.reporters", "example.Reporter");
+            harness.source("example.Reporter", REPORTER);
+            harness.source("example.Listener", LISTENER.formatted(GROUP + "-reporter", TOPIC, "first"));
+            harness.start();
+            AdminClient first = adminClientOfApplicationThread(harness);
+            assertTopicsListed(first);
+
+            harness.source("example.Listener", LISTENER.formatted(GROUP + "-reporter", TOPIC, "second"));
+            harness.reload();
+            assertEquals(2, harness.generation());
+
+            AdminClient second = adminClientOfApplicationThread(harness);
+            assertNotSame(first, second, "an admin client running a class of the retired generation is not retained");
+            assertTopicsListed(second);
+            first = null;
+            second = null;
+            // the admin client of the first generation, closed with it, keeps none of its reporters reachable
+            ReloadTck.assertRetiredGenerationsCollected(harness);
+        }
+    }
+
+    /**
+     * Creates the admin client as a thread of the application would, with the generation's classloader as the
+     * context classloader, through which Kafka loads the classes its configuration names.
+     */
+    private static AdminClient adminClientOfApplicationThread(ReloadHarness harness) {
+        Thread thread = Thread.currentThread();
+        ClassLoader previous = thread.getContextClassLoader();
+        thread.setContextClassLoader(harness.context().getClassLoader());
+        try {
+            return harness.context().getBean(AdminClient.class);
+        } finally {
+            thread.setContextClassLoader(previous);
+        }
+    }
+
+    private static void assertTopicsListed(AdminClient adminClient) throws Exception {
+        assertTrue(adminClient.listTopics().names().get(30, TimeUnit.SECONDS) != null);
     }
 
     private static int members(Admin admin) {

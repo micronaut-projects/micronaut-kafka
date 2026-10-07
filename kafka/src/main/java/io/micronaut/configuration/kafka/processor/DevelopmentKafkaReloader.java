@@ -17,10 +17,13 @@ package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.ProducerRegistry;
 import io.micronaut.configuration.kafka.TransactionalProducerRegistry;
+import io.micronaut.configuration.kafka.admin.AdminClientFactory;
+import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
+import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanRegistration;
 import io.micronaut.context.Qualifier;
@@ -28,6 +31,7 @@ import io.micronaut.context.WatchableBeanContext;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.DevelopmentMode;
+import io.micronaut.context.reload.BeanRetentionPolicy;
 import io.micronaut.context.reload.ClassChange;
 import io.micronaut.context.reload.ClassChangeEvent;
 import io.micronaut.context.reload.ReloadStrategy;
@@ -41,6 +45,7 @@ import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.BeanDefinitionReference;
 import io.micronaut.inject.BeanType;
 import io.micronaut.inject.ExecutableMethod;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
@@ -48,10 +53,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -86,6 +95,13 @@ import java.util.stream.Stream;
  * bean, which binds all of {@code kafka}, so the development runtime restarts the application for any change under
  * it, and the new context builds its clients from the new values.</p>
  *
+ * <p>Across a restart it retains the admin client that {@link AdminClientFactory} creates, with its connections,
+ * until a change under {@code kafka} releases it: the admin client copies the properties of the default configuration
+ * as it is created, and the next context binds the configuration again. It is retained only while the configuration
+ * names no class of the application, such as a metric reporter or a SASL callback handler, which the admin client
+ * would instantiate and keep running from the retired generation. Neither the consumers, the producers nor the
+ * streams are retained: they run the application's listeners and serdes.</p>
+ *
  * <p>The watches run after those of other modules, so that a serde or a mapper another module recreates for the
  * same change is in place before this reloader restarts the consumers. It holds the context only, never a Kafka bean: a bean that received one is a dependent of it, which recreating it
  * would destroy along with its watches.</p>
@@ -96,7 +112,7 @@ import java.util.stream.Stream;
 @Internal
 @Context
 @Requires(condition = DevelopmentMode.Active.class)
-final class DevelopmentKafkaReloader {
+final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
 
     private static final Logger LOG = LoggerFactory.getLogger(DevelopmentKafkaReloader.class);
 
@@ -121,6 +137,17 @@ final class DevelopmentKafkaReloader {
      */
     private static final Qualifier<Object> SERDES = new SerdeQualifier();
 
+    /**
+     * The properties under {@code kafka} that are not those of the admin client, as {@code KafkaDefaultConfiguration}
+     * leaves them out.
+     */
+    private static final List<String> NOT_ADMIN_PROPERTIES = List.of("embedded", "consumers", "producers", "streams");
+
+    /**
+     * A fully qualified class name: a value of the configuration that Kafka may load as a class.
+     */
+    private static final Pattern CLASS_NAME = Pattern.compile("(?:[\\p{L}_$][\\p{L}\\p{N}_$]*\\.)+[\\p{L}_$][\\p{L}\\p{N}_$]*");
+
     private final BeanContext beanContext;
 
     /**
@@ -134,6 +161,102 @@ final class DevelopmentKafkaReloader {
             watchable.watchDefinitions(Object.class, SERDES, new SerdeDefinitionsWatcher());
             watchable.watchClassChanges(new ClassWatcher());
         }
+    }
+
+    /**
+     * Retains the admin client of {@link AdminClientFactory} across a restart, unless the configuration names a class
+     * of the application.
+     *
+     * @param registration The bean's registration
+     * @return Whether it is the admin client, safe to retain
+     */
+    @Override
+    public boolean retain(BeanRegistration<?> registration) {
+        return isAdminClient(registration) && !namesApplicationClass();
+    }
+
+    /**
+     * @param registration The retained bean's registration
+     * @return {@code kafka}, under which the admin client's configuration is bound
+     */
+    @Override
+    public Set<String> observedConfigurationPrefixes(BeanRegistration<?> registration) {
+        return isAdminClient(registration) ? Set.of(AbstractKafkaConfiguration.PREFIX) : Set.of();
+    }
+
+    private static boolean isAdminClient(BeanRegistration<?> registration) {
+        BeanDefinition<?> definition = registration.getBeanDefinition();
+        return definition.getBeanType() == AdminClient.class
+            && definition.getDeclaringType().filter(type -> type == AdminClientFactory.class).isPresent();
+    }
+
+    /**
+     * Whether a property of the admin client's configuration names a class the application defines, rather than the
+     * classpath Kafka is loaded from: the admin client would instantiate it and keep it running, and the retired
+     * generation reachable, after the restart replaced it.
+     */
+    private boolean namesApplicationClass() {
+        if (!(beanContext instanceof ApplicationContext applicationContext)) {
+            return false;
+        }
+        Map<String, Object> properties = applicationContext.getEnvironment().getProperties(AbstractKafkaConfiguration.PREFIX);
+        for (Map.Entry<String, Object> property : properties.entrySet()) {
+            String key = property.getKey();
+            if (NOT_ADMIN_PROPERTIES.stream().noneMatch(key::startsWith) && namesApplicationClass(property.getValue())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("The Kafka admin client is not retained across the restart: {}.{} names a class of the application",
+                        AbstractKafkaConfiguration.PREFIX, key);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean namesApplicationClass(Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Class<?> type) {
+            return isApplicationClass(type);
+        }
+        if (value instanceof Collection<?> values) {
+            return values.stream().anyMatch(this::namesApplicationClass);
+        }
+        if (value.getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(value); i++) {
+                if (namesApplicationClass(Array.get(value, i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        // a list of class names, or a JAAS configuration that names a login module
+        for (String token : value.toString().split("[\\s,;=\"']+")) {
+            if (CLASS_NAME.matcher(token).matches() && isApplicationClass(load(token, beanContext.getClassLoader()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether a class was loaded by neither the classloader of the Kafka clients nor one of its parents.
+     */
+    private static boolean isApplicationClass(Class<?> type) {
+        if (type == null) {
+            return false;
+        }
+        ClassLoader loader = type.getClassLoader();
+        if (loader == null) {
+            return false;
+        }
+        for (ClassLoader kafka = AdminClient.class.getClassLoader(); kafka != null; kafka = kafka.getParent()) {
+            if (kafka == loader) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void onClassChange(ClassChangeEvent change) {
