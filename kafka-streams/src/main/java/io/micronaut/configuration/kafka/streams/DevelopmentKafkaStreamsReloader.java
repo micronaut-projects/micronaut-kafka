@@ -16,6 +16,7 @@
 package io.micronaut.configuration.kafka.streams;
 
 import io.micronaut.context.BeanContext;
+import io.micronaut.context.BeanDependencyGraph;
 import io.micronaut.context.BeanRegistration;
 import io.micronaut.context.WatchableBeanContext;
 import io.micronaut.context.annotation.Context;
@@ -35,6 +36,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,18 +119,37 @@ final class DevelopmentKafkaStreamsReloader {
 
     /**
      * The classes a topology is built from, as the context was compiled: the declaring factory of a topology bean,
-     * or its type. A change applied in place cannot change the definitions, so they name the classes the running
-     * topology was built from.
+     * or its type, and the beans either received, as the dependency graph records them, such as a bean the factory
+     * delegates the topology to. A change applied in place cannot change the definitions, so they name the classes
+     * the running topology was built from.
      */
     private Set<String> topologyClasses() {
         Set<String> classes = new HashSet<>();
+        BeanDependencyGraph graph = beanContext instanceof WatchableBeanContext watchable ? watchable.findDependencyGraph().orElse(null) : null;
         for (Class<?> type : TOPOLOGY_TYPES) {
             for (BeanDefinition<?> definition : beanContext.getBeanDefinitions(type)) {
-                classes.add(definition.getBeanType().getName());
-                definition.getDeclaringType().ifPresent(declaring -> classes.add(declaring.getName()));
+                addBuiltFrom(classes, definition, graph);
+                definition.getDeclaringType().ifPresent(declaring -> {
+                    classes.add(declaring.getName());
+                    if (graph != null) {
+                        for (BeanDefinition<?> factory : beanContext.getBeanDefinitions(declaring)) {
+                            addBuiltFrom(classes, factory, graph);
+                        }
+                    }
+                });
             }
         }
         return classes;
+    }
+
+    private static void addBuiltFrom(Set<String> classes, BeanDefinition<?> definition, @Nullable BeanDependencyGraph graph) {
+        classes.add(definition.getBeanType().getName());
+        if (graph != null) {
+            for (BeanDefinition<?> dependency : graph.transitiveDependenciesOf(definition)) {
+                classes.add(dependency.getBeanType().getName());
+                dependency.getDeclaringType().ifPresent(declaring -> classes.add(declaring.getName()));
+            }
+        }
     }
 
     /**

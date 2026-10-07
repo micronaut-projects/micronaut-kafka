@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Runs an application with a Kafka Streams topology through the development runtime, against a broker. A change of
- * the class that builds the topology applied in place rebuilds the streams; a restart closes the streams of the
+ * the class that builds the topology, or of a bean it delegates to, applied in place rebuilds the streams; a restart closes the streams of the
  * retired generation as its context stops, and nothing of them keeps it reachable.
  */
 class KafkaStreamsReloadTest {
@@ -79,12 +79,25 @@ class KafkaStreamsReloadTest {
         public class Topology {
             @Singleton
             @Named("%1$s")
-            KStream<String, String> stream(@Named("%1$s") ConfiguredStreamBuilder builder) {
+            KStream<String, String> stream(@Named("%1$s") ConfiguredStreamBuilder builder, Decorator decorator) {
                 builder.getConfiguration().put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
                 builder.getConfiguration().put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
                 KStream<String, String> source = builder.stream("%2$s");
-                source.mapValues(value -> "%4$s " + value).to("%3$s");
+                source.mapValues(decorator::decorate).to("%3$s");
                 return source;
+            }
+        }
+        """;
+
+    private static final String DECORATOR = """
+        package example;
+
+        import jakarta.inject.Singleton;
+
+        @Singleton
+        public class Decorator {
+            public String decorate(String value) {
+                return "%s " + value;
             }
         }
         """;
@@ -110,7 +123,8 @@ class KafkaStreamsReloadTest {
             harness.property("kafka.bootstrap.servers", bootstrap);
             harness.property("kafka.health.enabled", "false");
             harness.property("kafka.streams." + STREAM + ".application-id", "dev-streams-" + UUID.randomUUID());
-            harness.source("example.Topology", TOPOLOGY.formatted(STREAM, IN, OUT, "first"));
+            harness.source("example.Topology", TOPOLOGY.formatted(STREAM, IN, OUT));
+            harness.source("example.Decorator", DECORATOR.formatted("first"));
             harness.start();
             assertReloaderPresent(harness.context());
 
@@ -134,6 +148,17 @@ class KafkaStreamsReloadTest {
             System.out.println("The rebuilt streams processed a record " + rebuiltIn + " ms after the change");
             first = null;
 
+            // a bean the factory delegates the topology to changed in place: the streams are built again with it
+            KafkaStreams beforeDelegate = rebuilt;
+            changedInPlace(harness, "example.Decorator");
+            rebuilt = streams(harness.context());
+            assertNotSame(beforeDelegate, rebuilt);
+            assertEquals(KafkaStreams.State.NOT_RUNNING, beforeDelegate.state());
+            beforeDelegate = null;
+            awaitRunning(rebuilt);
+            producer.send(new ProducerRecord<>(IN, "delegated")).get();
+            awaitOutput(output, "first delegated");
+
             // the definition of the topology bean is swapped, as the development runtime does when it applies new definitions
             definitionsChanged(harness);
             KafkaStreams swapped = streams(harness.context());
@@ -145,7 +170,7 @@ class KafkaStreamsReloadTest {
             rebuilt = swapped;
             swapped = null;
 
-            harness.source("example.Topology", TOPOLOGY.formatted(STREAM, IN, OUT, "second"));
+            harness.source("example.Decorator", DECORATOR.formatted("second"));
             long restartStart = System.nanoTime();
             harness.reload();
             assertEquals(2, harness.generation());
