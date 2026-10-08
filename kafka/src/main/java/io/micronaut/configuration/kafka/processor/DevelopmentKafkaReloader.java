@@ -94,12 +94,11 @@ import java.util.stream.Stream;
  * bean, which binds all of {@code kafka}, so the development runtime restarts the application for any change under
  * it, and the new context builds its clients from the new values.</p>
  *
- * <p>Across a restart it retains the admin client that {@link AdminClientFactory} creates, with its connections,
- * until a change under {@code kafka} releases it: the admin client copies the properties of the default configuration
- * as it is created, and the next context binds the configuration again. It is retained only while the configuration
- * names no class of the application, such as a metric reporter or a SASL callback handler, which the admin client
- * would instantiate and keep running from the retired generation. Neither the consumers, the producers nor the
- * streams are retained: they run the application's listeners and serdes.</p>
+ * <p>{@link AdminClientFactory} retains the admin client across a restart with
+ * {@link io.micronaut.context.annotation.Retain}; this reloader refuses it while the configuration names a class of
+ * the application, such as a metric reporter or a SASL callback handler, which the admin client would instantiate and
+ * keep running from the retired generation. Neither the consumers, the producers nor the streams are retained: they
+ * run the application's listeners and serdes.</p>
  *
  * <p>The watches run after those of other modules, so that a serde or a mapper another module recreates for the
  * same change is in place before this reloader restarts the consumers. It holds the context only, never a Kafka bean: a bean that received one is a dependent of it, which recreating it
@@ -163,24 +162,15 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
     }
 
     /**
-     * Retains the admin client of {@link AdminClientFactory} across a restart, unless the configuration names a class
-     * of the application.
+     * Refuses the admin client of {@link AdminClientFactory}, which it retains, when the configuration names a class of
+     * the application.
      *
      * @param registration The bean's registration
-     * @return Whether it is the admin client, safe to retain
+     * @return {@link Decision#REFUSE} for the admin client while the configuration names a class of the application
      */
     @Override
-    public boolean retain(BeanRegistration<?> registration) {
-        return isAdminClient(registration) && !namesApplicationClass();
-    }
-
-    /**
-     * @param registration The retained bean's registration
-     * @return {@code kafka}, under which the admin client's configuration is bound
-     */
-    @Override
-    public Set<String> observedConfigurationPrefixes(BeanRegistration<?> registration) {
-        return isAdminClient(registration) ? Set.of(AbstractKafkaConfiguration.PREFIX) : Set.of();
+    public Decision decide(BeanRegistration<?> registration) {
+        return isAdminClient(registration) && namesApplicationClass() ? Decision.REFUSE : Decision.ABSTAIN;
     }
 
     private static boolean isAdminClient(BeanRegistration<?> registration) {
