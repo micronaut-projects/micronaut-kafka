@@ -21,8 +21,8 @@ class KafkaStreamsReloaderSpec extends Specification {
         context.containsBean(Class.forName(RELOADER))
 
         when:
-        context.publishEvent(new ClassChangeEvent(KafkaStreamsReloaderSpec, 1, [KafkaStreamsReloaderSpec.classLoader] as Set, KafkaStreamsReloaderSpec.classLoader, [], ReloadStrategy.RELOAD))
-        context.publishEvent(new ClassChangeEvent(KafkaStreamsReloaderSpec, 1, [] as Set, KafkaStreamsReloaderSpec.classLoader, [], ReloadStrategy.RESTART))
+        context.publishEvent(new ClassChangeEvent(KafkaStreamsReloaderSpec, [KafkaStreamsReloaderSpec.classLoader] as Set, KafkaStreamsReloaderSpec.classLoader, [], ReloadStrategy.RELOAD))
+        context.publishEvent(new ClassChangeEvent(KafkaStreamsReloaderSpec, [] as Set, KafkaStreamsReloaderSpec.classLoader, [], ReloadStrategy.RESTART))
 
         then:
         noExceptionThrown()

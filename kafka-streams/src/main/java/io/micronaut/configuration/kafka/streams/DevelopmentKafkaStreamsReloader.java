@@ -18,10 +18,10 @@ package io.micronaut.configuration.kafka.streams;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanDependencyGraph;
 import io.micronaut.context.BeanRegistration;
+import io.micronaut.context.ConfigurableBeanContext;
 import io.micronaut.context.WatchableBeanContext;
 import io.micronaut.context.annotation.Context;
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.env.DevelopmentMode;
+import io.micronaut.context.env.DevelopmentActive;
 import io.micronaut.context.reload.ClassChange;
 import io.micronaut.context.reload.ClassChangeEvent;
 import io.micronaut.context.reload.ReloadStrategy;
@@ -81,7 +81,7 @@ import java.util.Set;
  */
 @Internal
 @Context
-@Requires(condition = DevelopmentMode.Active.class)
+@DevelopmentActive
 final class DevelopmentKafkaStreamsReloader {
 
     private static final Logger LOG = LoggerFactory.getLogger(DevelopmentKafkaStreamsReloader.class);
@@ -125,7 +125,7 @@ final class DevelopmentKafkaStreamsReloader {
      */
     private Set<String> topologyClasses() {
         Set<String> classes = new HashSet<>();
-        BeanDependencyGraph graph = beanContext instanceof WatchableBeanContext watchable ? watchable.findDependencyGraph().orElse(null) : null;
+        BeanDependencyGraph graph = beanContext instanceof ConfigurableBeanContext configurable ? configurable.findDependencyGraph().orElse(null) : null;
         for (Class<?> type : TOPOLOGY_TYPES) {
             for (BeanDefinition<?> definition : beanContext.getBeanDefinitions(type)) {
                 addBuiltFrom(classes, definition, graph);
@@ -177,7 +177,7 @@ final class DevelopmentKafkaStreamsReloader {
             }
         }
         LOG.debug("Rebuilding the Kafka Streams: {}", reason);
-        if (context.findDependencyGraph().isPresent()) {
+        if (beanContext instanceof ConfigurableBeanContext configurable && configurable.findDependencyGraph().isPresent()) {
             leaveGroups();
         }
         boolean recreated = false;

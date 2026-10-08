@@ -426,7 +426,7 @@ class KafkaReloadSpec extends Specification {
     private static ApplicationContext devContext(boolean track) {
         return ApplicationContext.builder()
             .properties(kafkaProperties() + ['micronaut.dev.enabled': true])
-            .trackBeanDependencies(track)
+            .beanDependencyTrackingEnabled(track)
             .start()
     }
 
@@ -439,7 +439,7 @@ class KafkaReloadSpec extends Specification {
     }
 
     private static ClassChangeEvent classChange(Set<ClassLoader> retired, List<ClassChange> changes, ReloadStrategy strategy) {
-        return new ClassChangeEvent(KafkaReloadSpec, 1, retired, KafkaReloadSpec.classLoader, changes, strategy)
+        return new ClassChangeEvent(KafkaReloadSpec, retired, KafkaReloadSpec.classLoader, changes, strategy)
     }
 }
 
