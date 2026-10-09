@@ -46,6 +46,8 @@ public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfig
 
     private Duration closeTimeout = DEFAULT_CLOSE_TIMEOUT;
 
+    private boolean leaveGroupOnClose;
+
     /**
      * Construct a new {@link KafkaStreamsConfiguration} for the given defaults.
      *
@@ -95,6 +97,22 @@ public class AbstractKafkaStreamsConfiguration<K, V> extends AbstractKafkaConfig
      */
     public void setCloseTimeout(Duration closeTimeout) {
         this.closeTimeout = closeTimeout;
+    }
+
+    /**
+     * Whether to explicitly leave the consumer group when closing this stream. Defaults to false.
+     *
+     * @return whether to leave the group on close
+     */
+    public boolean isLeaveGroupOnClose() {
+        return leaveGroupOnClose;
+    }
+
+    /**
+     * @param leaveGroupOnClose whether to leave the group on close
+     */
+    public void setLeaveGroupOnClose(boolean leaveGroupOnClose) {
+        this.leaveGroupOnClose = leaveGroupOnClose;
     }
 
     /**
