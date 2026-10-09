@@ -72,7 +72,10 @@ public class KafkaStreamsConfiguration<K, V> extends AbstractKafkaStreamsConfigu
         setName(streamName);
         Properties config = getConfig();
         String propertyKey = PREFIX + '.' + NameUtils.hyphenate(streamName, true);
-        Properties properties = environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new);
+        Properties properties = new Properties();
+        properties.putAll(environment.getProperty(propertyKey, Properties.class).orElseGet(Properties::new));
+        // Shutdown metadata is bound to this configuration, not passed to Kafka Streams.
+        properties.remove("leave-group-on-close");
         config.putAll(toKafkaProperties(environment, properties));
         init(applicationConfiguration, environment, config);
     }

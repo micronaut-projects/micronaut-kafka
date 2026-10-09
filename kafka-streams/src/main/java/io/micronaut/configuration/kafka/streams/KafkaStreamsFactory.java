@@ -33,6 +33,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.inject.Singleton;
 import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KafkaStreams.CloseOptions;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
@@ -98,7 +99,7 @@ public class KafkaStreamsFactory implements Closeable, GracefulShutdownCapable {
      */
     @EachBean(AbstractKafkaStreamsConfiguration.class)
     ConfiguredStreamBuilder streamsBuilder(AbstractKafkaStreamsConfiguration<?, ?> configuration) {
-        return new ConfiguredStreamBuilder(configuration.getConfig(), configuration.getName(), configuration.getCloseTimeout());
+        return new ConfiguredStreamBuilder(configuration.getConfig(), configuration.getName(), configuration.getCloseTimeout(), configuration.isLeaveGroupOnClose());
     }
 
     /**
@@ -279,7 +280,11 @@ public class KafkaStreamsFactory implements Closeable, GracefulShutdownCapable {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Shutting down kafka stream {} ", builder.getName());
             }
-            boolean success = stream.close(builder.getCloseTimeout());
+            boolean success = builder.isLeaveGroupOnClose()
+                ? stream.close(new CloseOptions()
+                    .leaveGroup(true)
+                    .timeout(builder.getCloseTimeout()))
+                : stream.close(builder.getCloseTimeout());
             if (!success) {
                 LOG.warn("Timeout was exceeded while attempting to close kafka stream {}", builder.getName());
             }

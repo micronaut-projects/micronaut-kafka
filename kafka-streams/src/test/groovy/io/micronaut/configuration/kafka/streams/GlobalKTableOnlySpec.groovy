@@ -33,6 +33,10 @@ class GlobalKTableOnlySpec extends AbstractKafkaSpec {
 
         then:
         kafkaStreams
+        kafkaStreams.state() == KafkaStreams.State.CREATED
+        builder.leaveGroupOnClose
+        !builder.configuration.containsKey('leave-group-on-close')
+        !kafkaStreams.applicationConfigs.originals().containsKey('leave-group-on-close')
         topologyDescription.contains(GlobalTableOnlyFactory.INPUT)
         topologyDescription.contains(GlobalTableOnlyFactory.STORE)
     }
@@ -76,6 +80,7 @@ class GlobalKTableOnlySpec extends AbstractKafkaSpec {
                 'kafka.streams.start-kafka-streams-off.start-kafka-streams': 'false',
                 'kafka.streams.global-table-only.application.id': 'global-table-only-' + UNIQUE_SUFFIX,
                 'kafka.streams.global-table-only.start-kafka-streams': 'false',
+                'kafka.streams.global-table-only.leave-group-on-close': 'true',
                 'kafka.streams.global-table-only.state.dir': TMP_DIR + '/global-ktable-only-' + UNIQUE_SUFFIX
         ]
     }
