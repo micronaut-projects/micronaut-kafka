@@ -111,9 +111,9 @@ final class DevelopmentKafkaStreamsReloader {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
             for (Class<?> type : TOPOLOGY_TYPES) {
-                watchable.watchDefinitions((Class<Object>) type, null, new TopologyDefinitionsWatcher());
+                watchable.definitions((Class<Object>) type).watch(new TopologyDefinitionsWatcher());
             }
-            watchable.watchClassChanges(new ClassWatcher());
+            watchable.classChanges().watch(new ClassWatcher());
         }
     }
 

@@ -154,10 +154,10 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
     DevelopmentKafkaReloader(BeanContext beanContext) {
         this.beanContext = beanContext;
         if (beanContext instanceof WatchableBeanContext watchable) {
-            watchable.watchDefinitions(Object.class, LISTENERS, new ListenerDefinitionsWatcher());
+            watchable.definitions().qualifier(LISTENERS).watch(new ListenerDefinitionsWatcher());
             // one watch for every serde type, so that a definition of several of them restarts the consumers once
-            watchable.watchDefinitions(Object.class, SERDES, new SerdeDefinitionsWatcher());
-            watchable.watchClassChanges(new ClassWatcher());
+            watchable.definitions().qualifier(SERDES).watch(new SerdeDefinitionsWatcher());
+            watchable.classChanges().watch(new ClassWatcher());
         }
     }
 
