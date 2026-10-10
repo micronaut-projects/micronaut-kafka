@@ -20,6 +20,7 @@ import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Retain;
 import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 
@@ -37,13 +38,15 @@ import jakarta.inject.Singleton;
 public class AdminClientFactory {
 
     /**
-     * Creates the admin client.
+     * Creates the admin client. In development mode it is retained across a restart, with its connections, until a
+     * change under {@code kafka} releases it: it copies the properties of the default configuration as it is created.
      *
      * @param configuration The configuration to use.
      * @return The admin client
      */
     @Bean(preDestroy = "close")
     @Singleton
+    @Retain(invalidatedBy = AbstractKafkaConfiguration.PREFIX)
     AdminClient adminClient(KafkaDefaultConfiguration configuration) {
         return AdminClient.create(configuration.getConfig());
     }
