@@ -8828,6 +8828,90 @@ close-timeout = "10s"</code></pre>
 </div>
 </div>
 <div class="paragraph">
+<p>To explicitly leave the consumer group when a stream is gracefully closed, set <code>leave-group-on-close</code> for that stream. It defaults to <code>false</code>, so other streams retain their existing shutdown behavior. This is a Micronaut shutdown option, not a Kafka Streams client property:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.application-security-factors.leave-group-on-close=true
+kafka.streams.application-security-factors.close-timeout=3s
+kafka.streams.another-stream.leave-group-on-close=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        application-security-factors:
+            leave-group-on-close: true
+            close-timeout: 3s
+        another-stream:
+            leave-group-on-close: false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka.streams.application-security-factors]
+leave-group-on-close = true
+close-timeout = "3s"
+
+[kafka.streams.another-stream]
+leave-group-on-close = false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    applicationSecurityFactors {
+      leaveGroupOnClose = true
+      closeTimeout = "3s"
+    }
+    anotherStream {
+      leaveGroupOnClose = false
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      application-security-factors {
+        leave-group-on-close = true
+        close-timeout = "3s"
+      }
+      another-stream {
+        leave-group-on-close = false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "application-security-factors": {
+        "leave-group-on-close": true,
+        "close-timeout": "3s"
+      },
+      "another-stream": {
+        "leave-group-on-close": false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
 <div class="title">Configuring multiple Stream definitions on the same Micronaut Service.</div>
 <p>You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
 To do this you should define the configuration with <code>kafka.streams.[STREAM-NAME]</code>.

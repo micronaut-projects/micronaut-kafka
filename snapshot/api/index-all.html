@@ -366,6 +366,10 @@ when a <a href="https://kafka.apache.org/27/javadoc/org/apache/kafka/clients/con
 <dd>
 <div class="block">Default constructor.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#%3Cinit%3E(java.util.Properties,java.lang.String,java.time.Duration,boolean)" class="member-name-link">ConfiguredStreamBuilder(Properties, String, Duration, boolean)</a> - Constructor for class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
+<dd>
+<div class="block">Construct a builder with per-stream shutdown options.</div>
+</dd>
 <dt><a href="io/micronaut/configuration/kafka/ConsumerAware.html" class="type-name-link" title="interface in io.micronaut.configuration.kafka">ConsumerAware&lt;K,<wbr>V&gt;</a> - Interface in <a href="io/micronaut/configuration/kafka/package-summary.html">io.micronaut.configuration.kafka</a></dt>
 <dd>
 <div class="block">Interface for <a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation"><code>KafkaListener</code></a> instances to implement
@@ -1028,6 +1032,12 @@ support Confluent Cloud hosted Kafka.</div>
 <dt><a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html#isCooperativeStickyAssignor(java.lang.Object)" class="member-name-link">isCooperativeStickyAssignor(Object)</a> - Static method in class io.micronaut.configuration.kafka.exceptions.<a href="io/micronaut/configuration/kafka/exceptions/OffsetCommitExceptionLogger.html" title="class in io.micronaut.configuration.kafka.exceptions">OffsetCommitExceptionLogger</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html#isEnabled()" class="member-name-link">isEnabled()</a> - Method in class io.micronaut.configuration.kafka.config.<a href="io/micronaut/configuration/kafka/config/KafkaHealthConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.config">KafkaHealthConfigurationProperties</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#isLeaveGroupOnClose()" class="member-name-link">isLeaveGroupOnClose()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>
+<div class="block">Whether to explicitly leave the consumer group when closing this stream.</div>
+</dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html#isLeaveGroupOnClose()" class="member-name-link">isLeaveGroupOnClose()</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/ConfiguredStreamBuilder.html" title="class in io.micronaut.configuration.kafka.streams">ConfiguredStreamBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html#isolation()" class="member-name-link">isolation()</a> - Element in annotation interface io.micronaut.configuration.kafka.annotation.<a href="io/micronaut/configuration/kafka/annotation/KafkaListener.html" title="annotation interface in io.micronaut.configuration.kafka.annotation">KafkaListener</a></dt>
 <dd>
@@ -1900,6 +1910,8 @@ RETRY_CONDITIONALLY_ON_ERROR and RETRY_CONDITIONALLY_EXPONENTIALLY_ON_ERROR
 <dd>
 <div class="block">Sets the key serializer.</div>
 </dd>
+<dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#setLeaveGroupOnClose(boolean)" class="member-name-link">setLeaveGroupOnClose(boolean)</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html#setMetricNameStyle(io.micronaut.configuration.kafka.metrics.MetricNameStyle)" class="member-name-link">setMetricNameStyle(MetricNameStyle)</a> - Method in class io.micronaut.configuration.kafka.metrics.<a href="io/micronaut/configuration/kafka/metrics/KafkaMetricsConfigurationProperties.html" title="class in io.micronaut.configuration.kafka.metrics">KafkaMetricsConfigurationProperties</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html#setName(java.lang.String)" class="member-name-link">setName(String)</a> - Method in class io.micronaut.configuration.kafka.streams.<a href="io/micronaut/configuration/kafka/streams/AbstractKafkaStreamsConfiguration.html" title="class in io.micronaut.configuration.kafka.streams">AbstractKafkaStreamsConfiguration</a></dt>
