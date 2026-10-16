@@ -87,6 +87,19 @@ kafka:
             close-timeout: 10s
 ----
 
+To explicitly leave the consumer group when a stream is gracefully closed, set `leave-group-on-close` for that stream. It defaults to `false`, so other streams retain their existing shutdown behavior. This is a Micronaut shutdown option, not a Kafka Streams client property:
+
+[configuration]
+----
+kafka:
+    streams:
+        application-security-factors:
+            leave-group-on-close: true
+            close-timeout: 3s
+        another-stream:
+            leave-group-on-close: false
+----
+
 .Configuring multiple Stream definitions on the same Micronaut Service.
 You can define multiple Kafka Streams on the same Micronaut application, each with their own unique configuration.
 To do this you should define the configuration with `kafka.streams.[STREAM-NAME]`.
