@@ -90,6 +90,27 @@ class ConsumerFactorySpec extends Specification {
         context.close()
     }
 
+    void "the deprecated constructors keep working"() {
+        given: "a consumer configuration that needs no broker to create the consumer"
+        ApplicationContext context = ApplicationContext.run(['kafka.bootstrap.servers': 'localhost:9092', 'kafka.key.deserializer': StringDeserializer.name, 'kafka.value.deserializer': StringDeserializer.name])
+        List<Collection<NewTopic>> created = []
+        AdminClient adminClient = Mock() {
+            createTopics(_, _) >> { Collection<NewTopic> topics, CreateTopicsOptions options -> created << topics; null }
+        }
+
+        when:
+        Consumer<?, ?> consumer = new KafkaConsumerFactory().createConsumer(context.createBean(DefaultKafkaConsumerConfiguration))
+        new KafkaNewTopics(adminClient, null, [new NewTopic('deprecated-constructor-topic', 1, (short) 1)])
+
+        then:
+        consumer instanceof KafkaConsumer
+        created*.collect { it.name() } == [['deprecated-constructor-topic']]
+
+        cleanup:
+        consumer?.close()
+        context.close()
+    }
+
     @Factory
     @Requires(property = 'spec.name', value = 'ConsumerFactorySpec.Admin')
     static class CustomAdminFactory {
