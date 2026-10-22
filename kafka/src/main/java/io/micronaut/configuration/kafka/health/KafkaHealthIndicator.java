@@ -161,7 +161,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
         Optional<Admin> adminClient = adminClientSupplier.get();
         if (adminClient.isEmpty()) {
             return Flux.just(failure(new IllegalStateException(
-                "Kafka health indicator requires an AdminClient bean. Enable kafka.admin.enabled or set kafka.health.restricted=true."
+                "Kafka health indicator requires an Admin bean. Enable kafka.admin.enabled or set kafka.health.restricted=true."
             ), Collections.emptyMap()));
         }
         DescribeClusterResult result = adminClient.get().describeCluster(

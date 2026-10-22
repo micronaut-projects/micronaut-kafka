@@ -1,11 +1,17 @@
 package io.micronaut.configuration.kafka
 
 import io.micronaut.configuration.kafka.config.DefaultKafkaConsumerConfiguration
+import io.micronaut.configuration.kafka.admin.KafkaNewTopics
+import io.micronaut.configuration.kafka.processor.KafkaConsumerGroupManager
 import io.micronaut.context.ApplicationContext
+import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Replaces
 import io.micronaut.context.annotation.Requires
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.admin.Admin
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.CreateTopicsOptions
+import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.consumer.MockConsumer
@@ -13,6 +19,8 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.jspecify.annotations.Nullable
 import spock.lang.Specification
+
+import java.time.Duration
 
 class ConsumerFactorySpec extends Specification {
 
@@ -46,6 +54,7 @@ class ConsumerFactorySpec extends Specification {
         context.getBean(MockConsumerFactory).configs.any { it.getProperty('bootstrap.servers') == 'localhost:9092' }
 
         cleanup:
+        consumer?.close()
         context.close()
     }
 
@@ -58,6 +67,51 @@ class ConsumerFactorySpec extends Specification {
 
         cleanup:
         context.close()
+    }
+
+    void "an Admin bean that is not an AdminClient creates topics and manages consumer groups"() {
+        given:
+        ApplicationContext context = ApplicationContext.run([
+                'spec.name'              : 'ConsumerFactorySpec.Admin',
+                'kafka.bootstrap.servers': 'localhost:9092',
+                'kafka.admin.enabled'    : false
+        ])
+
+        expect: "the default AdminClient is disabled, so the custom Admin is the only one"
+        !context.containsBean(AdminClient)
+        !(context.getBean(Admin) instanceof AdminClient)
+
+        and: "the beans that need an Admin are created with it"
+        context.getBean(KafkaNewTopics) != null
+        context.getBean(CustomAdminFactory).createdTopics*.name() == ['custom-admin-topic']
+        context.getBean(KafkaConsumerGroupManager) != null
+
+        cleanup:
+        context.close()
+    }
+
+    @Factory
+    @Requires(property = 'spec.name', value = 'ConsumerFactorySpec.Admin')
+    static class CustomAdminFactory {
+
+        final List<NewTopic> createdTopics = []
+
+        @Singleton
+        NewTopic newTopic() {
+            return new NewTopic('custom-admin-topic', 1, (short) 1)
+        }
+
+        @Singleton
+        Admin admin() {
+            // an Admin that is not an AdminClient, like the OKafka admin client
+            return [
+                    createTopics: { Collection<NewTopic> topics, CreateTopicsOptions options ->
+                        createdTopics.addAll(topics)
+                        return null
+                    },
+                    close       : { Duration timeout -> }
+            ] as Admin
+        }
     }
 
     @Singleton

@@ -28,6 +28,12 @@ import jakarta.inject.Singleton;
 /**
  * Creates the Kafka {@link org.apache.kafka.clients.admin.AdminClient}.
  *
+ * <p>Micronaut Kafka looks up the admin client as an {@link org.apache.kafka.clients.admin.Admin} bean,
+ * for topic creation, the health indicator and consumer group deletion. To use another {@code Admin}
+ * implementation, such as the Oracle OKafka admin client, replace this bean or set
+ * {@code kafka.admin.enabled=false}. Registering a second {@code Admin} bean next to this one makes
+ * those lookups fail with a {@link io.micronaut.context.exceptions.NonUniqueBeanException}.</p>
+ *
  * @author Graeme Rocher
  * @since 1.0
  */
