@@ -185,7 +185,13 @@ abstract class ConsumerState {
     }
 
     void wakeUp() {
-        kafkaConsumer.wakeup();
+        try {
+            kafkaConsumer.wakeup();
+        } catch (RuntimeException e) {
+            // some Consumer implementations, such as Oracle's OKafka, do not support wakeup: the consumer then stops
+            // when its current poll returns, and closing it still waits for that
+            LOG.debug("Consumer {} could not be woken up, it stops when its current poll returns: {}", info.clientId, e.getMessage());
+        }
         synchronized (this) {
             if (startupLatch != null) {
                 startupLatch.countDown();
@@ -338,6 +344,11 @@ abstract class ConsumerState {
     }
 
     private synchronized void resumeTopicPartitions() {
+        if (pausedTopicPartitions == null || pausedTopicPartitions.isEmpty()) {
+            // nothing was paused here, so there is nothing to resume: this also leaves alone partitions that the
+            // application paused on the consumer itself, and consumers that do not support pausing
+            return;
+        }
         Set<TopicPartition> paused = kafkaConsumer.paused();
         if (paused.isEmpty()) {
             return;

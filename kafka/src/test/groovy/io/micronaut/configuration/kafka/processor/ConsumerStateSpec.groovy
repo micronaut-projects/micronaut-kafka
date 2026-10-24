@@ -42,6 +42,94 @@ class ConsumerStateSpec extends Specification {
         }
     }
 
+    void "a poll cycle does not ask the consumer for paused partitions when none were paused"() {
+        given:
+        List<String> calls = []
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, ['paused']))
+        // the started polling event needs the processor, which these states do not have
+        setField(state, 'pollingStarted', true)
+
+        when:
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        noExceptionThrown()
+        !calls.contains('paused')
+    }
+
+    void "pausing and resuming partitions still uses the consumer"() {
+        given:
+        List<String> calls = []
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, [], pausedOnConsumer))
+        // the started polling event needs the processor, which these states do not have
+        setField(state, 'pollingStarted', true)
+
+        when:
+        state.pause([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        calls.contains('pause')
+        pausedOnConsumer == [topicPartition] as Set
+        state.isPaused([topicPartition])
+
+        when:
+        state.resume([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        calls.contains('resume')
+        pausedOnConsumer.empty
+        !state.isPaused([topicPartition])
+    }
+
+    void "waking up tolerates a consumer that does not support it"() {
+        given:
+        List<String> calls = []
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, ['wakeup']))
+
+        when:
+        state.wakeUp()
+
+        then:
+        noExceptionThrown()
+        calls.contains('wakeup')
+    }
+
+    @SuppressWarnings('unchecked')
+    private static Consumer<Object, Object> createConsumer(List<String> calls, List<String> unsupported,
+                                                           Set<TopicPartition> paused = [] as Set) {
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Proxy.newProxyInstance(
+            ConsumerStateSpec.classLoader,
+            [Consumer] as Class<?>[],
+            { proxy, method, args ->
+                calls << method.name
+                if (method.name in unsupported) {
+                    throw new UnsupportedOperationException(method.name + ' is not supported')
+                }
+                switch (method.name) {
+                    case 'subscription':
+                        return ['topic'] as Set
+                    case 'assignment':
+                        return [topicPartition] as Set
+                    case 'paused':
+                        return new HashSet<>(paused)
+                    case 'pause':
+                        paused.addAll(args[0] as Collection<TopicPartition>)
+                        return null
+                    case 'resume':
+                        paused.removeAll(args[0] as Collection<TopicPartition>)
+                        return null
+                    default:
+                        return null
+                }
+            }
+        ) as Consumer<Object, Object>
+    }
+
     private static ConsumerInfo createConsumerInfo() {
         try (ApplicationContext context = ApplicationContext.run(['spec.name': 'ConsumerStateSpec'])) {
             BeanDefinition<ConsumerStateSpecListener> beanDefinition = context.getBeanDefinition(ConsumerStateSpecListener)
