@@ -1,14 +1,14 @@
 [versions]
-micronaut = "5.2.13"
-micronaut-platform = "5.2.1"
+micronaut = "5.2.21"
+micronaut-platform = "5.2.4"
 micronaut-gradle-plugin = "5.0.2"
 micronaut-test = "5.2.0"
-managed-kafka = '4.3.1'
+managed-kafka = '4.4.0'
 awaitility = '4.3.0'
 opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 zipkin-brave-kafka-clients = '6.3.1'
-lz4-java = '1.12.0'
+lz4-java = '1.13.0'
 okafka = '23.26.1.0'
 # OKafka is built on kafka-clients 3.9 and fails to load on the 4.x line
 okafka-kafka-clients = '3.9.2'
@@ -17,7 +17,7 @@ okafka-ojdbc = '23.26.3.0.0'
 micronaut-cache = "6.1.1"
 micronaut-micrometer = "6.1.0"
 micronaut-reactor = "4.3.0"
-micronaut-serde = "3.2.4"
+micronaut-serde = "3.2.6"
 micronaut-tracing = "8.3.0"
 
 [libraries]

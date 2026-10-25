@@ -20,6 +20,7 @@ import org.jspecify.annotations.NonNull;
 import jakarta.inject.Singleton;
 import jdk.jfr.Experimental;
 import org.apache.kafka.clients.ApiVersions;
+import org.apache.kafka.clients.BootstrapConfiguration;
 import org.apache.kafka.clients.Metadata;
 import org.apache.kafka.clients.MetadataRecoveryStrategy;
 import org.apache.kafka.clients.NetworkClient;
@@ -35,7 +36,7 @@ import org.apache.kafka.common.metrics.MetricsContext;
 import org.apache.kafka.common.metrics.Sensor;
 import org.apache.kafka.common.network.ChannelBuilder;
 import org.apache.kafka.common.network.Selector;
-import org.apache.kafka.common.utils.LogContext;
+import org.apache.kafka.common.utils.internals.LogContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -125,7 +126,9 @@ public class DefaultNetworkClientCreator implements NetworkClientCreator {
                 true,
                 new ApiVersions(),
                 logContext,
-                MetadataRecoveryStrategy.NONE
+                MetadataRecoveryStrategy.NONE,
+                BootstrapConfiguration.DISABLED,
+                false
             );
         } catch (Throwable e) {
             closeQuietly(metrics, "Metrics");
