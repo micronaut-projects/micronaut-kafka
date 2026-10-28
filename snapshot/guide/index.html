@@ -7642,6 +7642,12 @@ class RetryTopicProductDltListener {
 <div class="paragraph">
 <p>No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the <code>KafkaConsumer</code> instances are closed correctly when the server is shutdown.</p>
 </div>
+<div class="paragraph">
+<p>When the application context is stopped, the <code>@KafkaListener</code> consumers are stopped as soon as the <a href="{apimicronaut}context/event/ShutdownEvent.html">ShutdownEvent</a> is published, before any bean is destroyed. Each consumer finishes processing the records it has polled, and commits offsets according to its <code>OffsetStrategy</code>, so listeners can keep using the beans they depend on (such as a <code>DataSource</code> or a Kafka producer) until they finish. The context waits up to 30 seconds for each consumer to finish before continuing the shutdown. The stopped consumers can still be looked up through <code>ConsumerRegistry</code> by other <code>ShutdownEvent</code> listeners.</p>
+</div>
+<div class="paragraph">
+<p>If <a href="https://docs.micronaut.io/latest/guide/#gracefulShutdown">graceful shutdown</a> is enabled with <code>micronaut.lifecycle.graceful-shutdown.enabled</code>, the consumers are first drained within the configured grace period, and any consumer still running afterwards is stopped in the same way.</p>
+</div>
 
 <h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>8.1 Kafka Health Checks</h2>
 
