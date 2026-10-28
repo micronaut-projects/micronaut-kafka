@@ -15,8 +15,10 @@
  */
 package io.micronaut.configuration.kafka.processor;
 
+import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.BeanRegistration;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.context.event.ShutdownEvent;
 import io.micronaut.core.annotation.Internal;
@@ -37,12 +39,16 @@ import org.slf4j.LoggerFactory;
  * <p>This runs after graceful shutdown (when it is enabled), which has already drained the
  * consumers within its grace period. In that case this only stops what graceful shutdown did not.</p>
  *
- * <p>Only a processor that has already been created is closed: listening to the event must not create
+ * <p>The consumers stay registered, so that {@link io.micronaut.configuration.kafka.ConsumerRegistry} can
+ * still look them up by ID in later shutdown listeners. They are removed when the processor is destroyed.</p>
+ *
+ * <p>Only a processor that has already been created is stopped: listening to the event must not create
  * one during shutdown.</p>
  *
  * @since 6.2.1
  */
 @Singleton
+@Requires(beans = KafkaDefaultConfiguration.class)
 @Internal
 final class KafkaConsumerShutdownListener implements ApplicationEventListener<ShutdownEvent>, Ordered {
 
@@ -64,7 +70,7 @@ final class KafkaConsumerShutdownListener implements ApplicationEventListener<Sh
     public void onApplicationEvent(ShutdownEvent event) {
         for (BeanRegistration<KafkaConsumerProcessor> registration : beanContext.getActiveBeanRegistrations(KafkaConsumerProcessor.class)) {
             try {
-                registration.bean().close();
+                registration.bean().stopConsumers();
             } catch (Exception e) {
                 LOG.error("Error stopping Kafka consumers on shutdown", e);
             }

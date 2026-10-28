@@ -1,14 +1,14 @@
 package io.micronaut.configuration.kafka.processor
 
+import io.micronaut.context.ApplicationContext
 import io.micronaut.context.BeanContext
 import io.micronaut.context.BeanRegistration
 import io.micronaut.context.event.ShutdownEvent
-import io.micronaut.core.order.Ordered
 import spock.lang.Specification
 
 class KafkaConsumerShutdownListenerSpec extends Specification {
 
-    void "closes the active consumer processors on shutdown"() {
+    void "stops the consumers of the active consumer processors on shutdown"() {
         given:
         KafkaConsumerProcessor processor = Mock()
         BeanRegistration<KafkaConsumerProcessor> registration = Stub() {
@@ -20,9 +20,10 @@ class KafkaConsumerShutdownListenerSpec extends Specification {
         when:
         listener.onApplicationEvent(new ShutdownEvent(beanContext))
 
-        then:
+        then: "the consumers are stopped, but stay registered until the processor is destroyed"
         1 * beanContext.getActiveBeanRegistrations(KafkaConsumerProcessor) >> [registration]
-        1 * processor.close()
+        1 * processor.stopConsumers()
+        0 * processor.close()
         0 * beanContext._
     }
 
@@ -39,10 +40,10 @@ class KafkaConsumerShutdownListenerSpec extends Specification {
         0 * beanContext._
     }
 
-    void "a processor that fails to close does not stop the others from closing"() {
+    void "a processor that fails to stop its consumers does not stop the others from stopping"() {
         given:
         KafkaConsumerProcessor failing = Mock() {
-            close() >> { throw new IllegalStateException("boom") }
+            stopConsumers() >> { throw new IllegalStateException("boom") }
         }
         KafkaConsumerProcessor other = Mock()
         BeanContext beanContext = Stub() {
@@ -57,11 +58,22 @@ class KafkaConsumerShutdownListenerSpec extends Specification {
 
         then:
         noExceptionThrown()
-        1 * other.close()
+        1 * other.stopConsumers()
     }
 
-    void "runs after graceful shutdown"() {
-        expect: "GracefulShutdownListener has the highest precedence"
-        new KafkaConsumerShutdownListener(Stub(BeanContext)).order > Ordered.HIGHEST_PRECEDENCE
+    void "is not created when Kafka is #description"() {
+        given:
+        ApplicationContext ctx = ApplicationContext.run(config)
+
+        expect:
+        !ctx.containsBean(KafkaConsumerShutdownListener)
+
+        cleanup:
+        ctx.close()
+
+        where:
+        description      | config
+        'disabled'       | ['kafka.bootstrap.servers': 'localhost:9092', 'kafka.enabled': 'false']
+        'not configured' | [:]
     }
 }

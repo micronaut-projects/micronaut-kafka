@@ -70,6 +70,48 @@ class KafkaConsumerProcessorGracefulShutdownSpec extends Specification {
         shutdown.get() == null
     }
 
+    void "stopConsumers stops the consumers but keeps them registered"() {
+        given:
+        KafkaConsumerProcessor processor = newKafkaConsumerProcessor()
+        ConsumerState consumer = Mock()
+        processor.@consumers.put('consumer', consumer)
+
+        when:
+        processor.stopConsumers()
+
+        then:
+        1 * consumer.requestShutdown()
+
+        then:
+        1 * consumer.isActive() >> true
+        1 * consumer.wakeUp()
+        1 * consumer.close()
+        processor.consumerIds == ['consumer'] as Set
+
+        when:
+        processor.pause('consumer')
+
+        then: "the stopped consumer can still be looked up by ID"
+        1 * consumer.pause()
+    }
+
+    void "close stops the consumers and removes them"() {
+        given:
+        KafkaConsumerProcessor processor = newKafkaConsumerProcessor()
+        ConsumerState consumer = Mock()
+        processor.@consumers.put('consumer', consumer)
+
+        when:
+        processor.close()
+
+        then:
+        1 * consumer.requestShutdown()
+
+        then:
+        1 * consumer.close()
+        processor.consumerIds.empty
+    }
+
     void "reportActiveTasks counts active consumers"() {
         given:
         KafkaConsumerProcessor processor = newKafkaConsumerProcessor()

@@ -1,6 +1,7 @@
 package io.micronaut.configuration.kafka.annotation
 
 import io.micronaut.configuration.kafka.AbstractKafkaContainerSpec
+import io.micronaut.configuration.kafka.ConsumerRegistry
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.annotation.Requires
 import io.micronaut.context.event.ApplicationEventListener
@@ -48,6 +49,27 @@ class KafkaListenerShutdownOrderSpec extends AbstractKafkaContainerSpec {
         afterConsumersStopped.recordFinished.get()
         listener.processedWithLiveResource.get()
         resource.destroyed.count == 0
+        !ctx.running
+
+        cleanup:
+        close(ctx, listener)
+    }
+
+    void "stopped consumers can still be looked up by ID in shutdown listeners"() {
+        given:
+        ApplicationContext ctx = runContext('shutdown-order-registry', [:])
+        ShutdownOrderListener listener = ctx.getBean(ShutdownOrderListener)
+        ConsumerRegistryProbe registryProbe = ctx.getBean(ConsumerRegistryProbe)
+
+        when: "the context is stopped while a record is being processed"
+        CompletableFuture<Void> stop = stopWhileProcessing(ctx, 'shutdown-order-registry', listener)
+        listener.release.countDown()
+        stop.get(30, TimeUnit.SECONDS)
+
+        then: "a shutdown listener running after the consumers are stopped can still pause them by ID"
+        registryProbe.consumerIds.contains(ShutdownOrderListener.CLIENT_ID)
+        registryProbe.paused
+        !ctx.running
 
         cleanup:
         close(ctx, listener)
@@ -157,8 +179,10 @@ class KafkaListenerShutdownOrderSpec extends AbstractKafkaContainerSpec {
     }
 
     @Requires(property = 'spec.name', value = 'KafkaListenerShutdownOrder')
-    @KafkaListener(groupId = "shutdown-order", offsetReset = EARLIEST)
+    @KafkaListener(groupId = "shutdown-order", clientId = ShutdownOrderListener.CLIENT_ID, offsetReset = EARLIEST)
     static class ShutdownOrderListener {
+        static final String CLIENT_ID = 'shutdown-order-listener'
+
         final ShutdownOrderResource resource
         final CountDownLatch started = new CountDownLatch(1)
         final CountDownLatch release = new CountDownLatch(1)
@@ -213,6 +237,28 @@ class KafkaListenerShutdownOrderSpec extends AbstractKafkaContainerSpec {
         @Override
         int getOrder() {
             Ordered.HIGHEST_PRECEDENCE + 1
+        }
+    }
+
+    /**
+     * A shutdown listener with the default order, which runs after the consumers are stopped.
+     */
+    @Requires(property = 'spec.name', value = 'KafkaListenerShutdownOrder')
+    @Singleton
+    static class ConsumerRegistryProbe implements ApplicationEventListener<ShutdownEvent> {
+        final ConsumerRegistry registry
+        Set<String> consumerIds
+        boolean paused
+
+        ConsumerRegistryProbe(ConsumerRegistry registry) {
+            this.registry = registry
+        }
+
+        @Override
+        void onApplicationEvent(ShutdownEvent event) {
+            consumerIds = Set.copyOf(registry.consumerIds)
+            registry.pause(ShutdownOrderListener.CLIENT_ID)
+            paused = true
         }
     }
 
