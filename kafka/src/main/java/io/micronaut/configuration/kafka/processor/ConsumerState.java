@@ -64,6 +64,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -104,6 +105,7 @@ abstract class ConsumerState {
     private boolean pollingStarted;
     private volatile ConsumerCloseState closedState;
     private volatile boolean shutdownRequested;
+    private final AtomicBoolean closeAwaited = new AtomicBoolean();
     private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
     protected ConsumerState(
@@ -205,9 +207,13 @@ abstract class ConsumerState {
         return !shutdownFuture.isDone();
     }
 
+    /**
+     * Waits for the consumer to close, up to the close timeout. Only the first call waits, so a consumer
+     * that did not close in time is not waited for again when it is closed by another shutdown step.
+     */
     void close() {
         boolean closed = closedState == ConsumerCloseState.CLOSED;
-        if (!closed && (pollingStarted || closedState == ConsumerCloseState.POLLING)) {
+        if (!closed && (pollingStarted || closedState == ConsumerCloseState.POLLING) && closeAwaited.compareAndSet(false, true)) {
             final Instant start = Instant.now();
             final Duration timeout = getCloseTimeout();
             try {
