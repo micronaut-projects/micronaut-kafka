@@ -8,3 +8,7 @@ If you run your application without the `http-server-netty` dependency you will 
 ----
 
 No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the `KafkaConsumer` instances are closed correctly when the server is shutdown.
+
+When the application context is stopped, the `@KafkaListener` consumers are stopped as soon as the link:{apimicronaut}context/event/ShutdownEvent.html[ShutdownEvent] is published, before any bean is destroyed. Each consumer finishes processing the records it has polled, and commits offsets according to its `OffsetStrategy`, so listeners can keep using the beans they depend on (such as a `DataSource` or a Kafka producer) until they finish.
+
+If https://docs.micronaut.io/latest/guide/#gracefulShutdown[graceful shutdown] is enabled with `micronaut.lifecycle.graceful-shutdown.enabled`, the consumers are first drained within the configured grace period, and any consumer still running afterwards is stopped in the same way.
