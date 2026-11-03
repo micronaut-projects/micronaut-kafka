@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * Micronaut Kafka does not gain a dependency on any observability library.</p>
  *
  * @author Sagar Kharab
- * @since 6.2.0
+ * @since 6.2.1
  */
 @Internal
 public interface KafkaConsumerProcessingObserver {
