@@ -17,6 +17,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.util.Properties
+import java.util.concurrent.CountDownLatch
 
 class ConsumerStateSpec extends Specification {
 
@@ -89,6 +90,9 @@ class ConsumerStateSpec extends Specification {
         given:
         List<String> calls = []
         ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, ['wakeup']))
+        // a consumer that does not start automatically waits for this latch
+        CountDownLatch startupLatch = new CountDownLatch(1)
+        setField(state, 'startupLatch', startupLatch)
 
         when:
         state.wakeUp()
@@ -96,12 +100,63 @@ class ConsumerStateSpec extends Specification {
         then:
         noExceptionThrown()
         calls.contains('wakeup')
+        startupLatch.count == 0
+    }
+
+    void "partitions the application paused on the consumer stay paused while others are paused through the state"() {
+        given:
+        TopicPartition p0 = new TopicPartition('topic', 0)
+        TopicPartition p1 = new TopicPartition('topic', 1)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        ConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer([], [], pausedOnConsumer, [p0, p1] as Set))
+        setField(state, 'pollingStarted', true)
+
+        when:
+        state.pause([p0])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        // the application pauses another partition on the consumer itself
+        pausedOnConsumer << p1
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        pausedOnConsumer == [p0, p1] as Set
+
+        when:
+        state.resume([p0])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        pausedOnConsumer == [p1] as Set
+    }
+
+    void "a paused partition that is no longer paused on the consumer is forgotten"() {
+        given:
+        List<String> calls = []
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, [], pausedOnConsumer))
+        setField(state, 'pollingStarted', true)
+
+        when:
+        state.pause([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        // the partition is revoked, which also clears its paused state on the consumer
+        pausedOnConsumer.clear()
+        state.resume([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        calls.clear()
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        (getField(state, 'pausedTopicPartitions') as Set).empty
+        !calls.contains('paused')
     }
 
     @SuppressWarnings('unchecked')
     private static Consumer<Object, Object> createConsumer(List<String> calls, List<String> unsupported,
-                                                           Set<TopicPartition> paused = [] as Set) {
-        TopicPartition topicPartition = new TopicPartition('topic', 0)
+                                                           Set<TopicPartition> paused = [] as Set,
+                                                           Set<TopicPartition> assigned = [new TopicPartition('topic', 0)] as Set) {
         Proxy.newProxyInstance(
             ConsumerStateSpec.classLoader,
             [Consumer] as Class<?>[],
@@ -114,7 +169,7 @@ class ConsumerStateSpec extends Specification {
                     case 'subscription':
                         return ['topic'] as Set
                     case 'assignment':
-                        return [topicPartition] as Set
+                        return assigned
                     case 'paused':
                         return new HashSet<>(paused)
                     case 'pause':

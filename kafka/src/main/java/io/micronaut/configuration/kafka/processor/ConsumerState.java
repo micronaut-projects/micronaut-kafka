@@ -349,18 +349,15 @@ abstract class ConsumerState {
             // application paused on the consumer itself, and consumers that do not support pausing
             return;
         }
-        Set<TopicPartition> paused = kafkaConsumer.paused();
-        if (paused.isEmpty()) {
-            return;
-        }
-        final List<TopicPartition> toResume = paused.stream()
+        // forget the partitions that are no longer paused, for example because they were revoked
+        pausedTopicPartitions.retainAll(kafkaConsumer.paused());
+        // only resume what was paused here: the application may have paused other partitions on the consumer itself
+        final List<TopicPartition> toResume = pausedTopicPartitions.stream()
             .filter(topicPartition -> pauseRequests == null || !pauseRequests.contains(topicPartition))
             .toList();
         if (!toResume.isEmpty()) {
             LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, toResume);
             kafkaConsumer.resume(toResume);
-        }
-        if (pausedTopicPartitions != null) {
             toResume.forEach(pausedTopicPartitions::remove);
         }
     }
