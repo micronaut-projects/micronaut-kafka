@@ -7,6 +7,7 @@ import io.micronaut.inject.BeanDefinition
 import io.micronaut.inject.ExecutableMethod
 import io.micronaut.configuration.kafka.annotation.KafkaListener
 import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
@@ -130,27 +131,59 @@ class ConsumerStateSpec extends Specification {
         pausedOnConsumer == [p1] as Set
     }
 
-    void "a paused partition that is no longer paused on the consumer is forgotten"() {
+    void "a paused partition that is revoked and then resumed is forgotten without resuming it"() {
         given:
         List<String> calls = []
-        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        TopicPartition p0 = new TopicPartition('topic', 0)
+        TopicPartition p1 = new TopicPartition('topic', 1)
         Set<TopicPartition> pausedOnConsumer = [] as Set
-        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, [], pausedOnConsumer))
+        Set<TopicPartition> assigned = [p0, p1] as Set
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer(calls, [], pausedOnConsumer, assigned))
         setField(state, 'pollingStarted', true)
 
         when:
-        state.pause([topicPartition])
+        state.pause([p0])
         invokeRefreshAssignmentsPollAndProcessRecords(state)
-        // the partition is revoked, which also clears its paused state on the consumer
-        pausedOnConsumer.clear()
-        state.resume([topicPartition])
+        // p0 is revoked, which also clears its paused state on the consumer, which no longer accepts resuming it
+        assigned.remove(p0)
+        pausedOnConsumer.remove(p0)
+        state.resume([p0])
         invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        state.handled.empty
+        state.polls == 2
+        !calls.contains('resume')
+        (getField(state, 'pausedTopicPartitions') as Set).empty
+
+        when:
         calls.clear()
         invokeRefreshAssignmentsPollAndProcessRecords(state)
 
         then:
-        (getField(state, 'pausedTopicPartitions') as Set).empty
         !calls.contains('paused')
+    }
+
+    void "a consumer that does not support pausing keeps polling"() {
+        given:
+        List<String> calls = []
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer(calls, ['pause', 'paused', 'resume']))
+        setField(state, 'pollingStarted', true)
+
+        when:
+        state.pause([topicPartition])
+        5.times { invokeRefreshAssignmentsPollAndProcessRecords(state) }
+
+        then:
+        state.handled.empty
+        state.polls == 5
+        calls.count('pause') == 1
+        !calls.contains('paused')
+        !calls.contains('resume')
+        !state.isPaused([topicPartition])
     }
 
     @SuppressWarnings('unchecked')
@@ -173,9 +206,11 @@ class ConsumerStateSpec extends Specification {
                     case 'paused':
                         return new HashSet<>(paused)
                     case 'pause':
+                        rejectUnassigned(assigned, args[0] as Collection<TopicPartition>)
                         paused.addAll(args[0] as Collection<TopicPartition>)
                         return null
                     case 'resume':
+                        rejectUnassigned(assigned, args[0] as Collection<TopicPartition>)
                         paused.removeAll(args[0] as Collection<TopicPartition>)
                         return null
                     default:
@@ -183,6 +218,14 @@ class ConsumerStateSpec extends Specification {
                 }
             }
         ) as Consumer<Object, Object>
+    }
+
+    // like the real consumer, which only pauses and resumes partitions that are assigned to it
+    private static void rejectUnassigned(Set<TopicPartition> assigned, Collection<TopicPartition> partitions) {
+        TopicPartition unassigned = partitions.find { !assigned.contains(it) }
+        if (unassigned != null) {
+            throw new IllegalStateException('No current assignment for partition ' + unassigned)
+        }
     }
 
     private static ConsumerInfo createConsumerInfo() {
@@ -251,17 +294,26 @@ class ConsumerStateSpec extends Specification {
 
     private static final class TestConsumerState extends ConsumerState {
 
+        int polls
+        final List<Throwable> handled = []
+
         TestConsumerState(ConsumerInfo info, Consumer<?, ?> consumer) {
             super(null, info, consumer, new ConsumerStateSpecListener())
         }
 
         @Override
         protected ConsumerRecords<?, ?> pollRecords(Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+            polls++
             ConsumerRecords.empty()
         }
 
         @Override
         protected void processRecords(ConsumerRecords<?, ?> consumerRecords, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+        }
+
+        @Override
+        protected void handleException(Throwable e, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+            handled << e
         }
 
         @Override

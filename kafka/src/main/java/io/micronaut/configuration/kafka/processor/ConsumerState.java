@@ -99,6 +99,7 @@ abstract class ConsumerState {
     Set<TopicPartition> assignments;
     private @Nullable Set<TopicPartition> pausedTopicPartitions;
     private @Nullable Set<TopicPartition> pauseRequests;
+    private boolean pauseUnsupported;
     private @Nullable CountDownLatch startupLatch;
     private final CountDownLatch closedLatch;
     private boolean pollingStarted;
@@ -325,7 +326,7 @@ abstract class ConsumerState {
     }
 
     private synchronized void pauseTopicPartitions() {
-        if (pauseRequests == null || pauseRequests.isEmpty()) {
+        if (pauseUnsupported || pauseRequests == null || pauseRequests.isEmpty()) {
             return;
         }
         // Only attempt to pause active assignments
@@ -335,7 +336,18 @@ abstract class ConsumerState {
             return;
         }
         LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, validPauseRequests);
-        kafkaConsumer.pause(validPauseRequests);
+        try {
+            kafkaConsumer.pause(validPauseRequests);
+        } catch (IllegalStateException e) {
+            // a consumer that supports pausing throws this for a partition that is not assigned to it
+            throw e;
+        } catch (RuntimeException e) {
+            // some Consumer implementations, such as Oracle's OKafka, do not support pausing: keep polling rather than
+            // failing every poll, which also means that retries are not delayed
+            pauseUnsupported = true;
+            LOG.warn("Consumer [{}] does not support pausing partitions, so it keeps polling them and retries are not delayed: {}", info.clientId, e.getMessage());
+            return;
+        }
         LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, kafkaConsumer.paused());
         if (pausedTopicPartitions == null) {
             pausedTopicPartitions = new HashSet<>();
