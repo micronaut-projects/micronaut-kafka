@@ -11,6 +11,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.errors.InterruptException
+import org.apache.kafka.common.errors.TimeoutException
 import spock.lang.Specification
 
 import java.time.Duration
@@ -44,19 +46,19 @@ class ConsumerStateSpec extends Specification {
         }
     }
 
-    void "a poll cycle does not ask the consumer for paused partitions when none were paused"() {
+    void "the consumer is asked for its paused partitions once, not on every poll cycle"() {
         given:
         List<String> calls = []
-        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, ['paused']))
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer(calls, []))
         // the started polling event needs the processor, which these states do not have
         setField(state, 'pollingStarted', true)
 
         when:
-        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        3.times { invokeRefreshAssignmentsPollAndProcessRecords(state) }
 
         then:
-        noExceptionThrown()
-        !calls.contains('paused')
+        calls.count('paused') == 1
+        state.isPauseSupported()
     }
 
     void "pausing and resuming partitions still uses the consumer"() {
@@ -180,21 +182,123 @@ class ConsumerStateSpec extends Specification {
         then:
         state.handled.empty
         state.polls == 5
-        calls.count('pause') == 1
-        !calls.contains('paused')
+        calls.count('paused') == 1
+        !calls.contains('pause')
         !calls.contains('resume')
+        !state.isPauseSupported()
         !state.isPaused([topicPartition])
+    }
+
+    void "a consumer that does not support pausing stops when retries are exhausted and does not delay retries"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer([], ['pause', 'paused', 'resume']))
+        setField(state, 'pollingStarted', true)
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        when: "a retry is delayed, which would need the processor to schedule the resume"
+        state.delayRetry(Duration.ofSeconds(1), [topicPartition] as Set)
+
+        then:
+        noExceptionThrown()
+        !getField(state, 'shutdownRequested')
+        !(getField(state, 'pauseRequests') as Set)
+
+        when:
+        state.pauseOrStopOnExhaustedRetry([topicPartition] as Set)
+
+        then:
+        getField(state, 'shutdownRequested')
+    }
+
+    void "a consumer that supports pausing pauses when retries are exhausted"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer([], [], pausedOnConsumer))
+        setField(state, 'pollingStarted', true)
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        when:
+        state.pauseOrStopOnExhaustedRetry([topicPartition] as Set)
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        !getField(state, 'shutdownRequested')
+        pausedOnConsumer == [topicPartition] as Set
+        state.isPaused([topicPartition])
+    }
+
+    void "a temporary #exceptionType.simpleName from #method does not stop the consumer from pausing"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        Map<String, RuntimeException> failOnce = [:]
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer([], [], pausedOnConsumer, [topicPartition] as Set, failOnce))
+        setField(state, 'pollingStarted', true)
+
+        when:
+        failOnce[method] = exceptionType.getConstructor(String).newInstance('temporary failure')
+        state.pause([topicPartition])
+        3.times { invokeRefreshAssignmentsPollAndProcessRecords(state) }
+
+        then:
+        state.isPauseSupported()
+        pausedOnConsumer == [topicPartition] as Set
+        state.isPaused([topicPartition])
+
+        cleanup:
+        // constructing an InterruptException interrupts the current thread
+        Thread.interrupted()
+
+        where:
+        [method, exceptionType] << [['paused', 'pause'],
+                                    [ConcurrentModificationException, TimeoutException, InterruptException]].combinations()
+    }
+
+    void "pausing records the partitions even when the consumer then fails to report its paused partitions"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('topic', 0)
+        Set<TopicPartition> pausedOnConsumer = [] as Set
+        Map<String, RuntimeException> failOnce = [:]
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer([], [], pausedOnConsumer, [topicPartition] as Set, failOnce))
+        setField(state, 'pollingStarted', true)
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        when: "the next call to paused() fails, after the partition is paused"
+        failOnce.paused = new ConcurrentModificationException('KafkaConsumer is not safe for multi-threaded access')
+        state.pause([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        pausedOnConsumer == [topicPartition] as Set
+        getField(state, 'pausedTopicPartitions') == [topicPartition] as Set
+
+        when: "the pause is lifted"
+        state.resume([topicPartition])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        pausedOnConsumer.empty
     }
 
     @SuppressWarnings('unchecked')
     private static Consumer<Object, Object> createConsumer(List<String> calls, List<String> unsupported,
                                                            Set<TopicPartition> paused = [] as Set,
-                                                           Set<TopicPartition> assigned = [new TopicPartition('topic', 0)] as Set) {
+                                                           Set<TopicPartition> assigned = [new TopicPartition('topic', 0)] as Set,
+                                                           Map<String, RuntimeException> failOnce = [:]) {
         Proxy.newProxyInstance(
             ConsumerStateSpec.classLoader,
             [Consumer] as Class<?>[],
             { proxy, method, args ->
                 calls << method.name
+                RuntimeException failure = failOnce.remove(method.name)
+                if (failure != null) {
+                    throw failure
+                }
                 if (method.name in unsupported) {
                     throw new UnsupportedOperationException(method.name + ' is not supported')
                 }

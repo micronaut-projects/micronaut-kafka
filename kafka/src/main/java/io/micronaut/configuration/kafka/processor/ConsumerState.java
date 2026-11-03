@@ -35,6 +35,7 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.ProducerFencedException;
 import org.apache.kafka.common.errors.WakeupException;
@@ -54,6 +55,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,7 +101,7 @@ abstract class ConsumerState {
     Set<TopicPartition> assignments;
     private @Nullable Set<TopicPartition> pausedTopicPartitions;
     private @Nullable Set<TopicPartition> pauseRequests;
-    private boolean pauseUnsupported;
+    private volatile @Nullable Boolean pauseSupported;
     private @Nullable CountDownLatch startupLatch;
     private final CountDownLatch closedLatch;
     private boolean pollingStarted;
@@ -288,6 +290,7 @@ abstract class ConsumerState {
         // We need to retrieve current offsets in case we need to retry the current record or batch
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = getCurrentOffsets();
         // Poll records
+        detectPauseSupport();
         pauseTopicPartitions();
         final ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
         closedState = ConsumerCloseState.POLLING;
@@ -325,8 +328,50 @@ abstract class ConsumerState {
         return CLOSE_TIMEOUT;
     }
 
+    /**
+     * Finds out once, before the first records are processed, whether the consumer can pause partitions.
+     */
+    private void detectPauseSupport() {
+        if (pauseSupported != null) {
+            return;
+        }
+        try {
+            kafkaConsumer.paused();
+            pauseSupported = true;
+        } catch (KafkaException | ConcurrentModificationException | IllegalStateException e) {
+            // a consumer that can pause fails like this temporarily, for example while another thread uses it
+            LOG.debug("Consumer [{}] could not report its paused partitions, trying again on the next poll: {}", info.clientId, e.getMessage());
+        } catch (RuntimeException e) {
+            // some Consumer implementations, such as Oracle's OKafka, do not support pausing
+            pauseSupported = false;
+            LOG.warn("Consumer [{}] does not support pausing partitions: retries are not delayed, retry topic records that are not due yet are fetched again on each poll, and the consumer stops when stopOnExhaustedRetry applies: {}", info.clientId, e.getMessage());
+        }
+    }
+
+    /**
+     * @return whether the consumer can pause partitions, which is assumed until it is known that it cannot
+     */
+    protected final boolean isPauseSupported() {
+        return !Boolean.FALSE.equals(pauseSupported);
+    }
+
+    /**
+     * Stops consuming the given partitions after their retries are exhausted: pauses them, or stops the consumer when it
+     * cannot pause, so that it does not move past the failed record either way.
+     *
+     * @param partitions the partitions whose retries are exhausted
+     */
+    protected void pauseOrStopOnExhaustedRetry(Set<TopicPartition> partitions) {
+        if (isPauseSupported()) {
+            pause(partitions);
+            return;
+        }
+        LOG.error("Consumer [{}] cannot pause partitions {} after exhausting retries, so it stops", info.clientId, partitions);
+        requestShutdown();
+    }
+
     private synchronized void pauseTopicPartitions() {
-        if (pauseUnsupported || pauseRequests == null || pauseRequests.isEmpty()) {
+        if (!isPauseSupported() || pauseRequests == null || pauseRequests.isEmpty()) {
             return;
         }
         // Only attempt to pause active assignments
@@ -336,23 +381,13 @@ abstract class ConsumerState {
             return;
         }
         LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, validPauseRequests);
-        try {
-            kafkaConsumer.pause(validPauseRequests);
-        } catch (IllegalStateException e) {
-            // a consumer that supports pausing throws this for a partition that is not assigned to it
-            throw e;
-        } catch (RuntimeException e) {
-            // some Consumer implementations, such as Oracle's OKafka, do not support pausing: keep polling rather than
-            // failing every poll, which also means that retries are not delayed
-            pauseUnsupported = true;
-            LOG.warn("Consumer [{}] does not support pausing partitions, so it keeps polling them and retries are not delayed: {}", info.clientId, e.getMessage());
-            return;
-        }
-        LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, kafkaConsumer.paused());
+        kafkaConsumer.pause(validPauseRequests);
+        // record the partitions before anything else can fail, so that they are resumed later
         if (pausedTopicPartitions == null) {
             pausedTopicPartitions = new HashSet<>();
         }
         pausedTopicPartitions.addAll(validPauseRequests);
+        LOG.debug("Paused Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, validPauseRequests);
     }
 
     private synchronized void resumeTopicPartitions() {
@@ -568,7 +603,8 @@ abstract class ConsumerState {
     }
 
     protected void delayRetry(Duration retryDelay, Set<TopicPartition> partitions) {
-        if (retryDelay != null) {
+        // a consumer that cannot pause does not delay: it fetches the partitions again on the next poll
+        if (retryDelay != null && isPauseSupported()) {
             pause(partitions);
             kafkaConsumerProcessor.scheduleTask(retryDelay, () -> resume(partitions));
         }
