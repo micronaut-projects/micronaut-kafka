@@ -21,9 +21,9 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.context.annotation.Prototype;
 import io.micronaut.context.exceptions.ConfigurationException;
+import jakarta.inject.Inject;
 import org.apache.kafka.clients.consumer.CooperativeStickyAssignor;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.RangeAssignor;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.clients.consumer.StickyAssignor;
@@ -34,6 +34,7 @@ import java.util.Properties;
 
 /**
  * A factory class for creating Kafka {@link org.apache.kafka.clients.consumer.Consumer} instances.
+ * The consumers are created by the {@link ConsumerFactory} bean.
  *
  * @author Graeme Rocher
  * @since 1.0
@@ -50,8 +51,31 @@ import java.util.Properties;
 )
 public class KafkaConsumerFactory {
 
+    private final ConsumerFactory consumerFactory;
+
     /**
-     * Creates a new {@link KafkaConsumer} for the given configuration.
+     * Creates the factory with the {@link DefaultConsumerFactory}.
+     *
+     * @deprecated Use {@link #KafkaConsumerFactory(ConsumerFactory)} instead.
+     */
+    @Deprecated(since = "6.3.0", forRemoval = true)
+    public KafkaConsumerFactory() {
+        this(new DefaultConsumerFactory());
+    }
+
+    /**
+     * Creates the factory.
+     *
+     * @param consumerFactory The consumer factory that creates the Kafka consumers
+     * @since 6.3.0
+     */
+    @Inject
+    public KafkaConsumerFactory(ConsumerFactory consumerFactory) {
+        this.consumerFactory = consumerFactory;
+    }
+
+    /**
+     * Creates a new {@link Consumer} for the given configuration with the {@link ConsumerFactory}.
      *
      * @param consumerConfiguration The consumer configuration
      * @param <K> The key type
@@ -66,19 +90,9 @@ public class KafkaConsumerFactory {
         Optional<Deserializer<V>> valueDeserializer = consumerConfiguration.getValueDeserializer();
         Properties config = consumerConfiguration.getConfig();
 
-        if (keyDeserializer.isPresent() && valueDeserializer.isPresent()) {
-            return new KafkaConsumer<>(
-                    config,
-                    keyDeserializer.get(),
-                    valueDeserializer.get()
-            );
-        } else if (keyDeserializer.isPresent() || valueDeserializer.isPresent()) {
+        if (keyDeserializer.isPresent() != valueDeserializer.isPresent()) {
             throw new ConfigurationException("Both the [keyDeserializer] and [valueDeserializer] must be set when setting either");
-        } else {
-            return new KafkaConsumer<>(
-                    config
-            );
         }
-
+        return consumerFactory.createConsumer(config, keyDeserializer.orElse(null), valueDeserializer.orElse(null));
     }
 }

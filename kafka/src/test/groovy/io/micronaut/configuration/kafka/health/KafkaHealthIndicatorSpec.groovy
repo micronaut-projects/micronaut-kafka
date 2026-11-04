@@ -70,7 +70,7 @@ class KafkaHealthIndicatorSpec extends Specification {
 
         then:
         result.status == DOWN
-        result.details.error.contains("AdminClient")
+        result.details.error.contains("Admin bean")
 
         cleanup:
         ctx.close()

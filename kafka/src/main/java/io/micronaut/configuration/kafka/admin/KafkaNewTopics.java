@@ -20,7 +20,9 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.Experimental;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClient;
+import jakarta.inject.Inject;
 import org.apache.kafka.clients.admin.CreateTopicsOptions;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -30,13 +32,13 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * Creates Kafka topics via {@link AdminClient}.
+ * Creates Kafka topics via {@link Admin}.
  *
  * @author Guillermo Calvo
  * @since 5.2
  */
 @Context
-@Requires(bean = AdminClient.class)
+@Requires(bean = Admin.class)
 @Requires(bean = NewTopic.class)
 public class KafkaNewTopics {
 
@@ -49,14 +51,31 @@ public class KafkaNewTopics {
      * @param adminClient The Kafka admin client.
      * @param options Optional {@link CreateTopicsOptions}.
      * @param topics  The list of {@link NewTopic} beans to create.
+     * @deprecated Use {@link #KafkaNewTopics(Admin, CreateTopicsOptions, List)} instead.
      */
+    @Deprecated(since = "6.3.0", forRemoval = true)
     public KafkaNewTopics(
         @NonNull AdminClient adminClient,
         @Nullable CreateTopicsOptions options,
         @NonNull List<NewTopic> topics
     ) {
+        this((Admin) adminClient, options, topics);
+    }
+
+    /**
+     * @param admin   The Kafka admin client.
+     * @param options Optional {@link CreateTopicsOptions}.
+     * @param topics  The list of {@link NewTopic} beans to create.
+     * @since 6.3.0
+     */
+    @Inject
+    public KafkaNewTopics(
+        @NonNull Admin admin,
+        @Nullable CreateTopicsOptions options,
+        @NonNull List<NewTopic> topics
+    ) {
         LOG.info("Creating new topics: {}", topics);
-        this.result = adminClient.createTopics(topics, options != null ? options : new CreateTopicsOptions());
+        this.result = admin.createTopics(topics, options != null ? options : new CreateTopicsOptions());
     }
 
     /**

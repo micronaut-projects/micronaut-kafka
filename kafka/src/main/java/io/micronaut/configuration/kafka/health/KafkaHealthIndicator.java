@@ -31,6 +31,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.kafka.clients.LeastLoadedNode;
 import org.apache.kafka.clients.NetworkClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.Config;
 import org.apache.kafka.clients.admin.ConfigEntry;
@@ -72,7 +73,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
     private static final String DETAILS_BROKER_ID = "brokerId";
     private static final String DETAILS_CLUSTER_ID = "clusterId";
     private static final String DETAILS_NODES = "nodes";
-    private final Supplier<Optional<AdminClient>> adminClientSupplier;
+    private final Supplier<Optional<Admin>> adminClientSupplier;
     private final KafkaDefaultConfiguration defaultConfiguration;
 
     private final Supplier<NetworkClient> networkClientSupplier;
@@ -94,7 +95,7 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
                                 KafkaDefaultConfiguration defaultConfiguration,
                                 NetworkClientCreator networkClientCreator,
                                 KafkaHealthConfiguration kafkaHealthConfiguration) {
-        this.adminClientSupplier = SupplierUtil.memoized(() -> beanContext.findBean(AdminClient.class));
+        this.adminClientSupplier = SupplierUtil.memoized(() -> beanContext.findBean(Admin.class));
         this.defaultConfiguration = defaultConfiguration;
         this.networkClientSupplier = SupplierUtil.memoized(() -> networkClientCreator.create(this));
         this.kafkaHealthConfiguration = kafkaHealthConfiguration;
@@ -157,10 +158,10 @@ public class KafkaHealthIndicator implements HealthIndicator, ClusterResourceLis
             }
         }
 
-        Optional<AdminClient> adminClient = adminClientSupplier.get();
+        Optional<Admin> adminClient = adminClientSupplier.get();
         if (adminClient.isEmpty()) {
             return Flux.just(failure(new IllegalStateException(
-                "Kafka health indicator requires an AdminClient bean. Enable kafka.admin.enabled or set kafka.health.restricted=true."
+                "Kafka health indicator requires an Admin bean. Enable kafka.admin.enabled or set kafka.health.restricted=true."
             ), Collections.emptyMap()));
         }
         DescribeClusterResult result = adminClient.get().describeCluster(

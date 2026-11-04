@@ -19,7 +19,7 @@ import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.runtime.event.ApplicationShutdownEvent;
 import jakarta.inject.Singleton;
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +45,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 @Singleton
-@Requires(bean = AdminClient.class)
+@Requires(bean = Admin.class)
 class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationShutdownEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerGroupManager.class);
 
-    private final AdminClient adminClient;
+    private final Admin adminClient;
     /**
      * Stores the client IDs and their associated consumer states for consumer groups to be
      * deleted on shutdown.
@@ -64,11 +64,11 @@ class KafkaConsumerGroupManager implements ApplicationEventListener<ApplicationS
     private final List<String> uniqueGroupIdsDeleteOnShutdown = new ArrayList<>();
 
     /**
-     * Constructs a KafkaConsumerGroupManager with the provided {@link AdminClient}.
+     * Constructs a KafkaConsumerGroupManager with the provided {@link Admin}.
      *
-     * @param adminClient The Kafka {@link AdminClient} used for managing consumer groups.
+     * @param adminClient The Kafka {@link Admin} used for managing consumer groups.
      */
-    public KafkaConsumerGroupManager(AdminClient adminClient) {
+    public KafkaConsumerGroupManager(Admin adminClient) {
         this.adminClient = adminClient;
     }
 
