@@ -570,7 +570,8 @@ class ConsumerStateSingleSpec extends Specification {
         KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
             getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
             getProcessingObserver() >> observer
-            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+            // Resume immediately so the retry-delay pause does not mask the stop-on-exhausted pause
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> task.run() }
             interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
         }
         Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
@@ -583,6 +584,7 @@ class ConsumerStateSingleSpec extends Specification {
             kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1, [], [], true),
             executableMethod { throw new IllegalStateException('boom') }
         )
+        Boolean pauseRequestedWhenErrorReported = null
 
         when:
         consumerState.processRecords(consumerRecords, [:])
@@ -590,9 +592,14 @@ class ConsumerStateSingleSpec extends Specification {
 
         then:
         1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
-        1 * observer.onError(handle, { it instanceof IllegalStateException })
+        1 * observer.onError(handle, { it instanceof IllegalStateException }) >> {
+            pauseRequestedWhenErrorReported = pauseRequests(consumerState)?.contains(topicPartition) ?: false
+        }
         0 * observer.onSuccess(_)
-        1 * kafkaConsumer.pause(_)
+
+        and: 'the terminal error is reported before the partition pause is requested'
+        pauseRequestedWhenErrorReported == false
+        pauseRequests(consumerState) == [topicPartition] as Set
     }
 
     void "opt out from onStart is remembered across blocking retries"() {
@@ -904,6 +911,12 @@ class ConsumerStateSingleSpec extends Specification {
                 }
             }
         ) as ExecutableMethod<?, ?>
+    }
+
+    private static Set<TopicPartition> pauseRequests(ConsumerState consumerState) {
+        def field = ConsumerState.getDeclaredField('pauseRequests')
+        field.accessible = true
+        field.get(consumerState) as Set<TopicPartition>
     }
 
     private static String headerValue(ProducerRecord<?, ?> record, String name) {
