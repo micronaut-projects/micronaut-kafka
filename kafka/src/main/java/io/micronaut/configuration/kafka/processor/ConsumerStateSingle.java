@@ -19,6 +19,7 @@ import io.micronaut.configuration.kafka.KafkaAcknowledgement;
 import io.micronaut.configuration.kafka.KafkaConsumerProcessingObserver;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
@@ -46,6 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -423,6 +425,45 @@ final class ConsumerStateSingle extends ConsumerState {
         final Object handle = processingObservations.remove(observedKey(consumerRecord));
         if (handle != null && handle != OPTED_OUT) {
             safelyRun(() -> observer.onError(handle, error));
+        }
+    }
+
+    @Override
+    protected void onAssignmentsRevoked(Set<TopicPartition> revokedPartitions) {
+        abandonProcessingObservations(key -> revokedPartitions.contains(new TopicPartition(key.topic(), key.partition())),
+            "partition was revoked");
+    }
+
+    @Override
+    protected void onPollLoopExit() {
+        abandonProcessingObservations(key -> true, "consumer stopped");
+    }
+
+    /**
+     * Terminates observations of records this consumer will no longer process, typically ones waiting
+     * for a blocking retry, so that they are not left open. Another consumer that is assigned the
+     * partition starts its own observation when it processes the record.
+     */
+    private void abandonProcessingObservations(Predicate<ObservedRecordKey> released, String reason) {
+        if (processingObservations.isEmpty()) {
+            return;
+        }
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        final Iterator<Map.Entry<ObservedRecordKey, Object>> entries = processingObservations.entrySet().iterator();
+        while (entries.hasNext()) {
+            final Map.Entry<ObservedRecordKey, Object> entry = entries.next();
+            if (!released.test(entry.getKey())) {
+                continue;
+            }
+            entries.remove();
+            final Object handle = entry.getValue();
+            if (observer != null && handle != OPTED_OUT) {
+                final ObservedRecordKey key = entry.getKey();
+                final KafkaListenerException error = new KafkaListenerException(
+                    "Processing of the record was abandoned before completion: " + reason,
+                    consumerBean, kafkaConsumer, new ConsumerRecord<>(key.topic(), key.partition(), key.offset(), null, null));
+                safelyRun(() -> observer.onError(handle, error));
+            }
         }
     }
 

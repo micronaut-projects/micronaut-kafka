@@ -105,7 +105,10 @@ public interface KafkaConsumerProcessingObserver {
     /**
      * Invoked once when the record has reached a terminal failure and will not be retried: retries
      * exhausted, the retry strategy stopped on the paused partition, the exception is not retryable, or
-     * the failed record was handed off to a non-blocking retry topic.
+     * the failed record was handed off to a non-blocking retry topic. It is also invoked, with a
+     * {@link io.micronaut.configuration.kafka.exceptions.KafkaListenerException}, when this consumer
+     * abandons a record before its terminal outcome because the partition was revoked or the consumer
+     * stopped; whichever consumer processes the record next starts a new observation.
      *
      * @param handle the handle previously returned by {@link #onStart}
      * @param error  the terminal error
