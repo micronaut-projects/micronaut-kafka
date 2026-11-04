@@ -186,48 +186,55 @@ class ConsumerStateSpec extends Specification {
         !calls.contains('pause')
         !calls.contains('resume')
         !state.isPauseSupported()
-        !state.isPaused([topicPartition])
-    }
-
-    void "a consumer that does not support pausing stops when retries are exhausted and does not delay retries"() {
-        given:
-        TopicPartition topicPartition = new TopicPartition('topic', 0)
-        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
-            createConsumer([], ['pause', 'paused', 'resume']))
-        setField(state, 'pollingStarted', true)
-        invokeRefreshAssignmentsPollAndProcessRecords(state)
-
-        when: "a retry is delayed, which would need the processor to schedule the resume"
-        state.delayRetry(Duration.ofSeconds(1), [topicPartition] as Set)
-
-        then:
-        noExceptionThrown()
-        !getField(state, 'shutdownRequested')
-        !(getField(state, 'pauseRequests') as Set)
-
-        when:
-        state.pauseOrStopOnExhaustedRetry([topicPartition] as Set)
-
-        then:
-        getField(state, 'shutdownRequested')
-    }
-
-    void "a consumer that supports pausing pauses when retries are exhausted"() {
-        given:
-        TopicPartition topicPartition = new TopicPartition('topic', 0)
-        Set<TopicPartition> pausedOnConsumer = [] as Set
-        TestConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer([], [], pausedOnConsumer))
-        setField(state, 'pollingStarted', true)
-        invokeRefreshAssignmentsPollAndProcessRecords(state)
-
-        when:
-        state.pauseOrStopOnExhaustedRetry([topicPartition] as Set)
-        invokeRefreshAssignmentsPollAndProcessRecords(state)
-
-        then:
-        !getField(state, 'shutdownRequested')
-        pausedOnConsumer == [topicPartition] as Set
+        // the pause is still applied, by skipping the partition's records
         state.isPaused([topicPartition])
+    }
+
+    void "a consumer that does not support pausing skips the records of paused partitions until they are resumed"() {
+        given:
+        List<String> calls = []
+        List<List<Object>> seeks = []
+        TopicPartition p0 = new TopicPartition('topic', 0)
+        TopicPartition p1 = new TopicPartition('topic', 1)
+        Set<TopicPartition> assigned = [p0, p1] as Set
+        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
+            createConsumer(calls, ['pause', 'paused', 'resume'], [] as Set, assigned, [:], seeks))
+        setField(state, 'pollingStarted', true)
+        state.nextRecords = records([(p0): [5L, 6L], (p1): [7L]])
+
+        when: "p0 is paused, for example by a delayed retry or through the registry"
+        state.pause([p0])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then: "its records are skipped and fetched again from the first of them"
+        state.handled.empty
+        state.processed.collect { it.partitions() } == [[p1] as Set]
+        seeks == [[p0, 5L]]
+        state.isPaused([p0])
+        !state.isPaused([p1])
+
+        when:
+        state.processed.clear()
+        seeks.clear()
+        state.resume([p0])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then:
+        state.processed.collect { it.partitions() } == [[p0, p1] as Set]
+        seeks.empty
+        !state.isPaused([p0])
+
+        when: "a paused partition is revoked"
+        state.pause([p0])
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        assigned.remove(p0)
+        invokeRefreshAssignmentsPollAndProcessRecords(state)
+
+        then: "it is forgotten"
+        (getField(state, 'pausedTopicPartitions') as Set).empty
+        !calls.contains('pause')
+        !calls.contains('resume')
+        calls.count('paused') == 1
     }
 
     void "a temporary #exceptionType.simpleName from #method does not stop the consumer from pausing"() {
@@ -289,7 +296,8 @@ class ConsumerStateSpec extends Specification {
     private static Consumer<Object, Object> createConsumer(List<String> calls, List<String> unsupported,
                                                            Set<TopicPartition> paused = [] as Set,
                                                            Set<TopicPartition> assigned = [new TopicPartition('topic', 0)] as Set,
-                                                           Map<String, RuntimeException> failOnce = [:]) {
+                                                           Map<String, RuntimeException> failOnce = [:],
+                                                           List<List<Object>> seeks = []) {
         Proxy.newProxyInstance(
             ConsumerStateSpec.classLoader,
             [Consumer] as Class<?>[],
@@ -317,6 +325,9 @@ class ConsumerStateSpec extends Specification {
                         rejectUnassigned(assigned, args[0] as Collection<TopicPartition>)
                         paused.removeAll(args[0] as Collection<TopicPartition>)
                         return null
+                    case 'seek':
+                        seeks << [args[0], args[1]]
+                        return null
                     default:
                         return null
                 }
@@ -330,6 +341,12 @@ class ConsumerStateSpec extends Specification {
         if (unassigned != null) {
             throw new IllegalStateException('No current assignment for partition ' + unassigned)
         }
+    }
+
+    private static ConsumerRecords<Object, Object> records(Map<TopicPartition, List<Long>> offsets) {
+        new ConsumerRecords<Object, Object>(offsets.collectEntries { tp, partitionOffsets ->
+            [(tp): partitionOffsets.collect { new ConsumerRecord<Object, Object>(tp.topic(), tp.partition(), it, 'key', 'value') }]
+        } as Map<TopicPartition, List<ConsumerRecord<Object, Object>>>, [:])
     }
 
     private static ConsumerInfo createConsumerInfo() {
@@ -399,7 +416,9 @@ class ConsumerStateSpec extends Specification {
     private static final class TestConsumerState extends ConsumerState {
 
         int polls
+        ConsumerRecords<?, ?> nextRecords = ConsumerRecords.empty()
         final List<Throwable> handled = []
+        final List<ConsumerRecords<?, ?>> processed = []
 
         TestConsumerState(ConsumerInfo info, Consumer<?, ?> consumer) {
             super(null, info, consumer, new ConsumerStateSpecListener())
@@ -408,11 +427,12 @@ class ConsumerStateSpec extends Specification {
         @Override
         protected ConsumerRecords<?, ?> pollRecords(Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
             polls++
-            ConsumerRecords.empty()
+            nextRecords
         }
 
         @Override
         protected void processRecords(ConsumerRecords<?, ?> consumerRecords, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+            processed << consumerRecords
         }
 
         @Override

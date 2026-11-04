@@ -292,13 +292,22 @@ abstract class ConsumerState {
         // Poll records
         detectPauseSupport();
         pauseTopicPartitions();
-        final ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
+        final long pollStart = System.nanoTime();
+        ConsumerRecords<?, ?> consumerRecords = pollRecords(currentOffsets);
         closedState = ConsumerCloseState.POLLING;
         if (!pollingStarted) {
             pollingStarted = true;
             kafkaConsumerProcessor.publishStartedPollingEvent(kafkaConsumer);
         }
         resumeTopicPartitions();
+        if (consumerRecords != null && !consumerRecords.isEmpty() && !isPauseSupported()) {
+            consumerRecords = skipPausedTopicPartitions(consumerRecords);
+            if (consumerRecords.isEmpty()) {
+                // a paused consumer would have waited for the poll timeout, instead of fetching the records again at once
+                waitForRestOfPollTimeout(pollStart);
+                return;
+            }
+        }
         if (consumerRecords == null || consumerRecords.isEmpty()) {
             return; // No consumer records to process
         }
@@ -344,7 +353,7 @@ abstract class ConsumerState {
         } catch (RuntimeException e) {
             // some Consumer implementations, such as Oracle's OKafka, do not support pausing
             pauseSupported = false;
-            LOG.warn("Consumer [{}] does not support pausing partitions: retries are not delayed, retry topic records that are not due yet are fetched again on each poll, and the consumer stops when stopOnExhaustedRetry applies: {}", info.clientId, e.getMessage());
+            LOG.warn("Consumer [{}] does not support pausing partitions, so the records of paused partitions are fetched again on each poll and skipped until the partitions are resumed: {}", info.clientId, e.getMessage());
         }
     }
 
@@ -356,22 +365,46 @@ abstract class ConsumerState {
     }
 
     /**
-     * Stops consuming the given partitions after their retries are exhausted: pauses them, or stops the consumer when it
-     * cannot pause, so that it does not move past the failed record either way.
-     *
-     * @param partitions the partitions whose retries are exhausted
+     * Stands in for pausing on a consumer that cannot pause: the records of the paused partitions are not processed, and
+     * the consumer seeks back to the first of them so that they are fetched again once the partitions are resumed.
      */
-    protected void pauseOrStopOnExhaustedRetry(Set<TopicPartition> partitions) {
-        if (isPauseSupported()) {
-            pause(partitions);
-            return;
+    private synchronized ConsumerRecords<?, ?> skipPausedTopicPartitions(ConsumerRecords<?, ?> consumerRecords) {
+        if (pausedTopicPartitions == null || pausedTopicPartitions.isEmpty()) {
+            return consumerRecords;
         }
-        LOG.error("Consumer [{}] cannot pause partitions {} after exhausting retries, so it stops", info.clientId, partitions);
-        requestShutdown();
+        final Map<TopicPartition, List<ConsumerRecord<Object, Object>>> remaining = new HashMap<>();
+        final Map<TopicPartition, OffsetAndMetadata> remainingNextOffsets = new HashMap<>();
+        for (TopicPartition topicPartition : consumerRecords.partitions()) {
+            final List<? extends ConsumerRecord<?, ?>> records = consumerRecords.records(topicPartition);
+            if (pausedTopicPartitions.contains(topicPartition)) {
+                kafkaConsumer.seek(topicPartition, records.get(0).offset());
+            } else {
+                remaining.put(topicPartition, (List) records);
+                final OffsetAndMetadata nextOffset = consumerRecords.nextOffsets().get(topicPartition);
+                if (nextOffset != null) {
+                    remainingNextOffsets.put(topicPartition, nextOffset);
+                }
+            }
+        }
+        if (remaining.size() == consumerRecords.partitions().size()) {
+            return consumerRecords;
+        }
+        return new ConsumerRecords<>(remaining, remainingNextOffsets);
+    }
+
+    private void waitForRestOfPollTimeout(long pollStart) {
+        final long remaining = info.pollTimeout.toNanos() - (System.nanoTime() - pollStart);
+        if (remaining > 0) {
+            try {
+                TimeUnit.NANOSECONDS.sleep(remaining);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private synchronized void pauseTopicPartitions() {
-        if (!isPauseSupported() || pauseRequests == null || pauseRequests.isEmpty()) {
+        if (pauseRequests == null || pauseRequests.isEmpty()) {
             return;
         }
         // Only attempt to pause active assignments
@@ -381,7 +414,9 @@ abstract class ConsumerState {
             return;
         }
         LOG.trace("Pausing Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, validPauseRequests);
-        kafkaConsumer.pause(validPauseRequests);
+        if (isPauseSupported()) {
+            kafkaConsumer.pause(validPauseRequests);
+        }
         // record the partitions before anything else can fail, so that they are resumed later
         if (pausedTopicPartitions == null) {
             pausedTopicPartitions = new HashSet<>();
@@ -393,18 +428,20 @@ abstract class ConsumerState {
     private synchronized void resumeTopicPartitions() {
         if (pausedTopicPartitions == null || pausedTopicPartitions.isEmpty()) {
             // nothing was paused here, so there is nothing to resume: this also leaves alone partitions that the
-            // application paused on the consumer itself, and consumers that do not support pausing
+            // application paused on the consumer itself
             return;
         }
         // forget the partitions that are no longer paused, for example because they were revoked
-        pausedTopicPartitions.retainAll(kafkaConsumer.paused());
+        pausedTopicPartitions.retainAll(isPauseSupported() ? kafkaConsumer.paused() : assignments);
         // only resume what was paused here: the application may have paused other partitions on the consumer itself
         final List<TopicPartition> toResume = pausedTopicPartitions.stream()
             .filter(topicPartition -> pauseRequests == null || !pauseRequests.contains(topicPartition))
             .toList();
         if (!toResume.isEmpty()) {
             LOG.debug("Resuming Kafka consumption for Consumer [{}] from topic partition: {}", info.clientId, toResume);
-            kafkaConsumer.resume(toResume);
+            if (isPauseSupported()) {
+                kafkaConsumer.resume(toResume);
+            }
             toResume.forEach(pausedTopicPartitions::remove);
         }
     }
@@ -603,8 +640,7 @@ abstract class ConsumerState {
     }
 
     protected void delayRetry(Duration retryDelay, Set<TopicPartition> partitions) {
-        // a consumer that cannot pause does not delay: it fetches the partitions again on the next poll
-        if (retryDelay != null && isPauseSupported()) {
+        if (retryDelay != null) {
             pause(partitions);
             kafkaConsumerProcessor.scheduleTask(retryDelay, () -> resume(partitions));
         }

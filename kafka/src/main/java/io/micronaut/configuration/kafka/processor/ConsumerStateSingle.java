@@ -287,7 +287,7 @@ final class ConsumerStateSingle extends ConsumerState {
         }
         kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         handleException(e, consumerRecords, consumerRecord);
-        pauseOrStopOnExhaustedRetry(Collections.singleton(topicPartition));
+        pause(Collections.singleton(topicPartition));
         return true;
     }
 

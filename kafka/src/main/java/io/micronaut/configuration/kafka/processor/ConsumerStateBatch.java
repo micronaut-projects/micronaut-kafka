@@ -211,7 +211,7 @@ final class ConsumerStateBatch extends ConsumerState {
                     }
                 });
                 handleException(e, consumerRecords, consumerRecord);
-                pauseOrStopOnExhaustedRetry(partitions);
+                pause(partitions);
                 return true;
             }
         }
