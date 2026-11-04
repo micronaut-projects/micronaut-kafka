@@ -30,7 +30,7 @@ import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST
 import static io.micronaut.configuration.kafka.annotation.OffsetStrategy.SYNC
 
 /**
- * Consumers that cannot pause, like Oracle's OKafka consumer, skip the records of paused partitions instead.
+ * Consumers that cannot pause, like Oracle's OKafka consumer, stop polling while a partition is paused instead.
  */
 class KafkaPauseUnsupportedSpec extends AbstractKafkaContainerSpec {
 
@@ -107,8 +107,8 @@ class KafkaPauseUnsupportedSpec extends AbstractKafkaContainerSpec {
         }
         listener.received.count('ERROR') == 3
 
-        and: "the consumer holding the failed record polls no faster than a paused one would"
-        pollsDuring <= 30
+        and: "the consumer holding the failed record does not poll, and the other one polls as usual"
+        pollsDuring <= 15
     }
 
     private static int groupPolls(Map<String, AtomicInteger> polls) {
@@ -139,9 +139,9 @@ class KafkaPauseUnsupportedSpec extends AbstractKafkaContainerSpec {
         int pollsBefore = polls.get()
         sleep(2000)
 
-        then: "the record is not received, and the consumer polls no faster than a paused one would"
+        then: "the record is not received, because the consumer does not poll"
         listener.received.empty
-        polls.get() - pollsBefore <= 25
+        polls.get() == pollsBefore
 
         when:
         registry.resume('pause-unsupported-registry')

@@ -9,6 +9,10 @@ opentracing-kafka-client = '0.1.15'
 opentracing-mock = '0.33.0'
 zipkin-brave-kafka-clients = '6.3.1'
 lz4-java = '1.12.0'
+okafka = '23.26.1.0'
+# OKafka is built on kafka-clients 3.9 and fails to load on the 4.x line
+okafka-kafka-clients = '3.9.2'
+okafka-ojdbc = '23.26.3.0.0'
 
 micronaut-cache = "6.1.1"
 micronaut-micrometer = "6.1.0"
@@ -38,6 +42,10 @@ micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", ver
 micronaut-test = { module = "io.micronaut.test:micronaut-test-bom", version.ref = "micronaut-test" }
 testcontainers = { module = "org.testcontainers:testcontainers" }
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
+testcontainers-oracle-free = { module = "org.testcontainers:testcontainers-oracle-free" }
+okafka = { module = "com.oracle.database.messaging:okafka", version.ref = "okafka" }
+okafka-kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "okafka-kafka-clients" }
+okafka-ojdbc = { module = "com.oracle.database.jdbc:ojdbc17", version.ref = "okafka-ojdbc" }
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
 
 [plugins]

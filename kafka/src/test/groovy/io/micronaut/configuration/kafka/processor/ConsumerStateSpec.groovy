@@ -167,30 +167,7 @@ class ConsumerStateSpec extends Specification {
         !calls.contains('paused')
     }
 
-    void "a consumer that does not support pausing keeps polling"() {
-        given:
-        List<String> calls = []
-        TopicPartition topicPartition = new TopicPartition('topic', 0)
-        TestConsumerState state = new TestConsumerState(createConsumerInfo(),
-            createConsumer(calls, ['pause', 'paused', 'resume']))
-        setField(state, 'pollingStarted', true)
-
-        when:
-        state.pause([topicPartition])
-        5.times { invokeRefreshAssignmentsPollAndProcessRecords(state) }
-
-        then:
-        state.handled.empty
-        state.polls == 5
-        calls.count('paused') == 1
-        !calls.contains('pause')
-        !calls.contains('resume')
-        !state.isPauseSupported()
-        // the pause is still applied, by skipping the partition's records
-        state.isPaused([topicPartition])
-    }
-
-    void "a consumer that does not support pausing skips the records of paused partitions until they are resumed"() {
+    void "a consumer that does not support pausing does not poll while a partition is paused"() {
         given:
         List<String> calls = []
         List<List<Object>> seeks = []
@@ -204,22 +181,23 @@ class ConsumerStateSpec extends Specification {
 
         when: "p0 is paused, for example by a delayed retry or through the registry"
         state.pause([p0])
-        invokeRefreshAssignmentsPollAndProcessRecords(state)
+        3.times { invokeRefreshAssignmentsPollAndProcessRecords(state) }
 
-        then: "its records are skipped and fetched again from the first of them"
+        then: "nothing is fetched, so no record has to be fetched again"
         state.handled.empty
-        state.processed.collect { it.partitions() } == [[p1] as Set]
-        seeks == [[p0, 5L]]
+        state.polls == 0
+        state.processed.empty
+        seeks.empty
         state.isPaused([p0])
         !state.isPaused([p1])
+        !state.isPauseSupported()
 
         when:
-        state.processed.clear()
-        seeks.clear()
         state.resume([p0])
         invokeRefreshAssignmentsPollAndProcessRecords(state)
 
         then:
+        state.polls == 1
         state.processed.collect { it.partitions() } == [[p0, p1] as Set]
         seeks.empty
         !state.isPaused([p0])
@@ -230,7 +208,8 @@ class ConsumerStateSpec extends Specification {
         assigned.remove(p0)
         invokeRefreshAssignmentsPollAndProcessRecords(state)
 
-        then: "it is forgotten"
+        then: "it is forgotten, and polling continues"
+        state.polls == 2
         (getField(state, 'pausedTopicPartitions') as Set).empty
         !calls.contains('pause')
         !calls.contains('resume')
