@@ -94,8 +94,10 @@ import java.util.stream.Stream;
  * bean, which binds all of {@code kafka}, so the development runtime restarts the application for any change under
  * it, and the new context builds its clients from the new values.</p>
  *
- * <p>{@link AdminClientFactory} retains the admin client across a restart with
- * {@link io.micronaut.context.annotation.Retain}; this reloader refuses it while the configuration names a class of
+ * <p>In development mode {@link AdminClientFactory} builds the admin client from a
+ * {@link io.micronaut.configuration.kafka.config.RetainedKafkaConfiguration}, which receives nothing of the context,
+ * and retains it across a restart with {@link io.micronaut.context.annotation.Retain}, until a change under
+ * {@code kafka} releases it. This reloader refuses it while the configuration names a class of
  * the application, such as a metric reporter or a SASL callback handler, which the admin client would instantiate and
  * keep running from the retired generation. Neither the consumers, the producers nor the streams are retained: they
  * run the application's listeners and serdes.</p>

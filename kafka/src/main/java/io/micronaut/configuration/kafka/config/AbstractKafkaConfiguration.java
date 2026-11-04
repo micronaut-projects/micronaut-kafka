@@ -17,6 +17,7 @@ package io.micronaut.configuration.kafka.config;
 
 import io.micronaut.context.env.Environment;
 import io.micronaut.context.exceptions.ConfigurationException;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.util.Toggleable;
 
 import org.jspecify.annotations.NonNull;
@@ -77,6 +78,16 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
      * @return The kafka properties
      */
     protected static Properties toKafkaProperties(Environment environment, Map<?, ?> values) {
+        return toKafkaProperties(environment.getConversionService(), values);
+    }
+
+    /**
+     * Convert the given map of values to kafka properties.
+     * @param conversionService The conversion service
+     * @param values The values
+     * @return The kafka properties
+     */
+    static Properties toKafkaProperties(ConversionService conversionService, Map<?, ?> values) {
         Properties properties = new Properties();
         values.entrySet().stream().filter(entry -> {
             String key = entry.getKey().toString();
@@ -86,8 +97,8 @@ public abstract class AbstractKafkaConfiguration<K, V> implements Toggleable {
             if (value == null) {
                 throw new ConfigurationException("Value for property " + PREFIX + "." + entry.getKey().toString() + " resolved as null");
             }
-            if (environment.getConversionService().canConvert(value.getClass(), String.class)) {
-                Optional<?> converted = environment.getConversionService().convert(value, String.class);
+            if (conversionService.canConvert(value.getClass(), String.class)) {
+                Optional<?> converted = conversionService.convert(value, String.class);
                 if (converted.isPresent()) {
                     value = converted.get();
                 }
