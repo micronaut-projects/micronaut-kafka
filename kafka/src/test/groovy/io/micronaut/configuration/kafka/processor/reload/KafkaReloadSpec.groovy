@@ -29,7 +29,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.Serializer
-import org.slf4j.LoggerFactory
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -82,6 +81,7 @@ class KafkaReloadSpec extends Specification {
         context.getBean(ReloadListener).is(listener)
 
         when: 'the listener class is redefined in place'
+        int consumers = MockConsumers.mine().size()
         context.publishEvent(classChange([] as Set, [new ClassChange(ReloadListener.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
         ReloadListener recreated = context.getBean(ReloadListener)
 
@@ -95,6 +95,7 @@ class KafkaReloadSpec extends Specification {
         MockConsumer<?, ?> second = polling()
         !second.is(first)
         second.subscription() == [TOPIC] as Set
+        restarts(consumers) == 1
 
         and: 'records reach the new listener only'
         consume(second, 'two')
@@ -116,6 +117,7 @@ class KafkaReloadSpec extends Specification {
         MockConsumer<?, ?> first = polling()
 
         when: 'a serde is redefined in place'
+        int consumers = MockConsumers.mine().size()
         context.publishEvent(classChange([] as Set, [new ClassChange(ReloadSerializer.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
 
         then: 'the registries keyed by class are new, and so are the beans that received them'
@@ -130,7 +132,11 @@ class KafkaReloadSpec extends Specification {
         !second.is(first)
         context.getBean(ReloadListener).is(listener)
 
+        and: 'they are started once: the composite registry received the others, and goes with the first of them'
+        restarts(consumers) == 1
+
         when: 'a reload retires a classloader'
+        consumers = MockConsumers.mine().size()
         serdes = context.getBean(SerdeRegistry)
         registry = context.getBean(ConsumerRegistry)
         context.publishEvent(classChange([ReloadListener.classLoader] as Set, [], ReloadStrategy.RELOAD))
@@ -141,6 +147,7 @@ class KafkaReloadSpec extends Specification {
         !context.getBean(ConsumerRegistry).is(registry)
         MockConsumer<?, ?> third = polling()
         !third.is(second)
+        restarts(consumers) == 1
 
         cleanup:
         context.close()
@@ -156,6 +163,7 @@ class KafkaReloadSpec extends Specification {
         BeanDefinition<?> serializer = context.getBeanDefinition(Serializer, Qualifiers.byName('reload-spec'))
 
         when: 'the launcher registers a serializer definition'
+        int consumers = MockConsumers.mine().size()
         ((DefaultBeanContext) context).notifyDefinitionChange([], [serializer])
 
         then: 'the registries keyed by class are new, and so are the beans that received them'
@@ -164,8 +172,10 @@ class KafkaReloadSpec extends Specification {
         !context.getBean(ReloadClient).is(client)
         closed(first)
         MockConsumer<?, ?> second = polling()
+        restarts(consumers) == 1
 
         when: 'the launcher removes it'
+        consumers = MockConsumers.mine().size()
         serdes = context.getBean(SerdeRegistry)
         producers = context.getBean(ProducerRegistry)
         ((DefaultBeanContext) context).notifyDefinitionChange([serializer], [])
@@ -175,6 +185,7 @@ class KafkaReloadSpec extends Specification {
         !context.getBean(ProducerRegistry).is(producers)
         closed(second)
         polling() != second
+        restarts(consumers) == 1
 
         cleanup:
         context.close()
@@ -185,31 +196,26 @@ class KafkaReloadSpec extends Specification {
         ApplicationContext context = devContext(true)
         MockConsumer<?, ?> first = polling()
         BeanDefinition<?> both = context.getBeanDefinition(ReloadBothSerde)
-        // the reloader logs each restart once; Logback is on the test runtime classpath only, so it is used dynamically
-        def restarts = Class.forName('ch.qos.logback.core.read.ListAppender').getDeclaredConstructor().newInstance()
-        restarts.start()
-        def logger = LoggerFactory.getLogger(RELOADER)
-        logger.addAppender(restarts)
 
         when: 'the launcher registers it'
+        int consumers = MockConsumers.mine().size()
         ((DefaultBeanContext) context).notifyDefinitionChange([], [both])
 
         then: 'one restart, not one per serde type the bean is'
         closed(first)
         MockConsumer<?, ?> second = polling()
-        restarts.list*.formattedMessage == ['Restarting the Kafka consumers: serde definitions changed']
+        restarts(consumers) == 1
 
         when: 'the launcher removes it'
-        restarts.list.clear()
+        consumers = MockConsumers.mine().size()
         ((DefaultBeanContext) context).notifyDefinitionChange([both], [])
 
         then:
         closed(second)
         polling() != second
-        restarts.list*.formattedMessage == ['Restarting the Kafka consumers: serde definitions changed']
+        restarts(consumers) == 1
 
         cleanup:
-        logger.detachAppender(restarts)
         context.close()
     }
 
@@ -229,6 +235,7 @@ class KafkaReloadSpec extends Specification {
         !first.closed()
 
         when: 'the factory of a serializer is redefined in place'
+        int consumers = MockConsumers.mine().size()
         context.publishEvent(classChange([] as Set, [new ClassChange(ReloadSerdeFactory.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
 
         then:
@@ -236,6 +243,77 @@ class KafkaReloadSpec extends Specification {
         !context.getBean(ProducerRegistry).is(producers)
         closed(first)
         polling() != first
+        restarts(consumers) == 1
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode an in-place change of a Kafka client restarts the consumers once"() {
+        given:
+        ApplicationContext context = devContext(true)
+        MockConsumer<?, ?> first = polling()
+        int consumers = MockConsumers.mine().size()
+
+        when:
+        context.publishEvent(classChange([] as Set, [new ClassChange(ReloadClient.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
+
+        then:
+        closed(first)
+        polling() != first
+        restarts(consumers) == 1
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode one in-place change of a listener and a serde restarts the consumers once, on a new listener"() {
+        given:
+        ApplicationContext context = devContext(true)
+        ReloadListener listener = context.getBean(ReloadListener)
+        SerdeRegistry serdes = context.getBean(SerdeRegistry)
+        MockConsumer<?, ?> first = polling()
+        int consumers = MockConsumers.mine().size()
+
+        when:
+        context.publishEvent(classChange([] as Set, [new ClassChange(ReloadListener.name, ClassChange.Kind.MODIFIED), new ClassChange(ReloadSerializer.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
+        ReloadListener recreated = context.getBean(ReloadListener)
+
+        then:
+        closed(first)
+        MockConsumer<?, ?> second = polling()
+        restarts(consumers) == 1
+        !recreated.is(listener)
+        !context.getBean(SerdeRegistry).is(serdes)
+
+        and: 'records reach the new listener only'
+        consume(second, 'one')
+        conditions.eventually { assert recreated.received == ['one'] }
+        listener.received.isEmpty()
+
+        cleanup:
+        context.close()
+    }
+
+    void "in development mode a serde change recreates every serde registry, each one the composite received restarting the consumers"() {
+        given:
+        ApplicationContext context = devContext(true, ['spec.custom-registry': true])
+        ReloadSerdeRegistry custom = context.getBean(ReloadSerdeRegistry)
+        SerdeRegistry serdes = context.getBean(SerdeRegistry)
+        MockConsumer<?, ?> first = polling()
+        int consumers = MockConsumers.mine().size()
+
+        when:
+        context.publishEvent(classChange([] as Set, [new ClassChange(ReloadSerializer.name, ClassChange.Kind.MODIFIED)], ReloadStrategy.RELOAD))
+
+        then:
+        closed(first)
+        polling() != first
+        !context.getBean(ReloadSerdeRegistry).is(custom)
+        !context.getBean(SerdeRegistry).is(serdes)
+
+        and: 'one restart for the JSON registry and one for this one, as the context recreates one bean at a time'
+        restarts(consumers) == 2
 
         cleanup:
         context.close()
@@ -248,6 +326,7 @@ class KafkaReloadSpec extends Specification {
         BeanDefinition<?> definition = context.getBeanDefinition(ReloadListener)
 
         when: 'the launcher swaps the definition of the listener for another of the same class'
+        int consumers = MockConsumers.on(METHOD_TOPIC).size()
         ((DefaultBeanContext) context).notifyDefinitionChange([definition], [definition])
 
         then: 'every consumer started before is closed, and exactly one consumer polls for the listener'
@@ -256,6 +335,9 @@ class KafkaReloadSpec extends Specification {
         }
         closed(first)
         !context.getBean(ConsumerRegistry).consumerIds.isEmpty()
+
+        and: 'another listener counts the restarts: the context also gives the running processor the methods of an added definition'
+        MockConsumers.on(METHOD_TOPIC).size() - consumers == 1
 
         cleanup:
         context.close()
@@ -273,6 +355,7 @@ class KafkaReloadSpec extends Specification {
         !definition.hasStereotype(KafkaListener)
 
         when: 'the launcher swaps the definition of the method-scoped listener for another of the same class'
+        int consumers = MockConsumers.mine().size()
         ((DefaultBeanContext) context).notifyDefinitionChange([definition], [definition])
 
         then: 'every consumer started before is closed, and exactly one consumer polls for each listener'
@@ -280,6 +363,7 @@ class KafkaReloadSpec extends Specification {
         closed(methodFirst)
         polling() != first
         conditions.eventually { assert MockConsumers.on(METHOD_TOPIC).findAll { !it.closed() }.size() == 1 }
+        restarts(consumers) == 1
 
         cleanup:
         context.close()
@@ -398,6 +482,12 @@ class KafkaReloadSpec extends Specification {
         context.close()
     }
 
+    // the processor creates and subscribes its consumers as the context creates it, before the change returns, so
+    // the consumers created since count the restarts, whichever of them were closed again at once
+    private static int restarts(int consumersBefore) {
+        return MockConsumers.mine().size() - consumersBefore
+    }
+
     // a consumer closes as its poll loop ends, which a consumer that never polled may reach after the processor is destroyed
     private boolean closed(MockConsumer<?, ?> consumer) {
         conditions.eventually { assert consumer.closed() }
@@ -423,9 +513,9 @@ class KafkaReloadSpec extends Specification {
         return true
     }
 
-    private static ApplicationContext devContext(boolean track) {
+    private static ApplicationContext devContext(boolean track, Map<String, Object> properties = [:]) {
         return ApplicationContext.builder()
-            .properties(kafkaProperties() + ['micronaut.dev.enabled': true])
+            .properties(kafkaProperties() + properties + ['micronaut.dev.enabled': true])
             .beanDependencyTrackingEnabled(track)
             .start()
     }
@@ -513,6 +603,16 @@ class ReloadSerializer implements org.apache.kafka.common.serialization.Serializ
     @Override
     byte[] serialize(String topic, String data) {
         return data?.bytes
+    }
+}
+
+@Singleton
+@Requires(property = 'spec.name', value = 'KafkaReloadSpec')
+@Requires(property = 'spec.custom-registry')
+class ReloadSerdeRegistry implements SerdeRegistry {
+    @Override
+    <T> org.apache.kafka.common.serialization.Serde<T> getSerde(Class<T> type) {
+        return null
     }
 }
 

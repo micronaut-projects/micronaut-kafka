@@ -22,6 +22,7 @@ import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.micronaut.configuration.kafka.serde.CompositeSerdeRegistry;
 import io.micronaut.configuration.kafka.serde.SerdeRegistry;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.BeanContext;
@@ -437,6 +438,14 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
             }
         }
         if (typeCaches) {
+            // the composite received the other serde registries: the first of them destroys it and the processor, and
+            // recreating it before them would restart the consumers once more. Each further custom registry still
+            // does, as the context recreates one bean at a time and has no way to recreate them as a batch
+            for (BeanRegistration<SerdeRegistry> registration : beanContext.getActiveBeanRegistrations(SerdeRegistry.class)) {
+                if (!(registration.bean() instanceof CompositeSerdeRegistry)) {
+                    add(beans, registration.bean());
+                }
+            }
             for (Class<?> type : TYPE_CACHES) {
                 for (BeanRegistration<?> registration : beanContext.getActiveBeanRegistrations(type)) {
                     add(beans, registration.bean());
