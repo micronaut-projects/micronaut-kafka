@@ -21,20 +21,20 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Internal integration point that lets an observability module observe the full processing
- * lifecycle of a single consumed {@link ConsumerRecord}, from the first delivery attempt through
- * to the record's terminal outcome (successful processing, or terminal failure once retries are
- * exhausted / the exception is not retryable).
+ * Internal integration point that lets an observability module observe the processing lifecycle of a
+ * single consumed {@link ConsumerRecord}, from the first delivery attempt through to the record's
+ * terminal outcome (successful processing, or terminal failure once retries are exhausted / the
+ * exception is not retryable).
  *
- * <p>The consumer processor invokes {@link #onStart} once when a record is first processed and keeps
- * the returned handle across blocking retries of that same Kafka record. Around every individual
- * processing attempt (the first delivery and each blocking retry) it brackets the listener invocation
- * with {@link #onAttemptStart} and {@link #onAttemptEnd}, allowing the observation to be made the
- * current context for that attempt only and to be cleared again before any retry delay. When the
- * record reaches its terminal outcome it invokes exactly one of {@link #onSuccess} or
- * {@link #onError}. This is deliberately different from {@link ConsumerRecordInterceptor}, which fires
- * per delivery attempt before listener binding and therefore cannot observe the terminal outcome of a
- * record.</p>
+ * <p>The consumer processor invokes {@link #onStart} when it starts handling a record and keeps the
+ * returned handle across blocking retries of that same Kafka record. Around every individual processing
+ * attempt (the first delivery and each blocking retry) it brackets the listener invocation and any
+ * handling of its failure with {@link #onAttemptStart} and {@link #onAttemptEnd}, allowing the
+ * observation to be made the current context for that attempt only and to be cleared again before any
+ * retry delay. Each observation then ends with exactly one of {@link #onSuccess} or {@link #onError},
+ * after the attempt has ended. This is deliberately different from {@link ConsumerRecordInterceptor},
+ * which fires per delivery attempt before listener binding and therefore cannot observe the terminal
+ * outcome of a record.</p>
  *
  * <p>A successful non-blocking retry-topic dispatch is treated as the terminal outcome of the source
  * record's delivery ({@link #onError}): the failed record has been handed off to a separate retry
@@ -42,9 +42,13 @@ import org.jspecify.annotations.Nullable;
  * single observation spans all <em>blocking</em> attempts of one consumed Kafka record, not a
  * distributed retry-topic pipeline.</p>
  *
- * <p>All callbacks are invoked fail-open by the processor: an exception thrown by any method here is
- * caught and logged, and never alters Kafka delivery semantics (listener invocation, retries, offset
- * commits, or dead-letter publishing).</p>
+ * <p>Only listeners that consume single records are observed: batch listeners receive no callbacks.
+ * Failures to publish a listener result to its {@code @SendTo} destination are reported only if they are
+ * known when the listener invocation returns; a failure the producer reports later is not.</p>
+ *
+ * <p>All callbacks are invoked fail-open by the processor: an exception or linkage error thrown by any
+ * method here is caught and logged, and never alters Kafka delivery semantics (listener invocation,
+ * retries, offset commits, or dead-letter publishing).</p>
  *
  * <p>This type is marked {@link Internal} on purpose: it exists to support the framework's own
  * Micrometer Observation integration and is not a stable, user-facing extension API. The signature
@@ -52,17 +56,23 @@ import org.jspecify.annotations.Nullable;
  * Micronaut Kafka does not gain a dependency on any observability library.</p>
  *
  * @author Sagar Kharab
- * @since 6.2.1
+ * @since 6.3.0
  */
 @Internal
 public interface KafkaConsumerProcessingObserver {
 
     /**
-     * Invoked when a consumed record starts processing for the first time. On subsequent blocking
-     * retries of the same record the processor reuses the handle returned here rather than starting
-     * again, so implementations should treat this as "the record's processing has begun". The opt-out
-     * decision (a {@code null} return) is also remembered for the lifetime of the record, so this is
-     * never called more than once per consumed record.
+     * Invoked when a new observation of a consumed record starts. On subsequent blocking retries of the
+     * same record the processor reuses the handle returned here rather than starting again, so
+     * implementations should treat this as "the record's processing has begun". The opt-out decision (a
+     * {@code null} return) is remembered in the same way.
+     *
+     * <p>This is called once per observation, which is not always once per record: a record that is
+     * delivered again after its observation ended, for example when a partition paused by
+     * {@code stopOnExhaustedRetry} is resumed or a revoked partition is assigned back, starts a new one.</p>
+     *
+     * <p>A record that failed to deserialize while polling is passed with a {@code null} key and value
+     * and no headers.</p>
      *
      * @param record   the record about to be processed
      * @param clientId the Micronaut Kafka client id of the consumer
@@ -87,9 +97,10 @@ public interface KafkaConsumerProcessingObserver {
     Object onAttemptStart(@NonNull Object handle);
 
     /**
-     * Invoked once per processing attempt, after the listener invocation has completed whether it
-     * returned normally or threw, so that any per-attempt context opened by {@link #onAttemptStart} is
-     * cleared before a retry delay. It does not signal the record's terminal outcome.
+     * Invoked once per processing attempt for which {@link #onAttemptStart} returned a token, after the
+     * listener invocation and the handling of any failure (exception handler, dead-letter or retry-topic
+     * publishing), so that any per-attempt context opened by {@link #onAttemptStart} is cleared before a
+     * retry delay. It does not signal the record's terminal outcome.
      *
      * @param attempt the token previously returned by {@link #onAttemptStart}
      */
@@ -103,12 +114,15 @@ public interface KafkaConsumerProcessingObserver {
     void onSuccess(@NonNull Object handle);
 
     /**
-     * Invoked once when the record has reached a terminal failure and will not be retried: retries
-     * exhausted, the retry strategy stopped on the paused partition, the exception is not retryable, or
-     * the failed record was handed off to a non-blocking retry topic. It is also invoked, with a
+     * Invoked once when the observation of a record ends in failure: retries exhausted, the retry strategy
+     * stopped on the paused partition, the exception is not retryable, the failed record was handed off to
+     * a non-blocking retry topic, or the listener result could not be published to its destination. If the
+     * record is delivered again later, that starts a new observation (see {@link #onStart}).
+     *
+     * <p>It is also invoked, with a
      * {@link io.micronaut.configuration.kafka.exceptions.KafkaListenerException}, when this consumer
-     * abandons a record before its terminal outcome because the partition was revoked or the consumer
-     * stopped; whichever consumer processes the record next starts a new observation.
+     * abandons a record before its terminal outcome: the partition was revoked, the consumer stopped, the
+     * partition moved to another offset, or an interceptor skipped the record on a retry.</p>
      *
      * @param handle the handle previously returned by {@link #onStart}
      * @param error  the terminal error

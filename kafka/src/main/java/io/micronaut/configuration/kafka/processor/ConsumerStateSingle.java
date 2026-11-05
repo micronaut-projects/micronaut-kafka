@@ -60,20 +60,26 @@ import java.util.function.Supplier;
 final class ConsumerStateSingle extends ConsumerState {
 
     /**
-     * Sentinel stored in {@link #processingObservations} when an observer opted out of a record (by
-     * returning {@code null} from {@link KafkaConsumerProcessingObserver#onStart}). A non-null marker
-     * is required because {@link Map#computeIfAbsent} does not remember a {@code null} result and would
-     * otherwise re-invoke {@code onStart} on every blocking retry of the same record.
+     * In-flight processing observations. A consumer in single mode processes at most one record of a
+     * partition at a time, so there is at most one entry per partition. The entry survives across
+     * application retries of the same record (blocking retries re-poll the same offset) and remembers an
+     * opt-out as a {@code null} handle. Only populated when a {@link KafkaConsumerProcessingObserver} bean
+     * is present and only accessed on the poll thread.
      */
-    private static final Object OPTED_OUT = new Object();
+    private final Map<TopicPartition, ObservedRecord> processingObservations = new HashMap<>();
 
     /**
-     * Handles for in-flight processing observations, keyed by record coordinates so that the handle
-     * survives across application retries of the same record (blocking retries re-poll the same
-     * offset). Only populated when a {@link KafkaConsumerProcessingObserver} bean is present. An entry
-     * may hold the opaque observer handle or the {@link #OPTED_OUT} sentinel.
+     * The terminal outcome decided for the record being handled, reported once its attempt has ended.
      */
-    private final Map<ObservedRecordKey, Object> processingObservations = new HashMap<>();
+    @Nullable
+    private PendingOutcome pendingOutcome;
+
+    /**
+     * The last failure to publish a listener result. Volatile because a producer callback can report it
+     * from a producer thread.
+     */
+    @Nullable
+    private volatile SendToFailure sendToFailure;
 
     ConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, ConsumerInfo info, Consumer<?, ?> consumer, Object consumerBean) {
         super(kafkaConsumerProcessor, info, consumer, consumerBean);
@@ -98,7 +104,15 @@ final class ConsumerStateSingle extends ConsumerState {
             // By default, seek past the record to continue consumption
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
-            resolveWithErrorStrategy(null, makeConsumerRecord(ex), ex);
+            final ConsumerRecord<?, ?> failedRecord = makeConsumerRecord(ex);
+            beginProcessingObservation(failedRecord);
+            final Object attempt = beginProcessingAttempt(failedRecord);
+            try {
+                resolveWithErrorStrategy(null, failedRecord, ex);
+            } finally {
+                endProcessingAttempt(attempt);
+                completeProcessingObservation();
+            }
             // By now, it's been decided whether this record should be retried and the exception may have been handled
             return null;
         }
@@ -165,24 +179,37 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord) {
         ConsumerRecord<?, ?> interceptedConsumerRecord = null;
         KafkaSeekOperations seek = null;
+        boolean attemptStarted = false;
+        Object attempt = null;
         try {
             interceptedConsumerRecord = kafkaConsumerProcessor.interceptRecord(info, consumerRecord);
             seek = bindRecordArguments(topic, currentOffsets);
             if (interceptedConsumerRecord != null) {
                 beginProcessingObservation(interceptedConsumerRecord);
-                final Object attempt = beginProcessingAttempt(interceptedConsumerRecord);
-                try {
-                    process(topic, interceptedConsumerRecord, consumerRecords);
-                } finally {
-                    endProcessingAttempt(attempt);
-                }
+                attempt = beginProcessingAttempt(interceptedConsumerRecord);
+                attemptStarted = true;
+                sendToFailure = null;
+                process(topic, interceptedConsumerRecord, consumerRecords);
                 succeedProcessingObservation(interceptedConsumerRecord);
+            } else {
+                // Interceptors run on every attempt, so this can skip a record that an earlier attempt failed
+                abandonProcessingObservation(consumerRecord);
             }
         } catch (Exception e) {
             final ConsumerRecord<?, ?> errorRecord = interceptedConsumerRecord != null ? interceptedConsumerRecord : consumerRecord;
+            if (!attemptStarted) {
+                // The interceptor or the argument binding failed before the listener was reached
+                beginProcessingObservation(errorRecord);
+                attempt = beginProcessingAttempt(errorRecord);
+            }
             if (handleRecordFailure(consumerRecords, iterator, errorRecord, e)) {
                 return true;
             }
+        } finally {
+            // Failure handling stays inside the attempt so that it can be correlated with the observation.
+            // It does not include the retry delay, which only pauses the partition and schedules its resume.
+            endProcessingAttempt(attempt);
+            completeProcessingObservation();
         }
         if (currentOffsets != null) {
             commitOffsets(consumerRecords, consumerRecord, currentOffsets);
@@ -318,8 +345,7 @@ final class ConsumerStateSingle extends ConsumerState {
         }
         kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         handleException(e, consumerRecords, consumerRecord);
-        // Report the terminal failure before pausing so the observation is finished rather than left
-        // dangling while the partition stays paused.
+        // The observation is finished rather than left dangling while the partition stays paused
         failProcessingObservation(consumerRecord, e);
         pause(Collections.singleton(topicPartition));
         return true;
@@ -373,13 +399,19 @@ final class ConsumerStateSingle extends ConsumerState {
         if (observer == null) {
             return;
         }
-        // Reuse the handle (or the opt-out sentinel) across application retries of the same record so
-        // the observation spans the whole message lifecycle (first attempt to terminal outcome) rather
-        // than a single attempt, and onStart is invoked at most once per record.
-        processingObservations.computeIfAbsent(observedKey(consumerRecord), key -> {
-            final Object handle = safely(() -> observer.onStart(consumerRecord, info.clientId, info.groupId));
-            return handle == null ? OPTED_OUT : handle;
-        });
+        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+        final ObservedRecord observed = processingObservations.get(topicPartition);
+        if (observed != null) {
+            if (observed.offset() == consumerRecord.offset()) {
+                // Reuse the handle (or the opt-out) across application retries of the same record so the
+                // observation spans all attempts rather than a single one
+                return;
+            }
+            // The position moved away from the observed record, for example because of a seek or a rebalance
+            notifyAbandoned(topicPartition, observed, "the partition moved to offset " + consumerRecord.offset());
+        }
+        final Object handle = safely(() -> observer.onStart(consumerRecord, info.clientId, info.groupId));
+        processingObservations.put(topicPartition, new ObservedRecord(consumerRecord.offset(), handle));
     }
 
     @Nullable
@@ -388,11 +420,11 @@ final class ConsumerStateSingle extends ConsumerState {
         if (observer == null) {
             return null;
         }
-        final Object handle = processingObservations.get(observedKey(consumerRecord));
-        if (handle == null || handle == OPTED_OUT) {
+        final ObservedRecord observed = processingObservations.get(getTopicPartition(consumerRecord));
+        if (observed == null || observed.handle() == null) {
             return null;
         }
-        return safely(() -> observer.onAttemptStart(handle));
+        return safely(() -> observer.onAttemptStart(observed.handle()));
     }
 
     private void endProcessingAttempt(@Nullable Object attempt) {
@@ -407,36 +439,71 @@ final class ConsumerStateSingle extends ConsumerState {
     }
 
     private void succeedProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
-        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
-        if (observer == null) {
-            return;
-        }
-        final Object handle = processingObservations.remove(observedKey(consumerRecord));
-        if (handle != null && handle != OPTED_OUT) {
-            safelyRun(() -> observer.onSuccess(handle));
-        }
+        final SendToFailure failure = sendToFailure;
+        sendToFailure = null;
+        final boolean failedToSend = failure != null && failure.partition().equals(getTopicPartition(consumerRecord)) && failure.offset() == consumerRecord.offset();
+        setPendingOutcome(consumerRecord, failedToSend ? failure.error() : null);
     }
 
     private void failProcessingObservation(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
-        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
-        if (observer == null) {
+        setPendingOutcome(consumerRecord, error);
+    }
+
+    private void setPendingOutcome(ConsumerRecord<?, ?> consumerRecord, @Nullable Throwable error) {
+        if (kafkaConsumerProcessor.getProcessingObserver() != null) {
+            pendingOutcome = new PendingOutcome(getTopicPartition(consumerRecord), consumerRecord.offset(), error);
+        }
+    }
+
+    /**
+     * Reports the outcome decided for the record, if any. An attempt that scheduled a retry decides none,
+     * which keeps its observation open for the next attempt.
+     */
+    private void completeProcessingObservation() {
+        final PendingOutcome outcome = pendingOutcome;
+        if (outcome == null) {
             return;
         }
-        final Object handle = processingObservations.remove(observedKey(consumerRecord));
-        if (handle != null && handle != OPTED_OUT) {
+        pendingOutcome = null;
+        final ObservedRecord observed = processingObservations.get(outcome.partition());
+        if (observed == null || observed.offset() != outcome.offset()) {
+            return;
+        }
+        processingObservations.remove(outcome.partition());
+        final Object handle = observed.handle();
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (handle == null || observer == null) {
+            return;
+        }
+        final Throwable error = outcome.error();
+        if (error == null) {
+            safelyRun(() -> observer.onSuccess(handle));
+        } else {
             safelyRun(() -> observer.onError(handle, error));
         }
     }
 
     @Override
+    protected void onSendToError(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        sendToFailure = new SendToFailure(getTopicPartition(consumerRecord), consumerRecord.offset(), error);
+    }
+
+    @Override
     protected void onAssignmentsRevoked(Set<TopicPartition> revokedPartitions) {
-        abandonProcessingObservations(key -> revokedPartitions.contains(new TopicPartition(key.topic(), key.partition())),
-            "partition was revoked");
+        abandonProcessingObservations(revokedPartitions::contains, "partition was revoked");
     }
 
     @Override
     protected void onPollLoopExit() {
-        abandonProcessingObservations(key -> true, "consumer stopped");
+        abandonProcessingObservations(partition -> true, "consumer stopped");
+    }
+
+    private void abandonProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+        final ObservedRecord observed = processingObservations.remove(topicPartition);
+        if (observed != null) {
+            notifyAbandoned(topicPartition, observed, "an interceptor skipped the record");
+        }
     }
 
     /**
@@ -444,38 +511,43 @@ final class ConsumerStateSingle extends ConsumerState {
      * for a blocking retry, so that they are not left open. Another consumer that is assigned the
      * partition starts its own observation when it processes the record.
      */
-    private void abandonProcessingObservations(Predicate<ObservedRecordKey> released, String reason) {
+    private void abandonProcessingObservations(Predicate<TopicPartition> released, String reason) {
         if (processingObservations.isEmpty()) {
             return;
         }
-        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
-        final Iterator<Map.Entry<ObservedRecordKey, Object>> entries = processingObservations.entrySet().iterator();
+        final Iterator<Map.Entry<TopicPartition, ObservedRecord>> entries = processingObservations.entrySet().iterator();
         while (entries.hasNext()) {
-            final Map.Entry<ObservedRecordKey, Object> entry = entries.next();
+            final Map.Entry<TopicPartition, ObservedRecord> entry = entries.next();
             if (!released.test(entry.getKey())) {
                 continue;
             }
             entries.remove();
-            final Object handle = entry.getValue();
-            if (observer != null && handle != OPTED_OUT) {
-                final ObservedRecordKey key = entry.getKey();
-                final KafkaListenerException error = new KafkaListenerException(
-                    "Processing of the record was abandoned before completion: " + reason,
-                    consumerBean, kafkaConsumer, new ConsumerRecord<>(key.topic(), key.partition(), key.offset(), null, null));
-                safelyRun(() -> observer.onError(handle, error));
-            }
+            notifyAbandoned(entry.getKey(), entry.getValue(), reason);
         }
+    }
+
+    private void notifyAbandoned(TopicPartition topicPartition, ObservedRecord observed, String reason) {
+        final Object handle = observed.handle();
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (handle == null || observer == null) {
+            return;
+        }
+        final KafkaListenerException error = new KafkaListenerException(
+            "Processing of the record was abandoned before completion: " + reason,
+            consumerBean, kafkaConsumer, new ConsumerRecord<>(topicPartition.topic(), topicPartition.partition(), observed.offset(), null, null));
+        safelyRun(() -> observer.onError(handle, error));
     }
 
     /**
      * Invokes an observer callback fail-open: any exception is caught and logged so that telemetry
-     * never alters Kafka delivery semantics (listener invocation, retries, offset commits, DLQ).
+     * never alters Kafka delivery semantics (listener invocation, retries, offset commits, DLQ). Linkage
+     * errors are included because the observer ships in a separately versioned module.
      */
     @Nullable
     private static <T> T safely(Supplier<T> callback) {
         try {
             return callback.get();
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             LOG.warn("Kafka processing observer threw an exception and was ignored", e);
             return null;
         }
@@ -488,10 +560,12 @@ final class ConsumerStateSingle extends ConsumerState {
         });
     }
 
-    private static ObservedRecordKey observedKey(ConsumerRecord<?, ?> consumerRecord) {
-        return new ObservedRecordKey(consumerRecord.topic(), consumerRecord.partition(), consumerRecord.offset());
+    private record ObservedRecord(long offset, @Nullable Object handle) {
     }
 
-    private record ObservedRecordKey(String topic, int partition, long offset) {
+    private record PendingOutcome(TopicPartition partition, long offset, @Nullable Throwable error) {
+    }
+
+    private record SendToFailure(TopicPartition partition, long offset, Throwable error) {
     }
 }

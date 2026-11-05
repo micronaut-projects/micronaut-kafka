@@ -272,6 +272,18 @@ abstract class ConsumerState {
         // no-op by default
     }
 
+    /**
+     * Invoked when publishing a listener result to its destination fails. The failure is handled without
+     * failing the record, so this is the only signal of it. A producer callback can invoke this on a
+     * producer thread.
+     *
+     * @param consumerRecord the record whose result could not be published
+     * @param error          the publishing failure
+     */
+    protected void onSendToError(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        // no-op by default
+    }
+
     private void holdStartup() throws InterruptedException {
         if (startupLatch != null) {
             startupLatch.await();
@@ -604,6 +616,7 @@ abstract class ConsumerState {
     }
 
     private Publisher<RecordMetadata> handleSendToError(String topic, Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+        onSendToError(consumerRecord, error);
         handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.methodForTopic(topic) + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
 
         if (!info.shouldRedeliver) {

@@ -7,10 +7,13 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException
+import io.micronaut.context.BeanContext
+import io.micronaut.context.exceptions.BeanInstantiationException
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.core.type.Argument
 import io.micronaut.core.type.ReturnType
 import io.micronaut.inject.ExecutableMethod
+import io.micronaut.messaging.annotation.SendTo
 import io.micronaut.messaging.exceptions.MessagingSystemException
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -20,6 +23,7 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.RecordDeserializationException
+import org.apache.kafka.common.errors.SerializationException
 import spock.lang.Specification
 
 import java.lang.reflect.Method
@@ -560,7 +564,7 @@ class ConsumerStateSingleSpec extends Specification {
         0 * observer.onSuccess(_)
     }
 
-    void "stop on exhausted retry reports a terminal error before pausing the partition"() {
+    void "stop on exhausted retry reports a terminal error and pauses the partition"() {
         given:
         TopicPartition topicPartition = new TopicPartition('source-topic', 2)
         ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
@@ -584,7 +588,6 @@ class ConsumerStateSingleSpec extends Specification {
             kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1, [], [], true),
             executableMethod { throw new IllegalStateException('boom') }
         )
-        Boolean pauseRequestedWhenErrorReported = null
 
         when:
         consumerState.processRecords(consumerRecords, [:])
@@ -592,13 +595,10 @@ class ConsumerStateSingleSpec extends Specification {
 
         then:
         1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
-        1 * observer.onError(handle, { it instanceof IllegalStateException }) >> {
-            pauseRequestedWhenErrorReported = pauseRequests(consumerState)?.contains(topicPartition) ?: false
-        }
+        1 * observer.onError(handle, { it instanceof IllegalStateException })
         0 * observer.onSuccess(_)
 
-        and: 'the terminal error is reported before the partition pause is requested'
-        pauseRequestedWhenErrorReported == false
+        and: 'the observation is not left open while the partition stays paused'
         pauseRequests(consumerState) == [topicPartition] as Set
     }
 
@@ -789,6 +789,325 @@ class ConsumerStateSingleSpec extends Specification {
         noExceptionThrown()
     }
 
+    void "failure handling runs inside the attempt and the terminal error follows it"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        def scope = new Object()
+        Producer<?, ?> kafkaProducer = Mock(Producer)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            getProducer(_, _, _) >> kafkaProducer
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(LOG_AND_RESUME_AT_NEXT_RECORD),
+            executableMethod { throw new IllegalStateException('boom') }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
+
+        then:
+        1 * observer.onAttemptStart(handle) >> scope
+
+        then:
+        1 * kafkaProducer.send(_) >> CompletableFuture.completedFuture(null)
+
+        then:
+        1 * kafkaConsumerProcessor.handleException(_, _)
+
+        then:
+        1 * observer.onAttemptEnd(scope)
+
+        then:
+        1 * observer.onError(handle, { it instanceof IllegalStateException })
+    }
+
+    void "an interceptor skipping a retried record ends its observation"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+            interceptRecord(_, _ as ConsumerRecord) >>> [consumerRecord, null]
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        AtomicInteger invocations = new AtomicInteger()
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1),
+            executableMethod {
+                invocations.incrementAndGet()
+                throw new IllegalStateException('boom')
+            }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        invocations.get() == 1
+        1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
+        1 * observer.onError(handle, { it instanceof KafkaListenerException && it.message.contains('interceptor') })
+        0 * observer.onSuccess(_)
+    }
+
+    void "an interceptor filtering a record that was never attempted is not observed"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            interceptRecord(_, _ as ConsumerRecord) >> null
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null),
+            executableMethod { null }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        0 * observer._
+    }
+
+    void "an interceptor failure before the listener is reached is observed"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        def scope = new Object()
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            interceptRecord(_, _ as ConsumerRecord) >> { throw new IllegalStateException('interceptor boom') }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null),
+            executableMethod { null }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
+        1 * observer.onAttemptStart(handle) >> scope
+        1 * observer.onAttemptEnd(scope)
+        1 * observer.onError(handle, { it instanceof IllegalStateException })
+        0 * observer.onSuccess(_)
+    }
+
+    void "a poll-time deserialization failure is observed"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('books', 1)
+        RecordDeserializationException exception = new RecordDeserializationException(
+            topicPartition,
+            4L,
+            'boom',
+            new IllegalStateException('deserialization failed')
+        )
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+            poll(_ as Duration) >> { throw exception }
+        }
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getProcessingObserver() >> observer
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(kafkaConsumerProcessor, kafkaConsumer, OffsetStrategy.DISABLED, kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null), executableMethod())
+
+        when:
+        consumerState.pollRecords(null)
+
+        then:
+        1 * observer.onStart({ it.topic() == 'books' && it.partition() == 1 && it.offset() == 4L && it.value() == null }, 'client', 'group') >> handle
+        1 * observer.onError(handle, { it.is(exception) })
+        0 * observer.onSuccess(_)
+    }
+
+    void "a failure to publish the listener result is reported as a terminal error"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        Producer<?, ?> kafkaProducer = Mock(Producer) {
+            send(_, _) >> { throw new SerializationException('boom') }
+        }
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            getProducer(_, _, _) >> kafkaProducer
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null),
+            executableMethod(Argument.ZERO_ARGUMENTS, { 'result' }, ['replies'] as String[])
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
+        1 * kafkaConsumerProcessor.handleException(_, _)
+        1 * observer.onError(handle, { it instanceof SerializationException })
+        0 * observer.onSuccess(_)
+    }
+
+    void "a partition moving past a record waiting for a blocking retry ends its observation"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecords<?, ?> firstRecords = new ConsumerRecords<>([(topicPartition): [new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')]])
+        ConsumerRecords<?, ?> laterRecords = new ConsumerRecords<>([(topicPartition): [new ConsumerRecord<>('source-topic', 2, 8L, 'key', 'value')]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def waiting = new Object()
+        def later = new Object()
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            scheduleTask(_, _) >> { Duration retryDelay, Runnable task -> }
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        AtomicInteger attempts = new AtomicInteger()
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RETRY_ON_ERROR, null, 1),
+            executableMethod {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new IllegalStateException('boom')
+                }
+                null
+            }
+        )
+
+        when:
+        consumerState.processRecords(firstRecords, [:])
+        consumerState.processRecords(laterRecords, [:])
+
+        then:
+        2 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >>> [waiting, later]
+        1 * observer.onError(waiting, { it instanceof KafkaListenerException && it.message.contains('moved to offset 8') && it.consumerRecord.get().offset() == 7L })
+        1 * observer.onSuccess(later)
+        0 * observer.onError(later, _)
+    }
+
+    void "a linkage error from the observer does not stop the listener or change its failure handling"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('source-topic', 2)
+        ConsumerRecord<?, ?> consumerRecord = new ConsumerRecord<>('source-topic', 2, 7L, 'key', 'value')
+        ConsumerRecords<?, ?> consumerRecords = new ConsumerRecords<>([(topicPartition): [consumerRecord]])
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        def handle = new Object()
+        def scope = new Object()
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getBinderRegistry() >> Stub(ConsumerRecordBinderRegistry)
+            getProcessingObserver() >> observer
+            interceptRecord(_, _ as ConsumerRecord) >> { ConsumerInfo ignored, ConsumerRecord<?, ?> record -> record }
+        }
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+        }
+        AtomicInteger invocations = new AtomicInteger()
+        ConsumerStateSingle consumerState = newConsumerStateSingle(
+            kafkaConsumerProcessor,
+            kafkaConsumer,
+            OffsetStrategy.DISABLED,
+            kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null),
+            executableMethod {
+                invocations.incrementAndGet()
+                throw new IllegalStateException('boom')
+            }
+        )
+
+        when:
+        consumerState.processRecords(consumerRecords, [:])
+
+        then:
+        noExceptionThrown()
+        invocations.get() == 1
+        1 * observer.onStart(_ as ConsumerRecord, 'client', 'group') >> handle
+        1 * observer.onAttemptStart(handle) >> scope
+        1 * observer.onAttemptEnd(scope) >> { throw new NoClassDefFoundError('missing') }
+        1 * kafkaConsumerProcessor.handleException(_, { it.cause instanceof IllegalStateException })
+        1 * observer.onError(handle, { it instanceof IllegalStateException }) >> { throw new NoSuchMethodError('missing') }
+    }
+
+    void "the observer lookup is fail-open"() {
+        given:
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        BeanContext present = Mock(BeanContext) {
+            findBean(KafkaConsumerProcessingObserver) >> Optional.of(observer)
+        }
+        BeanContext failing = Mock(BeanContext) {
+            findBean(KafkaConsumerProcessingObserver) >> { throw new BeanInstantiationException('boom') }
+        }
+        BeanContext linkageFailing = Mock(BeanContext) {
+            findBean(KafkaConsumerProcessingObserver) >> { throw new NoClassDefFoundError('missing') }
+        }
+
+        expect:
+        KafkaConsumerProcessor.resolveProcessingObserver(present).get().is(observer)
+        KafkaConsumerProcessor.resolveProcessingObserver(failing).empty
+        KafkaConsumerProcessor.resolveProcessingObserver(linkageFailing).empty
+    }
+
     private static Consumer createConsumer(List<TopicPartition> seeks, List<Long> offsets) {
         Proxy.newProxyInstance(
             ConsumerStateSingleSpec.classLoader,
@@ -956,7 +1275,7 @@ class ConsumerStateSingleSpec extends Specification {
         executableMethod(Argument.ZERO_ARGUMENTS, invocation)
     }
 
-    private ExecutableMethod<?, ?> executableMethod(Argument[] arguments, Closure<?> invocation) {
+    private ExecutableMethod<?, ?> executableMethod(Argument[] arguments, Closure<?> invocation, String[] sendTo = [] as String[]) {
         ReturnType<?> returnType = Stub() {
             getType() >> void
             isAsyncOrReactive() >> false
@@ -965,10 +1284,10 @@ class ConsumerStateSingleSpec extends Specification {
         Proxy.newProxyInstance(
             ConsumerStateSingleSpec.classLoader,
             [ExecutableMethod] as Class<?>[],
-             { _, method, args ->
-                 switch (method.name) {
-                     case 'getDeclaringType':
-                         return TestListener
+            { _, method, args ->
+                switch (method.name) {
+                    case 'getDeclaringType':
+                        return TestListener
                     case 'getName':
                         return 'receive'
                     case 'isTrue':
@@ -980,7 +1299,7 @@ class ConsumerStateSingleSpec extends Specification {
                     case 'getArguments':
                         return arguments
                     case 'stringValues':
-                        return [] as String[]
+                        return args[0] == SendTo ? sendTo : [] as String[]
                     case 'getDeclaredAnnotationValuesByType':
                         return []
                     case 'getReturnType':

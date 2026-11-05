@@ -210,7 +210,7 @@ class KafkaConsumerProcessor
         this.kafkaConsumerSubscribedEventPublisher = subscribedEventPublisher;
         this.conditionalRetryBehaviourHandler = conditionalRetryBehaviourHandler;
         this.kafkaCustomScopeSupplier = SupplierUtil.memoized(() -> beanContext.findBean(KafkaCustomScope.class));
-        this.processingObserverSupplier = SupplierUtil.memoized(() -> beanContext.findBean(KafkaConsumerProcessingObserver.class));
+        this.processingObserverSupplier = SupplierUtil.memoized(() -> resolveProcessingObserver(beanContext));
         this.beanContext.getBeanDefinitions(Qualifiers.byType(KafkaListener.class))
                 .forEach(definition -> {
                     // pre-initialize singletons before processing
@@ -467,6 +467,22 @@ class KafkaConsumerProcessor
 
     ConsumerRecordBinderRegistry getBinderRegistry() {
         return binderRegistry;
+    }
+
+    /**
+     * Resolves the optional processing observer fail-open: telemetry that cannot be set up, for example
+     * because the observer bean cannot be created or is not unique, must not stop records being processed.
+     *
+     * @param beanContext the bean context
+     * @return the observer, or empty if there is none or it cannot be resolved
+     */
+    static Optional<KafkaConsumerProcessingObserver> resolveProcessingObserver(BeanContext beanContext) {
+        try {
+            return beanContext.findBean(KafkaConsumerProcessingObserver.class);
+        } catch (RuntimeException | LinkageError e) {
+            LOG.warn("Failed to resolve the Kafka processing observer, records will not be observed", e);
+            return Optional.empty();
+        }
     }
 
     /**
