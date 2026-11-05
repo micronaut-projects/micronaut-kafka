@@ -99,12 +99,15 @@ class OKafkaPauseTest {
     void aPausedConsumerFetchesNothingAndLosesNoRecord() throws Exception {
         ConsumerRegistry registry = context.getBean(ConsumerRegistry.class);
         PauseListener listener = context.getBean(PauseListener.class);
-        await().atMost(120, SECONDS).until(() -> registry.getConsumerAssignment(CONSUMER).size() == 2);
 
         try (Producer<String, String> producer = new KafkaProducer<>(clientProperties, new StringSerializer(), new StringSerializer())) {
+            // OKafka only lists a partition in its assignment once records have been sent to it
+            producer.send(new ProducerRecord<>(TOPIC, 0, "key", "before-0")).get();
             producer.send(new ProducerRecord<>(TOPIC, 1, "key", "before")).get();
             producer.flush();
-            await().atMost(60, SECONDS).until(() -> listener.received.contains("before"));
+            await().atMost(120, SECONDS).until(() -> listener.received.contains("before") && listener.received.contains("before-0"));
+            await().atMost(60, SECONDS).ignoreException(IllegalArgumentException.class).until(() -> registry.getConsumerAssignment(CONSUMER).size() == 2);
+            listener.received.remove("before-0");
 
             registry.pause(CONSUMER, List.of(PARTITION_0));
             await().atMost(30, SECONDS).until(() -> registry.isPaused(CONSUMER, List.of(PARTITION_0)));
