@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -75,11 +76,10 @@ final class ConsumerStateSingle extends ConsumerState {
     private PendingOutcome pendingOutcome;
 
     /**
-     * The last failure to publish a listener result. Volatile because a producer callback can report it
+     * The last failure to publish a listener result. Atomic because a producer callback can report it
      * from a producer thread.
      */
-    @Nullable
-    private volatile SendToFailure sendToFailure;
+    private final AtomicReference<@Nullable SendToFailure> sendToFailure = new AtomicReference<>();
 
     ConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, ConsumerInfo info, Consumer<?, ?> consumer, Object consumerBean) {
         super(kafkaConsumerProcessor, info, consumer, consumerBean);
@@ -188,7 +188,7 @@ final class ConsumerStateSingle extends ConsumerState {
                 beginProcessingObservation(interceptedConsumerRecord);
                 attempt = beginProcessingAttempt(interceptedConsumerRecord);
                 attemptStarted = true;
-                sendToFailure = null;
+                sendToFailure.set(null);
                 process(topic, interceptedConsumerRecord, consumerRecords);
                 succeedProcessingObservation(interceptedConsumerRecord);
             } else {
@@ -439,8 +439,7 @@ final class ConsumerStateSingle extends ConsumerState {
     }
 
     private void succeedProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
-        final SendToFailure failure = sendToFailure;
-        sendToFailure = null;
+        final SendToFailure failure = sendToFailure.getAndSet(null);
         final boolean failedToSend = failure != null && failure.partition().equals(getTopicPartition(consumerRecord)) && failure.offset() == consumerRecord.offset();
         setPendingOutcome(consumerRecord, failedToSend ? failure.error() : null);
     }
@@ -485,7 +484,7 @@ final class ConsumerStateSingle extends ConsumerState {
 
     @Override
     protected void onSendToError(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
-        sendToFailure = new SendToFailure(getTopicPartition(consumerRecord), consumerRecord.offset(), error);
+        sendToFailure.set(new SendToFailure(getTopicPartition(consumerRecord), consumerRecord.offset(), error));
     }
 
     @Override
