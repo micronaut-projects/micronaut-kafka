@@ -246,8 +246,42 @@ abstract class ConsumerState {
             // Closing a Kafka consumer relies on wakeup to break a blocked poll.
             LOG.debug("Consumer {} woken up during shutdown", info.clientId);
         } finally {
-            closeComplete();
+            try {
+                onPollLoopExit();
+            } finally {
+                closeComplete();
+            }
         }
+    }
+
+    /**
+     * Invoked on the poll thread when this consumer stops polling, so that per-record state that will
+     * never be completed by this consumer can be released.
+     */
+    protected void onPollLoopExit() {
+        // no-op by default
+    }
+
+    /**
+     * Invoked on the poll thread when partitions are no longer assigned to this consumer (revoked or
+     * lost in a rebalance), so that per-record state for those partitions can be released.
+     *
+     * @param revokedPartitions the partitions that are no longer assigned
+     */
+    protected void onAssignmentsRevoked(Set<TopicPartition> revokedPartitions) {
+        // no-op by default
+    }
+
+    /**
+     * Invoked when publishing a listener result to its destination fails. The failure is handled without
+     * failing the record, so this is the only signal of it. A producer callback can invoke this on a
+     * producer thread.
+     *
+     * @param consumerRecord the record whose result could not be published
+     * @param error          the publishing failure
+     */
+    protected void onSendToError(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        // no-op by default
     }
 
     private void holdStartup() throws InterruptedException {
@@ -281,7 +315,12 @@ abstract class ConsumerState {
         final Set<TopicPartition> newAssignments = kafkaConsumer.assignment();
         if (!newAssignments.equals(assignments)) {
             LOG.info("Consumer [{}] assignments changed: {} -> {}", info.clientId, assignments, newAssignments);
+            final Set<TopicPartition> revokedPartitions = new HashSet<>(assignments);
+            revokedPartitions.removeAll(newAssignments);
             assignments = Collections.unmodifiableSet(newAssignments);
+            if (!revokedPartitions.isEmpty()) {
+                onAssignmentsRevoked(revokedPartitions);
+            }
         }
     }
 
@@ -577,6 +616,7 @@ abstract class ConsumerState {
     }
 
     private Publisher<RecordMetadata> handleSendToError(String topic, Throwable error, ConsumerRecords<?, ?> consumerRecords, ConsumerRecord<?, ?> consumerRecord) {
+        onSendToError(consumerRecord, error);
         handleException("Error occurred processing record [" + consumerRecord + "] with Kafka reactive consumer [" + info.methodForTopic(topic) + "]: " + error.getMessage(), error, consumerRecords, consumerRecord);
 
         if (!info.shouldRedeliver) {
