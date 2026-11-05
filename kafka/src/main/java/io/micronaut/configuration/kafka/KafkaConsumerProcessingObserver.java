@@ -71,8 +71,9 @@ public interface KafkaConsumerProcessingObserver {
      * delivered again after its observation ended, for example when a partition paused by
      * {@code stopOnExhaustedRetry} is resumed or a revoked partition is assigned back, starts a new one.</p>
      *
-     * <p>A record that failed to deserialize while polling is passed with a {@code null} key and value
-     * and no headers.</p>
+     * <p>A record that failed to deserialize while polling is passed with a {@code null} key and value.
+     * It has the headers and timestamp of the failed record if the Kafka client reports them, and
+     * otherwise no headers and no timestamp.</p>
      *
      * @param record   the record about to be processed
      * @param clientId the Micronaut Kafka client id of the consumer

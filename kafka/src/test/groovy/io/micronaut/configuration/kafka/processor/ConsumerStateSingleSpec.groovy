@@ -24,6 +24,9 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.RecordDeserializationException
 import org.apache.kafka.common.errors.SerializationException
+import org.apache.kafka.common.header.internals.RecordHeader
+import org.apache.kafka.common.header.internals.RecordHeaders
+import org.apache.kafka.common.record.TimestampType
 import spock.lang.Specification
 
 import java.lang.reflect.Method
@@ -964,9 +967,49 @@ class ConsumerStateSingleSpec extends Specification {
         consumerState.pollRecords(null)
 
         then:
-        1 * observer.onStart({ it.topic() == 'books' && it.partition() == 1 && it.offset() == 4L && it.value() == null }, 'client', 'group') >> handle
+        1 * observer.onStart({ it.topic() == 'books' && it.partition() == 1 && it.offset() == 4L && it.value() == null && it.headers().toArray().length == 0 && it.timestamp() == ConsumerRecord.NO_TIMESTAMP }, 'client', 'group') >> handle
         1 * observer.onError(handle, { it.is(exception) })
         0 * observer.onSuccess(_)
+    }
+
+    void "a poll-time deserialization failure is observed with the headers and timestamp of the failed record"() {
+        given:
+        TopicPartition topicPartition = new TopicPartition('books', 1)
+        RecordHeaders headers = new RecordHeaders([new RecordHeader('traceparent', 'trace'.bytes)])
+        RecordDeserializationException exception = new RecordDeserializationException(
+            RecordDeserializationException.DeserializationExceptionOrigin.VALUE,
+            topicPartition,
+            4L,
+            1234L,
+            TimestampType.CREATE_TIME,
+            null,
+            null,
+            headers,
+            'boom',
+            new IllegalStateException('deserialization failed')
+        )
+        Consumer<?, ?> kafkaConsumer = Mock(Consumer) {
+            subscription() >> Collections.emptySet()
+            poll(_ as Duration) >> { throw exception }
+        }
+        KafkaConsumerProcessingObserver observer = Mock(KafkaConsumerProcessingObserver)
+        KafkaConsumerProcessor kafkaConsumerProcessor = Mock(KafkaConsumerProcessor) {
+            getProcessingObserver() >> observer
+        }
+        ConsumerStateSingle consumerState = newConsumerStateSingle(kafkaConsumerProcessor, kafkaConsumer, OffsetStrategy.DISABLED, kafkaListenerAnnotation(RESUME_AT_NEXT_RECORD, null), executableMethod())
+
+        when:
+        consumerState.pollRecords(null)
+
+        then:
+        1 * observer.onStart({
+            it.offset() == 4L &&
+                it.value() == null &&
+                it.headers().lastHeader('traceparent').value() == 'trace'.bytes &&
+                it.timestamp() == 1234L &&
+                it.timestampType() == TimestampType.CREATE_TIME
+        }, 'client', 'group') >> new Object()
+        1 * kafkaConsumerProcessor.handleException(_, { it.consumerRecord.get().headers().toArray().length == 0 })
     }
 
     void "a failure to publish the listener result is reported as a terminal error"() {

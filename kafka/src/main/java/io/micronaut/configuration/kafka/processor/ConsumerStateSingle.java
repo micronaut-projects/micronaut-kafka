@@ -37,6 +37,8 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.RecordDeserializationException;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
@@ -105,8 +107,9 @@ final class ConsumerStateSingle extends ConsumerState {
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
             final ConsumerRecord<?, ?> failedRecord = makeConsumerRecord(ex);
-            beginProcessingObservation(failedRecord);
-            final Object attempt = beginProcessingAttempt(failedRecord);
+            final ConsumerRecord<?, ?> observedRecord = makeObservedRecord(ex);
+            beginProcessingObservation(observedRecord);
+            final Object attempt = beginProcessingAttempt(observedRecord);
             try {
                 resolveWithErrorStrategy(null, failedRecord, ex);
             } finally {
@@ -392,6 +395,14 @@ final class ConsumerStateSingle extends ConsumerState {
     private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
         final TopicPartition tp = ex.topicPartition();
         return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
+    }
+
+    private static ConsumerRecord<?, ?> makeObservedRecord(RecordDeserializationException ex) {
+        final TopicPartition tp = ex.topicPartition();
+        // Exceptions created without the record details have no headers, and a consumer record requires them
+        final Headers headers = ex.headers() != null ? ex.headers() : new RecordHeaders();
+        return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), ex.timestamp(), ex.timestampType(),
+            ConsumerRecord.NULL_SIZE, ConsumerRecord.NULL_SIZE, null, null, headers, Optional.empty());
     }
 
     private void beginProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
