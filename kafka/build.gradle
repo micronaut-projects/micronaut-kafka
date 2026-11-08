@@ -4,8 +4,8 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.graalvm.sdk:graal-sdk:25.4.4.1.1'
-        force 'io.micronaut.platform:micronaut-platform:5.2.4'
+        force 'org.graalvm.sdk:graal-sdk:25.5.5.0.3'
+        force 'io.micronaut.platform:micronaut-platform:5.2.5'
     }
 }
 
@@ -18,7 +18,7 @@ dependencies {
     }
     constraints {
         // "org.apache.kafka:kafka-clients 4.2.0 requests jackson-core 2.19.1, which is affected by GHSA-72hv-8253-57qq"
-        api("com.fasterxml.jackson.core:jackson-core:2.22.3") {
+        api("com.fasterxml.jackson.core:jackson-core:2.23.0") {
             because("Require a non-vulnerable jackson-core version instead of the transitive 2.19.1 from :kafka-clients")
         }
         // "org.apache.kafka:kafka-clients 4.3.1 requests lz4-java 1.10.2, which is affected by GHSA-xx22-p4ch-683r"
@@ -26,7 +26,7 @@ dependencies {
             because("Require a non-vulnerable lz4-java version instead of the transitive 1.10.2 from :kafka-clients")
         }
         // "org.apache.kafka:kafka-clients 4.3.1 requests snappy-java 1.1.10.7, which is affected by GHSA-gwq9-9ffj-mvrv, GHSA-q233-g92q-qxp6 and GHSA-xqrx-qh46-34m7"
-        api("org.xerial.snappy:snappy-java:1.1.10.9") {
+        api("org.xerial.snappy:snappy-java:1.1.10.12") {
             because("Require a non-vulnerable snappy-java version instead of the transitive 1.1.10.7 from :kafka-clients")
         }
     }
