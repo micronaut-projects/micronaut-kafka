@@ -26,7 +26,7 @@ micronaut-core = { module = 'io.micronaut:micronaut-core-bom', version.ref = 'mi
 
 managed-kafka-clients = { module = 'org.apache.kafka:kafka-clients', version.ref = 'managed-kafka' }
 managed-kafka-streams = { module = 'org.apache.kafka:kafka-streams', version.ref = 'managed-kafka' }
-lz4-java = '1.14.0'
+lz4-java = { module = 'at.yawk.lz4:lz4-java', version.ref = 'lz4-java' }
 
 opentracing-kafka-client = { module = 'io.opentracing.contrib:opentracing-kafka-client', version.ref = 'opentracing-kafka-client' }
 opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = 'opentracing-mock' }
@@ -34,8 +34,8 @@ opentracing-mock = { module = 'io.opentracing:opentracing-mock', version.ref = '
 zipkin-brave-kafka-clients = { module = 'io.zipkin.brave:brave-instrumentation-kafka-clients', version.ref = 'zipkin-brave-kafka-clients' }
 awaitility = { module = 'org.awaitility:awaitility', version.ref = 'awaitility' }
 
-micronaut-cache = "6.2.0"
-micronaut-micrometer = "6.1.2"
+micronaut-cache = { module = "io.micronaut.cache:micronaut-cache-bom", version.ref = "micronaut-cache" }
+micronaut-micrometer = { module = "io.micronaut.micrometer:micronaut-micrometer-bom", version.ref = "micronaut-micrometer" }
 micronaut-reactor = { module = "io.micronaut.reactor:micronaut-reactor-bom", version.ref = "micronaut-reactor" }
 micronaut-serde = { module = "io.micronaut.serde:micronaut-serde-bom", version.ref = "micronaut-serde" }
 micronaut-tracing = { module = "io.micronaut.tracing:micronaut-tracing-bom", version.ref = "micronaut-tracing" }
@@ -45,7 +45,7 @@ testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
 testcontainers-oracle-free = { module = "org.testcontainers:testcontainers-oracle-free" }
 okafka = { module = "com.oracle.database.messaging:okafka", version.ref = "okafka" }
 okafka-kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "okafka-kafka-clients" }
-okafka-ojdbc = '23.26.4.0.0'
+okafka-ojdbc = { module = "com.oracle.database.jdbc:ojdbc17", version.ref = "okafka-ojdbc" }
 micronaut-gradle-plugin = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle-plugin" }
 
 [plugins]
