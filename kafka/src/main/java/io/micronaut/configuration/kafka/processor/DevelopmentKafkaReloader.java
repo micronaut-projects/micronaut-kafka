@@ -42,7 +42,6 @@ import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.annotation.Internal;
 import io.micronaut.core.order.Ordered;
 import io.micronaut.inject.BeanDefinition;
-import io.micronaut.inject.BeanDefinitionReference;
 import io.micronaut.inject.BeanType;
 import io.micronaut.inject.ExecutableMethod;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -265,10 +264,20 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
         for (ClassChange classChange : change.changes()) {
             String className = classChange.className();
             Class<?> type = load(className, change.newLoader());
-            if (isListener(type) || wasCompiledWith(className, KafkaListener.class)) {
+            if (isListener(type)) {
                 listeners.add(className);
             }
-            if (isSerdeOrClient(type) || wasCompiledWith(className, KafkaClient.class) || wasSerde(className)) {
+            if (isSerdeOrClient(type)) {
+                typeCaches = true;
+            }
+        }
+        // what the beans were as the context was compiled: a change applied in place leaves the definitions as they were
+        for (BeanDefinition<?> definition : changedDefinitions(change)) {
+            String beanType = definition.getBeanType().getName();
+            if (declares(definition, KafkaListener.class) && !listeners.contains(beanType)) {
+                listeners.add(beanType);
+            }
+            if (isSerdeType(definition.getBeanType()) || declares(definition, KafkaClient.class)) {
                 typeCaches = true;
             }
         }
@@ -318,73 +327,44 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
     }
 
     /**
-     * Whether the class a change replaces carried a stereotype as the context was compiled: a bean definition of it,
-     * or of its proxy, has it on the class or an executable method. The references are matched by name, so that only
-     * the definitions of that class are loaded, and nothing of a previous class is kept.
+     * The definitions of the context built from a class of a change applied in place: its bean type or a superclass
+     * of it, the factory that declares it, or the class its advice intercepts, as the event tells.
      *
-     * @param className The changed class
-     * @param stereotype The stereotype
-     * @return Whether it was there
+     * @param change The change
+     * @return The definitions
      */
-    private boolean wasCompiledWith(String className, Class<? extends Annotation> stereotype) {
-        for (BeanDefinitionReference<?> reference : definitionsOf(className)) {
-            try {
-                if (reference.getAnnotationMetadata().hasStereotype(stereotype)) {
-                    return true;
-                }
-                BeanDefinition<?> definition = reference.load();
-                if (definition == null) {
-                    continue;
-                }
-                for (ExecutableMethod<?, ?> method : definition.getExecutableMethods()) {
-                    if (method.getAnnotationMetadata().hasStereotype(stereotype)) {
-                        return true;
-                    }
-                }
-            } catch (RuntimeException | LinkageError e) {
-                // a definition of that name that no longer loads: what it was is unknown, so it counts
-                return true;
+    private List<BeanDefinition<?>> changedDefinitions(ClassChangeEvent change) {
+        List<BeanDefinition<?>> changed = new ArrayList<>();
+        for (BeanDefinition<?> definition : beanContext.getAllBeanDefinitions()) {
+            if (change.affectsDefinition(definition)) {
+                changed.add(definition);
             }
         }
-        return false;
+        return changed;
     }
 
     /**
-     * Whether the class a change replaces was a serde or a serde registry bean as the context was compiled, or a
-     * factory that produced one: a product of a factory is defined by {@code $Factory$MethodN$Definition}, whose bean
-     * type is the product and whose declaring type is the factory.
+     * Whether a definition carries a stereotype, on the class or an executable method.
+     *
+     * @param definition The definition
+     * @param stereotype The stereotype
+     * @return Whether it is there
      */
-    private boolean wasSerde(String className) {
-        for (BeanDefinitionReference<?> reference : definitionsOf(className)) {
-            try {
-                if (isSerdeType(reference.getBeanType())) {
-                    return true;
-                }
-            } catch (RuntimeException | LinkageError e) {
+    private static boolean declares(BeanDefinition<?> definition, Class<? extends Annotation> stereotype) {
+        try {
+            if (definition.getAnnotationMetadata().hasStereotype(stereotype)) {
                 return true;
             }
-        }
-        int lastDot = className.lastIndexOf('.');
-        String products = className.substring(0, lastDot + 1) + '$' + className.substring(lastDot + 1) + '$';
-        for (BeanDefinitionReference<?> reference : beanContext.getBeanDefinitionReferences()) {
-            String name = reference.getBeanDefinitionName();
-            if (!name.startsWith(products) || !name.endsWith("$Definition")) {
-                continue;
-            }
-            try {
-                if (!isSerdeType(reference.getBeanType())) {
-                    continue;
-                }
-                // the name alone matches a nested class too: the declaring type tells the product of this factory
-                BeanDefinition<?> definition = reference.load();
-                if (definition == null || definition.getDeclaringType().map(Class::getName).filter(className::equals).isPresent()) {
+            for (ExecutableMethod<?, ?> method : definition.getExecutableMethods()) {
+                if (method.getAnnotationMetadata().hasStereotype(stereotype)) {
                     return true;
                 }
-            } catch (RuntimeException | LinkageError e) {
-                return true;
             }
+            return false;
+        } catch (RuntimeException | LinkageError e) {
+            // a method that no longer resolves: what it was is unknown, so it counts
+            return true;
         }
-        return false;
     }
 
     private static boolean isSerdeType(Class<?> beanType) {
@@ -394,21 +374,6 @@ final class DevelopmentKafkaReloader implements BeanRetentionPolicy {
             }
         }
         return false;
-    }
-
-    private List<BeanDefinitionReference<?>> definitionsOf(String className) {
-        int lastDot = className.lastIndexOf('.');
-        // $Name$Definition, the definitions of its proxies and, for an introduced interface, $Name$Intercepted$Definition
-        String prefix = className.substring(0, lastDot + 1) + '$' + className.substring(lastDot + 1);
-        String definition = prefix + "$Definition";
-        List<BeanDefinitionReference<?>> references = new ArrayList<>();
-        for (BeanDefinitionReference<?> reference : beanContext.getBeanDefinitionReferences()) {
-            String name = reference.getBeanDefinitionName();
-            if (name.equals(definition) || name.startsWith(definition + '$') || name.startsWith(prefix + "$Intercepted$Definition")) {
-                references.add(reference);
-            }
-        }
-        return references;
     }
 
     /**
