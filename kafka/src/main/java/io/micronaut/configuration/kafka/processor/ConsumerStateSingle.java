@@ -16,8 +16,10 @@
 package io.micronaut.configuration.kafka.processor;
 
 import io.micronaut.configuration.kafka.KafkaAcknowledgement;
+import io.micronaut.configuration.kafka.KafkaConsumerProcessingObserver;
 import io.micronaut.configuration.kafka.annotation.ErrorStrategyValue;
 import io.micronaut.configuration.kafka.annotation.OffsetStrategy;
+import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.OffsetCommitExceptionLogger;
 import io.micronaut.configuration.kafka.seek.KafkaSeekOperations;
 import io.micronaut.configuration.kafka.seek.KafkaSeeker;
@@ -35,6 +37,8 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.consumer.OffsetCommitCallback;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.RecordDeserializationException;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
@@ -45,6 +49,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * The internal state of the consumer in single mode.
@@ -54,6 +61,27 @@ import java.util.Set;
  */
 @Internal
 final class ConsumerStateSingle extends ConsumerState {
+
+    /**
+     * In-flight processing observations. A consumer in single mode processes at most one record of a
+     * partition at a time, so there is at most one entry per partition. The entry survives across
+     * application retries of the same record (blocking retries re-poll the same offset) and remembers an
+     * opt-out as a {@code null} handle. Only populated when a {@link KafkaConsumerProcessingObserver} bean
+     * is present and only accessed on the poll thread.
+     */
+    private final Map<TopicPartition, ObservedRecord> processingObservations = new HashMap<>();
+
+    /**
+     * The terminal outcome decided for the record being handled, reported once its attempt has ended.
+     */
+    @Nullable
+    private PendingOutcome pendingOutcome;
+
+    /**
+     * The last failure to publish a listener result. Atomic because a producer callback can report it
+     * from a producer thread.
+     */
+    private final AtomicReference<@Nullable SendToFailure> sendToFailure = new AtomicReference<>();
 
     ConsumerStateSingle(KafkaConsumerProcessor kafkaConsumerProcessor, ConsumerInfo info, Consumer<?, ?> consumer, Object consumerBean) {
         super(kafkaConsumerProcessor, info, consumer, consumerBean);
@@ -78,7 +106,16 @@ final class ConsumerStateSingle extends ConsumerState {
             // By default, seek past the record to continue consumption
             kafkaConsumer.seek(ex.topicPartition(), ex.offset() + 1);
             // The error strategy and the exception handler can still decide what to do about this record
-            resolveWithErrorStrategy(null, makeConsumerRecord(ex), ex);
+            final ConsumerRecord<?, ?> failedRecord = makeConsumerRecord(ex);
+            final ConsumerRecord<?, ?> observedRecord = makeObservedRecord(ex);
+            beginProcessingObservation(observedRecord);
+            final Object attempt = beginProcessingAttempt(observedRecord);
+            try {
+                resolveWithErrorStrategy(null, failedRecord, ex);
+            } finally {
+                endProcessingAttempt(attempt);
+                completeProcessingObservation();
+            }
             // By now, it's been decided whether this record should be retried and the exception may have been handled
             return null;
         }
@@ -145,17 +182,37 @@ final class ConsumerStateSingle extends ConsumerState {
         ConsumerRecord<?, ?> consumerRecord) {
         ConsumerRecord<?, ?> interceptedConsumerRecord = null;
         KafkaSeekOperations seek = null;
+        boolean attemptStarted = false;
+        Object attempt = null;
         try {
             interceptedConsumerRecord = kafkaConsumerProcessor.interceptRecord(info, consumerRecord);
             seek = bindRecordArguments(topic, currentOffsets);
             if (interceptedConsumerRecord != null) {
+                beginProcessingObservation(interceptedConsumerRecord);
+                attempt = beginProcessingAttempt(interceptedConsumerRecord);
+                attemptStarted = true;
+                sendToFailure.set(null);
                 process(topic, interceptedConsumerRecord, consumerRecords);
+                succeedProcessingObservation(interceptedConsumerRecord);
+            } else {
+                // Interceptors run on every attempt, so this can skip a record that an earlier attempt failed
+                abandonProcessingObservation(consumerRecord);
             }
         } catch (Exception e) {
             final ConsumerRecord<?, ?> errorRecord = interceptedConsumerRecord != null ? interceptedConsumerRecord : consumerRecord;
+            if (!attemptStarted) {
+                // The interceptor or the argument binding failed before the listener was reached
+                beginProcessingObservation(errorRecord);
+                attempt = beginProcessingAttempt(errorRecord);
+            }
             if (handleRecordFailure(consumerRecords, iterator, errorRecord, e)) {
                 return true;
             }
+        } finally {
+            // Failure handling stays inside the attempt so that it can be correlated with the observation.
+            // It does not include the retry delay, which only pauses the partition and schedules its resume.
+            endProcessingAttempt(attempt);
+            completeProcessingObservation();
         }
         if (currentOffsets != null) {
             commitOffsets(consumerRecords, consumerRecord, currentOffsets);
@@ -223,6 +280,9 @@ final class ConsumerStateSingle extends ConsumerState {
                     if (info.shouldHandleAllExceptions) {
                         handleException(e, consumerRecords, consumerRecord);
                     }
+                    // Handing the record off to a separate retry topic is the terminal outcome of the
+                    // source record's delivery; the retry record begins its own observation when consumed.
+                    failProcessingObservation(consumerRecord, e);
                     return false;
                 }
                 final TopicPartition topicPartition = getTopicPartition(consumerRecord);
@@ -246,6 +306,7 @@ final class ConsumerStateSingle extends ConsumerState {
             }
         }
         // Skip the failing record
+        failProcessingObservation(consumerRecord, e);
         publishToDlq(e, consumerRecords, consumerRecord);
         handleException(e, consumerRecords, consumerRecord);
         return info.errorStrategy == ErrorStrategyValue.NONE;
@@ -287,6 +348,8 @@ final class ConsumerStateSingle extends ConsumerState {
         }
         kafkaConsumer.seek(topicPartition, consumerRecord.offset());
         handleException(e, consumerRecords, consumerRecord);
+        // The observation is finished rather than left dangling while the partition stays paused
+        failProcessingObservation(consumerRecord, e);
         pause(Collections.singleton(topicPartition));
         return true;
     }
@@ -332,5 +395,187 @@ final class ConsumerStateSingle extends ConsumerState {
     private static ConsumerRecord<?, ?> makeConsumerRecord(RecordDeserializationException ex) {
         final TopicPartition tp = ex.topicPartition();
         return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), null, null);
+    }
+
+    private static ConsumerRecord<?, ?> makeObservedRecord(RecordDeserializationException ex) {
+        final TopicPartition tp = ex.topicPartition();
+        // Exceptions created without the record details have no headers, and a consumer record requires them
+        final Headers headers = ex.headers() != null ? ex.headers() : new RecordHeaders();
+        return new ConsumerRecord<>(tp.topic(), tp.partition(), ex.offset(), ex.timestamp(), ex.timestampType(),
+            ConsumerRecord.NULL_SIZE, ConsumerRecord.NULL_SIZE, null, null, headers, Optional.empty());
+    }
+
+    private void beginProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+        final ObservedRecord observed = processingObservations.get(topicPartition);
+        if (observed != null) {
+            if (observed.offset() == consumerRecord.offset()) {
+                // Reuse the handle (or the opt-out) across application retries of the same record so the
+                // observation spans all attempts rather than a single one
+                return;
+            }
+            // The position moved away from the observed record, for example because of a seek or a rebalance
+            notifyAbandoned(topicPartition, observed, "the partition moved to offset " + consumerRecord.offset());
+        }
+        final Object handle = safely(() -> observer.onStart(consumerRecord, info.clientId, info.groupId));
+        processingObservations.put(topicPartition, new ObservedRecord(consumerRecord.offset(), handle));
+    }
+
+    @Nullable
+    private Object beginProcessingAttempt(ConsumerRecord<?, ?> consumerRecord) {
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return null;
+        }
+        final ObservedRecord observed = processingObservations.get(getTopicPartition(consumerRecord));
+        if (observed == null || observed.handle() == null) {
+            return null;
+        }
+        return safely(() -> observer.onAttemptStart(observed.handle()));
+    }
+
+    private void endProcessingAttempt(@Nullable Object attempt) {
+        if (attempt == null) {
+            return;
+        }
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (observer == null) {
+            return;
+        }
+        safelyRun(() -> observer.onAttemptEnd(attempt));
+    }
+
+    private void succeedProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final SendToFailure failure = sendToFailure.getAndSet(null);
+        final boolean failedToSend = failure != null && failure.partition().equals(getTopicPartition(consumerRecord)) && failure.offset() == consumerRecord.offset();
+        setPendingOutcome(consumerRecord, failedToSend ? failure.error() : null);
+    }
+
+    private void failProcessingObservation(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        setPendingOutcome(consumerRecord, error);
+    }
+
+    private void setPendingOutcome(ConsumerRecord<?, ?> consumerRecord, @Nullable Throwable error) {
+        if (kafkaConsumerProcessor.getProcessingObserver() != null) {
+            pendingOutcome = new PendingOutcome(getTopicPartition(consumerRecord), consumerRecord.offset(), error);
+        }
+    }
+
+    /**
+     * Reports the outcome decided for the record, if any. An attempt that scheduled a retry decides none,
+     * which keeps its observation open for the next attempt.
+     */
+    private void completeProcessingObservation() {
+        final PendingOutcome outcome = pendingOutcome;
+        if (outcome == null) {
+            return;
+        }
+        pendingOutcome = null;
+        final ObservedRecord observed = processingObservations.get(outcome.partition());
+        if (observed == null || observed.offset() != outcome.offset()) {
+            return;
+        }
+        processingObservations.remove(outcome.partition());
+        final Object handle = observed.handle();
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (handle == null || observer == null) {
+            return;
+        }
+        final Throwable error = outcome.error();
+        if (error == null) {
+            safelyRun(() -> observer.onSuccess(handle));
+        } else {
+            safelyRun(() -> observer.onError(handle, error));
+        }
+    }
+
+    @Override
+    protected void onSendToError(ConsumerRecord<?, ?> consumerRecord, Throwable error) {
+        sendToFailure.set(new SendToFailure(getTopicPartition(consumerRecord), consumerRecord.offset(), error));
+    }
+
+    @Override
+    protected void onAssignmentsRevoked(Set<TopicPartition> revokedPartitions) {
+        abandonProcessingObservations(revokedPartitions::contains, "partition was revoked");
+    }
+
+    @Override
+    protected void onPollLoopExit() {
+        abandonProcessingObservations(partition -> true, "consumer stopped");
+    }
+
+    private void abandonProcessingObservation(ConsumerRecord<?, ?> consumerRecord) {
+        final TopicPartition topicPartition = getTopicPartition(consumerRecord);
+        final ObservedRecord observed = processingObservations.remove(topicPartition);
+        if (observed != null) {
+            notifyAbandoned(topicPartition, observed, "an interceptor skipped the record");
+        }
+    }
+
+    /**
+     * Terminates observations of records this consumer will no longer process, typically ones waiting
+     * for a blocking retry, so that they are not left open. Another consumer that is assigned the
+     * partition starts its own observation when it processes the record.
+     */
+    private void abandonProcessingObservations(Predicate<TopicPartition> released, String reason) {
+        if (processingObservations.isEmpty()) {
+            return;
+        }
+        final Iterator<Map.Entry<TopicPartition, ObservedRecord>> entries = processingObservations.entrySet().iterator();
+        while (entries.hasNext()) {
+            final Map.Entry<TopicPartition, ObservedRecord> entry = entries.next();
+            if (!released.test(entry.getKey())) {
+                continue;
+            }
+            entries.remove();
+            notifyAbandoned(entry.getKey(), entry.getValue(), reason);
+        }
+    }
+
+    private void notifyAbandoned(TopicPartition topicPartition, ObservedRecord observed, String reason) {
+        final Object handle = observed.handle();
+        final KafkaConsumerProcessingObserver observer = kafkaConsumerProcessor.getProcessingObserver();
+        if (handle == null || observer == null) {
+            return;
+        }
+        final KafkaListenerException error = new KafkaListenerException(
+            "Processing of the record was abandoned before completion: " + reason,
+            consumerBean, kafkaConsumer, new ConsumerRecord<>(topicPartition.topic(), topicPartition.partition(), observed.offset(), null, null));
+        safelyRun(() -> observer.onError(handle, error));
+    }
+
+    /**
+     * Invokes an observer callback fail-open: any exception is caught and logged so that telemetry
+     * never alters Kafka delivery semantics (listener invocation, retries, offset commits, DLQ). Linkage
+     * errors are included because the observer ships in a separately versioned module.
+     */
+    @Nullable
+    private static <T> T safely(Supplier<T> callback) {
+        try {
+            return callback.get();
+        } catch (Exception | LinkageError e) {
+            LOG.warn("Kafka processing observer threw an exception and was ignored", e);
+            return null;
+        }
+    }
+
+    private static void safelyRun(Runnable callback) {
+        safely(() -> {
+            callback.run();
+            return null;
+        });
+    }
+
+    private record ObservedRecord(long offset, @Nullable Object handle) {
+    }
+
+    private record PendingOutcome(TopicPartition partition, long offset, @Nullable Throwable error) {
+    }
+
+    private record SendToFailure(TopicPartition partition, long offset, Throwable error) {
     }
 }

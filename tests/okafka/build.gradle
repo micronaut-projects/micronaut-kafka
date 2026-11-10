@@ -1,0 +1,32 @@
+plugins {
+    id 'io.micronaut.build.internal.java-base'
+    id 'io.micronaut.build.internal.kafka-base'
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+}
+
+// Micronaut Kafka on Oracle's OKafka client, against Oracle Database rather than a stand-in, whose seek behaves differently
+dependencies {
+    testAnnotationProcessor mn.micronaut.inject.java
+
+    testImplementation projects.micronautKafka
+    testImplementation(libs.okafka) {
+        exclude group: "com.oracle.database.jdbc", module: "ojdbc11"
+    }
+    testImplementation libs.okafka.ojdbc
+    testImplementation(libs.okafka.kafka.clients) {
+        version {
+            strictly libs.versions.okafka.kafka.clients.get()
+        }
+    }
+    testImplementation(platform(mnTest.boms.testcontainers))
+    testImplementation libs.testcontainers.oracle.free
+    testImplementation libs.awaitility
+    testImplementation(mnTest.junit.jupiter.api)
+
+    testRuntimeOnly mnLogging.logback.classic
+    testRuntimeOnly(mnTest.junit.platform.launcher)
+    testRuntimeOnly(mnTest.junit.jupiter.engine)
+}
