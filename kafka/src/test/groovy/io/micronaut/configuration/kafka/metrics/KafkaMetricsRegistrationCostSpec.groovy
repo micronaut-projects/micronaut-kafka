@@ -15,10 +15,12 @@ import org.apache.kafka.common.metrics.MetricConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.utils.Time
 import org.slf4j.LoggerFactory
+import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 
 import java.lang.management.ManagementFactory
+import java.lang.management.ThreadMXBean
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -31,6 +33,11 @@ import java.time.Duration
  * never connect. The registry mirrors a typical Micronaut runtime without Prometheus: a {@link CompositeMeterRegistry}
  * with one {@link SimpleMeterRegistry} child. It prints one row per scenario and writes them to
  * build/registration-cost/latest.tsv.
+ *
+ * The cost test is a measurement, not a check, so it only runs when the MICRONAUT_KAFKA_REGISTRATION_COST
+ * environment variable is set:
+ *
+ * MICRONAUT_KAFKA_REGISTRATION_COST=true ./gradlew :micronaut-kafka:test --rerun --tests '*KafkaMetricsRegistrationCostSpec'
  */
 class KafkaMetricsRegistrationCostSpec extends Specification {
 
@@ -40,7 +47,7 @@ class KafkaMetricsRegistrationCostSpec extends Specification {
     private static final String METER_PREFIX = "kafka."
 
     @Shared
-    def threadMx = (com.sun.management.ThreadMXBean) ManagementFactory.threadMXBean
+    ThreadMXBean threadMx = ManagementFactory.threadMXBean
 
     @Shared
     Object kafkaLogger
@@ -64,6 +71,7 @@ class KafkaMetricsRegistrationCostSpec extends Specification {
         }
     }
 
+    @Requires({ env.MICRONAUT_KAFKA_REGISTRATION_COST })
     void "registration cost of Kafka consumer metrics, by number of consumers"() {
         given:
         def variants = [
@@ -160,19 +168,33 @@ class KafkaMetricsRegistrationCostSpec extends Specification {
         def registry = compositeRegistry()
         List<KafkaConsumer> created = []
         System.gc()
-        long cpu0 = threadMx.currentThreadCpuTime
-        long alloc0 = threadMx.currentThreadAllocatedBytes
+        long cpu0 = cpuNanos()
+        long alloc0 = allocatedBytes()
         long t0 = System.nanoTime()
         consumers.times { int i ->
             created << new KafkaConsumer<String, String>(consumerConfig(i, reporterClass, registry))
         }
         long t1 = System.nanoTime()
-        long cpu1 = threadMx.currentThreadCpuTime
-        long alloc1 = threadMx.currentThreadAllocatedBytes
+        long cpu1 = cpuNanos()
+        long alloc1 = allocatedBytes()
         int kafkaMeters = registry.meters.count { it.id.name.startsWith(METER_PREFIX) } as int
         created.each { it.close(Duration.ZERO) }
         registry.close()
-        [wallMs: (t1 - t0) / 1e6d, cpuMs: (cpu1 - cpu0) / 1e6d, allocMb: (alloc1 - alloc0) / 1048576d, kafkaMeters: kafkaMeters]
+        [wallMs: (t1 - t0) / 1e6d, cpuMs: delta(cpu0, cpu1, 1e6d), allocMb: delta(alloc0, alloc1, 1048576d), kafkaMeters: kafkaMeters]
+    }
+
+    // CPU time and allocated bytes are optional JVM features: report NaN where they aren't available
+    private long cpuNanos() {
+        threadMx.currentThreadCpuTimeSupported ? threadMx.currentThreadCpuTime : -1L
+    }
+
+    private long allocatedBytes() {
+        threadMx instanceof com.sun.management.ThreadMXBean && threadMx.threadAllocatedMemorySupported && threadMx.threadAllocatedMemoryEnabled ?
+                threadMx.currentThreadAllocatedBytes : -1L
+    }
+
+    private static double delta(long before, long after, double unit) {
+        before < 0 || after < 0 ? Double.NaN : (after - before) / unit
     }
 
     private static Map<String, Object> consumerConfig(int i, String reporterClass, MeterRegistry registry) {
