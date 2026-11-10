@@ -190,6 +190,12 @@ public class KafkaMetricMeterTypeBuilder {
         // Look the meter up by its exact id instead of searching the registry: a search copies and scans every meter,
         // which made registering N metrics O(N^2). Meter.Id equality only uses the name and the tags, so the type
         // passed here doesn't matter. removeByPreFilterId does nothing if no such meter is registered.
+        // Why GAUGE is fine for every meter this builder registers:
+        // - removeByPreFilterId looks the id up in the registry's pre-filter map, a HashMap keyed by Meter.Id, whose
+        //   hashCode() and equals() use only the name and the tags.
+        // - Gauges and time gauges are registered as Type.GAUGE and function counters as Type.COUNTER; the lookup finds
+        //   all of them because the type isn't compared.
+        // - The previous find(name).tags(tags).meter() didn't filter by type either.
         Meter.Id id = new Meter.Id(getMetricName(currentPrefix, currentName), Tags.of(tags), null, null, Meter.Type.GAUGE);
         currentMeterRegistry.removeByPreFilterId(id);
     }
