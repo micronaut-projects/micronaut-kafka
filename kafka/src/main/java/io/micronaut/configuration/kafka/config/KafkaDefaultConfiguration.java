@@ -23,6 +23,7 @@ import java.util.Properties;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -54,10 +55,6 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
      */
     public KafkaDefaultConfiguration(Environment environment) {
         super(resolveDefaultConfiguration(environment));
-        getConfig().putIfAbsent(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS
-        );
     }
 
     /**
@@ -82,11 +79,23 @@ public class KafkaDefaultConfiguration extends AbstractKafkaConfiguration {
 
     private static Properties resolveDefaultConfiguration(Environment environment) {
         Map<String, Object> values = environment.containsProperties(PREFIX) ? environment.getProperties(PREFIX) : Collections.emptyMap();
-        Properties properties = toKafkaProperties(environment, values);
+        return defaultProperties(environment.getConversionService(), values);
+    }
+
+    /**
+     * The properties of the default configuration, from the values under {@code kafka}.
+     *
+     * @param conversionService The conversion service
+     * @param values The values under {@code kafka}
+     * @return The Kafka properties
+     */
+    static Properties defaultProperties(ConversionService conversionService, Map<?, ?> values) {
+        Properties properties = toKafkaProperties(conversionService, values);
         if (!properties.containsKey(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG)
                 && properties.stringPropertyNames().stream().anyMatch(name -> name.startsWith("ssl."))) {
             properties.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
         }
+        properties.putIfAbsent(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, AbstractKafkaConfiguration.DEFAULT_BOOTSTRAP_SERVERS);
         return properties;
     }
 }
