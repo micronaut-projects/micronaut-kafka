@@ -7642,6 +7642,12 @@ class RetryTopicProductDltListener {
 <div class="paragraph">
 <p>No port is exposed, but the Kafka consumers are active and running. The process registers a shutdown hook such that the <code>KafkaConsumer</code> instances are closed correctly when the server is shutdown.</p>
 </div>
+<div class="paragraph">
+<p>When the application context is stopped, the <code>@KafkaListener</code> consumers are stopped as soon as the <a href="{apimicronaut}context/event/ShutdownEvent.html">ShutdownEvent</a> is published, before any bean is destroyed. Each consumer finishes processing the records it has polled, and commits offsets according to its <code>OffsetStrategy</code>, so listeners can keep using the beans they depend on (such as a <code>DataSource</code> or a Kafka producer) until they finish. The context waits up to 30 seconds for each consumer to finish before continuing the shutdown. The stopped consumers can still be looked up through <code>ConsumerRegistry</code> by other <code>ShutdownEvent</code> listeners.</p>
+</div>
+<div class="paragraph">
+<p>If <a href="https://docs.micronaut.io/latest/guide/#gracefulShutdown">graceful shutdown</a> is enabled with <code>micronaut.lifecycle.graceful-shutdown.enabled</code>, the consumers are first drained within the configured grace period, and any consumer still running afterwards is stopped in the same way.</p>
+</div>
 
 <h2 id="kafkaHealth"><a class="anchor" href="#kafkaHealth"></a>8.1 Kafka Health Checks</h2>
 
@@ -8819,6 +8825,90 @@ close-timeout = "10s"</code></pre>
     "streams": {
       "default": {
         "close-timeout": "10s"
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To explicitly leave the consumer group when a stream is gracefully closed, set <code>leave-group-on-close</code> for that stream. It defaults to <code>false</code>, so other streams retain their existing shutdown behavior. This is a Micronaut shutdown option, not a Kafka Streams client property:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">kafka.streams.application-security-factors.leave-group-on-close=true
+kafka.streams.application-security-factors.close-timeout=3s
+kafka.streams.another-stream.leave-group-on-close=false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">kafka:
+    streams:
+        application-security-factors:
+            leave-group-on-close: true
+            close-timeout: 3s
+        another-stream:
+            leave-group-on-close: false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[kafka.streams.application-security-factors]
+leave-group-on-close = true
+close-timeout = "3s"
+
+[kafka.streams.another-stream]
+leave-group-on-close = false</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy-config hljs" data-lang="groovy-config">kafka {
+  streams {
+    applicationSecurityFactors {
+      leaveGroupOnClose = true
+      closeTimeout = "3s"
+    }
+    anotherStream {
+      leaveGroupOnClose = false
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-hocon hljs" data-lang="hocon">{
+  kafka {
+    streams {
+      application-security-factors {
+        leave-group-on-close = true
+        close-timeout = "3s"
+      }
+      another-stream {
+        leave-group-on-close = false
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock multi-language-sample">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json-config hljs" data-lang="json-config">{
+  "kafka": {
+    "streams": {
+      "application-security-factors": {
+        "leave-group-on-close": true,
+        "close-timeout": "3s"
+      },
+      "another-stream": {
+        "leave-group-on-close": false
       }
     }
   }
