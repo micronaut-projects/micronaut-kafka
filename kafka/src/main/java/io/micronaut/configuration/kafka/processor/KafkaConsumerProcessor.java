@@ -392,6 +392,15 @@ class KafkaConsumerProcessor
     @Override
     @PreDestroy
     public void close() {
+        stopConsumers();
+        consumers.clear();
+    }
+
+    /**
+     * Stops the consumers, waiting for the records being processed, but keeps them registered so that
+     * they can still be looked up by ID until this processor is destroyed.
+     */
+    void stopConsumers() {
         consumers.values().forEach(ConsumerState::requestShutdown);
         consumers.values().forEach(state -> {
             if (state.isActive()) {
@@ -399,7 +408,6 @@ class KafkaConsumerProcessor
             }
             state.close();
         });
-        consumers.clear();
     }
 
     void publishStartedPollingEvent(Consumer<?, ?> consumer) {

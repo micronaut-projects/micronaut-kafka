@@ -46,6 +46,28 @@ class ConsumerStateSpec extends Specification {
         }
     }
 
+    void "close waits only once for a consumer that does not close in time"() {
+        given:
+        ConsumerState state = new TestConsumerState(createConsumerInfo(), createConsumer())
+        setField(state, 'pollingStarted', true)
+
+        when: "the consumer does not close within the close timeout"
+        long start = System.nanoTime()
+        state.close()
+        long firstWait = System.nanoTime() - start
+
+        then:
+        firstWait >= Duration.ofMillis(200).toNanos()
+
+        when: "it is closed again by another shutdown step"
+        start = System.nanoTime()
+        state.close()
+        long secondWait = System.nanoTime() - start
+
+        then: "it is not waited for again"
+        secondWait < Duration.ofMillis(100).toNanos()
+    }
+
     void "the consumer is asked for its paused partitions once, not on every poll cycle"() {
         given:
         List<String> calls = []

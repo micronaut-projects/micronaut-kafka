@@ -36,6 +36,8 @@ public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
 
     private final Duration closeTimeout;
 
+    private final boolean leaveGroupOnClose;
+
     /**
      * Default constructor.
      *
@@ -55,9 +57,22 @@ public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
      * @param closeTimeout The time to wait for the stream to shut down
      */
     public ConfiguredStreamBuilder(Properties configuration, String streamName, Duration closeTimeout) {
+        this(configuration, streamName, closeTimeout, false);
+    }
+
+    /**
+     * Construct a builder with per-stream shutdown options.
+     *
+     * @param configuration The configuration
+     * @param streamName The logical name of the stream
+     * @param closeTimeout The time to wait for the stream to shut down
+     * @param leaveGroupOnClose Whether to leave the consumer group on close
+     */
+    public ConfiguredStreamBuilder(Properties configuration, String streamName, Duration closeTimeout, boolean leaveGroupOnClose) {
         this.configuration.putAll(configuration);
         this.streamName = streamName;
         this.closeTimeout = closeTimeout;
+        this.leaveGroupOnClose = leaveGroupOnClose;
     }
 
     /**
@@ -86,5 +101,12 @@ public class ConfiguredStreamBuilder extends StreamsBuilder implements Named {
      */
     public @NonNull Duration getCloseTimeout() {
         return closeTimeout;
+    }
+
+    /**
+     * @return whether to leave the consumer group when closing this stream
+     */
+    public boolean isLeaveGroupOnClose() {
+        return leaveGroupOnClose;
     }
 }
