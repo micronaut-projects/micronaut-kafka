@@ -17,9 +17,13 @@ package io.micronaut.configuration.kafka.admin;
 
 import io.micronaut.configuration.kafka.config.AbstractKafkaConfiguration;
 import io.micronaut.configuration.kafka.config.KafkaDefaultConfiguration;
+import io.micronaut.configuration.kafka.config.RetainedKafkaConfiguration;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Retain;
+import io.micronaut.context.env.DevelopmentActive;
+import io.micronaut.context.env.DevelopmentInactive;
 import io.micronaut.core.util.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 
@@ -43,14 +47,32 @@ import jakarta.inject.Singleton;
 public class AdminClientFactory {
 
     /**
-     * Creates the admin client.
+     * Creates the admin client, outside development mode.
      *
      * @param configuration The configuration to use.
      * @return The admin client
      */
     @Bean(preDestroy = "close")
     @Singleton
+    @DevelopmentInactive
     AdminClient adminClient(KafkaDefaultConfiguration configuration) {
+        return AdminClient.create(configuration.getConfig());
+    }
+
+    /**
+     * Creates the admin client in development mode, where it is retained across a restart, with its connections, until
+     * a change under {@code kafka} releases it. It is built from a configuration of its own, as development mode refuses
+     * to retain a bean whose configuration received the environment, as {@link KafkaDefaultConfiguration} does.
+     *
+     * @param configuration The values under {@code kafka}, which the admin client copies
+     * @return The admin client
+     */
+    @Bean(preDestroy = "close")
+    @Singleton
+    @DevelopmentActive
+    @Requires(beans = RetainedKafkaConfiguration.class)
+    @Retain(invalidatedBy = AbstractKafkaConfiguration.PREFIX)
+    AdminClient retainedAdminClient(RetainedKafkaConfiguration configuration) {
         return AdminClient.create(configuration.getConfig());
     }
 
